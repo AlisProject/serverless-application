@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import os
-import time
 import settings
 from lambda_base import LambdaBase
 from jsonschema import validate
@@ -36,13 +35,12 @@ class MeArticlesPublicUnpublish(LambdaBase):
             Key={
                 'article_id': self.params['article_id'],
             },
-            UpdateExpression='set #attr = :article_status, #sync_elasticsearch = :zero, #updated_at = :unixtime',
+            UpdateExpression='set #attr = :article_status, #sync_elasticsearch = :one',
             ExpressionAttributeNames={
                 '#attr': 'status',
-                '#sync_elasticsearch': 'sync_elasticsearch',
-                '#updated_at': 'updated_at'
+                '#sync_elasticsearch': 'sync_elasticsearch'
             },
-            ExpressionAttributeValues={':article_status': 'draft', ':zero': 0, ':unixtime': int(time.time())}
+            ExpressionAttributeValues={':article_status': 'draft', ':one': 1}
         )
 
         return {

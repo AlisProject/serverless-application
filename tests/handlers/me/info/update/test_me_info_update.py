@@ -72,7 +72,7 @@ class TestMeInfoUpdate(TestCase):
             'user_id': target_user_data['user_id'],
             'user_display_name': json.loads(params['body'])['user_display_name'],
             'self_introduction': json.loads(params['body'])['self_introduction'],
-            'sync_elasticsearch': 0
+            'sync_elasticsearch': 1
         }
 
         self.assertEqual(response['statusCode'], 200)

@@ -1508,12 +1508,14 @@ Resources:
       EBSOptions:
         EBSEnabled: true
         VolumeType: gp2
-        VolumeSize: 10
+        VolumeSize: 20
       ElasticsearchClusterConfig:
-        InstanceType: t2.small.elasticsearch
+        InstanceType: m4.large.elasticsearch
         InstanceCount: 1
-        DedicatedMasterEnabled: false
+        DedicatedMasterEnabled: true
         ZoneAwarenessEnabled: false
+        DedicatedMasterType: m4.large.elasticsearch
+        DedicatedMasterCount: 3
       ElasticsearchVersion: '6.2'
       SnapshotOptions:
         AutomatedSnapshotStartHour: 0

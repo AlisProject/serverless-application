@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import os
-import time
 import settings
 from db_util import DBUtil
 from lambda_base import LambdaBase
@@ -34,8 +33,7 @@ class MeInfoUpdate(LambdaBase):
         expression_attribute_values = {
             ':user_display_name': TextSanitizer.sanitize_text(self.params['user_display_name']),
             ':self_introduction': TextSanitizer.sanitize_text(self.params['self_introduction']),
-            ':sync_elasticsearch': 0,
-            ':updated_at': int(time.time())
+            ':sync_elasticsearch': 1
         }
         DBUtil.items_values_empty_to_none(expression_attribute_values)
 
@@ -44,7 +42,7 @@ class MeInfoUpdate(LambdaBase):
                 'user_id': self.event['requestContext']['authorizer']['claims']['cognito:username'],
             },
             UpdateExpression=("set user_display_name=:user_display_name, self_introduction=:self_introduction, "
-                              "sync_elasticsearch=:sync_elasticsearch, updated_at=:updated_at"),
+                              "sync_elasticsearch=:sync_elasticsearch"),
             ExpressionAttributeValues=expression_attribute_values
         )
 
