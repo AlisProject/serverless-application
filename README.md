@@ -1,5 +1,5 @@
 # Serverless Application
-This is serverless application using AWS SAM.
+This is a serverless application using AWS SAM.
 
 # Installation
 ## aws-cli
@@ -9,7 +9,7 @@ $ sudo pip install awscli
 
 # Settings
 ## credential of IAM user
-Add IAM user's credential to `~/.aws/credentials`
+Add IAM user's credentials to `~/.aws/credentials`
 
 ```
 [default]
@@ -17,7 +17,7 @@ aws_access_key_id = #{IAM user access key}
 aws_secret_access_key = #{IAM user secret token}
 ```
 
-If you use multiple credentials, use profile.
+If you use multiple credentials, use this profile.
 https://docs.aws.amazon.com/cli/latest/userguide/cli-multiple-profiles.html
 
 # Package
