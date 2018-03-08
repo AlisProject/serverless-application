@@ -1,0 +1,42 @@
+version: 2
+
+jobs:
+  build:
+    docker:
+      - image: circleci/python:3.6.1
+      - image: localstack/localstack
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "requirements.txt" }}
+          - v1-dependencies-
+
+      - run:
+          name: install dependencies
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            pip install -r requirements.txt
+
+      - save_cache:
+          paths:
+            - ./venv
+          key: v1-dependencies-{{ checksum "requirements.txt" }}
+
+      - run:
+          name: run tests
+          command: |
+            . venv/bin/activate
+            # テスト事前準備
+            python pre_exec_test.py
+            # 全テスト実行
+            find ./tests -name "test_*.py" | rev |  cut -d/ -f 2- | rev | xargs python -m unittest discover
+
+      - store_artifacts:
+          path: test-reports
+          destination: test-reports
