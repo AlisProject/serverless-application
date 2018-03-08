@@ -35,7 +35,7 @@ jobs:
             # テスト事前準備
             python pre_exec_test.py
             # 全テスト実行
-            find ./tests -name "test_*.py" | rev |  cut -d/ -f 2- | rev | xargs python -m unittest discover
+            find ./tests -name "test_*.py" | rev |  cut -d/ -f 2- | rev | xargs -I {} python -m unittest discover {}
 
       - store_artifacts:
           path: test-reports
