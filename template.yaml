@@ -9,26 +9,26 @@ Globals:
     MemorySize: 256
     Environment:
       Variables:
-        TABLE_NAME: !Ref SamSampleDynamoTable
+        ARTICLE_INFO_TABLE_NAME: !Ref ArticleInfo
 
 Resources:
   SNSRole:
     Type: "AWS::IAM::Role"
     Properties:
-      AssumeRolePolicyDocument: 
+      AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
           - Effect: "Allow"
-            Principal: 
-              Service: 
+            Principal:
+              Service:
                 - "cognito-idp.amazonaws.com"
-            Action: 
+            Action:
               - "sts:AssumeRole"
       Policies:
         - PolicyName: "CognitoSNSPolicy"
-          PolicyDocument: 
+          PolicyDocument:
             Version: "2012-10-17"
-            Statement: 
+            Statement:
               - Effect: "Allow"
                 Action: "sns:publish"
                 Resource: "*"
@@ -195,128 +195,94 @@ Resources:
         schemes:
           - https
         paths:
-          /users:
+          /articles/recent:
             get:
-              summary: user index
-              description: |
-                Get lists of all users.
-              consumes:
-                - application/json
-              produces:
-                - application/json
-              responses:
-                "200":
-                  description: "responce when request succeed"
-                  schema:
-                    type: "array"
-                    items:
-                      type: "object"
-                      properties:
-                        name:
-                          type: "string"
-                          example: "foo"
-                "404":
-                  description: "responce when request is failed"
-                  schema:
-                    type: "object"
-                    properties:
-                      error:
-                        type: "string"
-                        example: "404 Not Found"
-                      message:
-                        type: "string"
-                        example: "Can not find resources"
-              security:
-                - cognitoUserPool: []
-              x-amazon-apigateway-integration:
-                responses:
-                  default:
-                    statusCode: "200"
-                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${UserIndex.Arn}/invocations
-                passthroughBehavior: when_no_templates
-                httpMethod: POST
-                type: aws_proxy
-            post:
-              summary: user create
-              description: |
-                Create user
-              consumes:
-                - application/json
-              produces:
-                - application/json
+              description: "最新記事一覧情報を取得"
               parameters:
-              - name: name
-                in: body
-                description: User name.
-                required: true
-                schema:
-                  type: object
-                  properties:
-                    name:
-                      type: "string"
-                      example: "foo"
+              - name: "limit"
+                in: "query"
+                description: "取得件数"
+                required: false
+                type: "integer"
+                minimum: 1
+              - name: "article_id"
+                in: "query"
+                description: "ページング処理における、現在のページの最後の記事のID"
+                required: false
+                type: "string"
+              - name: "sort_key"
+                in: "query"
+                description: "ページング処理における、現在のページの最後の記事のソートキー"
+                required: false
+                type: "integer"
+                minimum: 1
               responses:
                 "200":
-                  description: "responce when request succeed"
+                  description: "最新記事一覧"
                   schema:
-                    type: "object"
-                    properties:
-                      name:
-                        type: "string"
-                        example: "foo"
-                "400":
-                  description: "responce when request is failed"
-                  schema:
-                    type: "object"
-                    properties:
-                      error:
-                        type: "string"
-                        example: "400 Bad Request"
-                      message:
-                        type: "string"
-                        example: "Invalid parameter"
-                "404":
-                  description: "responce when request is failed"
-                  schema:
-                    type: "object"
-                    properties:
-                      error:
-                        type: "string"
-                        example: "404 Not Found"
-                      message:
-                        type: "string"
-                        example: "Can not find resources"
-              security:
-                - cognitoUserPool: []
+                    type: array
+                    items:
+                      $ref: '#/definitions/ArticleInfo'
               x-amazon-apigateway-integration:
                 responses:
                   default:
                     statusCode: "200"
-                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${UserCreate.Arn}/invocations
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ArticleInfoRecent.Arn}/invocations
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
-        securityDefinitions:
-          cognitoUserPool:
-            type: apiKey
-            name: Authorization
-            in: header
-            x-amazon-apigateway-authtype: cognito_user_pools
-            x-amazon-apigateway-authorizer:
-              type: cognito_user_pools
-              providerARNs:
-                - !GetAtt UserPool.Arn
   LambdaRole:
     Type: "AWS::IAM::Role"
     Properties:
-      AssumeRolePolicyDocument: 
+      AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
           - Effect: "Allow"
-            Principal: 
-              Service: 
+            Principal:
+              Service:
                 - "lambda.amazonaws.com"
-            Action: 
+            Action:
               - "sts:AssumeRole"
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess
+  ArticleInfoRecent:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: arn:aws:iam::090169530579:role/lambda_dynamo_access
+      CodeUri: ./deploy/article_info-index.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /articles/recent
+            Method: get
+            RestApiId: !Ref RestApi
+  ArticleInfo:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: article_id
+          AttributeType: S
+        - AttributeName: status
+          AttributeType: S
+        - AttributeName: sort_key
+          AttributeType: N
+      KeySchema:
+        - AttributeName: article_id
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: status-sort_key-index
+          KeySchema:
+            - AttributeName: status
+              KeyType: HASH
+            - AttributeName: sort_key
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: 2
+            WriteCapacityUnits: 2
+      ProvisionedThroughput:
+          ReadCapacityUnits: 2
+          WriteCapacityUnits: 2
