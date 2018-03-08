@@ -14,7 +14,7 @@ class TestArticleInfoRecent(TestCase):
     def setUpClass(cls):
         os.environ['ARTICLE_INFO_TABLE_NAME'] = 'ArticleInfo'
 
-        f = open("./packaged-template.yaml", "r+")
+        f = open("./database.yaml", "r+")
         template = yaml.load(f)
         f.close()
 
