@@ -30,6 +30,12 @@ jobs:
           key: v1-dependencies-{{ checksum "requirements.txt" }}
 
       - run:
+          name: run checkstyle for python code
+          command: |
+            . venv/bin/activate
+            pycodestyle src tests ./*.py
+
+      - run:
           name: run tests
           command: |
             . venv/bin/activate
