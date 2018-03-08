@@ -1,4 +1,6 @@
 # Serverless Application
+[![CircleCI](https://circleci.com/gh/AlisProject/serverless-application.svg?style=svg)](https://circleci.com/gh/AlisProject/serverless-application)  
+
 This is a serverless application using AWS SAM.
 
 # Installation
