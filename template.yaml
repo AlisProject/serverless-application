@@ -10,6 +10,8 @@ Globals:
     Environment:
       Variables:
         ARTICLE_INFO_TABLE_NAME: !Ref ArticleInfo
+        ARTICLE_EVALUATED_MANAGE_TABLE_NAME: !Ref ArticleEvaluatedManage
+        ARTICLE_ALIS_TOKEN_TABLE_NAME: !Ref ArticleAlisToken
 
 Resources:
   SNSRole:
@@ -231,6 +233,32 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+          /articles/{article_id}/alistoken:
+            get:
+              description: "指定された article_id のALISトークン数を取得"
+              parameters:
+              - name: "article_id"
+                in: "path"
+                description: "対象記事の指定するために使用"
+                required: true
+                type: "string"
+              responses:
+                "200":
+                  description: "ALISトークン数"
+                  schema:
+                    type: object
+                    properties:
+                      alistoken:
+                        type: "number"
+                        format: "double"
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ArticleAlisTokenShow.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
   LambdaRole:
     Type: "AWS::IAM::Role"
     Properties:
@@ -256,6 +284,19 @@ Resources:
           Type: Api
           Properties:
             Path: /articles/recent
+            Method: get
+            RestApiId: !Ref RestApi
+  ArticleAlisTokenShow:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: arn:aws:iam::090169530579:role/lambda_dynamo_access
+      CodeUri: ./deploy/article_alis_token_show.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /articles/{article_id}/alistoken
             Method: get
             RestApiId: !Ref RestApi
   ArticleInfo:
@@ -286,3 +327,42 @@ Resources:
       ProvisionedThroughput:
           ReadCapacityUnits: 2
           WriteCapacityUnits: 2
+  ArticleAlisToken:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: evaluated_at
+          AttributeType: N
+        - AttributeName: article_id
+          AttributeType: S
+        - AttributeName: alis_token
+          AttributeType: N
+      KeySchema:
+        - AttributeName: evaluated_at
+          KeyType: HASH
+        - AttributeName: article_id
+          KeyType: RANGE
+      LocalSecondaryIndexes:
+        - IndexName: evaluated_at-alis_token-index
+          KeySchema:
+            - AttributeName: evaluated_at
+              KeyType: HASH
+            - AttributeName: alis_token
+              KeyType: RANGE
+          Projection:
+            ProjectionType: KEYS_ONLY
+      ProvisionedThroughput:
+          ReadCapacityUnits: 2
+          WriteCapacityUnits: 2
+  ArticleEvaluatedManage:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: active_evaluated_at
+          AttributeType: N
+      KeySchema:
+        - AttributeName: active_evaluated_at
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
