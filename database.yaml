@@ -37,9 +37,9 @@ Resources:
           AttributeType: N
       KeySchema:
         - AttributeName: article_id
-          KeyType: RANGE
-        - AttributeName: evaluated_at
           KeyType: HASH
+        - AttributeName: evaluated_at
+          KeyType: RANGE
       ProvisionedThroughput:
           ReadCapacityUnits: 2
           WriteCapacityUnits: 2
