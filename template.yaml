@@ -277,7 +277,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: arn:aws:iam::090169530579:role/lambda_dynamo_access
+      Role: !GetAtt LambdaRole.Arn
       CodeUri: ./deploy/article_info-index.zip
       Events:
         Api:
@@ -290,7 +290,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: arn:aws:iam::090169530579:role/lambda_dynamo_access
+      Role: !GetAtt LambdaRole.Arn
       CodeUri: ./deploy/article_alis_token_show.zip
       Events:
         Api:
