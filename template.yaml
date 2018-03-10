@@ -195,6 +195,39 @@ Resources:
         basePath: /
         schemes:
           - https
+        definitions:
+          ArticleInfo:
+            type: object
+            properties:
+              article_id:
+                type: string
+              user_id:
+                type: string
+              title:
+                type: string
+              overview:
+                type: string
+              eye_catch_url:
+                type: string
+              created_at:
+                type: string
+          ArticleContent:
+            type: object
+            properties:
+              article_id:
+                type: string
+              user_id:
+                type: string
+              title:
+                type: string
+              overview:
+                type: string
+              eye_catch_url:
+                type: string
+              body:
+                type: string
+              created_at:
+                type: string
         paths:
           /articles/recent:
             get:
