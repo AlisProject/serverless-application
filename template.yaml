@@ -10,6 +10,7 @@ Globals:
     Environment:
       Variables:
         ARTICLE_INFO_TABLE_NAME: !Ref ArticleInfo
+        ARTICLE_CONTENT_TABLE_NAME: !Ref ArticleContent
 
 Resources:
   SNSRole:
@@ -231,6 +232,28 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+          /articles/{article_id}:
+            get:
+              description: "指定されたarticle_idのストーリー情報を取得"
+              parameters:
+              - name: "story_id"
+                in: "path"
+                description: "対象記事の指定するために使用"
+                required: true
+                type: "string"
+              responses:
+                "200":
+                  description: "記事内容取得"
+                  schema:
+                    $ref: '#/definitions/StoryContent'
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ArticleContentShow.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
   LambdaRole:
     Type: "AWS::IAM::Role"
     Properties:
@@ -249,13 +272,26 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: arn:aws:iam::090169530579:role/lambda_dynamo_access
+      Role: !GetAtt LambdaRole.Arn
       CodeUri: ./deploy/article_info-index.zip
       Events:
         Api:
           Type: Api
           Properties:
             Path: /articles/recent
+            Method: get
+            RestApiId: !Ref RestApi
+  ArticleContentShow:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/article_content_show.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /articles/{article_id}
             Method: get
             RestApiId: !Ref RestApi
   ArticleInfo:
@@ -286,3 +322,15 @@ Resources:
       ProvisionedThroughput:
           ReadCapacityUnits: 2
           WriteCapacityUnits: 2
+  ArticleContent:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: article_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: article_id
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 2
+        WriteCapacityUnits: 2
