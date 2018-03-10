@@ -234,9 +234,9 @@ Resources:
                 type: aws_proxy
           /articles/{article_id}:
             get:
-              description: "指定されたarticle_idのストーリー情報を取得"
+              description: "指定されたarticle_idの記事情報を取得"
               parameters:
-              - name: "story_id"
+              - name: "article_id"
                 in: "path"
                 description: "対象記事の指定するために使用"
                 required: true
@@ -245,7 +245,7 @@ Resources:
                 "200":
                   description: "記事内容取得"
                   schema:
-                    $ref: '#/definitions/StoryContent'
+                    $ref: '#/definitions/ArticleContent'
               x-amazon-apigateway-integration:
                 responses:
                   default:
