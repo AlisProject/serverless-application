@@ -37,3 +37,16 @@ aws cloudformation deploy \
   --stack-name sam-sample-stack \
   --capabilities CAPABILITY_IAM
 ```
+
+# Test（Python 3.6.1）
+```
+# library install
+pip install -r requirements.txt
+pip install -r requirements_test.txt
+
+# lunch docker for localstack（for macos）
+TMPDIR=/private$TMPDIR docker-compose up -d
+
+# exec test
+python exec_test.py
+```
