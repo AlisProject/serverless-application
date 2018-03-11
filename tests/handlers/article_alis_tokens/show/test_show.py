@@ -124,7 +124,7 @@ class TestArticleAlisTokenShow(TestCase):
     def test_validation_article_id_max(self):
         params = {
             'pathParameters': {
-                'article_id': 'A' * 9
+                'article_id': 'A' * 13
             }
         }
 
@@ -133,7 +133,7 @@ class TestArticleAlisTokenShow(TestCase):
     def test_validation_article_id_min(self):
         params = {
             'pathParameters': {
-                'article_id': 'A' * 21
+                'article_id': 'A' * 11
             }
         }
 
