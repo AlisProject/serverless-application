@@ -10,6 +10,7 @@ Globals:
     Environment:
       Variables:
         ARTICLE_INFO_TABLE_NAME: !Ref ArticleInfo
+        ARTICLE_CONTENT_TABLE_NAME: !Ref ArticleContent
         ARTICLE_EVALUATED_MANAGE_TABLE_NAME: !Ref ArticleEvaluatedManage
         ARTICLE_ALIS_TOKEN_TABLE_NAME: !Ref ArticleAlisToken
 
@@ -196,6 +197,39 @@ Resources:
         basePath: /
         schemes:
           - https
+        definitions:
+          ArticleInfo:
+            type: object
+            properties:
+              article_id:
+                type: string
+              user_id:
+                type: string
+              title:
+                type: string
+              overview:
+                type: string
+              eye_catch_url:
+                type: string
+              created_at:
+                type: integer
+          ArticleContent:
+            type: object
+            properties:
+              article_id:
+                type: string
+              user_id:
+                type: string
+              title:
+                type: string
+              overview:
+                type: string
+              eye_catch_url:
+                type: string
+              body:
+                type: string
+              created_at:
+                type: integer
         paths:
           /articles/recent:
             get:
@@ -230,6 +264,28 @@ Resources:
                   default:
                     statusCode: "200"
                 uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ArticleInfoRecent.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /articles/{article_id}:
+            get:
+              description: "指定されたarticle_idの記事情報を取得"
+              parameters:
+              - name: "article_id"
+                in: "path"
+                description: "対象記事の指定するために使用"
+                required: true
+                type: "string"
+              responses:
+                "200":
+                  description: "記事内容取得"
+                  schema:
+                    $ref: '#/definitions/ArticleContent'
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ArticleContentShow.Arn}/invocations
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
@@ -286,6 +342,19 @@ Resources:
             Path: /articles/recent
             Method: get
             RestApiId: !Ref RestApi
+  ArticleContentShow:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/article_content_show.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /articles/{article_id}
+            Method: get
+            RestApiId: !Ref RestApi
   ArticleAlisTokenShow:
     Type: AWS::Serverless::Function
     Properties:
@@ -327,6 +396,18 @@ Resources:
       ProvisionedThroughput:
           ReadCapacityUnits: 2
           WriteCapacityUnits: 2
+  ArticleContent:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: article_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: article_id
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 2
+        WriteCapacityUnits: 2
   ArticleAlisToken:
     Type: AWS::DynamoDB::Table
     Properties:

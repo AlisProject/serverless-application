@@ -27,6 +27,18 @@ Resources:
       ProvisionedThroughput:
           ReadCapacityUnits: 2
           WriteCapacityUnits: 2
+  ArticleContent:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: article_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: article_id
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 2
+        WriteCapacityUnits: 2
   ArticleAlisToken:
     Type: AWS::DynamoDB::Table
     Properties:
