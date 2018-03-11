@@ -1,3 +1,4 @@
+import sys
 import os
 import shutil
 import subprocess
@@ -11,6 +12,7 @@ from distutils.dir_util import copy_tree
 os.mkdir('./tmp_tests')
 copy_tree('./tests/', './tmp_tests')
 execute_dir = []
+exit_status = 0
 
 # 各テストファイル毎に、テスト対象ソースと共通ライブラリをテストファイルと同一のディレクトリに複製する。
 for name in glob.iglob('tmp_tests/**/test*.py', recursive=True):
@@ -24,7 +26,12 @@ for name in glob.iglob('tmp_tests/**/test*.py', recursive=True):
     copy_tree('src/common', test_dir)
 
 for name in execute_dir:
-    subprocess.run(['green', name])
+    try:
+        subprocess.check_call(['green', name])
+    except subprocess.CalledProcessError:
+        exit_status = 1
 
 # tmpディレクトリは削除
 shutil.rmtree('./tmp_tests')
+
+sys.exit(exit_status)
