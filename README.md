@@ -8,7 +8,7 @@ This is a serverless application using AWS SAM.
 - aws-cli
 - docker
 
-# Settings
+# Local settings
 ## credential of IAM user
 Add IAM user's credentials to `~/.aws/credentials`
 
@@ -38,11 +38,18 @@ TMPDIR=/private$TMPDIR docker-compose up -d
 python exec_test.py
 ```
 
+# AWS settings
+
+## Create S3 bucket
+```bash
+aws s3api create-bucket --bucket YOUR_BUCKET_NAME_HERE
+```
+
 # Package
 ```
 aws cloudformation package \
   --template-file template.yaml \
-  --s3-bucket sample-sam-resource \
+  --s3-bucket YOUR_BUCKET_NAME_HERE \
   --output-template-file packaged-template.yaml
 ```
 
