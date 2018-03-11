@@ -210,7 +210,7 @@ Resources:
               eye_catch_url:
                 type: string
               created_at:
-                type: string
+                type: integer
           ArticleContent:
             type: object
             properties:
@@ -227,7 +227,7 @@ Resources:
               body:
                 type: string
               created_at:
-                type: string
+                type: integer
         paths:
           /articles/recent:
             get:
