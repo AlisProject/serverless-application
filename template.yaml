@@ -230,6 +230,17 @@ Resources:
                 type: string
               created_at:
                 type: integer
+          ArticlesDraftCreate:
+            type: object
+            properties:
+              title:
+                type: string
+              body:
+                type: string
+              eye_catch_url:
+                type: string
+              overview:
+                type: string
         paths:
           /articles/recent:
             get:
@@ -315,6 +326,33 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+          /me/stories/drafts:
+            post:
+              description: '下書き記事を作成'
+              parameters:
+              - name: 'story'
+                in: 'body'
+                description: 'story object'
+                required: true
+                schema:
+                  $ref: '#/definitions/ArticlesDraftCreate'
+              responses:
+                '200':
+                  description: '作成された記事ID'
+                  schema:
+                    type: object
+                    properties:
+                      article_id:
+                        type: 'string'
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ArticlesDraftCreate.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+
   LambdaRole:
     Type: "AWS::IAM::Role"
     Properties:
@@ -368,6 +406,19 @@ Resources:
             Path: /articles/{article_id}/alistoken
             Method: get
             RestApiId: !Ref RestApi
+  ArticlesDraftCreate:
+      Type: AWS::Serverless::Function
+      Properties:
+        Handler: handler.lambda_handler
+        Role: !GetAtt LambdaRole.Arn
+        CodeUri: ./deploy/articles_draft_create.zip
+        Events:
+          Api:
+            Type: Api
+            Properties:
+              Path: /me/stories/drafts
+              Method: post
+              RestApiId: !Ref RestApi
   ArticleInfo:
     Type: AWS::DynamoDB::Table
     Properties:
