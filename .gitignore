@@ -1,4 +1,5 @@
 packaged-template.yaml
+venv
 
 # editor
 .idea
