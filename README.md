@@ -8,7 +8,7 @@ This is a serverless application using AWS SAM.
 - aws-cli
 - docker
 
-# Settings
+# Local settings
 ## credential of IAM user
 Add IAM user's credentials to `~/.aws/credentials`
 
@@ -38,18 +38,31 @@ TMPDIR=/private$TMPDIR docker-compose up -d
 python exec_test.py
 ```
 
-# Package
+# Deployment
+
+## Create S3 bucket
+You have to change `YOUR_BUCKET_NAME_HERE` to your AWS S3 bucket name you want. 
+```bash
+aws s3api create-bucket --bucket YOUR_BUCKET_NAME_HERE \
+  --create-bucket-configuration LocationConstraint=ap-northeast-1
 ```
+
+## Packaging
+You have to change `YOUR_BUCKET_NAME_HERE` to your AWS S3 bucket name you made.
+```bash
+python make_deploy_zip.py
 aws cloudformation package \
   --template-file template.yaml \
-  --s3-bucket sample-sam-resource \
+  --s3-bucket YOUR_BUCKET_NAME_HERE \
   --output-template-file packaged-template.yaml
 ```
 
-# Deploy
+## Deployment 
+You have to change `YOURSTACKNAMEHERE` to your AWS CloudFormation stack name you want.  
+⚠ You can not use a hyphen to your stack name.
 ```
 aws cloudformation deploy \
   --template-file packaged-template.yaml \
-  --stack-name sam-sample-stack \
+  --stack-name YOURSTACKNAMEHERE \
   --capabilities CAPABILITY_IAM
 ```

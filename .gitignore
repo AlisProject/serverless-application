@@ -1,5 +1,6 @@
 packaged-template.yaml
 venv
+deploy
 
 # editor
 .idea
