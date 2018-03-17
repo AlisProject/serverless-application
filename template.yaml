@@ -349,7 +349,7 @@ Resources:
     Properties:
       Handler: handler.lambda_handler
       Role: !GetAtt LambdaRole.Arn
-      CodeUri: ./deploy/article_info-index.zip
+      CodeUri: ./deploy/article_info_recent.zip
       Events:
         Api:
           Type: Api
@@ -362,7 +362,7 @@ Resources:
     Properties:
       Handler: handler.lambda_handler
       Role: !GetAtt LambdaRole.Arn
-      CodeUri: ./deploy/article_content_show.zip
+      CodeUri: ./deploy/article_contents_show.zip
       Events:
         Api:
           Type: Api
@@ -375,7 +375,7 @@ Resources:
     Properties:
       Handler: handler.lambda_handler
       Role: !GetAtt LambdaRole.Arn
-      CodeUri: ./deploy/article_alis_token_show.zip
+      CodeUri: ./deploy/article_alis_tokens_show.zip
       Events:
         Api:
           Type: Api
