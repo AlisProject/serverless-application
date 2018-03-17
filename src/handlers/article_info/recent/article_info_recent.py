@@ -47,13 +47,13 @@ class ArticleInfoRecent(object):
             query_params = {
                 'Limit': limit,
                 'IndexName': 'status-sort_key-index',
-                'KeyConditionExpression': Key('status').eq('published'),
+                'KeyConditionExpression': Key('status').eq('public'),
                 'ScanIndexForward': False
             }
 
             if params.get('article_id') is not None and params.get('sort_key') is not None:
                 LastEvaluatedKey = {
-                    'status': 'published',
+                    'status': 'public',
                     'article_id': params.get('article_id'),
                     'sort_key': params.get('sort_key')
                 }

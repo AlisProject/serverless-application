@@ -31,17 +31,17 @@ class TestArticleInfoRecent(TestCase):
             },
             {
                 'article_id': 'testid000001',
-                'status': 'published',
+                'status': 'public',
                 'sort_key': 1520150272000001
             },
             {
                 'article_id': 'testid000002',
-                'status': 'published',
+                'status': 'public',
                 'sort_key': 1520150272000002
             },
             {
                 'article_id': 'testid000003',
-                'status': 'published',
+                'status': 'public',
                 'sort_key': 1520150272000003
             }
         ]
@@ -72,7 +72,7 @@ class TestArticleInfoRecent(TestCase):
         expected_items = [
             {
                 'article_id': 'testid000003',
-                'status': 'published',
+                'status': 'public',
                 'sort_key': 1520150272000003
             }
         ]
@@ -86,7 +86,7 @@ class TestArticleInfoRecent(TestCase):
         for i in range(21):
             table.put_item(Item={
                 'article_id': 'test_limit_number' + str(i),
-                'status': 'published',
+                'status': 'public',
                 'sort_key': 1520150273000000 + i
                 }
             )
@@ -113,7 +113,7 @@ class TestArticleInfoRecent(TestCase):
         expected_items = [
             {
                 'article_id': 'testid000001',
-                'status': 'published',
+                'status': 'public',
                 'sort_key': 1520150272000001
             }
         ]

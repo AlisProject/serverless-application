@@ -31,13 +31,13 @@ class TestArticleContnetShow(TestCase):
         items = [
             {
                 'article_id': 'testid000001',
-                'status': 'published',
+                'status': 'public',
                 'title': 'testid000001 titile',
                 'sort_key': 1520150272000000
             },
             {
                 'article_id': 'testid000002',
-                'status': 'published',
+                'status': 'public',
                 'title': 'testid000002 titile',
                 'sort_key': 1520150272000001
             }
@@ -85,7 +85,7 @@ class TestArticleContnetShow(TestCase):
 
         expected_item = {
             'article_id': 'testid000001',
-            'status': 'published',
+            'status': 'public',
             'title': 'testid000001 titile',
             'body': 'testid000001 body',
             'sort_key': 1520150272000000
