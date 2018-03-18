@@ -7,26 +7,23 @@ from unittest.mock import patch, MagicMock
 from boto3.dynamodb.conditions import Key
 
 
-article_liked_user_table_name = 'ArticleLikedUser'
-
-
 class TestArticlesLikesPost(TestCase):
+    article_liked_user_table_name = 'ArticleLikedUser'
     dynamodb = boto3.resource('dynamodb', endpoint_url='http://localhost:4569/')
 
     @classmethod
     def setUpClass(cls):
-        article_liked_user_table_name = 'ArticleLikedUser'
-        os.environ['ARTICLE_LIKED_USER_TABLE_NAME'] = article_liked_user_table_name
+        os.environ['ARTICLE_LIKED_USER_TABLE_NAME'] = cls.article_liked_user_table_name
 
         f = open('./database.yaml', 'r+')
         template = yaml.load(f)
         f.close()
 
-        create_params = {'TableName': article_liked_user_table_name}
-        create_params.update(template['Resources'][article_liked_user_table_name]['Properties'])
+        create_params = {'TableName': cls.article_liked_user_table_name}
+        create_params.update(template['Resources'][cls.article_liked_user_table_name]['Properties'])
         cls.dynamodb.create_table(**create_params)
 
-        table = cls.dynamodb.Table(article_liked_user_table_name)
+        table = cls.dynamodb.Table(cls.article_liked_user_table_name)
         cls.items = [
             {
                 'article_id': 'testid000000',
@@ -50,7 +47,7 @@ class TestArticlesLikesPost(TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        table = cls.dynamodb.Table(article_liked_user_table_name)
+        table = cls.dynamodb.Table(cls.article_liked_user_table_name)
         table.delete()
 
     def assert_bad_request(self, params):
@@ -72,7 +69,7 @@ class TestArticlesLikesPost(TestCase):
             }
         }
 
-        article_liked_user_table = self.dynamodb.Table(article_liked_user_table_name)
+        article_liked_user_table = self.dynamodb.Table(self.article_liked_user_table_name)
         article_liked_user_before = article_liked_user_table.scan()['Items']
 
         article_liked_user = ArticlesLikesPost(event=params, context={}, dynamodb=self.dynamodb)
@@ -111,7 +108,7 @@ class TestArticlesLikesPost(TestCase):
             }
         }
 
-        article_liked_user_table = self.dynamodb.Table(article_liked_user_table_name)
+        article_liked_user_table = self.dynamodb.Table(self.article_liked_user_table_name)
         article_liked_user_before = article_liked_user_table.scan()['Items']
 
         article_liked_user = ArticlesLikesPost(event=params, context={}, dynamodb=self.dynamodb)
