@@ -17,3 +17,5 @@ parameters = {
 }
 
 article_recent_default_limit = 20
+
+LIKED_RETRY_COUNT = 3
