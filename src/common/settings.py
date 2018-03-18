@@ -36,8 +36,6 @@ parameters = {
 article_recent_default_limit = 20
 article_id_length = 12
 
-sort_key_additional_digits_number = 6
-
 html_allowed_tags = ['a', 'b', 'blockquote', 'br', 'h2', 'h3', 'i', 'p', 'u', 'img']
 html_allowed_attributes = {'a': ['href'], 'img': ['src', 'alt']}
 

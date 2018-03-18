@@ -5,7 +5,6 @@ import logging
 import traceback
 import settings
 import time
-from decimal import Decimal, ROUND_DOWN
 from botocore.exceptions import ClientError
 from lambda_base import LambdaBase
 from jsonschema import validate, ValidationError, FormatChecker
