@@ -6,6 +6,7 @@ import traceback
 import settings
 from decimal import Decimal, ROUND_DOWN
 import time
+from botocore.exceptions import ClientError
 from jsonschema import validate, ValidationError, FormatChecker
 from hashids import Hashids
 from text_sanitizer import TextSanitizer
@@ -47,6 +48,15 @@ class ArticlesDraftCreate(object):
                 'statusCode': 400,
                 'body': json.dumps({'message': "Invalid parameter: {0}".format(err)})
             }
+
+        except ClientError as e:
+            if e.response['Error']['Code'] == 'ConditionalCheckFailedException':
+                return {
+                    'statusCode': 400,
+                    'body': json.dumps({'message': 'Already exists'})
+                }
+            else:
+                raise
         except Exception as err:
             logger.fatal(err)
             traceback.print_exc()
@@ -81,7 +91,10 @@ class ArticlesDraftCreate(object):
             'created_at': int(time.time())
         }
 
-        article_info_table.put_item(Item=article_info)
+        article_info_table.put_item(
+            Item=article_info,
+            ConditionExpression='attribute_not_exists(article_id)'
+        )
 
     def __create_article_content(self, params):
         article_content_table = self.dynamodb.Table(os.environ['ARTICLE_CONTENT_TABLE_NAME'])
@@ -92,7 +105,10 @@ class ArticlesDraftCreate(object):
             'title': TextSanitizer.sanitize_text(params.get('title'))
         }
 
-        article_content_table.put_item(Item=article_content)
+        article_content_table.put_item(
+            Item=article_content,
+            ConditionExpression='attribute_not_exists(article_id)'
+        )
 
     def __generate_article_id(self, target):
         hashids = Hashids(salt=os.environ['SALT_FOR_ARTICLE_ID'], min_length=settings.article_id_length)

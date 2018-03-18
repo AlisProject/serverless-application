@@ -1,6 +1,7 @@
 from unittest import TestCase
 from articles_draft_create import ArticlesDraftCreate
 from unittest.mock import patch, MagicMock
+from botocore.exceptions import ClientError
 import yaml
 import os
 import boto3
@@ -111,7 +112,7 @@ class TestArticlesDraftCreate(TestCase):
            MagicMock(return_value='HOGEHOGEHOGE'))
     @patch('articles_draft_create.ArticlesDraftCreate._ArticlesDraftCreate__create_article_content',
            MagicMock(side_effect=Exception()))
-    def test_main_with_internal_server_error_on_create_article_content(self):
+    def test_main_with_error_on_create_article_content(self):
         params = {
             'body': {
                 'eye_catch_url': 'http://example.com',
@@ -126,7 +127,7 @@ class TestArticlesDraftCreate(TestCase):
         article_info_before = self.article_info_table.scan()['Items']
         article_content_before = self.article_content_table.scan()['Items']
 
-        response = articles_draft_create = ArticlesDraftCreate(params, {}, self.dynamodb).main()
+        response = ArticlesDraftCreate(params, {}, self.dynamodb).main()
 
         article_info_after = self.article_info_table.scan()['Items']
         article_content_after = self.article_content_table.scan()['Items']
@@ -134,6 +135,69 @@ class TestArticlesDraftCreate(TestCase):
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(json.loads(response['body']), {'article_id': 'HOGEHOGEHOGE'})
         self.assertEqual(len(article_info_after) - len(article_info_before), 1)
+        self.assertEqual(len(article_content_after) - len(article_content_before), 0)
+
+    @patch('articles_draft_create.ArticlesDraftCreate._ArticlesDraftCreate__generate_article_id',
+           MagicMock(return_value='HOGEHOGEHOGE'))
+    def test_main_with_article_id_already_exsits(self):
+        self.article_info_table.put_item(
+            Item={
+                'article_id': 'HOGEHOGEHOGE',
+                'user_id': 'USER_ID',
+                'status': 'draft',
+                'sort_key': 1521120784000001,
+            }
+        )
+
+        params = {
+            'body': {
+                'eye_catch_url': 'http://example.com',
+                'title': 'sample title',
+                'body': '<p>sample body</p>',
+                'overview': 'sample body'
+            }
+        }
+
+        params['body'] = json.dumps(params['body'])
+
+        article_info_before = self.article_info_table.scan()['Items']
+        article_content_before = self.article_content_table.scan()['Items']
+
+        response = ArticlesDraftCreate(params, {}, self.dynamodb).main()
+
+        article_info_after = self.article_info_table.scan()['Items']
+        article_content_after = self.article_content_table.scan()['Items']
+
+        self.assertEqual(response['statusCode'], 400)
+        self.assertEqual(json.loads(response['body']), {'message': 'Already exists'})
+        self.assertEqual(len(article_info_after) - len(article_info_before), 0)
+        self.assertEqual(len(article_content_after) - len(article_content_before), 0)
+
+    @patch('articles_draft_create.ArticlesDraftCreate._ArticlesDraftCreate__generate_article_id',
+           MagicMock(return_value='HOGEHOGEHOGE'))
+    def test_create_article_content_with_article_id_already_exsits(self):
+        self.article_content_table.put_item(
+            Item={
+                'article_id': 'HOGEHOGEHOGE',
+                'title': 'test_title',
+                'body': 'test_body'
+            }
+        )
+
+        params = {
+            'title': 'sample title',
+            'body': '<p>sample body</p>'
+        }
+
+        article_draft_create = ArticlesDraftCreate({}, {}, self.dynamodb)
+
+        article_content_before = self.article_content_table.scan()['Items']
+
+        with self.assertRaises(ClientError):
+            article_draft_create._ArticlesDraftCreate__create_article_content(params)
+
+        article_content_after = self.article_content_table.scan()['Items']
+
         self.assertEqual(len(article_content_after) - len(article_content_before), 0)
 
     def test_generate_article_id(self):
