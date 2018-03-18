@@ -49,7 +49,7 @@ class ArticlesLikesPost(LambdaBase):
         now = time.time()
         article_liked_user = {
             'article_id': self.event['pathParameters']['article_id'],
-            'user_id': self.event['requestContext']['authorizer']['cognito:username'],
+            'user_id': self.event['requestContext']['authorizer']['claims']['cognito:username'],
             'created_at': int(now),
             'sort_key': int(now * 1000000)
         }
