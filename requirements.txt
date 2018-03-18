@@ -1,2 +1,5 @@
 pyyaml
 jsonschema
+hashids
+bleach
+rfc3987
