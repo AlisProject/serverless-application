@@ -421,6 +421,17 @@ Resources:
           ProvisionedThroughput:
             ReadCapacityUnits: 2
             WriteCapacityUnits: 2
+        - IndexName: article_id-status_key-index
+          KeySchema:
+            - AttributeName: article_id
+              KeyType: HASH
+            - AttributeName: status
+              KeyType: RANGE
+          Projection:
+            ProjectionType: KEYS_ONLY
+          ProvisionedThroughput:
+            ReadCapacityUnits: 2
+            WriteCapacityUnits: 2
       ProvisionedThroughput:
           ReadCapacityUnits: 2
           WriteCapacityUnits: 2

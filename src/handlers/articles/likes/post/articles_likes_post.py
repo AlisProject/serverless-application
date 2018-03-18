@@ -6,6 +6,7 @@ import json
 from botocore.exceptions import ClientError
 from lambda_base import LambdaBase
 from jsonschema import validate, ValidationError
+from boto3.dynamodb.conditions import Key
 
 
 class ArticlesLikesPost(LambdaBase):
@@ -19,9 +20,13 @@ class ArticlesLikesPost(LambdaBase):
         }
 
     def validate_params(self):
+        # single
         if self.event.get('pathParameters') is None:
             raise ValidationError('pathParameters is required')
         validate(self.event.get('pathParameters'), self.get_schema())
+        # relation
+        if self.exists_public_article_check(self.event['pathParameters']['article_id']) is False:
+            raise ValidationError('Bad Request')
 
     def exec_main_proc(self):
         try:
@@ -52,3 +57,11 @@ class ArticlesLikesPost(LambdaBase):
             Item=article_liked_user,
             ConditionExpression='attribute_not_exists(article_id)'
         )
+
+    def exists_public_article_check(self, article_id):
+        query_params = {
+            'IndexName': 'article_id-status_key-index',
+            'KeyConditionExpression': Key('status').eq('public') & Key('article_id').eq(article_id)
+        }
+        article_info_table = self.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
+        return True if article_info_table.query(**query_params)['Count'] == 1 else False
