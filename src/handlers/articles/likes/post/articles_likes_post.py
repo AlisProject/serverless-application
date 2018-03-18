@@ -7,6 +7,7 @@ from botocore.exceptions import ClientError
 from lambda_base import LambdaBase
 from jsonschema import validate, ValidationError
 from boto3.dynamodb.conditions import Key
+from time_util import TimeUtil
 
 
 class ArticlesLikesPost(LambdaBase):
@@ -46,12 +47,11 @@ class ArticlesLikesPost(LambdaBase):
         }
 
     def __create_article_liked_user(self, article_liked_user_table):
-        now = time.time()
         article_liked_user = {
             'article_id': self.event['pathParameters']['article_id'],
-            'user_id': self.event['requestContext']['authorizer']['cognito:username'],
-            'created_at': int(now),
-            'sort_key': int(now * 1000000)
+            'user_id': self.event['requestContext']['authorizer']['claims']['cognito:username'],
+            'created_at': int(time.time()),
+            'sort_key': TimeUtil.generate_sort_key()
         }
         article_liked_user_table.put_item(
             Item=article_liked_user,
