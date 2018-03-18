@@ -25,7 +25,7 @@ class ArticlesLikesPost(LambdaBase):
             raise ValidationError('pathParameters is required')
         validate(self.event.get('pathParameters'), self.get_schema())
         # relation
-        if self.exists_public_article_check(self.event['pathParameters']['article_id']) is False:
+        if self.exists_public_article(self.event['pathParameters']['article_id']) is False:
             raise ValidationError('Bad Request')
 
     def exec_main_proc(self):
@@ -58,7 +58,7 @@ class ArticlesLikesPost(LambdaBase):
             ConditionExpression='attribute_not_exists(article_id)'
         )
 
-    def exists_public_article_check(self, article_id):
+    def exists_public_article(self, article_id):
         query_params = {
             'IndexName': 'article_id-status_key-index',
             'KeyConditionExpression': Key('status').eq('public') & Key('article_id').eq(article_id)
