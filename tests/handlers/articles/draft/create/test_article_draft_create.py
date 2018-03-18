@@ -52,6 +52,13 @@ class TestArticlesDraftCreate(TestCase):
                 "title": "sample title",
                 "body": "<p>sample body</p>",
                 "overview": " "
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test_user_id'
+                    }
+                }
             }
         }
 
@@ -76,6 +83,9 @@ class TestArticlesDraftCreate(TestCase):
         article_info_param_names = ['eye_catch_url', 'title', 'overview']
         article_content_param_names = ['title', 'body']
 
+        self.assertEqual(params['requestContext']['authorizer']['claims']['cognito:username'],
+                         article_info_after[0]['user_id'])
+
         for key in article_info_param_names:
             self.assertEqual(json.loads(params['body'])[key], article_info_after[0][key])
 
@@ -90,6 +100,13 @@ class TestArticlesDraftCreate(TestCase):
                 'title': 'sample title',
                 'body': '<p>sample body</p>',
                 'overview': 'sample body'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test_user_id'
+                    }
+                }
             }
         }
 
@@ -119,6 +136,13 @@ class TestArticlesDraftCreate(TestCase):
                 'title': 'sample title',
                 'body': '<p>sample body</p>',
                 'overview': 'sample body'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test_user_id'
+                    }
+                }
             }
         }
 
@@ -155,6 +179,13 @@ class TestArticlesDraftCreate(TestCase):
                 'title': 'sample title',
                 'body': '<p>sample body</p>',
                 'overview': 'sample body'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test_user_id'
+                    }
+                }
             }
         }
 

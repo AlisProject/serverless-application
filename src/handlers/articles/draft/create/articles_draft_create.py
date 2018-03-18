@@ -65,7 +65,7 @@ class ArticlesDraftCreate(LambdaBase):
 
         article_info = {
             'article_id': article_id,
-            'user_id': 'USER_ID',  # FIXME. Autorizationの実装が完了したらcognito経由でuser_idを取得する
+            'user_id': self.event['requestContext']['authorizer']['claims']['cognito:username'],
             'status': 'draft',
             'title': TextSanitizer.sanitize_text(params.get('title')),
             'overview': TextSanitizer.sanitize_text(params.get('overview')),
