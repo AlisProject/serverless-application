@@ -9,6 +9,7 @@ from jsonschema import validate, ValidationError
 from boto3.dynamodb.conditions import Key
 from time_util import TimeUtil
 
+
 class ArticlesLikesPost(LambdaBase):
     def get_schema(self):
         return {
