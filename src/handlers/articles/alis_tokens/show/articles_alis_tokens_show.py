@@ -13,7 +13,7 @@ from decimal_encoder import DecimalEncoder
 from parameter_util import ParameterUtil
 
 
-class ArticleAlisTokenShow(object):
+class ArticlesAlisTokensShow(object):
     def __init__(self, event, context, dynamodb):
         self.event = event
         self.context = context

@@ -13,7 +13,7 @@ from decimal_encoder import DecimalEncoder
 from parameter_util import ParameterUtil
 
 
-class ArticleInfoRecent(object):
+class ArticlesRecent(object):
     def __init__(self, event, context, dynamodb):
         self.event = event
         self.context = context

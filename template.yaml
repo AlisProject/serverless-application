@@ -263,7 +263,7 @@ Resources:
                 responses:
                   default:
                     statusCode: "200"
-                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ArticleInfoRecent.Arn}/invocations
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ArticlesRecent.Arn}/invocations
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
@@ -285,7 +285,7 @@ Resources:
                 responses:
                   default:
                     statusCode: "200"
-                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ArticleContentShow.Arn}/invocations
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ArticlesShow.Arn}/invocations
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
@@ -311,7 +311,7 @@ Resources:
                 responses:
                   default:
                     statusCode: "200"
-                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ArticleAlisTokenShow.Arn}/invocations
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ArticlesAlisTokensShow.Arn}/invocations
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
@@ -344,7 +344,7 @@ Resources:
               - "sts:AssumeRole"
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess
-  ArticleInfoRecent:
+  ArticlesRecent:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
@@ -357,7 +357,7 @@ Resources:
             Path: /articles/recent
             Method: get
             RestApiId: !Ref RestApi
-  ArticleContentShow:
+  ArticlesShow:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
@@ -370,7 +370,7 @@ Resources:
             Path: /articles/{article_id}
             Method: get
             RestApiId: !Ref RestApi
-  ArticleAlisTokenShow:
+  ArticlesAlisTokensShow:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler

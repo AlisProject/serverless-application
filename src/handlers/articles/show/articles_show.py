@@ -11,7 +11,7 @@ from jsonschema import validate, ValidationError
 from decimal_encoder import DecimalEncoder
 
 
-class ArticleContentShow(object):
+class ArticlesShow(object):
     def __init__(self, event, context, dynamodb):
         self.event = event
         self.context = context
