@@ -11,6 +11,7 @@ from lambda_base import LambdaBase
 from jsonschema import validate, ValidationError, FormatChecker
 from hashids import Hashids
 from text_sanitizer import TextSanitizer
+from time_util import TimeUtil
 
 
 class ArticlesDraftCreate(LambdaBase):
@@ -34,7 +35,7 @@ class ArticlesDraftCreate(LambdaBase):
         validate(params, self.get_schema(), format_checker=FormatChecker())
 
     def exec_main_proc(self):
-        sort_key = self.__generate_sort_key()
+        sort_key = TimeUtil.generate_sort_key()
         article_id = self.__generate_article_id(sort_key)
         params = json.loads(self.event.get('body'))
 
@@ -97,7 +98,3 @@ class ArticlesDraftCreate(LambdaBase):
     def __generate_article_id(self, target):
         hashids = Hashids(salt=os.environ['SALT_FOR_ARTICLE_ID'], min_length=settings.article_id_length)
         return hashids.encode(target)
-
-    def __generate_sort_key(self):
-        unixtime_now_decimal = time.time()
-        return int(unixtime_now_decimal * (10 ** settings.sort_key_additional_digits_number))

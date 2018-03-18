@@ -214,14 +214,6 @@ class TestArticlesDraftCreate(TestCase):
         self.assertEqual(len(hashid1), 12)
         self.assertEqual(len(hashid2), 12)
 
-    def test_generate_sort_key(self):
-        articles_draft_create = ArticlesDraftCreate({}, {}, self.dynamodb)
-
-        sort_key = articles_draft_create._ArticlesDraftCreate__generate_sort_key()
-
-        self.assertEqual(len(str(sort_key)), 16)
-        self.assertTrue(type(sort_key) is int)
-
     def test_validation_with_no_params(self):
         params = {}
 
