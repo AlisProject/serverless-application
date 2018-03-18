@@ -2,6 +2,8 @@
 import os
 import settings
 import time
+import json
+from botocore.exceptions import ClientError
 from lambda_base import LambdaBase
 from jsonschema import validate, ValidationError
 
@@ -22,8 +24,18 @@ class ArticlesLikesPost(LambdaBase):
         validate(self.event.get('pathParameters'), self.get_schema())
 
     def exec_main_proc(self):
-        article_liked_user_table = self.dynamodb.Table(os.environ['ARTICLE_LIKED_USER_TABLE_NAME'])
-        self.__create_article_liked_user(article_liked_user_table)
+        try:
+            article_liked_user_table = self.dynamodb.Table(os.environ['ARTICLE_LIKED_USER_TABLE_NAME'])
+            self.__create_article_liked_user(article_liked_user_table)
+        except ClientError as e:
+            if e.response['Error']['Code'] == 'ConditionalCheckFailedException':
+                return {
+                    'statusCode': 400,
+                    'body': json.dumps({'message': 'Already exists'})
+                }
+            else:
+                raise
+
         return {
             'statusCode': 200
         }
