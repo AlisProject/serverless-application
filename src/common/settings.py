@@ -40,3 +40,5 @@ sort_key_additional_digits_number = 6
 
 html_allowed_tags = ['a', 'b', 'blockquote', 'br', 'h2', 'h3', 'i', 'p', 'u', 'img']
 html_allowed_attributes = {'a': ['href'], 'img': ['src', 'alt']}
+
+LIKED_RETRY_COUNT = 3
