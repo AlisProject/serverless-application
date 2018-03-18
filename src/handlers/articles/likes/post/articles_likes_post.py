@@ -16,7 +16,7 @@ class ArticlesLikesPost(LambdaBase):
             'required': ['article_id']
         }
 
-    def validation(self):
+    def validate_params(self):
         if self.event.get('pathParameters') is None:
             raise ValidationError('pathParameters is required')
         validate(self.event.get('pathParameters'), self.get_schema())

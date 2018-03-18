@@ -21,7 +21,7 @@ class LambdaBase(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def validation(self):
+    def validate_params(self):
         pass
 
     def main(self):
@@ -30,7 +30,7 @@ class LambdaBase(metaclass=ABCMeta):
 
         try:
             # validation
-            self.validation()
+            self.validate_params()
 
             # exec main process
             return self.exec_main_proc()
