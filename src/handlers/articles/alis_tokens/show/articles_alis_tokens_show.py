@@ -7,23 +7,16 @@ import logging
 import decimal
 import traceback
 import settings
+from lambda_base import LambdaBase
 from boto3.dynamodb.conditions import Key, Attr
 from jsonschema import validate, ValidationError
 from decimal_encoder import DecimalEncoder
 from parameter_util import ParameterUtil
 
 
-class ArticlesAlisTokensShow(object):
-    def __init__(self, event, context, dynamodb):
-        self.event = event
-        self.context = context
-        self.dynamodb = dynamodb
-
-    def main(self):
-        logger = logging.getLogger()
-        logger.setLevel(logging.INFO)
-
-        schema = {
+class ArticlesAlisTokensShow(LambdaBase):
+    def get_schema(self):
+        return {
             'type': 'object',
             'properties': {
                 'article_id': settings.parameters['article_id']
@@ -31,47 +24,34 @@ class ArticlesAlisTokensShow(object):
             'required': ['article_id']
         }
 
-        try:
-            params = self.event.get('pathParameters')
-            if params is None:
-                raise ValidationError('pathParameters is required')
+    def validate_params(self):
+        params = self.event.get('pathParameters')
 
-            validate(params, schema)
+        if params is None:
+            raise ValidationError('pathParameters is required')
 
-            article_evaluated_manage_table = self.dynamodb.Table(os.environ['ARTICLE_EVALUATED_MANAGE_TABLE_NAME'])
-            article_alis_token_table = self.dynamodb.Table(os.environ['ARTICLE_ALIS_TOKEN_TABLE_NAME'])
+        validate(params, self.get_schema())
 
-            active_evaluated_at = article_evaluated_manage_table.scan()['Items'][0]['active_evaluated_at']
+    def exec_main_proc(self):
+        article_evaluated_manage_table = self.dynamodb.Table(os.environ['ARTICLE_EVALUATED_MANAGE_TABLE_NAME'])
+        article_alis_token_table = self.dynamodb.Table(os.environ['ARTICLE_ALIS_TOKEN_TABLE_NAME'])
 
-            responce = article_alis_token_table.get_item(
-                Key={
-                    'evaluated_at': active_evaluated_at,
-                    'article_id': params['article_id']
-                }
-            )
+        active_evaluated_at = article_evaluated_manage_table.scan()['Items'][0]['active_evaluated_at']
 
-            if responce.get('Item') is None:
-                return {
-                   'statusCode': 404,
-                   'body': json.dumps({'message': 'Record Not Found'})
-                }
+        responce = article_alis_token_table.get_item(
+            Key={
+                'evaluated_at': active_evaluated_at,
+                'article_id': self.event['pathParameters']['article_id']
+            }
+        )
 
+        if responce.get('Item') is None:
             return {
-                'statusCode': 200,
-                'body': json.dumps(responce['Item'], cls=DecimalEncoder)
+               'statusCode': 404,
+               'body': json.dumps({'message': 'Record Not Found'})
             }
 
-        except ValidationError as err:
-            return {
-                'statusCode': 400,
-                'body': json.dumps({'message': "Invalid parameter: {0}".format(err)})
-            }
-
-        except Exception as err:
-            logger.fatal(err)
-            traceback.print_exc()
-
-            return {
-                'statusCode': 500,
-                'body': json.dumps({'message': 'Internal server error'})
-            }
+        return {
+            'statusCode': 200,
+            'body': json.dumps(responce['Item'], cls=DecimalEncoder)
+        }
