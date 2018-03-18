@@ -73,7 +73,7 @@ class TestArticlesLikesPost(TestCase):
         }
 
         article_liked_user_table = self.dynamodb.Table(article_liked_user_table_name)
-        article_liked_user_befor = article_liked_user_table.scan()['Items']
+        article_liked_user_before = article_liked_user_table.scan()['Items']
 
         article_liked_user = ArticlesLikesPost(event=params, context={}, dynamodb=self.dynamodb)
         response = article_liked_user.main()
@@ -93,7 +93,7 @@ class TestArticlesLikesPost(TestCase):
         }
 
         self.assertEqual(response['statusCode'], 200)
-        self.assertEqual(len(article_liked_user_after), len(article_liked_user_befor) + 1)
+        self.assertEqual(len(article_liked_user_after), len(article_liked_user_before) + 1)
         article_liked_user_param_names = ['article_id', 'user_id', 'created_at', 'sort_key']
         for key in article_liked_user_param_names:
             self.assertEqual(expected_items[key], article_liked_user[key])
@@ -112,7 +112,7 @@ class TestArticlesLikesPost(TestCase):
         }
 
         article_liked_user_table = self.dynamodb.Table(article_liked_user_table_name)
-        article_liked_user_befor = article_liked_user_table.scan()['Items']
+        article_liked_user_before = article_liked_user_table.scan()['Items']
 
         article_liked_user = ArticlesLikesPost(event=params, context={}, dynamodb=self.dynamodb)
         response = article_liked_user.main()
@@ -132,7 +132,7 @@ class TestArticlesLikesPost(TestCase):
         }
 
         self.assertEqual(response['statusCode'], 200)
-        self.assertEqual(len(article_liked_user_after), len(article_liked_user_befor) + 1)
+        self.assertEqual(len(article_liked_user_after), len(article_liked_user_before) + 1)
         article_liked_user_param_names = ['article_id', 'user_id', 'created_at', 'sort_key']
         for key in article_liked_user_param_names:
             self.assertEqual(expected_items[key], article_liked_user[key])
