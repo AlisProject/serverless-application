@@ -49,7 +49,7 @@ class ArticlesLikesPost(LambdaBase):
     def __create_article_liked_user(self, article_liked_user_table):
         article_liked_user = {
             'article_id': self.event['pathParameters']['article_id'],
-            'user_id': self.event['requestContext']['authorizer']['cognito:username'],
+            'user_id': self.event['requestContext']['authorizer']['claims']['cognito:username'],
             'created_at': int(time.time()),
             'sort_key': TimeUtil.generate_sort_key()
         }

@@ -92,7 +92,9 @@ class TestArticlesLikesPost(TestCase):
             },
             'requestContext': {
                 'authorizer': {
-                    'cognito:username': 'test05'
+                    'claims': {
+                        'cognito:username': 'test05'
+                    }
                 }
             }
         }
@@ -106,7 +108,7 @@ class TestArticlesLikesPost(TestCase):
         article_liked_user_after = article_liked_user_table.scan()['Items']
 
         target_article_id = params['pathParameters']['article_id']
-        target_user_id = params['requestContext']['authorizer']['cognito:username']
+        target_user_id = params['requestContext']['authorizer']['claims']['cognito:username']
 
         article_liked_user = self.get_article_liked_user(target_article_id, target_user_id)
 
@@ -130,7 +132,9 @@ class TestArticlesLikesPost(TestCase):
             },
             'requestContext': {
                 'authorizer': {
-                    'cognito:username': self.article_liked_user_table_items[0]['user_id']
+                    'claims': {
+                        'cognito:username': self.article_liked_user_table_items[0]['user_id']
+                    }
                 }
             }
         }
@@ -169,7 +173,9 @@ class TestArticlesLikesPost(TestCase):
             },
             'requestContext': {
                 'authorizer': {
-                    'cognito:username': self.article_liked_user_table_items[0]['user_id']
+                    'claims': {
+                        'cognito:username': self.article_liked_user_table_items[0]['user_id']
+                    }
                 }
             }
         }
@@ -185,7 +191,9 @@ class TestArticlesLikesPost(TestCase):
             },
             'requestContext': {
                 'authorizer': {
-                    'cognito:username': self.article_liked_user_table_items[0]['user_id']
+                    'claims': {
+                        'cognito:username': self.article_liked_user_table_items[0]['user_id']
+                    }
                 }
             }
         }
