@@ -184,6 +184,7 @@ class TestArticlesDraftCreate(TestCase):
             }
         )
 
+        article_id = 'HOGEHOGEHOGE'
         params = {
             'title': 'sample title',
             'body': '<p>sample body</p>'
@@ -194,7 +195,7 @@ class TestArticlesDraftCreate(TestCase):
         article_content_before = self.article_content_table.scan()['Items']
 
         with self.assertRaises(ClientError):
-            article_draft_create._ArticlesDraftCreate__create_article_content(params)
+            article_draft_create._ArticlesDraftCreate__create_article_content(params, article_id)
 
         article_content_after = self.article_content_table.scan()['Items']
 
