@@ -13,6 +13,7 @@ Globals:
         ARTICLE_CONTENT_TABLE_NAME: !Ref ArticleContent
         ARTICLE_EVALUATED_MANAGE_TABLE_NAME: !Ref ArticleEvaluatedManage
         ARTICLE_ALIS_TOKEN_TABLE_NAME: !Ref ArticleAlisToken
+        COGNITO_EMAIL_VERIFY_URL: {{ COGNITO_EMAIL_VERIFY_URL }}
 
 Resources:
   SNSRole:
@@ -46,7 +47,7 @@ Resources:
         - phone_number
       AutoVerifiedAttributes:
         - email
-      EmailVerificationMessage: "Your verification code is {####}."
+      EmailVerificationMessage: "Your verification code is {{ '{' }}####}."
       EmailVerificationSubject: "Your verification code"
       LambdaConfig:
         CustomMessage: !GetAtt CognitoTriggerCustomMessage.Arn
@@ -83,8 +84,8 @@ Resources:
           - - 'external-'
             - !Ref "AWS::StackName"
         SnsCallerArn: !GetAtt SNSRole.Arn
-      SmsAuthenticationMessage:  "Your authentication code is {####}."
-      SmsVerificationMessage: "Your verification code is {####}."
+      SmsAuthenticationMessage:  "Your authentication code is {{ '{' }}####}."
+      SmsVerificationMessage: "Your verification code is {{ '{' }}####}."
   UserPoolClient:
     Type: AWS::Cognito::UserPoolClient
     Properties:

@@ -10,5 +10,5 @@ def lambda_handler(event, context):
         user=event['userName'], code=event['request']['codeParameter'])
     event['response']['emailSubject'] = 'Email確認リンク'
     event['response']['emailMessage'] = "E メールアドレスを検証するには、次のリンクをクリックしてください\n{url}?code={code}&user={user}".format(
-        url="https://alis.cloud.yaasita.net/confirm.html", code=event['request']['codeParameter'], user=event['userName'])
+        url=os.environ['COGNITO_EMAIL_VERIFY_URL'], code=event['request']['codeParameter'], user=event['userName'])
     return event
