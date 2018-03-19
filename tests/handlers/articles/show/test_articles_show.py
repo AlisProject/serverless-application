@@ -1,5 +1,5 @@
 from unittest import TestCase
-from article_alis_token_show import ArticleAlisTokenShow
+from articles_show import ArticlesShow
 from unittest.mock import patch, MagicMock
 import yaml
 import os
@@ -7,15 +7,15 @@ import boto3
 import json
 
 
-class TestArticleAlisTokenShow(TestCase):
+class TestArticlesShow(TestCase):
     dynamodb = boto3.resource('dynamodb', endpoint_url='http://localhost:4569/')
 
-    target_tables = ['ArticleAlisToken', 'ArticleEvaluatedManage']
+    target_tables = ['ArticleInfo', 'ArticleContent']
 
     @classmethod
     def setUpClass(cls):
-        os.environ['ARTICLE_ALIS_TOKEN_TABLE_NAME'] = 'ArticleAlisToken'
-        os.environ['ARTICLE_EVALUATED_MANAGE_TABLE_NAME'] = 'ArticleEvaluatedManage'
+        os.environ['ARTICLE_INFO_TABLE_NAME'] = 'ArticleInfo'
+        os.environ['ARTICLE_CONTENT_TABLE_NAME'] = 'ArticleContent'
 
         f = open("./database.yaml", "r+")
         template = yaml.load(f)
@@ -27,35 +27,41 @@ class TestArticleAlisTokenShow(TestCase):
 
             cls.dynamodb.create_table(**create_params)
 
-        article_evaluated_manage_table = cls.dynamodb.Table('ArticleEvaluatedManage')
-        article_evaluated_manage_table.put_item(Item={'active_evaluated_at': 1520150272000000})
-
-        article_alis_token_table = cls.dynamodb.Table('ArticleAlisToken')
-        article_alis_tokens = [
+        article_info_table = cls.dynamodb.Table('ArticleInfo')
+        items = [
             {
                 'article_id': 'testid000001',
-                'alis_token': 100,
-                'evaluated_at': 1520150272000000
+                'status': 'public',
+                'title': 'testid000001 titile',
+                'sort_key': 1520150272000000
             },
             {
                 'article_id': 'testid000002',
-                'alis_token': 50,
-                'evaluated_at': 1520150272000000
-            },
-            {
-                'article_id': 'testid000003',
-                'alis_token': 150,
-                'evaluated_at': 1520150572000000
-            },
-            {
-                'article_id': 'testid000001',
-                'alis_token': 80,
-                'evaluated_at': 1520150572000000
+                'status': 'public',
+                'title': 'testid000002 titile',
+                'sort_key': 1520150272000001
             }
         ]
 
-        for article_alis_token in article_alis_tokens:
-            article_alis_token_table.put_item(Item=article_alis_token)
+        for item in items:
+            article_info_table.put_item(Item=item)
+
+        article_content_table = cls.dynamodb.Table('ArticleContent')
+        items = [
+            {
+                'article_id': 'testid000001',
+                'body': 'testid000001 body',
+                'title': 'testid000001 titile'
+            },
+            {
+                'article_id': 'testid000003',
+                'body': 'testid000003 body',
+                'title': 'testid000003 titile'
+            }
+        ]
+
+        for item in items:
+            article_content_table.put_item(Item=item)
 
     @classmethod
     def tearDownClass(cls):
@@ -63,7 +69,7 @@ class TestArticleAlisTokenShow(TestCase):
             cls.dynamodb.Table(table_name).delete()
 
     def assert_bad_request(self, params):
-        function = ArticleAlisTokenShow(params, {}, self.dynamodb)
+        function = ArticlesShow(params, {}, self.dynamodb)
         response = function.main()
 
         self.assertEqual(response['statusCode'], 400)
@@ -75,18 +81,20 @@ class TestArticleAlisTokenShow(TestCase):
             }
         }
 
-        response = ArticleAlisTokenShow(params, {}, self.dynamodb).main()
+        response = ArticlesShow(params, {}, self.dynamodb).main()
 
         expected_item = {
             'article_id': 'testid000001',
-            'alis_token': 100,
-            'evaluated_at': 1520150272000000
+            'status': 'public',
+            'title': 'testid000001 titile',
+            'body': 'testid000001 body',
+            'sort_key': 1520150272000000
         }
 
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(json.loads(response['body']), expected_item)
 
-    @patch('article_alis_token_show.validate', MagicMock(side_effect=Exception()))
+    @patch('articles_show.validate', MagicMock(side_effect=Exception()))
     def test_main_ng_with_internal_server_error(self):
         params = {
             'pathParameters': {
@@ -94,18 +102,29 @@ class TestArticleAlisTokenShow(TestCase):
             }
         }
 
-        response = ArticleAlisTokenShow(params, {}, self.dynamodb).main()
+        response = ArticlesShow(params, {}, self.dynamodb).main()
 
         self.assertEqual(response['statusCode'], 500)
 
-    def test_record_not_found(self):
+    def test_article_info_record_not_found(self):
         params = {
             'pathParameters': {
                 'article_id': 'testid000003'
             }
         }
 
-        response = ArticleAlisTokenShow(params, {}, self.dynamodb).main()
+        response = ArticlesShow(params, {}, self.dynamodb).main()
+
+        self.assertEqual(response['statusCode'], 404)
+
+    def test_article_content_record_not_found(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'testid000002'
+            }
+        }
+
+        response = ArticlesShow(params, {}, self.dynamodb).main()
 
         self.assertEqual(response['statusCode'], 404)
 

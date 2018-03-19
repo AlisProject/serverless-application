@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import boto3
-from article_alis_token_show import ArticleAlisTokenShow
+from articles_alis_tokens_show import ArticlesAlisTokensShow
 
 dynamodb = boto3.resource('dynamodb')
 

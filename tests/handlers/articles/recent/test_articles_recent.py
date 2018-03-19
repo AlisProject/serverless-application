@@ -1,5 +1,5 @@
 from unittest import TestCase
-from article_info_recent import ArticleInfoRecent
+from articles_recent import ArticlesRecent
 from unittest.mock import patch, MagicMock
 import yaml
 import os
@@ -7,7 +7,7 @@ import boto3
 import json
 
 
-class TestArticleInfoRecent(TestCase):
+class TestArticlesRecent(TestCase):
     dynamodb = boto3.resource('dynamodb', endpoint_url='http://localhost:4569/')
 
     @classmethod
@@ -22,7 +22,7 @@ class TestArticleInfoRecent(TestCase):
         create_params.update(template['Resources']['ArticleInfo']['Properties'])
         cls.dynamodb.create_table(**create_params)
 
-        table = TestArticleInfoRecent.dynamodb.Table('ArticleInfo')
+        table = TestArticlesRecent.dynamodb.Table('ArticleInfo')
         items = [
             {
                 'article_id': 'draftId00001',
@@ -51,11 +51,11 @@ class TestArticleInfoRecent(TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        table = TestArticleInfoRecent.dynamodb.Table('ArticleInfo')
+        table = TestArticlesRecent.dynamodb.Table('ArticleInfo')
         table.delete()
 
     def assert_bad_request(self, params):
-        function = ArticleInfoRecent(params, {}, self.dynamodb)
+        function = ArticlesRecent(params, {}, self.dynamodb)
         response = function.main()
 
         self.assertEqual(response['statusCode'], 400)
@@ -67,7 +67,7 @@ class TestArticleInfoRecent(TestCase):
             }
         }
 
-        response = ArticleInfoRecent(params, {}, self.dynamodb).main()
+        response = ArticlesRecent(params, {}, self.dynamodb).main()
 
         expected_items = [
             {
@@ -81,7 +81,7 @@ class TestArticleInfoRecent(TestCase):
         self.assertEqual(json.loads(response['body'])['Items'], expected_items)
 
     def test_main_ok_with_no_limit(self):
-        table = TestArticleInfoRecent.dynamodb.Table('ArticleInfo')
+        table = TestArticlesRecent.dynamodb.Table('ArticleInfo')
 
         for i in range(21):
             table.put_item(Item={
@@ -94,7 +94,7 @@ class TestArticleInfoRecent(TestCase):
         params = {
             'queryStringParameters': {}
         }
-        response = ArticleInfoRecent(params, {}, self.dynamodb).main()
+        response = ArticlesRecent(params, {}, self.dynamodb).main()
 
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(len(json.loads(response['body'])['Items']), 20)
@@ -108,7 +108,7 @@ class TestArticleInfoRecent(TestCase):
             }
         }
 
-        response = ArticleInfoRecent(params, {}, self.dynamodb).main()
+        response = ArticlesRecent(params, {}, self.dynamodb).main()
 
         expected_items = [
             {
@@ -121,7 +121,7 @@ class TestArticleInfoRecent(TestCase):
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(json.loads(response['body'])['Items'], expected_items)
 
-    @patch("article_info_recent.validate", MagicMock(side_effect=Exception()))
+    @patch("articles_recent.validate", MagicMock(side_effect=Exception()))
     def test_main_ng_with_internal_server_error(self):
         params = {
             'queryStringParameters': {
@@ -129,7 +129,7 @@ class TestArticleInfoRecent(TestCase):
             }
         }
 
-        response = ArticleInfoRecent(params, {}, self.dynamodb).main()
+        response = ArticlesRecent(params, {}, self.dynamodb).main()
 
         self.assertEqual(response['statusCode'], 500)
 
