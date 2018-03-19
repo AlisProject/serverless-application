@@ -40,6 +40,20 @@ python exec_test.py
 
 # Deployment
 
+## Configuration
+
+COGNITO_EMAIL_VERIFY_URL is used by cognito email validation
+
+```bash
+export COGNITO_EMAIL_VERIFY_URL=https://example.com/confirm
+```
+
+## Create template.yaml
+
+```bash
+python make_template.py
+```
+
 ## Create S3 bucket
 You have to change `YOUR_BUCKET_NAME_HERE` to your AWS S3 bucket name you want. 
 ```bash
