@@ -112,7 +112,6 @@ Resources:
               - Ref: AWS::Region
               - .amazonaws.com/
               - Ref: UserPool
-      AllowUnauthenticatedIdentities: false
   UnauthenticatedPolicy:
     Type: AWS::IAM::ManagedPolicy
     Properties:
