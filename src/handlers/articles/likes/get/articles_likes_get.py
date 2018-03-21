@@ -29,6 +29,7 @@ class ArticlesLikesGet(LambdaBase):
     def exec_main_proc(self):
         query_params = {
             'KeyConditionExpression': Key('article_id').eq(self.event['pathParameters']['article_id']),
+            'Select': 'COUNT'
         }
         article_liked_user_table = self.dynamodb.Table(os.environ['ARTICLE_LIKED_USER_TABLE_NAME'])
         response = article_liked_user_table.query(**query_params)
