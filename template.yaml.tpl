@@ -368,6 +368,37 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+          /users/{user_id}/articles/public:
+            get:
+              description: '指定されたユーザーの公開記事一覧情報を取得'
+              parameters:
+              - name: 'limit'
+                in: 'query'
+                description: '取得件数'
+                required: false
+                type: 'integer'
+                minimum: 1
+              - name: 'offset'
+                in: 'query'
+                description: '取得位置'
+                required: false
+                type: 'integer'
+                minimum: 0
+              responses:
+                '200':
+                  description: '公開記事一覧'
+                  schema:
+                    type: array
+                    items:
+                      $ref: '#/definitions/StoryInfo'
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${UsersArticlesPublic.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
 
   LambdaRole:
     Type: "AWS::IAM::Role"
@@ -431,6 +462,19 @@ Resources:
             Path: /articles/{article_id}/alistoken
             Method: get
             RestApiId: !Ref RestApi
+  UsersArticlesPublic:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/users_articles_public.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /users/{user_id}/articles/public
+            Method: get
+            RestApiId: !Ref RestApi
   ArticlesDraftCreate:
       Type: AWS::Serverless::Function
       Properties:
@@ -469,6 +513,8 @@ Resources:
       AttributeDefinitions:
         - AttributeName: article_id
           AttributeType: S
+        - AttributeName: user_id
+          AttributeType: S
         - AttributeName: status
           AttributeType: S
         - AttributeName: sort_key
@@ -480,6 +526,17 @@ Resources:
         - IndexName: status-sort_key-index
           KeySchema:
             - AttributeName: status
+              KeyType: HASH
+            - AttributeName: sort_key
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: 2
+            WriteCapacityUnits: 2
+        - IndexName: user_id-sort_key-index
+          KeySchema:
+            - AttributeName: user_id
               KeyType: HASH
             - AttributeName: sort_key
               KeyType: RANGE

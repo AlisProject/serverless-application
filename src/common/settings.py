@@ -9,6 +9,11 @@ parameters = {
         'minLength': 12,
         'maxLength': 12
     },
+    'user_id': {
+        'type': 'string',
+        'minLength': 1,
+        'maxLength': 255
+    },
     'sort_key': {
         'type': 'integer',
         'minimum': 1,
@@ -34,6 +39,8 @@ parameters = {
 }
 
 article_recent_default_limit = 20
+users_articles_public_default_limit = 10
+
 article_id_length = 12
 
 html_allowed_tags = ['a', 'b', 'blockquote', 'br', 'h2', 'h3', 'i', 'p', 'u', 'img']
