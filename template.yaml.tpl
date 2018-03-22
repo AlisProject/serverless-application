@@ -13,6 +13,7 @@ Globals:
         ARTICLE_CONTENT_TABLE_NAME: !Ref ArticleContent
         ARTICLE_EVALUATED_MANAGE_TABLE_NAME: !Ref ArticleEvaluatedManage
         ARTICLE_ALIS_TOKEN_TABLE_NAME: !Ref ArticleAlisToken
+        ARTICLE_LIKED_USER_TABLE_NAME: !Ref ArticleLikedUser
         COGNITO_EMAIL_VERIFY_URL: {{ COGNITO_EMAIL_VERIFY_URL }}
 
 Resources:
@@ -368,6 +369,31 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+          /articles/{article_id}/likes/me:
+            get:
+              description: '指定された article_id の記事に「いいね」を行ったかを確認'
+              parameters:
+              - name: 'article_id'
+                in: 'path'
+                description: '対象記事の指定するために使用'
+                required: true
+                type: 'string'
+              responses:
+                '200':
+                  description: '対象記事に「いいね」を行ったかを判定'
+                  schema:
+                    type: object
+                    properties:
+                      is_good:
+                        type: boolean
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ArticlesLikesMe.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
 
   LambdaRole:
     Type: "AWS::IAM::Role"
@@ -456,6 +482,19 @@ Resources:
           Properties:
             Path: /articles/{article_id}/likes
             Method: post
+            RestApiId: !Ref RestApi
+  ArticlesLikesMe:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/articles_likes_me.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /articles/{article_id}/likes/me
+            Method: get
             RestApiId: !Ref RestApi
   CognitoTriggerCustomMessage:
     Type: AWS::Serverless::Function
