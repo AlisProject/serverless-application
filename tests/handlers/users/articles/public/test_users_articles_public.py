@@ -116,6 +116,32 @@ class TestUsersArticlesPublic(TestCase):
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(json.loads(response['body'])['Items'], expected_items)
 
+    def test_main_ok_with_only_sort_key(self):
+        table = self.dynamodb.Table('ArticleInfo')
+
+        for i in range(11):
+            table.put_item(Item={
+                'user_id': 'test_only_sort_key',
+                'article_id': 'test_limit_number' + str(i),
+                'status': 'public',
+                'sort_key': 1520150273000000 + i
+                }
+            )
+
+        params = {
+            'pathParameters': {
+                'user_id': 'test_only_sort_key'
+            },
+            'queryStringParameters': {
+                'sort_key': '1520150272000002'
+            }
+        }
+
+        response = UsersArticlesPublic(params, {}, self.dynamodb).main()
+
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(len(json.loads(response['body'])['Items']), 10)
+
     def test_main_ok_with_evaluated_key_with_no_limit(self):
         table = self.dynamodb.Table('ArticleInfo')
 
