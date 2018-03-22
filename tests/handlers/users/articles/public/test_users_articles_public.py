@@ -168,7 +168,7 @@ class TestUsersArticlesPublic(TestCase):
     def test_main_with_no_recource(self):
         params = {
             'pathParameters': {
-                'user_id': 'A' * 20
+                'user_id': 'A' * 30
             },
             'queryStringParameters': {
                 'limit': '3'
@@ -234,7 +234,7 @@ class TestUsersArticlesPublic(TestCase):
     def test_validation_user_id_min(self):
         params = {
             'pathParameters': {
-                'user_id': 'A' * 21
+                'user_id': 'A' * 31
             }
         }
 

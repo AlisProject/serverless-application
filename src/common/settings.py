@@ -12,7 +12,7 @@ parameters = {
     'user_id': {
         'type': 'string',
         'minLength': 3,
-        'maxLength': 20
+        'maxLength': 30
     },
     'sort_key': {
         'type': 'integer',
