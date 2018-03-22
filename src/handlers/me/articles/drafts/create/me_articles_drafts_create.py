@@ -13,7 +13,7 @@ from text_sanitizer import TextSanitizer
 from time_util import TimeUtil
 
 
-class ArticlesDraftCreate(LambdaBase):
+class MeArticlesDraftsCreate(LambdaBase):
     def get_schema(self):
         return {
             'type': 'object',
