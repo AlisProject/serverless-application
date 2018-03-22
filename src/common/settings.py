@@ -11,8 +11,8 @@ parameters = {
     },
     'user_id': {
         'type': 'string',
-        'minLength': 1,
-        'maxLength': 255
+        'minLength': 3,
+        'maxLength': 20
     },
     'sort_key': {
         'type': 'integer',

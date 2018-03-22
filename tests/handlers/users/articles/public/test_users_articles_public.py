@@ -18,31 +18,31 @@ class TestUsersArticlesPublic(TestCase):
         items = [
             {
                 'article_id': 'draftId00001',
-                'user_id': 'test_user_1',
+                'user_id': 'TST',
                 'status': 'draft',
                 'sort_key': 1520150272000000
             },
             {
                 'article_id': 'testid000001',
-                'user_id': 'test_user_1',
+                'user_id': 'TST',
                 'status': 'public',
                 'sort_key': 1520150272000001
             },
             {
                 'article_id': 'testid000002',
-                'user_id': 'test_user_1',
+                'user_id': 'TST',
                 'status': 'public',
                 'sort_key': 1520150272000002
             },
             {
                 'article_id': 'testid000003',
-                'user_id': 'test_user_2',
+                'user_id': 'TST2',
                 'status': 'public',
                 'sort_key': 1520150272000003
             },
             {
                 'article_id': 'testid000004',
-                'user_id': 'test_user_1',
+                'user_id': 'TST',
                 'status': 'public',
                 'sort_key': 1520150272000004
             }
@@ -63,7 +63,7 @@ class TestUsersArticlesPublic(TestCase):
     def test_main_ok(self):
         params = {
             'pathParameters': {
-                'user_id': 'test_user_1'
+                'user_id': 'TST'
             },
             'queryStringParameters': {
                 'limit': '2'
@@ -75,13 +75,13 @@ class TestUsersArticlesPublic(TestCase):
         expected_items = [
             {
                 'article_id': 'testid000004',
-                'user_id': 'test_user_1',
+                'user_id': 'TST',
                 'status': 'public',
                 'sort_key': 1520150272000004
             },
             {
                 'article_id': 'testid000002',
-                'user_id': 'test_user_1',
+                'user_id': 'TST',
                 'status': 'public',
                 'sort_key': 1520150272000002
             }
@@ -93,7 +93,7 @@ class TestUsersArticlesPublic(TestCase):
     def test_main_ok_with_evaluated_key(self):
         params = {
             'pathParameters': {
-                'user_id': 'test_user_1'
+                'user_id': 'TST'
             },
             'queryStringParameters': {
                 'limit': '3',
@@ -107,7 +107,7 @@ class TestUsersArticlesPublic(TestCase):
         expected_items = [
             {
                 'article_id': 'testid000001',
-                'user_id': 'test_user_1',
+                'user_id': 'TST',
                 'status': 'public',
                 'sort_key': 1520150272000001
             }
@@ -121,7 +121,7 @@ class TestUsersArticlesPublic(TestCase):
 
         for i in range(11):
             table.put_item(Item={
-                'user_id': 'test_user_1',
+                'user_id': 'TST',
                 'article_id': 'test_limit_number' + str(i),
                 'status': 'public',
                 'sort_key': 1520150273000000 + i
@@ -130,7 +130,7 @@ class TestUsersArticlesPublic(TestCase):
 
         params = {
             'pathParameters': {
-                'user_id': 'test_user_1'
+                'user_id': 'TST'
             }
         }
 
@@ -142,7 +142,7 @@ class TestUsersArticlesPublic(TestCase):
     def test_main_with_no_recource(self):
         params = {
             'pathParameters': {
-                'user_id': 'test_user_3'
+                'user_id': 'A' * 20
             },
             'queryStringParameters': {
                 'limit': '3'
@@ -158,7 +158,7 @@ class TestUsersArticlesPublic(TestCase):
     def test_main_ng_with_internal_server_error(self):
         params = {
             'pathParameters': {
-                'user_id': 'test_user_1'
+                'user_id': 'TST'
             },
             'queryStringParameters': {
                 'limit': '3'
@@ -181,7 +181,7 @@ class TestUsersArticlesPublic(TestCase):
     def test_validation_with_no_query_params(self):
         params = {
             'pathParameters': {
-                'user_id': 'test_user_1'
+                'user_id': 'TST'
             }
         }
 
@@ -199,7 +199,7 @@ class TestUsersArticlesPublic(TestCase):
     def test_validation_user_id_max(self):
         params = {
             'pathParameters': {
-                'user_id': ''
+                'user_id': 'AL'
             }
         }
 
@@ -208,7 +208,7 @@ class TestUsersArticlesPublic(TestCase):
     def test_validation_user_id_min(self):
         params = {
             'pathParameters': {
-                'user_id': 'A' * 256
+                'user_id': 'A' * 21
             }
         }
 
