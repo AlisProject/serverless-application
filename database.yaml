@@ -5,6 +5,8 @@ Resources:
       AttributeDefinitions:
         - AttributeName: article_id
           AttributeType: S
+        - AttributeName: user_id
+          AttributeType: S
         - AttributeName: status
           AttributeType: S
         - AttributeName: sort_key
@@ -16,6 +18,17 @@ Resources:
         - IndexName: status-sort_key-index
           KeySchema:
             - AttributeName: status
+              KeyType: HASH
+            - AttributeName: sort_key
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: 2
+            WriteCapacityUnits: 2
+        - IndexName: user_id-sort_key-index
+          KeySchema:
+            - AttributeName: user_id
               KeyType: HASH
             - AttributeName: sort_key
               KeyType: RANGE
