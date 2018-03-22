@@ -369,7 +369,7 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
-          /articles/{article_id}/likes/me:
+          /me/articles/{article_id}/like:
             get:
               description: '指定された article_id の記事に「いいね」を行ったかを確認'
               parameters:
@@ -390,7 +390,7 @@ Resources:
                 responses:
                   default:
                     statusCode: "200"
-                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ArticlesLikesMe.Arn}/invocations
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesLikesShow.Arn}/invocations
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
@@ -527,17 +527,17 @@ Resources:
             Path: /articles/{article_id}/likes
             Method: post
             RestApiId: !Ref RestApi
-  ArticlesLikesMe:
+  MeArticlesLikesShow:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
       Role: !GetAtt LambdaRole.Arn
-      CodeUri: ./deploy/articles_likes_me.zip
+      CodeUri: ./deploy/me_articles_like_show.zip
       Events:
         Api:
           Type: Api
           Properties:
-            Path: /articles/{article_id}/likes/me
+            Path: /me/articles/{article_id}/like
             Method: get
             RestApiId: !Ref RestApi
   CognitoTriggerCustomMessage:

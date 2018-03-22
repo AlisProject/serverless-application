@@ -2,12 +2,12 @@ import os
 import boto3
 import json
 from unittest import TestCase
-from articles_likes_me import ArticlesLikesMe
+from me_articles_like_show import MeArticleLikeShow
 from tests_util import TestsUtil
 from unittest.mock import patch, MagicMock
 
 
-class TestArticlesLikesMe(TestCase):
+class TestMeArticleLikeShow(TestCase):
     dynamodb = boto3.resource('dynamodb', endpoint_url='http://localhost:4569/')
 
     target_tables = ['ArticleLikedUser']
@@ -57,8 +57,8 @@ class TestArticlesLikesMe(TestCase):
         TestsUtil.delete_all_tables(cls.dynamodb)
 
     def assert_bad_request(self, params):
-        articles_likes_me = ArticlesLikesMe(params, {}, self.dynamodb)
-        response = articles_likes_me.main()
+        me_articles_like_show = MeArticleLikeShow(params, {}, self.dynamodb)
+        response = me_articles_like_show.main()
 
         self.assertEqual(response['statusCode'], 400)
 
@@ -76,7 +76,7 @@ class TestArticlesLikesMe(TestCase):
             }
         }
 
-        response = ArticlesLikesMe(params, {}, self.dynamodb).main()
+        response = MeArticleLikeShow(params, {}, self.dynamodb).main()
 
         expected_item = {
             'liked': True
@@ -99,7 +99,7 @@ class TestArticlesLikesMe(TestCase):
             }
         }
 
-        response = ArticlesLikesMe(params, {}, self.dynamodb).main()
+        response = MeArticleLikeShow(params, {}, self.dynamodb).main()
 
         expected_item = {
             'liked': False
@@ -108,7 +108,7 @@ class TestArticlesLikesMe(TestCase):
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(json.loads(response['body']), expected_item)
 
-    @patch('articles_likes_me.validate', MagicMock(side_effect=Exception()))
+    @patch('me_articles_like_show.validate', MagicMock(side_effect=Exception()))
     def test_main_ng_with_internal_server_error(self):
         params = {
             'pathParameters': {
@@ -123,7 +123,7 @@ class TestArticlesLikesMe(TestCase):
             }
         }
 
-        response = ArticlesLikesMe(params, {}, self.dynamodb).main()
+        response = MeArticleLikeShow(params, {}, self.dynamodb).main()
 
         self.assertEqual(response['statusCode'], 500)
 
@@ -164,7 +164,7 @@ class TestArticlesLikesMe(TestCase):
             }
         }
 
-        article_liked_user = ArticlesLikesMe(event=params, context={}, dynamodb=self.dynamodb)
+        article_liked_user = MeArticleLikeShow(event=params, context={}, dynamodb=self.dynamodb)
         response = article_liked_user.main()
 
         self.assertEqual(response['statusCode'], 400)
