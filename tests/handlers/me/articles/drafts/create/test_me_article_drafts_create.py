@@ -1,5 +1,5 @@
 from unittest import TestCase
-from articles_draft_create import ArticlesDraftCreate
+from me_articles_drafts_create import MeArticlesDraftsCreate
 from unittest.mock import patch, MagicMock
 from botocore.exceptions import ClientError
 import yaml
@@ -8,7 +8,7 @@ import boto3
 import json
 
 
-class TestArticlesDraftCreate(TestCase):
+class TestMeArticlesDraftsCreate(TestCase):
     dynamodb = boto3.resource('dynamodb', endpoint_url='http://localhost:4569/')
 
     target_tables = ['ArticleInfo', 'ArticleContent']
@@ -38,12 +38,12 @@ class TestArticlesDraftCreate(TestCase):
             self.dynamodb.Table(table_name).delete()
 
     def assert_bad_request(self, params):
-        function = ArticlesDraftCreate(params, {}, self.dynamodb)
+        function = MeArticlesDraftsCreate(params, {}, self.dynamodb)
         response = function.main()
 
         self.assertEqual(response['statusCode'], 400)
 
-    @patch("articles_draft_create.ArticlesDraftCreate._ArticlesDraftCreate__generate_article_id",
+    @patch("me_articles_drafts_create.MeArticlesDraftsCreate._MeArticlesDraftsCreate__generate_article_id",
            MagicMock(return_value='HOGEHOGEHOGE'))
     def test_main_ok(self):
         params = {
@@ -67,9 +67,9 @@ class TestArticlesDraftCreate(TestCase):
         article_info_before = self.article_info_table.scan()['Items']
         article_content_before = self.article_content_table.scan()['Items']
 
-        articles_draft_create = ArticlesDraftCreate(params, {}, self.dynamodb)
+        me_articles_drafts_create = MeArticlesDraftsCreate(params, {}, self.dynamodb)
 
-        response = articles_draft_create.main()
+        response = me_articles_drafts_create.main()
 
         article_info_after = self.article_info_table.scan()['Items']
         article_content_after = self.article_content_table.scan()['Items']
@@ -92,7 +92,7 @@ class TestArticlesDraftCreate(TestCase):
         for key in article_content_param_names:
             self.assertEqual(json.loads(params['body'])[key], article_content_after[0][key])
 
-    @patch("articles_draft_create.validate", MagicMock(side_effect=Exception()))
+    @patch("me_articles_drafts_create.validate", MagicMock(side_effect=Exception()))
     def test_main_with_internal_server_error_on_create_article_info(self):
         params = {
             'body': {
@@ -115,7 +115,7 @@ class TestArticlesDraftCreate(TestCase):
         article_info_before = self.article_info_table.scan()['Items']
         article_content_before = self.article_content_table.scan()['Items']
 
-        response = ArticlesDraftCreate(params, {}, self.dynamodb).main()
+        response = MeArticlesDraftsCreate(params, {}, self.dynamodb).main()
 
         article_info_after = self.article_info_table.scan()['Items']
         article_content_after = self.article_content_table.scan()['Items']
@@ -125,9 +125,9 @@ class TestArticlesDraftCreate(TestCase):
         self.assertEqual(len(article_info_after) - len(article_info_before), 0)
         self.assertEqual(len(article_content_after) - len(article_content_before), 0)
 
-    @patch('articles_draft_create.ArticlesDraftCreate._ArticlesDraftCreate__generate_article_id',
+    @patch('me_articles_drafts_create.MeArticlesDraftsCreate._MeArticlesDraftsCreate__generate_article_id',
            MagicMock(return_value='HOGEHOGEHOGE'))
-    @patch('articles_draft_create.ArticlesDraftCreate._ArticlesDraftCreate__create_article_content',
+    @patch('me_articles_drafts_create.MeArticlesDraftsCreate._MeArticlesDraftsCreate__create_article_content',
            MagicMock(side_effect=Exception()))
     def test_main_with_error_on_create_article_content(self):
         params = {
@@ -151,7 +151,7 @@ class TestArticlesDraftCreate(TestCase):
         article_info_before = self.article_info_table.scan()['Items']
         article_content_before = self.article_content_table.scan()['Items']
 
-        response = ArticlesDraftCreate(params, {}, self.dynamodb).main()
+        response = MeArticlesDraftsCreate(params, {}, self.dynamodb).main()
 
         article_info_after = self.article_info_table.scan()['Items']
         article_content_after = self.article_content_table.scan()['Items']
@@ -161,7 +161,7 @@ class TestArticlesDraftCreate(TestCase):
         self.assertEqual(len(article_info_after) - len(article_info_before), 1)
         self.assertEqual(len(article_content_after) - len(article_content_before), 0)
 
-    @patch('articles_draft_create.ArticlesDraftCreate._ArticlesDraftCreate__generate_article_id',
+    @patch('me_articles_drafts_create.MeArticlesDraftsCreate._MeArticlesDraftsCreate__generate_article_id',
            MagicMock(return_value='HOGEHOGEHOGE'))
     def test_main_with_article_id_already_exsits(self):
         self.article_info_table.put_item(
@@ -194,7 +194,7 @@ class TestArticlesDraftCreate(TestCase):
         article_info_before = self.article_info_table.scan()['Items']
         article_content_before = self.article_content_table.scan()['Items']
 
-        response = ArticlesDraftCreate(params, {}, self.dynamodb).main()
+        response = MeArticlesDraftsCreate(params, {}, self.dynamodb).main()
 
         article_info_after = self.article_info_table.scan()['Items']
         article_content_after = self.article_content_table.scan()['Items']
@@ -204,7 +204,7 @@ class TestArticlesDraftCreate(TestCase):
         self.assertEqual(len(article_info_after) - len(article_info_before), 0)
         self.assertEqual(len(article_content_after) - len(article_content_before), 0)
 
-    @patch('articles_draft_create.ArticlesDraftCreate._ArticlesDraftCreate__generate_article_id',
+    @patch('me_articles_drafts_create.MeArticlesDraftsCreate._MeArticlesDraftsCreate__generate_article_id',
            MagicMock(return_value='HOGEHOGEHOGE'))
     def test_create_article_content_with_article_id_already_exsits(self):
         self.article_content_table.put_item(
@@ -221,25 +221,25 @@ class TestArticlesDraftCreate(TestCase):
             'body': '<p>sample body</p>'
         }
 
-        article_draft_create = ArticlesDraftCreate({}, {}, self.dynamodb)
+        article_draft_create = MeArticlesDraftsCreate({}, {}, self.dynamodb)
 
         article_content_before = self.article_content_table.scan()['Items']
 
         with self.assertRaises(ClientError):
-            article_draft_create._ArticlesDraftCreate__create_article_content(params, article_id)
+            article_draft_create._MeArticlesDraftsCreate__create_article_content(params, article_id)
 
         article_content_after = self.article_content_table.scan()['Items']
 
         self.assertEqual(len(article_content_after) - len(article_content_before), 0)
 
     def test_generate_article_id(self):
-        articles_draft_create = ArticlesDraftCreate({}, {}, self.dynamodb)
+        me_articles_drafts_create = MeArticlesDraftsCreate({}, {}, self.dynamodb)
 
         target_sort_key1 = 1521120784000001
         target_sort_key2 = 1521120784000002
 
-        hashid1 = articles_draft_create._ArticlesDraftCreate__generate_article_id(target_sort_key1)
-        hashid2 = articles_draft_create._ArticlesDraftCreate__generate_article_id(target_sort_key2)
+        hashid1 = me_articles_drafts_create._MeArticlesDraftsCreate__generate_article_id(target_sort_key1)
+        hashid2 = me_articles_drafts_create._MeArticlesDraftsCreate__generate_article_id(target_sort_key2)
 
         self.assertNotEqual(hashid1, hashid2)
         self.assertEqual(len(hashid1), 12)
