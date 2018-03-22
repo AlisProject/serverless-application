@@ -62,7 +62,7 @@ class TestArticlesLikesMe(TestCase):
 
         self.assertEqual(response['statusCode'], 400)
 
-    def test_main_ok_with_good(self):
+    def test_main_ok_with_liked_article(self):
         params = {
             'pathParameters': {
                 'article_id': 'testidlike01'
@@ -79,13 +79,13 @@ class TestArticlesLikesMe(TestCase):
         response = ArticlesLikesMe(params, {}, self.dynamodb).main()
 
         expected_item = {
-            'is_good': True
+            'liked': True
         }
 
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(json.loads(response['body']), expected_item)
 
-    def test_main_ok_with_no_good(self):
+    def test_main_ok_with_not_liked_article(self):
         params = {
             'pathParameters': {
                 'article_id': 'testidlike02'
@@ -102,7 +102,7 @@ class TestArticlesLikesMe(TestCase):
         response = ArticlesLikesMe(params, {}, self.dynamodb).main()
 
         expected_item = {
-            'is_good': False
+            'liked': False
         }
 
         self.assertEqual(response['statusCode'], 200)

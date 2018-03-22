@@ -384,7 +384,7 @@ Resources:
                   schema:
                     type: object
                     properties:
-                      is_good:
+                      liked:
                         type: boolean
               x-amazon-apigateway-integration:
                 responses:

@@ -37,9 +37,9 @@ class ArticlesLikesMe(LambdaBase):
             }
         )
 
-        is_good = True if responce.get('Item') is not None else False
+        liked = True if responce.get('Item') is not None else False
 
         return {
             'statusCode': 200,
-            'body': json.dumps({'is_good': is_good})
+            'body': json.dumps({'liked': liked})
         }
