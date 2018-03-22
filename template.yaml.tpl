@@ -13,6 +13,7 @@ Globals:
         ARTICLE_CONTENT_TABLE_NAME: !Ref ArticleContent
         ARTICLE_EVALUATED_MANAGE_TABLE_NAME: !Ref ArticleEvaluatedManage
         ARTICLE_ALIS_TOKEN_TABLE_NAME: !Ref ArticleAlisToken
+        ARTICLE_LIKED_USER_TABLE_NAME: !Ref ArticleLikedUser
         COGNITO_EMAIL_VERIFY_URL: {{ COGNITO_EMAIL_VERIFY_URL }}
 
 Resources:
@@ -232,7 +233,7 @@ Resources:
                 type: string
               created_at:
                 type: integer
-          ArticlesDraftCreate:
+          MeArticlesDraftsCreate:
             type: object
             properties:
               title:
@@ -328,16 +329,16 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
-          /me/stories/drafts:
+          /me/articles/drafts:
             post:
               description: '下書き記事を作成'
               parameters:
-              - name: 'story'
+              - name: 'article'
                 in: 'body'
-                description: 'story object'
+                description: 'article object'
                 required: true
                 schema:
-                  $ref: '#/definitions/ArticlesDraftCreate'
+                  $ref: '#/definitions/MeArticlesDraftsCreate'
               responses:
                 '200':
                   description: '作成された記事ID'
@@ -350,7 +351,7 @@ Resources:
                 responses:
                   default:
                     statusCode: '200'
-                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ArticlesDraftCreate.Arn}/invocations
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesDraftsCreate.Arn}/invocations
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
@@ -365,6 +366,31 @@ Resources:
                   default:
                     statusCode: "200"
                 uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ArticlesLikesPost.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /me/articles/{article_id}/like:
+            get:
+              description: '指定された article_id の記事に「いいね」を行ったかを確認'
+              parameters:
+              - name: 'article_id'
+                in: 'path'
+                description: '対象記事の指定するために使用'
+                required: true
+                type: 'string'
+              responses:
+                '200':
+                  description: '対象記事に「いいね」を行ったかを判定'
+                  schema:
+                    type: object
+                    properties:
+                      liked:
+                        type: boolean
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesLikesShow.Arn}/invocations
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
@@ -497,17 +523,17 @@ Resources:
             Path: /users/{user_id}/articles/public
             Method: get
             RestApiId: !Ref RestApi
-  ArticlesDraftCreate:
+  MeArticlesDraftsCreate:
       Type: AWS::Serverless::Function
       Properties:
         Handler: handler.lambda_handler
         Role: !GetAtt LambdaRole.Arn
-        CodeUri: ./deploy/articles_draft_create.zip
+        CodeUri: ./deploy/me_articles_drafts_create.zip
         Events:
           Api:
             Type: Api
             Properties:
-              Path: /me/stories/drafts
+              Path: /me/articles/drafts
               Method: post
               RestApiId: !Ref RestApi
   ArticlesLikesPost:
@@ -522,6 +548,19 @@ Resources:
           Properties:
             Path: /articles/{article_id}/likes
             Method: post
+            RestApiId: !Ref RestApi
+  MeArticlesLikesShow:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_articles_like_show.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/articles/{article_id}/like
+            Method: get
             RestApiId: !Ref RestApi
   MeArticlesDraftsShow:
     Type: AWS::Serverless::Function
