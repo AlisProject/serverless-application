@@ -425,6 +425,28 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+          /me/articles/{article_id}/drafts:
+            get:
+              description: '指定されたIDの下書き記事取得を取得'
+              parameters:
+              - name: 'article_id'
+                in: 'path'
+                description: '対象記事の指定するために使用'
+                required: true
+                type: 'string'
+              responses:
+                '200':
+                  description: '記事内容取得'
+                  schema:
+                    $ref: '#/definitions/StoryContent'
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesDraftsShow.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
 
   LambdaRole:
     Type: "AWS::IAM::Role"
@@ -538,6 +560,19 @@ Resources:
           Type: Api
           Properties:
             Path: /me/articles/{article_id}/like
+            Method: get
+            RestApiId: !Ref RestApi
+  MeArticlesDraftsShow:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_articles_drafts_show.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/articles/{article_id}/drafts
             Method: get
             RestApiId: !Ref RestApi
   CognitoTriggerCustomMessage:
