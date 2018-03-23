@@ -142,25 +142,6 @@ class TestMeArticlesDraftsShow(TestCase):
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(json.loads(response['body']), expected_item)
 
-    @patch("me_articles_drafts_show.validate", MagicMock(side_effect=Exception()))
-    def test_main_ng_with_internal_server_error(self):
-        params = {
-            'pathParameters': {
-                'article_id': 'draftId00001'
-            },
-            'requestContext': {
-                'authorizer': {
-                    'claims': {
-                        'cognito:username': 'test01'
-                    }
-                }
-            }
-        }
-
-        response = MeArticlesDraftsShow(params, {}, self.dynamodb).main()
-
-        self.assertEqual(response['statusCode'], 500)
-
     def test_validation_with_no_params(self):
         params = {
             'pathParameters': {}

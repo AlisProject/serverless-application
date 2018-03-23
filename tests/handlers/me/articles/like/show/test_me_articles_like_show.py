@@ -132,25 +132,6 @@ class TestMeArticleLikeShow(TestCase):
             self.assertTrue(args[1])
             self.assertEqual(kwargs['status'], 'public')
 
-    @patch('me_articles_like_show.validate', MagicMock(side_effect=Exception()))
-    def test_main_ng_with_internal_server_error(self):
-        params = {
-            'pathParameters': {
-                'article_id': 'testidlike01'
-            },
-            'requestContext': {
-                'authorizer': {
-                    'claims': {
-                        'cognito:username': 'test01'
-                    }
-                }
-            }
-        }
-
-        response = MeArticleLikeShow(params, {}, self.dynamodb).main()
-
-        self.assertEqual(response['statusCode'], 500)
-
     def test_validation_with_no_params(self):
         params = {}
 

@@ -180,21 +180,6 @@ class TestUsersArticlesPublic(TestCase):
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(json.loads(response['body'])['Items'], [])
 
-    @patch("users_articles_public.validate", MagicMock(side_effect=Exception()))
-    def test_main_ng_with_internal_server_error(self):
-        params = {
-            'pathParameters': {
-                'user_id': 'TST'
-            },
-            'queryStringParameters': {
-                'limit': '3'
-            }
-        }
-
-        response = UsersArticlesPublic(params, {}, self.dynamodb).main()
-
-        self.assertEqual(response['statusCode'], 500)
-
     def test_validation_with_no_path_params(self):
         params = {
             'queryStringParameters': {
