@@ -91,43 +91,7 @@ class TestMeArticlesDraftsShow(TestCase):
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(json.loads(response['body']), expected_item)
 
-    def test_main_with_public_article(self):
-        params = {
-            'pathParameters': {
-                'article_id': 'publicId0001'
-            },
-            'requestContext': {
-                'authorizer': {
-                    'claims': {
-                        'cognito:username': 'test01'
-                    }
-                }
-            }
-        }
-
-        response = MeArticlesDraftsShow(params, {}, self.dynamodb).main()
-
-        self.assertEqual(response['statusCode'], 404)
-
-    def test_main_with_article_not_exists(self):
-        params = {
-            'pathParameters': {
-                'article_id': 'A' * 12
-            },
-            'requestContext': {
-                'authorizer': {
-                    'claims': {
-                        'cognito:username': 'test01'
-                    }
-                }
-            }
-        }
-
-        response = MeArticlesDraftsShow(params, {}, self.dynamodb).main()
-
-        self.assertEqual(response['statusCode'], 404)
-
-    def test_main_accessing_other_users_resource(self):
+    def test_call_validate_article_existence(self):
         params = {
             'pathParameters': {
                 'article_id': 'draftId00001'
@@ -135,15 +99,22 @@ class TestMeArticlesDraftsShow(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'test02'
+                        'cognito:username': 'test01'
                     }
                 }
             }
         }
 
-        response = MeArticlesDraftsShow(params, {}, self.dynamodb).main()
+        mock_lib = MagicMock()
+        with patch('me_articles_drafts_show.DBUtil', mock_lib):
+            response = MeArticlesDraftsShow(params, {}, self.dynamodb).main()
+            args, kwargs = mock_lib.validate_article_existence.call_args
 
-        self.assertEqual(response['statusCode'], 403)
+            self.assertTrue(mock_lib.validate_article_existence.called)
+            self.assertTrue(args[0])
+            self.assertTrue(args[1])
+            self.assertTrue(kwargs['user_id'])
+            self.assertEqual(kwargs['status'], 'draft')
 
     def test_main_with_no_article_content(self):
         params = {
