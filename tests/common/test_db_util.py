@@ -36,18 +36,6 @@ class TestDBUtil(TestCase):
     def tearDownClass(cls):
         TestsUtil.delete_all_tables(cls.dynamodb)
 
-    def test_exists_public_article_ok(self):
-        result = DBUtil.exists_public_article(self.dynamodb, self.article_info_table_items[0]['article_id'])
-        self.assertTrue(result)
-
-    def test_exists_public_article_ng_status_draft(self):
-        result = DBUtil.exists_public_article(self.dynamodb, self.article_info_table_items[1]['article_id'])
-        self.assertFalse(result)
-
-    def test_exists_public_article_ng_not_exists(self):
-        result = DBUtil.exists_public_article(self.dynamodb, 'hogefugapiyo')
-        self.assertFalse(result)
-
     def test_exists_article_ok(self):
         result = DBUtil.exists_article(
             self.dynamodb,

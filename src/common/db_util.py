@@ -6,16 +6,6 @@ from not_authorized_error import NotAuthorizedError
 class DBUtil:
 
     @staticmethod
-    def exists_public_article(dynamodb, article_id):
-        query_params = {
-            'IndexName': 'article_id-status_key-index',
-            'KeyConditionExpression': Key('status').eq('public') & Key('article_id').eq(article_id),
-            'Select': 'COUNT'
-        }
-        article_info_table = dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
-        return True if article_info_table.query(**query_params)['Count'] == 1 else False
-
-    @staticmethod
     def exists_article(dynamodb, article_id, user_id=None, status=None):
         article_info_table = dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
         article_info = article_info_table.get_item(Key={'article_id': article_id}).get('Item')
