@@ -447,6 +447,23 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+            put:
+              description: '下書き記事を更新'
+              parameters:
+              - name: 'article'
+                in: 'body'
+                description: 'article object'
+                required: true
+                schema:
+                  $ref: '#/definitions/MeArticlesDraftsCreate'
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesDraftsUpdate.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
 
   LambdaRole:
     Type: "AWS::IAM::Role"
@@ -535,6 +552,19 @@ Resources:
             Properties:
               Path: /me/articles/drafts
               Method: post
+              RestApiId: !Ref RestApi
+  MeArticlesDraftsUpdate:
+      Type: AWS::Serverless::Function
+      Properties:
+        Handler: handler.lambda_handler
+        Role: !GetAtt LambdaRole.Arn
+        CodeUri: ./deploy/me_articles_drafts_update.zip
+        Events:
+          Api:
+            Type: Api
+            Properties:
+              Path: /me/articles/{article_id}/drafts
+              Method: put
               RestApiId: !Ref RestApi
   ArticlesLikesPost:
     Type: AWS::Serverless::Function
