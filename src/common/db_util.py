@@ -3,6 +3,7 @@ from boto3.dynamodb.conditions import Key
 from record_not_found_error import RecordNotFoundError
 from not_authorized_error import NotAuthorizedError
 
+
 class DBUtil:
 
     @staticmethod

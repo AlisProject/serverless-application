@@ -6,6 +6,7 @@ from jsonschema import ValidationError
 from record_not_found_error import RecordNotFoundError
 from not_authorized_error import NotAuthorizedError
 
+
 class LambdaBase(metaclass=ABCMeta):
     def __init__(self, event, context, dynamodb=None, s3=None):
         self.event = event
