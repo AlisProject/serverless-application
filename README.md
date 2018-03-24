@@ -28,7 +28,7 @@ cd serverless-application
 pyenv install
   
 # libraries
-python3 -m venv venv
+python -m venv venv
 . venv/bin/activate
 pip install -r requirements.txt
 pip install -r requirements_test.txt
