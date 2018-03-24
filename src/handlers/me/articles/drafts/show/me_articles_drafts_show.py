@@ -9,6 +9,7 @@ from lambda_base import LambdaBase
 from boto3.dynamodb.conditions import Key
 from jsonschema import validate, ValidationError
 from decimal_encoder import DecimalEncoder
+from db_util import DBUtil
 
 
 class MeArticlesDraftsShow(LambdaBase):
@@ -36,17 +37,12 @@ class MeArticlesDraftsShow(LambdaBase):
         article_info = article_info_table.get_item(Key={'article_id': params['article_id']}).get('Item')
         article_content = article_content_table.get_item(Key={'article_id': params['article_id']}).get('Item')
 
-        if article_info is None or article_info['status'] != 'draft':
-            return {
-               'statusCode': 404,
-               'body': json.dumps({'message': 'Record Not Found'})
-            }
-
-        if article_info['user_id'] != self.event['requestContext']['authorizer']['claims']['cognito:username']:
-            return {
-               'statusCode': 403,
-               'body': json.dumps({'message': 'Forbidden'})
-            }
+        DBUtil.validate_article_existence(
+            self.dynamodb,
+            params['article_id'],
+            user_id=self.event['requestContext']['authorizer']['claims']['cognito:username'],
+            status='draft'
+        )
 
         if article_content is not None:
             article_info.update(article_content)

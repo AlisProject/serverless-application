@@ -125,6 +125,30 @@ class TestArticlesLikesPost(TestCase):
         for key in article_liked_user_param_names:
             self.assertEqual(expected_items[key], article_liked_user[key])
 
+    def test_call_validate_article_existence(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'testid000002'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test05'
+                    }
+                }
+            }
+        }
+
+        mock_lib = MagicMock()
+        with patch('articles_likes_post.DBUtil', mock_lib):
+            response = ArticlesLikesPost(event=params, context={}, dynamodb=self.dynamodb).main()
+            args, kwargs = mock_lib.validate_article_existence.call_args
+
+            self.assertTrue(mock_lib.validate_article_existence.called)
+            self.assertTrue(args[0])
+            self.assertTrue(args[1])
+            self.assertEqual(kwargs['status'], 'public')
+
     def test_main_ng_exist_user_id(self):
         params = {
             'pathParameters': {
@@ -165,42 +189,6 @@ class TestArticlesLikesPost(TestCase):
         }
 
         self.assert_bad_request(params)
-
-    def test_validation_not_exists_article_id(self):
-        params = {
-            'pathParameters': {
-                'article_id': 'a' * 12
-            },
-            'requestContext': {
-                'authorizer': {
-                    'claims': {
-                        'cognito:username': self.article_liked_user_table_items[0]['user_id']
-                    }
-                }
-            }
-        }
-
-        response = ArticlesLikesPost(event=params, context={}, dynamodb=self.dynamodb).main()
-
-        self.assertEqual(response['statusCode'], 400)
-
-    def test_validation_status_draft(self):
-        params = {
-            'pathParameters': {
-                'article_id': 'testid000002'
-            },
-            'requestContext': {
-                'authorizer': {
-                    'claims': {
-                        'cognito:username': self.article_liked_user_table_items[0]['user_id']
-                    }
-                }
-            }
-        }
-
-        response = ArticlesLikesPost(event=params, context={}, dynamodb=self.dynamodb).main()
-
-        self.assertEqual(response['statusCode'], 400)
 
     def get_article_liked_user(self, article_id, user_id):
         query_params = {

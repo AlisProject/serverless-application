@@ -108,11 +108,10 @@ class TestMeArticleLikeShow(TestCase):
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(json.loads(response['body']), expected_item)
 
-    @patch('me_articles_like_show.validate', MagicMock(side_effect=Exception()))
-    def test_main_ng_with_internal_server_error(self):
+    def test_call_validate_article_existence(self):
         params = {
             'pathParameters': {
-                'article_id': 'testidlike01'
+                'article_id': 'testidlike02'
             },
             'requestContext': {
                 'authorizer': {
@@ -123,9 +122,15 @@ class TestMeArticleLikeShow(TestCase):
             }
         }
 
-        response = MeArticleLikeShow(params, {}, self.dynamodb).main()
+        mock_lib = MagicMock()
+        with patch('me_articles_like_show.DBUtil', mock_lib):
+            response = MeArticleLikeShow(params, {}, self.dynamodb).main()
+            args, kwargs = mock_lib.validate_article_existence.call_args
 
-        self.assertEqual(response['statusCode'], 500)
+            self.assertTrue(mock_lib.validate_article_existence.called)
+            self.assertTrue(args[0])
+            self.assertTrue(args[1])
+            self.assertEqual(kwargs['status'], 'public')
 
     def test_validation_with_no_params(self):
         params = {}
@@ -156,15 +161,3 @@ class TestMeArticleLikeShow(TestCase):
         }
 
         self.assert_bad_request(params)
-
-    def test_validation_not_exists_article_id(self):
-        params = {
-            'pathParameters': {
-                'article_id': 'testidlike03'
-            }
-        }
-
-        article_liked_user = MeArticleLikeShow(event=params, context={}, dynamodb=self.dynamodb)
-        response = article_liked_user.main()
-
-        self.assertEqual(response['statusCode'], 400)
