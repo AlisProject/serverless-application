@@ -44,6 +44,7 @@ python exec_test.py
 
 * AWS_DEFAULT_REGION is used by aws cli.
 * CLOUDFORMATION_STACK_NAME is used by stack name of cloudformation. ⚠ You can not use a hyphen.
+* API_NAME is used by API name of API Gateway.
 * DEPLOY_BUCKET_NAME is used by deploy of lambda.
 * ARTICLES_IMAGES_BUCKET_NAME	is used by upload images of articles.
 * COGNITO_EMAIL_VERIFY_URL is used by cognito email validation
@@ -51,6 +52,7 @@ python exec_test.py
 ```bash
 export AWS_DEFAULT_REGION=ap-northeast-1
 export CLOUDFORMATION_STACK_NAME=YOURSTACKNAMEHERE
+export API_NAME=API_NAME
 export DEPLOY_BUCKET_NAME=DEPLOY_BUCKET_NAME
 export ARTICLES_IMAGES_BUCKET_NAME=YOUR_ARTOCLES_IMAGES_BUCKET_NAME
 export COGNITO_EMAIL_VERIFY_URL=https://example.com/confirm
