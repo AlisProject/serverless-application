@@ -13,6 +13,8 @@ class LambdaBase(metaclass=ABCMeta):
         self.context = context
         self.dynamodb = dynamodb
         self.s3 = s3
+        self.params = self.__get_params()
+        self.headers = self.__get_headers()
 
     @abstractmethod
     def get_schema(self):
@@ -60,3 +62,33 @@ class LambdaBase(metaclass=ABCMeta):
                 'statusCode': 500,
                 'body': json.dumps({'message': 'Internal server error'})
             }
+
+    def __get_params(self):
+        target_params = [
+            {
+                'param_name': 'queryStringParameters',
+                'is_json_str': False
+            },
+            {
+                'param_name': 'pathParameters',
+                'is_json_str': False
+            },
+            {
+                'param_name': 'body',
+                'is_json_str': True
+            }
+        ]
+        result = {}
+        for param in target_params:
+            if self.event.get(param['param_name']) is not None:
+                update_param = self.event.get(param['param_name'])
+                if param['is_json_str']:
+                    update_param = json.loads(update_param)
+                result.update(update_param)
+        return result
+
+    def __get_headers(self):
+        result = {}
+        if self.event.get('headers') is not None:
+            result.update(self.event.get('headers'))
+        return result

@@ -27,6 +27,10 @@ parameters = {
         'type': 'string',
         'maxLength': 65535
     },
+    'article_image': {
+        'type': 'string',
+        'maxLength': 8388608
+    },
     'eye_catch_url': {
         'type': 'string',
         'format': 'uri',
@@ -47,3 +51,6 @@ html_allowed_tags = ['a', 'b', 'blockquote', 'br', 'h2', 'h3', 'i', 'p', 'u', 'i
 html_allowed_attributes = {'a': ['href'], 'img': ['src', 'alt']}
 
 LIKED_RETRY_COUNT = 3
+
+ARTICLE_IMAGE_MAX_WIDTH = 1920
+ARTICLE_IMAGE_MAX_HEIGHT = 1080

@@ -394,6 +394,39 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+          /me/articles/{article_id/images:
+            post:
+              description: '対象記事に画像データを登録'
+              produces:
+              - application/json
+                application/octet-stream
+              parameters:
+                - name: 'article_id'
+                  in: 'path'
+                  description: '対象記事の指定するために使用'
+                  required: true
+                  type: 'string'
+                - name: 'article_image'
+                  in: 'body'
+                  description: '対象記事の画像データ'
+                  required: true
+                  type: 'string'
+              responses:
+                '200':
+                  description: '登録した画像データのURL'
+                  schema:
+                    type: object
+                    properties:
+                      image_url:
+                        type: 'string'
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesImagesCreate.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
           /users/{user_id}/articles/public:
             get:
               description: '指定されたユーザーの公開記事一覧情報を取得'
@@ -549,6 +582,22 @@ Resources:
             Path: /articles/{article_id}/likes
             Method: post
             RestApiId: !Ref RestApi
+  MeArticlesImagesCreate:
+      Type: AWS::Serverless::Function
+      Properties:
+        Handler: handler.lambda_handler
+        Role: !GetAtt LambdaRole.Arn
+        CodeUri: ./deploy/me_articles_images_create.zip
+        Environment:
+          Variables:
+            ARTICLES_IMAGES_BUCKET_NAME: {{ ARTICLES_IMAGES_BUCKET_NAME }}
+        Events:
+          Api:
+            Type: Api
+            Properties:
+              Path: me/articles/{article_id}/images
+              Method: post
+              RestApiId: !Ref RestApi
   MeArticlesLikesShow:
     Type: AWS::Serverless::Function
     Properties:
