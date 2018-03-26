@@ -4,13 +4,10 @@ import json
 import logging
 import traceback
 import settings
-import time
 from botocore.exceptions import ClientError
 from lambda_base import LambdaBase
 from jsonschema import validate, ValidationError, FormatChecker
-from hashids import Hashids
 from text_sanitizer import TextSanitizer
-from time_util import TimeUtil
 from db_util import DBUtil
 
 
