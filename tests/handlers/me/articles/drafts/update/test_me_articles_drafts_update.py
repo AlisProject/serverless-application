@@ -84,10 +84,10 @@ class TestMeArticlesDraftsUpdate(TestCase):
                 'article_id': 'draftId00001'
             },
             'body': {
-                "eye_catch_url": "http://example.com/update",
-                "title": "update title",
-                "body": "<p>update body</p>",
-                "overview": "update overview"
+                'eye_catch_url': 'http://example.com/update',
+                'title': 'update title',
+                'body': '<p>update body</p>',
+                'overview': 'update overview'
             },
             'requestContext': {
                 'authorizer': {
@@ -182,10 +182,10 @@ class TestMeArticlesDraftsUpdate(TestCase):
                 'article_id': 'draftId00001'
             },
             'body': {
-                "eye_catch_url": "http://example.com/update",
-                "title": "update title",
-                "body": "<p>update body</p>",
-                "overview": "update overview"
+                'eye_catch_url': 'http://example.com/update',
+                'title': 'update title',
+                'body': '<p>update body</p>',
+                'overview': 'update overview'
             },
             'requestContext': {
                 'authorizer': {
