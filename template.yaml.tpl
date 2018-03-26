@@ -14,6 +14,7 @@ Globals:
         ARTICLE_EVALUATED_MANAGE_TABLE_NAME: !Ref ArticleEvaluatedManage
         ARTICLE_ALIS_TOKEN_TABLE_NAME: !Ref ArticleAlisToken
         ARTICLE_LIKED_USER_TABLE_NAME: !Ref ArticleLikedUser
+        USERS_TABLE_NAME: !Ref Users
         COGNITO_EMAIL_VERIFY_URL: {{ COGNITO_EMAIL_VERIFY_URL }}
 
 Resources:
@@ -52,6 +53,7 @@ Resources:
       EmailVerificationSubject: "Your verification code"
       LambdaConfig:
         CustomMessage: !GetAtt CognitoTriggerCustomMessage.Arn
+        PostConfirmation: !GetAtt CognitoTriggerPostConfirmation.Arn
       MfaConfiguration: "OPTIONAL"
       Policies:
         PasswordPolicy:
@@ -195,7 +197,7 @@ Resources:
       DefinitionBody:
         swagger: "2.0"
         info:
-          title: dev-api
+          title: {{ API_NAME }}
           version: 1.0.0
         basePath: /
         schemes:
@@ -497,11 +499,18 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess
         - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
-  LambdaInvocationPermission:
+  LambdaInvocationPermissionCognitoTriggerCustomMessage:
     Type: AWS::Lambda::Permission
     Properties:
       Action: lambda:InvokeFunction
       FunctionName: !GetAtt CognitoTriggerCustomMessage.Arn
+      Principal: cognito-idp.amazonaws.com
+      SourceArn: !GetAtt UserPool.Arn
+  LambdaInvocationPermissionCognitoTriggerPostConfirmation:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt CognitoTriggerPostConfirmation.Arn
       Principal: cognito-idp.amazonaws.com
       SourceArn: !GetAtt UserPool.Arn
   ArticlesRecent:
@@ -629,7 +638,13 @@ Resources:
     Properties:
       Handler: handler.lambda_handler
       Role: !GetAtt LambdaRole.Arn
-      CodeUri: ./src/handlers/cognito_trigger/handler.py
+      CodeUri: ./src/handlers/cognito_trigger/custommessage/handler.py
+  CognitoTriggerPostConfirmation:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./src/handlers/cognito_trigger/postconfirmation/handler.py
   ArticleInfo:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -746,6 +761,18 @@ Resources:
               KeyType: RANGE
           Projection:
             ProjectionType: KEYS_ONLY
+      ProvisionedThroughput:
+        ReadCapacityUnits: 2
+        WriteCapacityUnits: 2
+  Users:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: user_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: user_id
+          KeyType: HASH
       ProvisionedThroughput:
         ReadCapacityUnits: 2
         WriteCapacityUnits: 2

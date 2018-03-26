@@ -42,10 +42,30 @@ python exec_test.py
 
 ## Configuration
 
-COGNITO_EMAIL_VERIFY_URL is used by cognito email validation
+* AWS_DEFAULT_REGION is used by aws cli.
+* CLOUDFORMATION_STACK_NAME is used by stack name of cloudformation. ⚠ You can not use a hyphen.
+* API_NAME is used by API name of API Gateway.
+* DEPLOY_BUCKET_NAME is used by deploy of lambda.
+* ARTICLES_IMAGES_BUCKET_NAME	is used by upload images of articles.
+* COGNITO_EMAIL_VERIFY_URL is used by cognito email validation
 
 ```bash
+export AWS_DEFAULT_REGION=ap-northeast-1
+export CLOUDFORMATION_STACK_NAME=YOURSTACKNAMEHERE
+export API_NAME=API_NAME
+export DEPLOY_BUCKET_NAME=DEPLOY_BUCKET_NAME
+export ARTICLES_IMAGES_BUCKET_NAME=YOUR_ARTOCLES_IMAGES_BUCKET_NAME
 export COGNITO_EMAIL_VERIFY_URL=https://example.com/confirm
+```
+
+## Create S3 bucket
+
+You have to change `YOUR_DEPLOY_BUCKET_NAME` and `ARTICLES_IMAGES_BUCKET_NAME` to your AWS S3 bucket name you want.
+```bash
+aws s3api create-bucket --bucket $DEPLOY_BUCKET_NAME \
+  --create-bucket-configuration LocationConstraint=ap-northeast-1
+aws s3api create-bucket --bucket $ARTICLES_IMAGES_BUCKET_NAME \
+  --create-bucket-configuration LocationConstraint=ap-northeast-1
 ```
 
 ## Create template.yaml
@@ -54,29 +74,26 @@ export COGNITO_EMAIL_VERIFY_URL=https://example.com/confirm
 python make_template.py
 ```
 
-## Create S3 bucket
-You have to change `YOUR_BUCKET_NAME_HERE` to your AWS S3 bucket name you want. 
-```bash
-aws s3api create-bucket --bucket YOUR_BUCKET_NAME_HERE \
-  --create-bucket-configuration LocationConstraint=ap-northeast-1
-```
-
 ## Packaging
-You have to change `YOUR_BUCKET_NAME_HERE` to your AWS S3 bucket name you made.
+
 ```bash
+docker image build --tag deploy-image .
+docker container run -it --name deploy-container deploy-image
+docker container cp deploy-container:/workdir/vendor-package .
+docker container rm deploy-container
+docker image rm deploy-image
 python make_deploy_zip.py
 aws cloudformation package \
   --template-file template.yaml \
-  --s3-bucket YOUR_BUCKET_NAME_HERE \
+  --s3-bucket $DEPLOY_BUCKET_NAME \
   --output-template-file packaged-template.yaml
 ```
 
-## Deployment 
-You have to change `YOURSTACKNAMEHERE` to your AWS CloudFormation stack name you want.  
-⚠ You can not use a hyphen to your stack name.
+## Deployment
+
 ```
 aws cloudformation deploy \
   --template-file packaged-template.yaml \
-  --stack-name YOURSTACKNAMEHERE \
+  --stack-name $CLOUDFORMATION_STACK_NAME \
   --capabilities CAPABILITY_IAM
 ```
