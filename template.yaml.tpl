@@ -599,7 +599,7 @@ Resources:
         CodeUri: ./deploy/me_articles_images_create.zip
         Environment:
           Variables:
-            ARTICLES_IMAGES_BUCKET_NAME: {{ ARTICLES_IMAGES_BUCKET_NAME }}
+            ARTICLES_IMAGES_BUCKET_NAME: !Ref "ArticlesImagesBucket"
         Events:
           Api:
             Type: Api
@@ -776,3 +776,7 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: 2
         WriteCapacityUnits: 2
+  ArticlesImagesBucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      AccessControl: "PublicRead"
