@@ -2,12 +2,12 @@ import yaml
 import os
 import boto3
 from unittest import TestCase
-from articles_likes_post import ArticlesLikesPost
+from me_articles_like_create import MeArticlesLikeCreate
 from unittest.mock import patch, MagicMock
 from boto3.dynamodb.conditions import Key
 
 
-class TestArticlesLikesPost(TestCase):
+class TestMeArticlesLikeCreate(TestCase):
     article_liked_user_table_name = 'ArticleLikedUser'
     article_info_table_name = 'ArticleInfo'
 
@@ -79,7 +79,7 @@ class TestArticlesLikesPost(TestCase):
         cls.dynamodb.Table(cls.article_info_table_name).delete()
 
     def assert_bad_request(self, params):
-        test_function = ArticlesLikesPost(params, {}, self.dynamodb)
+        test_function = MeArticlesLikeCreate(params, {}, self.dynamodb)
         response = test_function.main()
 
         self.assertEqual(response['statusCode'], 400)
@@ -102,7 +102,7 @@ class TestArticlesLikesPost(TestCase):
         article_liked_user_table = self.dynamodb.Table(self.article_liked_user_table_name)
         article_liked_user_before = article_liked_user_table.scan()['Items']
 
-        article_liked_user = ArticlesLikesPost(event=params, context={}, dynamodb=self.dynamodb)
+        article_liked_user = MeArticlesLikeCreate(event=params, context={}, dynamodb=self.dynamodb)
         response = article_liked_user.main()
 
         article_liked_user_after = article_liked_user_table.scan()['Items']
@@ -140,8 +140,8 @@ class TestArticlesLikesPost(TestCase):
         }
 
         mock_lib = MagicMock()
-        with patch('articles_likes_post.DBUtil', mock_lib):
-            response = ArticlesLikesPost(event=params, context={}, dynamodb=self.dynamodb).main()
+        with patch('me_articles_like_create.DBUtil', mock_lib):
+            response = MeArticlesLikeCreate(event=params, context={}, dynamodb=self.dynamodb).main()
             args, kwargs = mock_lib.validate_article_existence.call_args
 
             self.assertTrue(mock_lib.validate_article_existence.called)
@@ -163,7 +163,7 @@ class TestArticlesLikesPost(TestCase):
             }
         }
 
-        response = ArticlesLikesPost(event=params, context={}, dynamodb=self.dynamodb).main()
+        response = MeArticlesLikeCreate(event=params, context={}, dynamodb=self.dynamodb).main()
 
         self.assertEqual(response['statusCode'], 400)
 

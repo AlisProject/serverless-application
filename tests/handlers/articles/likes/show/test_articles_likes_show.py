@@ -1,12 +1,12 @@
 import os
 import boto3
 from unittest import TestCase
-from articles_likes_get import ArticlesLikesGet
+from articles_likes_show import ArticlesLikesShow
 from tests_util import TestsUtil
 from unittest.mock import patch, MagicMock
 
 
-class TestArticlesLikesGet(TestCase):
+class TestArticlesLikesShow(TestCase):
     dynamodb = boto3.resource('dynamodb', endpoint_url='http://localhost:4569/')
 
     @classmethod
@@ -64,7 +64,7 @@ class TestArticlesLikesGet(TestCase):
         TestsUtil.delete_all_tables(cls.dynamodb)
 
     def assert_bad_request(self, params):
-        test_function = ArticlesLikesGet(params, {}, self.dynamodb)
+        test_function = ArticlesLikesShow(params, {}, self.dynamodb)
         response = test_function.main()
 
         self.assertEqual(response['statusCode'], 400)
@@ -76,7 +76,7 @@ class TestArticlesLikesGet(TestCase):
             }
         }
 
-        article_liked_user = ArticlesLikesGet(event=params, context={}, dynamodb=self.dynamodb)
+        article_liked_user = ArticlesLikesShow(event=params, context={}, dynamodb=self.dynamodb)
         response = article_liked_user.main()
 
         self.assertEqual(response['statusCode'], 200)
@@ -89,7 +89,7 @@ class TestArticlesLikesGet(TestCase):
             }
         }
 
-        article_liked_user = ArticlesLikesGet(event=params, context={}, dynamodb=self.dynamodb)
+        article_liked_user = ArticlesLikesShow(event=params, context={}, dynamodb=self.dynamodb)
         response = article_liked_user.main()
 
         self.assertEqual(response['statusCode'], 200)
@@ -102,7 +102,7 @@ class TestArticlesLikesGet(TestCase):
             }
         }
 
-        article_liked_user = ArticlesLikesGet(event=params, context={}, dynamodb=self.dynamodb)
+        article_liked_user = ArticlesLikesShow(event=params, context={}, dynamodb=self.dynamodb)
         response = article_liked_user.main()
 
         self.assertEqual(response['statusCode'], 200)
@@ -116,8 +116,8 @@ class TestArticlesLikesGet(TestCase):
         }
 
         mock_lib = MagicMock()
-        with patch('articles_likes_get.DBUtil', mock_lib):
-            response = ArticlesLikesGet(event=params, context={}, dynamodb=self.dynamodb).main()
+        with patch('articles_likes_show.DBUtil', mock_lib):
+            response = ArticlesLikesShow(event=params, context={}, dynamodb=self.dynamodb).main()
             args, kwargs = mock_lib.validate_article_existence.call_args
 
             self.assertTrue(mock_lib.validate_article_existence.called)

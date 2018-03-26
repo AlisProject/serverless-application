@@ -331,6 +331,32 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+          /articles/{article_id}/likes:
+            get:
+              description: '指定された article_id の記事の「いいね」数を取得'
+              parameters:
+              - name: 'article_id'
+                in: 'path'
+                description: '対象記事の指定するために使用'
+                required: true
+                type: 'string'
+              responses:
+                '200':
+                  description: '対象記事の「いいね」数'
+                  schema:
+                    type: object
+                    properties:
+                      count:
+                        type: "number"
+                        format: "double"
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ArticlesLikesShow.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
           /me/articles/drafts:
             post:
               description: '下書き記事を作成'
@@ -357,21 +383,7 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
-          /articles/{article_id}/likes:
-            post:
-              description: '対象記事に「いいね」を行う'
-              responses:
-                '200':
-                  description: '「いいね」の実施成功'
-              x-amazon-apigateway-integration:
-                responses:
-                  default:
-                    statusCode: "200"
-                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ArticlesLikesPost.Arn}/invocations
-                passthroughBehavior: when_no_templates
-                httpMethod: POST
-                type: aws_proxy
-          /me/articles/{article_id}/like:
+          me/articles/{article_id}/like:
             get:
               description: '指定された article_id の記事に「いいね」を行ったかを確認'
               parameters:
@@ -393,6 +405,19 @@ Resources:
                   default:
                     statusCode: "200"
                 uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesLikesShow.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+            post:
+              description: '対象記事に「いいね」を行う'
+              responses:
+                '200':
+                  description: '「いいね」の実施成功'
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesLikesCreate.Arn}/invocations
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
@@ -545,12 +570,12 @@ Resources:
               Path: /me/articles/drafts
               Method: post
               RestApiId: !Ref RestApi
-  ArticlesLikesPost:
+  MeArticlesLikeCreate:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
       Role: !GetAtt LambdaRole.Arn
-      CodeUri: ./deploy/articles_likes_post.zip
+      CodeUri: ./deploy/me_articles_like_create.zip
       Events:
         Api:
           Type: Api

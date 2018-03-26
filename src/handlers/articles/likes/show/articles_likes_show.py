@@ -7,7 +7,8 @@ from jsonschema import validate, ValidationError
 from boto3.dynamodb.conditions import Key
 
 
-class ArticlesLikesGet(LambdaBase):
+
+class ArticlesLikesShow(LambdaBase):
     def get_schema(self):
         return {
             'type': 'object',

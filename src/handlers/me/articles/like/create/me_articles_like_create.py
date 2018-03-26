@@ -10,7 +10,7 @@ from jsonschema import validate, ValidationError
 from time_util import TimeUtil
 
 
-class ArticlesLikesPost(LambdaBase):
+class MeArticlesLikeCreate(LambdaBase):
     def get_schema(self):
         return {
             'type': 'object',
