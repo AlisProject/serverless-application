@@ -44,6 +44,12 @@ class TestMeArticlesDraftsUpdate(TestCase):
                 'status': 'draft',
                 'sort_key': 1520150272000000
             },
+            {
+                'article_id': 'draftId00003',
+                'user_id': 'test01',
+                'status': 'draft',
+                'sort_key': 1520150272000000
+            }
         ]
 
         TestsUtil.create_table(self.dynamodb, os.environ['ARTICLE_INFO_TABLE_NAME'], article_info_items)
@@ -119,6 +125,56 @@ class TestMeArticlesDraftsUpdate(TestCase):
 
         for key in article_content_param_names:
             self.assertEqual(json.loads(params['body'])[key], article_content_after[0][key])
+
+    def test_main_ok_article_content_not_exists(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'draftId00003'
+            },
+            'body': {
+                'eye_catch_url': 'http://example.com/update',
+                'title': 'A' * 255,
+                'body': 'A' * 65535,
+                'overview': 'A' * 100
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01'
+                    }
+                }
+            }
+        }
+
+        params['body'] = json.dumps(params['body'])
+
+        article_info_before = self.article_info_table.scan()['Items']
+        article_content_before = self.article_content_table.scan()['Items']
+
+        me_articles_drafts_update = MeArticlesDraftsUpdate(params, {}, self.dynamodb)
+
+        response = me_articles_drafts_update.main()
+
+        article_info_after = self.article_info_table.scan()['Items']
+        article_content_after = self.article_content_table.scan()['Items']
+
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(len(article_info_after) - len(article_info_before), 0)
+        self.assertEqual(len(article_content_after) - len(article_content_before), 1)
+
+        article_info_param_names = ['eye_catch_url', 'title', 'overview']
+        article_content_param_names = ['title', 'body']
+
+        self.assertEqual(params['requestContext']['authorizer']['claims']['cognito:username'],
+                         article_info_after[0]['user_id'])
+
+        for key in article_info_param_names:
+            target = [info for info in article_info_after if info['article_id'] == 'draftId00003'][0]
+            self.assertEqual(json.loads(params['body'])[key], target[key])
+
+        for key in article_content_param_names:
+            target = [content for content in article_content_after if content['article_id'] == 'draftId00003'][0]
+            self.assertEqual(json.loads(params['body'])[key], target[key])
 
     def test_call_validate_article_existence(self):
         params = {
