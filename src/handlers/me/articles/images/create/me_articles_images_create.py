@@ -38,7 +38,7 @@ class MeArticlesImagesCreate(LambdaBase):
             'required': ['Content-Type']
         }
 
-    def validate_image_date(self, image_data):
+    def validate_image_data(self, image_data):
         try:
             Image.open(BytesIO(base64.b64decode(image_data)))
         except Exception as e:
@@ -48,7 +48,7 @@ class MeArticlesImagesCreate(LambdaBase):
         # single
         # params
         validate(self.params, self.get_schema())
-        self.validate_image_date(self.params['article_image'])
+        self.validate_image_data(self.params['article_image'])
         # headers
         validate(self.event.get('headers'), self.get_headers_schema())
 

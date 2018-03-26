@@ -248,35 +248,6 @@ class TestMeArticlesImagesCreate(TestCase):
         self.assertEqual(json.loads(response['body']), expected_item)
         self.assertTrue(self.equal_size_to_s3_image(image_url_path + image_file_name, image_data.size))
 
-    @patch("me_articles_images_create.validate", MagicMock(side_effect=Exception()))
-    def test_main_ng_with_internal_server_error(self):
-        image_data = Image.new('RGB', (settings.ARTICLE_IMAGE_MAX_WIDTH, settings.ARTICLE_IMAGE_MAX_HEIGHT))
-        buf = BytesIO()
-        image_format = 'jpeg'
-        image_data.save(buf, format=image_format)
-
-        target_article_info = self.article_info_table_items[0]
-        params = {
-            'headers': {
-                'Content-Type': 'image/' + image_format
-            },
-            'pathParameters': {
-                'article_id': target_article_info['article_id']
-            },
-            'body': json.dumps({'article_image': base64.b64encode(buf.getvalue()).decode('ascii')}),
-            'requestContext': {
-                'authorizer': {
-                    'claims': {
-                        'cognito:username': target_article_info['user_id']
-                    }
-                }
-            }
-        }
-
-        response = MeArticlesImagesCreate(params, {}, dynamodb=self.dynamodb, s3=self.s3).main()
-
-        self.assertEqual(response['statusCode'], 500)
-
     def test_validation_with_no_params(self):
         params = {
         }

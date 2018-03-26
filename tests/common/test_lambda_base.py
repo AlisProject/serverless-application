@@ -81,7 +81,7 @@ class TestLambdaBase(TestCase):
         expected_headers = {}
         self.assertEqual(expected_headers, lambda_impl.headers)
 
-    def test_get_params_ok(self):
+    def test_get_headers_ok(self):
         event = {
             'headers': {
                 'test_key1': 'test1',

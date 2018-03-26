@@ -394,7 +394,7 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
-          /me/articles/{article_id/images:
+          /me/articles/{article_id}/images:
             post:
               description: '対象記事に画像データを登録'
               produces:
@@ -595,7 +595,7 @@ Resources:
           Api:
             Type: Api
             Properties:
-              Path: me/articles/{article_id}/images
+              Path: /me/articles/{article_id}/images
               Method: post
               RestApiId: !Ref RestApi
   MeArticlesLikesShow:
