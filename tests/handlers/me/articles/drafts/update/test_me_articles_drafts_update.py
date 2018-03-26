@@ -120,86 +120,7 @@ class TestMeArticlesDraftsUpdate(TestCase):
         for key in article_content_param_names:
             self.assertEqual(json.loads(params['body'])[key], article_content_after[0][key])
 
-    def test_main_with_article_not_exists(self):
-        params = {
-            'pathParameters': {
-                'article_id': 'publicId0003'
-            },
-            'body': {
-                "eye_catch_url": "http://example.com/update",
-                "title": "update title",
-                "body": "<p>update body</p>",
-                "overview": "update overview"
-            },
-            'requestContext': {
-                'authorizer': {
-                    'claims': {
-                        'cognito:username': 'test01'
-                    }
-                }
-            }
-        }
-
-        params['body'] = json.dumps(params['body'])
-        me_articles_drafts_update = MeArticlesDraftsUpdate(params, {}, self.dynamodb)
-        response = me_articles_drafts_update.main()
-
-        self.assertEqual(response['statusCode'], 404)
-
-    def test_main_with_public_article(self):
-        params = {
-            'pathParameters': {
-                'article_id': 'publicId0001'
-            },
-            'body': {
-                "eye_catch_url": "http://example.com/update",
-                "title": "update title",
-                "body": "<p>update body</p>",
-                "overview": "update overview"
-            },
-            'requestContext': {
-                'authorizer': {
-                    'claims': {
-                        'cognito:username': 'test01'
-                    }
-                }
-            }
-        }
-
-        params['body'] = json.dumps(params['body'])
-        me_articles_drafts_update = MeArticlesDraftsUpdate(params, {}, self.dynamodb)
-        response = me_articles_drafts_update.main()
-
-        self.assertEqual(response['statusCode'], 404)
-
-    def test_main_with_article_belongs_to_other_user(self):
-        params = {
-            'pathParameters': {
-                'article_id': 'draftId00002'
-            },
-            'body': {
-                "eye_catch_url": "http://example.com/update",
-                "title": "update title",
-                "body": "<p>update body</p>",
-                "overview": "update overview"
-            },
-            'requestContext': {
-                'authorizer': {
-                    'claims': {
-                        'cognito:username': 'test01'
-                    }
-                }
-            }
-        }
-
-        params['body'] = json.dumps(params['body'])
-        me_articles_drafts_update = MeArticlesDraftsUpdate(params, {}, self.dynamodb)
-        response = me_articles_drafts_update.main()
-
-        self.assertEqual(response['statusCode'], 403)
-
-    @patch("me_articles_drafts_update.validate", MagicMock(side_effect=Exception()))
-    def test_main_with_internal_server_error(self):
+    def test_call_validate_article_existence(self):
         params = {
             'pathParameters': {
                 'article_id': 'draftId00001'
@@ -220,10 +141,17 @@ class TestMeArticlesDraftsUpdate(TestCase):
         }
 
         params['body'] = json.dumps(params['body'])
-        me_articles_drafts_update = MeArticlesDraftsUpdate(params, {}, self.dynamodb)
-        response = me_articles_drafts_update.main()
 
-        self.assertEqual(response['statusCode'], 500)
+        mock_lib = MagicMock()
+        with patch('me_articles_drafts_update.DBUtil', mock_lib):
+            response = MeArticlesDraftsUpdate(params, {}, self.dynamodb).main()
+            args, kwargs = mock_lib.validate_article_existence.call_args
+
+            self.assertTrue(mock_lib.validate_article_existence.called)
+            self.assertTrue(args[0])
+            self.assertTrue(args[1])
+            self.assertTrue(kwargs['user_id'])
+            self.assertEqual(kwargs['status'], 'draft')
 
     def test_validation_with_no_params(self):
         params = {}

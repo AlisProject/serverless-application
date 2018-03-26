@@ -11,6 +11,7 @@ from jsonschema import validate, ValidationError, FormatChecker
 from hashids import Hashids
 from text_sanitizer import TextSanitizer
 from time_util import TimeUtil
+from db_util import DBUtil
 
 
 class MeArticlesDraftsUpdate(LambdaBase):
@@ -37,20 +38,12 @@ class MeArticlesDraftsUpdate(LambdaBase):
         validate(json.loads(self.event.get('body')), self.get_schema(), format_checker=FormatChecker())
 
     def exec_main_proc(self):
-        article_info_table = self.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
-        article_info = article_info_table.get_item(Key={'article_id': self.event['pathParameters']['article_id']}).get('Item')
-
-        if article_info is None or article_info['status'] != 'draft':
-            return {
-               'statusCode': 404,
-               'body': json.dumps({'message': 'Record Not Found'})
-            }
-
-        if article_info['user_id'] != self.event['requestContext']['authorizer']['claims']['cognito:username']:
-            return {
-               'statusCode': 403,
-               'body': json.dumps({'message': 'Forbidden'})
-            }
+        DBUtil.validate_article_existence(
+            self.dynamodb,
+            self.event['pathParameters']['article_id'],
+            user_id=self.event['requestContext']['authorizer']['claims']['cognito:username'],
+            status='draft'
+        )
 
         params = json.loads(self.event.get('body'))
 
