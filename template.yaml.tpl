@@ -643,7 +643,7 @@ Resources:
     Properties:
       Handler: handler.lambda_handler
       Role: !GetAtt LambdaRole.Arn
-      CodeUri: ./src/handlers/cognito_trigger/postconfirmation/handler.py
+      CodeUri: ./deploy/cognito_trigger_postconfirmation.zip
   ArticleInfo:
     Type: AWS::DynamoDB::Table
     Properties:
