@@ -106,7 +106,6 @@ Resources:
   IdentityPool:
     Type: AWS::Cognito::IdentityPool
     Properties:
-      AllowUnauthenticatedIdentities: true
       IdentityPoolName: !Ref "AWS::StackName"
       CognitoIdentityProviders:
         - ClientId: !Ref UserPoolClient
