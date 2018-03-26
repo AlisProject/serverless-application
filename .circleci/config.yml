@@ -1,7 +1,13 @@
 version: 2
 
+references:
+    setup_remote_docker: &setup_remote_docker
+      setup_remote_docker:
+        version: 17.11.0-ce
+
 jobs:
   build:
+
     docker:
       - image: circleci/python:3.6.1
       - image: localstack/localstack
@@ -10,6 +16,7 @@ jobs:
 
     steps:
       - checkout
+      - <<: *setup_remote_docker
       # Download and cache dependencies
       - restore_cache:
           keys:
@@ -41,6 +48,29 @@ jobs:
             . venv/bin/activate
             # 全テスト実行
             python exec_test.py
+
+      - run:
+          name: make deploy package
+          command: |
+            docker image build --tag deploy-image .
+            docker container run -it --name deploy-container deploy-image
+            docker container cp deploy-container:/workdir/vendor-package .
+            . venv/bin/activate
+            python make_deploy_zip.py
+
+      - run:
+          name: run deploy
+          command: |
+            . venv/bin/activate
+            python make_template.py
+            aws cloudformation package \
+              --template-file template.yaml \
+              --s3-bucket $DEPLOY_BUCKET_NAME \
+              --output-template-file packaged-template.yaml
+            aws cloudformation deploy \
+              --template-file packaged-template.yaml \
+              --stack-name $CLOUDFORMATION_STACK_NAME \
+              --capabilities CAPABILITY_IAM
 
       - store_artifacts:
           path: test-reports

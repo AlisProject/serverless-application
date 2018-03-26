@@ -26,8 +26,11 @@ class ArticlesLikesPost(LambdaBase):
             raise ValidationError('pathParameters is required')
         validate(self.event.get('pathParameters'), self.get_schema())
         # relation
-        if DBUtil.exists_public_article(self.dynamodb, self.event['pathParameters']['article_id']) is False:
-            raise ValidationError('Bad Request')
+        DBUtil.validate_article_existence(
+            self.dynamodb,
+            self.event['pathParameters']['article_id'],
+            status='public'
+        )
 
     def exec_main_proc(self):
         try:

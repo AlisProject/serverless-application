@@ -3,6 +3,8 @@ import json
 import logging
 import traceback
 from jsonschema import ValidationError
+from record_not_found_error import RecordNotFoundError
+from not_authorized_error import NotAuthorizedError
 
 
 class LambdaBase(metaclass=ABCMeta):
@@ -38,6 +40,16 @@ class LambdaBase(metaclass=ABCMeta):
             return {
                 'statusCode': 400,
                 'body': json.dumps({'message': "Invalid parameter: {0}".format(err)})
+            }
+        except NotAuthorizedError as err:
+            return {
+                'statusCode': 403,
+                'body': json.dumps({'message': str(err)})
+            }
+        except RecordNotFoundError as err:
+            return {
+                'statusCode': 404,
+                'body': json.dumps({'message': str(err)})
             }
 
         except Exception as err:

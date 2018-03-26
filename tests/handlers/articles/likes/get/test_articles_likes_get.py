@@ -3,6 +3,7 @@ import boto3
 from unittest import TestCase
 from articles_likes_get import ArticlesLikesGet
 from tests_util import TestsUtil
+from unittest.mock import patch, MagicMock
 
 
 class TestArticlesLikesGet(TestCase):
@@ -107,17 +108,22 @@ class TestArticlesLikesGet(TestCase):
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(response['body']['Count'], 2)
 
-    def test_main_ng_status_draft(self):
+    def test_call_validate_article_existence(self):
         params = {
             'pathParameters': {
-                'article_id': 'testidlike03'
+                'article_id': 'testidlike02'
             }
         }
 
-        article_liked_user = ArticlesLikesGet(event=params, context={}, dynamodb=self.dynamodb)
-        response = article_liked_user.main()
+        mock_lib = MagicMock()
+        with patch('articles_likes_get.DBUtil', mock_lib):
+            response = ArticlesLikesGet(event=params, context={}, dynamodb=self.dynamodb).main()
+            args, kwargs = mock_lib.validate_article_existence.call_args
 
-        self.assertEqual(response['statusCode'], 400)
+            self.assertTrue(mock_lib.validate_article_existence.called)
+            self.assertTrue(args[0])
+            self.assertTrue(args[1])
+            self.assertEqual(kwargs['status'], 'public')
 
     def test_validation_with_no_params(self):
         params = {}
@@ -141,15 +147,3 @@ class TestArticlesLikesGet(TestCase):
         }
 
         self.assert_bad_request(params)
-
-    def test_validation_not_exists_article_id(self):
-        params = {
-            'pathParameters': {
-                'article_id': 'a' * 12
-            }
-        }
-
-        article_liked_user = ArticlesLikesGet(event=params, context={}, dynamodb=self.dynamodb)
-        response = article_liked_user.main()
-
-        self.assertEqual(response['statusCode'], 400)

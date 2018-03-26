@@ -121,18 +121,6 @@ class TestArticlesRecent(TestCase):
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(json.loads(response['body'])['Items'], expected_items)
 
-    @patch("articles_recent.validate", MagicMock(side_effect=Exception()))
-    def test_main_ng_with_internal_server_error(self):
-        params = {
-            'queryStringParameters': {
-                'limit': '2'
-            }
-        }
-
-        response = ArticlesRecent(params, {}, self.dynamodb).main()
-
-        self.assertEqual(response['statusCode'], 500)
-
     def test_validation_with_no_params(self):
         params = {}
 
