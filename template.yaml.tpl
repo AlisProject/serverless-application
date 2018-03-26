@@ -576,6 +576,19 @@ Resources:
             Path: /articles/{article_id}/alistoken
             Method: get
             RestApiId: !Ref RestApi
+  ArticlesLikesShow:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/articles_likes_show.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /articles/{article_id}/likes
+            Method: get
+            RestApiId: !Ref RestApi
   UsersArticlesPublic:
     Type: AWS::Serverless::Function
     Properties:
