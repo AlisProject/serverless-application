@@ -24,7 +24,7 @@ def make_deploy_zip(zip_file_name, target_dir):
     # zip 追加（共通ライブラリ）
     exec_zip(zip_file_name, 'src/common')
     # zip 追加（venv ライブラリ）
-    exec_zip(zip_file_name, 'venv/lib/python3.6/site-packages')
+    exec_zip(zip_file_name, 'vendor-package')
 
 
 # zip ファイル作成実行

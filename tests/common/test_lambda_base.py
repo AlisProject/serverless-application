@@ -47,3 +47,50 @@ class TestLambdaBase(TestCase):
         lambda_impl.exec_main_proc = MagicMock(side_effect=Exception())
         response = lambda_impl.main()
         self.assertEqual(response['statusCode'], 500)
+
+    def test_get_params_ok_not_exists_any_params(self):
+        event = {}
+        lambda_impl = self.TestLambdaImpl(event, {})
+        expected_params = {}
+        self.assertEqual(expected_params, lambda_impl.params)
+
+    def test_get_params_ok_exists_all_params(self):
+        event = {
+            'queryStringParameters': {
+                'test_key1': 'test1'
+            },
+            'pathParameters': {
+                'test_key2': 'test2',
+                'test_key3': 'test3'
+
+            },
+            'body': json.dumps({'test_key4': 'test4'})
+        }
+        lambda_impl = self.TestLambdaImpl(event, {})
+        expected_params = {
+            'test_key1': 'test1',
+            'test_key2': 'test2',
+            'test_key3': 'test3',
+            'test_key4': 'test4'
+        }
+        self.assertEqual(expected_params, lambda_impl.params)
+
+    def test_get_headers_ok_not_exists_any_params(self):
+        event = {}
+        lambda_impl = self.TestLambdaImpl(event, {})
+        expected_headers = {}
+        self.assertEqual(expected_headers, lambda_impl.headers)
+
+    def test_get_headers_ok(self):
+        event = {
+            'headers': {
+                'test_key1': 'test1',
+                'test_key2': 'test2'
+            }
+        }
+        lambda_impl = self.TestLambdaImpl(event, {})
+        expected_headers = {
+            'test_key1': 'test1',
+            'test_key2': 'test2'
+        }
+        self.assertEqual(expected_headers, lambda_impl.headers)
