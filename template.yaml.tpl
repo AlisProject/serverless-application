@@ -197,7 +197,7 @@ Resources:
       DefinitionBody:
         swagger: "2.0"
         info:
-          title: dev-api
+          title: {{ API_NAME }}
           version: 1.0.0
         basePath: /
         schemes:
