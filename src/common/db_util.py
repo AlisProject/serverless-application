@@ -31,3 +31,12 @@ class DBUtil:
         if status is not None and article_info['status'] != status:
             raise RecordNotFoundError('Record Not Found')
         return True
+
+    @staticmethod
+    def validate_user_existence(dynamodb, user_id):
+        users_table = dynamodb.Table(os.environ['USERS'])
+        user = users_table.get_item(Key={'user_id': user_id}).get('Item')
+
+        if user is None:
+            raise RecordNotFoundError('Record Not Found')
+        return True
