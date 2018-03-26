@@ -4,3 +4,5 @@ hashids
 bleach
 rfc3987
 jinja2
+pillow
+uuid

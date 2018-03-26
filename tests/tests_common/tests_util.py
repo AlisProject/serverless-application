@@ -21,9 +21,18 @@ class TestsUtil:
             table.put_item(Item=item)
 
     @classmethod
+    def create_s3_bucket(cls, s3):
+        cls.set_s3_env()
+        s3.create_bucket(Bucket=os.environ['ARTICLES_IMAGES_BUCKET_NAME'])
+
+    @classmethod
     def set_all_tables_name_to_env(cls):
         for table in cls.get_all_tables():
             os.environ[table['env_name']] = table['table_name']
+
+    @classmethod
+    def set_s3_env(self):
+        os.environ['ARTICLES_IMAGES_BUCKET_NAME'] = 'test_bucket'
 
     @classmethod
     def delete_all_tables(cls, dynamodb):
