@@ -197,7 +197,7 @@ Resources:
       DefinitionBody:
         swagger: "2.0"
         info:
-          title: {{ API_NAME }}
+          title: !Ref "AWS::StackName"
           version: 1.0.0
         basePath: /
         schemes:
