@@ -1,4 +1,5 @@
 import os
+import json
 import boto3
 from unittest import TestCase
 from articles_likes_show import ArticlesLikesShow
@@ -80,7 +81,7 @@ class TestArticlesLikesShow(TestCase):
         response = article_liked_user.main()
 
         self.assertEqual(response['statusCode'], 200)
-        self.assertEqual(response['body']['Count'], 0)
+        self.assertEqual(json.loads(response['body'])['count'], 0)
 
     def test_main_ok_like_1(self):
         params = {
@@ -93,7 +94,7 @@ class TestArticlesLikesShow(TestCase):
         response = article_liked_user.main()
 
         self.assertEqual(response['statusCode'], 200)
-        self.assertEqual(response['body']['Count'], 1)
+        self.assertEqual(json.loads(response['body'])['count'], 1)
 
     def test_main_ok_like_2(self):
         params = {
@@ -106,7 +107,7 @@ class TestArticlesLikesShow(TestCase):
         response = article_liked_user.main()
 
         self.assertEqual(response['statusCode'], 200)
-        self.assertEqual(response['body']['Count'], 2)
+        self.assertEqual(json.loads(response['body'])['count'], 2)
 
     def test_call_validate_article_existence(self):
         params = {
