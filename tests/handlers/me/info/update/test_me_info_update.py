@@ -5,11 +5,10 @@ import settings
 from unittest import TestCase
 from me_info_update import MeInfoUpdate
 from unittest.mock import patch, MagicMock
-from boto3.dynamodb.conditions import Key
 from tests_util import TestsUtil
 
 
-class TestMeInfosUpdate(TestCase):
+class TestMeInfoUpdate(TestCase):
     dynamodb = boto3.resource('dynamodb', endpoint_url='http://localhost:4569/')
 
     @classmethod

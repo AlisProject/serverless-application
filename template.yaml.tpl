@@ -245,7 +245,7 @@ Resources:
                 type: string
               overview:
                 type: string
-          MeInfosUpdate:
+          MeInfoUpdate:
             type: object
             properties:
               user_display_name:
@@ -444,7 +444,7 @@ Resources:
                 description: 'user info object'
                 required: true
                 schema:
-                  $ref: '#/definitions/MeInfosUpdate'
+                  $ref: '#/definitions/MeInfoUpdate'
               responses:
                 '200':
                   description: 'ユーザ情報更新成功'
@@ -452,7 +452,7 @@ Resources:
                 responses:
                   default:
                     statusCode: '200'
-                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeInfosUpdate.Arn}/invocations
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeInfoUpdate.Arn}/invocations
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
@@ -660,7 +660,7 @@ Resources:
             Path: /me/articles/{article_id}/drafts
             Method: get
             RestApiId: !Ref RestApi
-  MeInfosUpdate:
+  MeInfoUpdate:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
@@ -671,7 +671,7 @@ Resources:
           Type: Api
           Properties:
             Path: /me/info
-            Method: post
+            Method: put
             RestApiId: !Ref RestApi
   CognitoTriggerCustomMessage:
     Type: AWS::Serverless::Function

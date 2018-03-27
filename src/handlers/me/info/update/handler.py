@@ -6,5 +6,5 @@ dynamodb = boto3.resource('dynamodb')
 
 
 def lambda_handler(event, context):
-    me_articles_drafts_create = MeInfoUpdate(event, context, dynamodb)
-    return me_articles_drafts_create.main()
+    me_info_update = MeInfoUpdate(event, context, dynamodb)
+    return me_info_update.main()
