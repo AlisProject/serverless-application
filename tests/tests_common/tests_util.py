@@ -49,5 +49,5 @@ class TestsUtil:
             {'env_name': 'ARTICLE_CONTENT_TABLE_NAME', 'table_name': 'ArticleContent'},
             {'env_name': 'ARTICLE_INFO_TABLE_NAME', 'table_name': 'ArticleInfo'},
             {'env_name': 'ARTICLE_LIKED_USER_TABLE_NAME', 'table_name': 'ArticleLikedUser'},
-            {'env_name': 'USERS', 'table_name': 'Users'}
+            {'env_name': 'USERS_TABLE_NAME', 'table_name': 'Users'}
         ]

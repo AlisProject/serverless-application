@@ -40,7 +40,7 @@ class TestDBUtil(TestCase):
                 'self_introduction': 'test_introduction01'
             }
         ]
-        TestsUtil.create_table(cls.dynamodb, os.environ['USERS'], cls.users_table_items)
+        TestsUtil.create_table(cls.dynamodb, os.environ['USERS_TABLE_NAME'], cls.users_table_items)
 
     @classmethod
     def tearDownClass(cls):
@@ -173,3 +173,13 @@ class TestDBUtil(TestCase):
                 self.dynamodb,
                 'piyopiyo'
             )
+
+    def test_items_values_empty_to_none_ok(self):
+        values = {
+            'test': 'test',
+            'empty': ''
+        }
+        DBUtil.items_values_empty_to_none(values)
+
+        self.assertEqual(values['test'], 'test')
+        self.assertEqual(values['empty'], None)

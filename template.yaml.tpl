@@ -245,6 +245,13 @@ Resources:
                 type: string
               overview:
                 type: string
+          MeInfosUpdate:
+            type: object
+            properties:
+              user_display_name:
+                type: string
+              self_introduction:
+                type: string
         paths:
           /articles/recent:
             get:
@@ -425,6 +432,27 @@ Resources:
                   default:
                     statusCode: "200"
                 uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesImagesCreate.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /me/info:
+            put:
+              description: 'ユーザ情報を更新'
+              parameters:
+              - name: 'user info'
+                in: 'body'
+                description: 'user info object'
+                required: true
+                schema:
+                  $ref: '#/definitions/MeInfosUpdate'
+              responses:
+                '200':
+                  description: 'ユーザ情報更新成功'
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeInfosUpdate.Arn}/invocations
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
@@ -631,6 +659,19 @@ Resources:
           Properties:
             Path: /me/articles/{article_id}/drafts
             Method: get
+            RestApiId: !Ref RestApi
+  MeInfosUpdate:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_info_update.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/info
+            Method: post
             RestApiId: !Ref RestApi
   CognitoTriggerCustomMessage:
     Type: AWS::Serverless::Function
