@@ -7,9 +7,7 @@ env = Environment(loader=FileSystemLoader('.'))
 template = env.get_template('template.yaml.tpl')
 
 data = {
-    'COGNITO_EMAIL_VERIFY_URL': os.environ['COGNITO_EMAIL_VERIFY_URL'],
-    'ARTICLES_IMAGES_BUCKET_NAME': os.environ['ARTICLES_IMAGES_BUCKET_NAME'],
-    'API_NAME': os.environ['API_NAME']
+    'COGNITO_EMAIL_VERIFY_URL': os.environ['COGNITO_EMAIL_VERIFY_URL']
 }
 
 with open("template.yaml", "w") as f:
