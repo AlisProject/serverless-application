@@ -32,6 +32,16 @@ class TestDBUtil(TestCase):
         ]
         TestsUtil.create_table(cls.dynamodb, os.environ['ARTICLE_INFO_TABLE_NAME'], cls.article_info_table_items)
 
+        # create users_table
+        cls.users_table_items = [
+            {
+                'user_id': 'test01',
+                'user_display_name': 'test_display_name01',
+                'self_introduction': 'test_introduction01'
+            }
+        ]
+        TestsUtil.create_table(cls.dynamodb, os.environ['USERS_TABLE_NAME'], cls.users_table_items)
+
     @classmethod
     def tearDownClass(cls):
         TestsUtil.delete_all_tables(cls.dynamodb)
@@ -149,3 +159,27 @@ class TestDBUtil(TestCase):
                 user_id=self.article_info_table_items[0]['user_id'],
                 status='draft'
             )
+
+    def test_validate_user_existence_ok(self):
+        result = DBUtil.validate_user_existence(
+            self.dynamodb,
+            self.users_table_items[0]['user_id']
+        )
+        self.assertTrue(result)
+
+    def test_validate_user_existence_ng_not_exists_user_id(self):
+        with self.assertRaises(RecordNotFoundError):
+            DBUtil.validate_user_existence(
+                self.dynamodb,
+                'piyopiyo'
+            )
+
+    def test_items_values_empty_to_none_ok(self):
+        values = {
+            'test': 'test',
+            'empty': ''
+        }
+        DBUtil.items_values_empty_to_none(values)
+
+        self.assertEqual(values['test'], 'test')
+        self.assertEqual(values['empty'], None)
