@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
+import json
 import os
 import settings
 from db_util import DBUtil
 from lambda_base import LambdaBase
 from jsonschema import validate, ValidationError
 from boto3.dynamodb.conditions import Key
+from decimal_encoder import DecimalEncoder
 
 
-class ArticlesLikesGet(LambdaBase):
+class ArticlesLikesShow(LambdaBase):
     def get_schema(self):
         return {
             'type': 'object',
@@ -40,5 +42,5 @@ class ArticlesLikesGet(LambdaBase):
 
         return {
             'statusCode': 200,
-            'body': {'Count': response['Count']}
+            'body': json.dumps({'count': response['Count']}, cls=DecimalEncoder)
         }
