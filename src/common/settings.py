@@ -14,6 +14,10 @@ parameters = {
         'minLength': 3,
         'maxLength': 30
     },
+    'icon_image': {
+        'type': 'string',
+        'maxLength': 8388608
+    },
     'sort_key': {
         'type': 'integer',
         'minimum': 1,
@@ -63,3 +67,6 @@ LIKED_RETRY_COUNT = 3
 
 ARTICLE_IMAGE_MAX_WIDTH = 1920
 ARTICLE_IMAGE_MAX_HEIGHT = 1080
+
+USER_ICON_WIDTH = 240
+USER_ICON_HEIGHT = 240

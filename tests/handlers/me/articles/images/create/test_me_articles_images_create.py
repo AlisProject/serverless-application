@@ -19,11 +19,11 @@ class TestMeArticlesImagesCreate(TestCase):
     @classmethod
     def setUpClass(cls):
         TestsUtil.set_all_tables_name_to_env()
-        TestsUtil.set_s3_env()
+        TestsUtil.set_all_s3_buckets_name_to_env()
         TestsUtil.delete_all_tables(cls.dynamodb)
 
         # create s3 bucket
-        TestsUtil.create_s3_bucket(cls.s3)
+        TestsUtil.create_all_s3_buckets(cls.s3)
 
         # create article_info_table
         cls.article_info_table_items = [
