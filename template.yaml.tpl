@@ -247,6 +247,13 @@ Resources:
                 type: string
               overview:
                 type: string
+          MeInfoUpdate:
+            type: object
+            properties:
+              user_display_name:
+                type: string
+              self_introduction:
+                type: string
         paths:
           /articles/recent:
             get:
@@ -475,6 +482,27 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+          /me/info:
+            put:
+              description: 'ユーザ情報を更新'
+              parameters:
+              - name: 'user info'
+                in: 'body'
+                description: 'user info object'
+                required: true
+                schema:
+                  $ref: '#/definitions/MeInfoUpdate'
+              responses:
+                '200':
+                  description: 'ユーザ情報更新成功'
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeInfoUpdate.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
           /users/{user_id}/articles/public:
             get:
               description: '指定されたユーザーの公開記事一覧情報を取得'
@@ -525,6 +553,23 @@ Resources:
                   default:
                     statusCode: '200'
                 uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesDraftsShow.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+            put:
+              description: '下書き記事を更新'
+              parameters:
+              - name: 'article'
+                in: 'body'
+                description: 'article object'
+                required: true
+                schema:
+                  $ref: '#/definitions/MeArticlesDraftsCreate'
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesDraftsUpdate.Arn}/invocations
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
@@ -650,6 +695,19 @@ Resources:
             Path: /me/articles/{article_id}/drafts/publish
             Method: put
             RestApiId: !Ref RestApi
+  MeArticlesDraftsUpdate:
+      Type: AWS::Serverless::Function
+      Properties:
+        Handler: handler.lambda_handler
+        Role: !GetAtt LambdaRole.Arn
+        CodeUri: ./deploy/me_articles_drafts_update.zip
+        Events:
+          Api:
+            Type: Api
+            Properties:
+              Path: /me/articles/{article_id}/drafts
+              Method: put
+              RestApiId: !Ref RestApi
   MeArticlesLikeCreate:
     Type: AWS::Serverless::Function
     Properties:
@@ -705,6 +763,19 @@ Resources:
             Path: /me/articles/{article_id}/drafts
             Method: get
             RestApiId: !Ref RestApi
+  MeInfoUpdate:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_info_update.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/info
+            Method: put
+            RestApiId: !Ref RestApi
   CognitoTriggerCustomMessage:
     Type: AWS::Serverless::Function
     Properties:
@@ -716,7 +787,7 @@ Resources:
     Properties:
       Handler: handler.lambda_handler
       Role: !GetAtt LambdaRole.Arn
-      CodeUri: ./src/handlers/cognito_trigger/postconfirmation/handler.py
+      CodeUri: ./deploy/cognito_trigger_postconfirmation.zip
   ArticleInfo:
     Type: AWS::DynamoDB::Table
     Properties:

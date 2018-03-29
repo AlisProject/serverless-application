@@ -39,7 +39,16 @@ parameters = {
     'overview': {
         'type': 'string',
         'maxLength': 100
-    }
+    },
+    'user_display_name': {
+        'type': 'string',
+        'minLength': 1,
+        'maxLength': 30
+    },
+    'self_introduction': {
+        'type': 'string',
+        'maxLength': 100
+    },
 }
 
 article_recent_default_limit = 20
