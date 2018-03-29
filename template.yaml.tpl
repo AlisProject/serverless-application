@@ -11,6 +11,8 @@ Globals:
       Variables:
         ARTICLE_INFO_TABLE_NAME: !Ref ArticleInfo
         ARTICLE_CONTENT_TABLE_NAME: !Ref ArticleContent
+        ARTICLE_HISTORY_TABLE_NAME: !Ref ArticleHistory
+        ARTICLE_CONTENT_EDIT_TABLE_NAME: !Ref ArticleContentEdit
         ARTICLE_EVALUATED_MANAGE_TABLE_NAME: !Ref ArticleEvaluatedManage
         ARTICLE_ALIS_TOKEN_TABLE_NAME: !Ref ArticleAlisToken
         ARTICLE_LIKED_USER_TABLE_NAME: !Ref ArticleLikedUser
@@ -382,6 +384,26 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+          /me/articles/{article_id}/drafts/publish:
+            put:
+              description: "指定された article_id の下書き記事を公開"
+              parameters:
+              - name: 'article_id'
+                in: 'path'
+                description: '対象記事の指定するために使用'
+                required: true
+                type: 'string'
+              responses:
+                '200':
+                  description: 'successful operation'
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesDraftsPublish.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
           /me/articles/{article_id}/like:
             get:
               description: '指定された article_id の記事に「いいね」を行ったかを確認'
@@ -615,6 +637,19 @@ Resources:
               Path: /me/articles/drafts
               Method: post
               RestApiId: !Ref RestApi
+  MeArticlesDraftsPublish:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_articles_drafts_publish.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/articles/{article_id}/drafts/publish
+            Method: put
+            RestApiId: !Ref RestApi
   MeArticlesLikeCreate:
     Type: AWS::Serverless::Function
     Properties:
@@ -735,6 +770,34 @@ Resources:
           ReadCapacityUnits: 2
           WriteCapacityUnits: 2
   ArticleContent:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: article_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: article_id
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 2
+        WriteCapacityUnits: 2
+  ArticleHistory:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: article_id
+          AttributeType: S
+        - AttributeName: created_at
+          AttributeType: N
+      KeySchema:
+        - AttributeName: article_id
+          KeyType: HASH
+        - AttributeName: created_at
+          KeyType: RANGE
+      ProvisionedThroughput:
+        ReadCapacityUnits: 2
+        WriteCapacityUnits: 2
+  ArticleContentEdit:
     Type: AWS::DynamoDB::Table
     Properties:
       AttributeDefinitions:
