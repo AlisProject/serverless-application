@@ -43,13 +43,6 @@ jobs:
             pycodestyle src tests ./*.py
 
       - run:
-          name: run tests
-          command: |
-            . venv/bin/activate
-            # 全テスト実行
-            python exec_test.py
-
-      - run:
           name: make deploy package
           command: |
             docker image build --tag deploy-image .
@@ -71,6 +64,13 @@ jobs:
               --template-file packaged-template.yaml \
               --stack-name $CLOUDFORMATION_STACK_NAME \
               --capabilities CAPABILITY_IAM
+
+      - run:
+          name: run tests
+          command: |
+            . venv/bin/activate
+            # 全テスト実行
+            python exec_test.py
 
       - store_artifacts:
           path: test-reports
