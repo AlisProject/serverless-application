@@ -1,5 +1,6 @@
 from unittest import TestCase
 from articles_recent import ArticlesRecent
+from tests_util import TestsUtil
 from unittest.mock import patch, MagicMock
 import yaml
 import os
@@ -8,22 +9,15 @@ import json
 
 
 class TestArticlesRecent(TestCase):
-    dynamodb = boto3.resource('dynamodb', endpoint_url='http://localhost:4569/')
+    dynamodb = TestsUtil.get_dynamodb_client()
 
     @classmethod
     def setUpClass(cls):
-        os.environ['ARTICLE_INFO_TABLE_NAME'] = 'ArticleInfo'
+        TestsUtil.set_all_tables_name_to_env()
+        TestsUtil.delete_all_tables(cls.dynamodb)
 
-        f = open("./database.yaml", "r+")
-        template = yaml.load(f)
-        f.close()
-
-        create_params = {'TableName': 'ArticleInfo'}
-        create_params.update(template['Resources']['ArticleInfo']['Properties'])
-        cls.dynamodb.create_table(**create_params)
-
-        table = TestArticlesRecent.dynamodb.Table('ArticleInfo')
-        items = [
+        # create article_info_table
+        article_info_items = [
             {
                 'article_id': 'draftId00001',
                 'status': 'draft',
@@ -45,14 +39,11 @@ class TestArticlesRecent(TestCase):
                 'sort_key': 1520150272000003
             }
         ]
-
-        for item in items:
-            table.put_item(Item=item)
+        TestsUtil.create_table(cls.dynamodb, os.environ['ARTICLE_INFO_TABLE_NAME'], article_info_items)
 
     @classmethod
     def tearDownClass(cls):
-        table = TestArticlesRecent.dynamodb.Table('ArticleInfo')
-        table.delete()
+        TestsUtil.delete_all_tables(cls.dynamodb)
 
     def assert_bad_request(self, params):
         function = ArticlesRecent(params, {}, self.dynamodb)
@@ -81,7 +72,7 @@ class TestArticlesRecent(TestCase):
         self.assertEqual(json.loads(response['body'])['Items'], expected_items)
 
     def test_main_ok_with_no_limit(self):
-        table = TestArticlesRecent.dynamodb.Table('ArticleInfo')
+        table = TestArticlesRecent.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
 
         for i in range(21):
             table.put_item(Item={

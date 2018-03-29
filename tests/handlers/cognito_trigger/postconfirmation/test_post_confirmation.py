@@ -6,11 +6,10 @@ from post_confirmation import PostConfirmation
 from tests_util import TestsUtil
 
 
-dynamodb = boto3.resource('dynamodb', endpoint_url='http://localhost:4569/')
+dynamodb = TestsUtil.get_dynamodb_client()
 
 
 class TestPostConfirmation(TestCase):
-    user_table_name = "Users"
 
     @classmethod
     def setUpClass(cls):
