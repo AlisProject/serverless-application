@@ -49,6 +49,13 @@ class TestsUtil:
             os.environ[s3_bucket['env_name']] = s3_bucket['bucket_name']
 
     @classmethod
+    def get_all_s3_buckets(cls):
+        return [
+            {'env_name': 'ARTICLES_IMAGES_BUCKET_NAME', 'bucket_name': 'articles_images'},
+            {'env_name': 'ME_INFO_ICON_BUCKET_NAME', 'bucket_name': 'me_info_icon'}
+        ]
+
+    @classmethod
     def delete_all_tables(cls, dynamodb):
         for table in cls.get_all_tables():
             try:
