@@ -14,7 +14,7 @@ class TestPostConfirmation(TestCase):
     @classmethod
     def setUpClass(cls):
         user_tables_items = [
-            {'user_id': 'testid000000', 'duser_display_name': 'testid000000'}
+            {'user_id': 'testid000000', 'user_display_name': 'testid000000'}
         ]
         TestsUtil.set_all_tables_name_to_env()
         TestsUtil.delete_all_tables(dynamodb)
@@ -28,6 +28,9 @@ class TestPostConfirmation(TestCase):
         event = {'userName': 'hogehoge'}
         postconfirmation = PostConfirmation(event=event, context="", dynamodb=dynamodb)
         self.assertEqual(postconfirmation.main(), True)
+        table = dynamodb.Table(os.environ['USERS_TABLE_NAME'])
+        items = table.get_item(Key={"user_id": "hogehoge"})
+        self.assertEqual(items['Item']['user_id'], items['Item']['user_display_name'])
 
     def test_create_userid_already_exists(self):
         event = {'userName': 'testid000000'}
