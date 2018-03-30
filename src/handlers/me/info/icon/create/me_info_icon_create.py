@@ -87,15 +87,20 @@ class MeInfoIconCreate(LambdaBase):
         w, h = image.size
         if w <= settings.USER_ICON_WIDTH and h <= settings.USER_ICON_HEIGHT:
             return image_data
+
         # resize to icon size
-        if w > h:
+        if w >= h and (h > settings.USER_ICON_HEIGHT):
             resize_rate = h / settings.USER_ICON_HEIGHT
-            image.thumbnail((w // resize_rate, settings.USER_ICON_HEIGHT), Image.ANTIALIAS)
-        else:
+            image.thumbnail((w / resize_rate, settings.USER_ICON_HEIGHT), Image.ANTIALIAS)
+        elif (h > w) and (w > settings.USER_ICON_WIDTH):
             resize_rate = w / settings.USER_ICON_WIDTH
-            image.thumbnail((settings.USER_ICON_WIDTH, h // resize_rate), Image.ANTIALIAS)
+            image.thumbnail((settings.USER_ICON_WIDTH, h / resize_rate), Image.ANTIALIAS)
+
         # crop image to square
-        crop_image = self.__crop_center(image, settings.USER_ICON_WIDTH, settings.USER_ICON_HEIGHT)
+        w, h = image.size
+        crop_width = settings.USER_ICON_WIDTH if w >= settings.USER_ICON_WIDTH else w
+        crop_height = settings.USER_ICON_HEIGHT if h >= settings.USER_ICON_HEIGHT else h
+        crop_image = self.__crop_center(image, crop_width, crop_height)
         buf = BytesIO()
         crop_image.save(buf, format=ext)
         return buf.getvalue()

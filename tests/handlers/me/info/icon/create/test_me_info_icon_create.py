@@ -104,8 +104,8 @@ class TestMeInfoIconCreate(TestCase):
         self.assertTrue(self.equal_size_to_s3_image(image_url_path + image_file_name, image_data.size))
 
     @patch('uuid.uuid4', MagicMock(return_value='uuid'))
-    def test_main_ok_exists_icon_image_url(self):
-        image_data = Image.new('RGB', (1, 1))
+    def test_main_ok_exists_icon_image_url_png(self):
+        image_data = Image.new('RGB', (150, 120))
         buf = BytesIO()
         image_format = 'png'
         image_data.save(buf, format=image_format)
@@ -150,10 +150,10 @@ class TestMeInfoIconCreate(TestCase):
         self.assertTrue(self.equal_size_to_s3_image(image_url_path + image_file_name, image_data.size))
 
     @patch('uuid.uuid4', MagicMock(return_value='uuid'))
-    def test_main_ok_over_size_and_width_gt_height_png(self):
-        image_data = Image.new('RGB', (settings.USER_ICON_WIDTH + 100, settings.USER_ICON_WIDTH + 50))
+    def test_main_ok_over_size_and_width_gt_height_jpeg(self):
+        image_data = Image.new('RGB', (settings.USER_ICON_WIDTH + 100, settings.USER_ICON_HEIGHT + 50))
         buf = BytesIO()
-        image_format = 'png'
+        image_format = 'jpeg'
         image_data.save(buf, format=image_format)
 
         target_user = self.users_table_items[1]
@@ -198,7 +198,7 @@ class TestMeInfoIconCreate(TestCase):
 
     @patch('uuid.uuid4', MagicMock(return_value='uuid'))
     def test_main_ok_over_size_and_height_gt_width_gif(self):
-        image_data = Image.new('RGB', (settings.USER_ICON_WIDTH + 50, settings.USER_ICON_WIDTH + 100))
+        image_data = Image.new('RGB', (settings.USER_ICON_WIDTH + 50, settings.USER_ICON_HEIGHT + 100))
         buf = BytesIO()
         image_format = 'gif'
         image_data.save(buf, format=image_format)
@@ -242,6 +242,101 @@ class TestMeInfoIconCreate(TestCase):
         # s3
         expected_size = (settings.USER_ICON_WIDTH, settings.USER_ICON_HEIGHT)
         self.assertTrue(self.equal_size_to_s3_image(image_url_path + image_file_name, expected_size))
+
+    @patch('uuid.uuid4', MagicMock(return_value='uuid'))
+    def test_main_ok_over_size_only_width(self):
+        image_data = Image.new('RGB', (settings.USER_ICON_WIDTH + 100, settings.USER_ICON_HEIGHT - 100))
+        buf = BytesIO()
+        image_format = 'png'
+        image_data.save(buf, format=image_format)
+
+        target_user = self.users_table_items[1]
+        params = {
+            'headers': {
+                'Content-Type': 'image/' + image_format
+            },
+            'body': json.dumps({'icon_image': base64.b64encode(buf.getvalue()).decode('ascii')}),
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': target_user['user_id']
+                    }
+                }
+            }
+        }
+
+        response = MeInfoIconCreate(params, {}, dynamodb=self.dynamodb, s3=self.s3).main()
+
+        users_table = self.dynamodb.Table(os.environ['USERS_TABLE_NAME'])
+        user_item = users_table.get_item(Key={'user_id': target_user['user_id']}).get('Item')
+
+        # response
+        image_url_path = target_user['user_id'] + '/icon/'
+        image_file_name = 'uuid.' + image_format
+        expected_item = {
+            'icon_image_url': image_url_path + image_file_name
+        }
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(json.loads(response['body']), expected_item)
+        # dynamodb
+        expected_items = {
+            'user_id': target_user['user_id'],
+            'icon_image_url': image_url_path + image_file_name
+        }
+        users_param_names = ['user_id', 'icon_image_url']
+        for key in users_param_names:
+            self.assertEqual(expected_items[key], user_item[key])
+        # s3
+        expected_size = (settings.USER_ICON_WIDTH, settings.USER_ICON_HEIGHT - 100)
+        self.assertTrue(self.equal_size_to_s3_image(image_url_path + image_file_name, expected_size))
+
+    @patch('uuid.uuid4', MagicMock(return_value='uuid'))
+    def test_main_ok_over_size_only_height(self):
+        image_data = Image.new('RGB', (settings.USER_ICON_WIDTH - 100, settings.USER_ICON_HEIGHT + 100))
+        buf = BytesIO()
+        image_format = 'png'
+        image_data.save(buf, format=image_format)
+
+        target_user = self.users_table_items[1]
+        params = {
+            'headers': {
+                'Content-Type': 'image/' + image_format
+            },
+            'body': json.dumps({'icon_image': base64.b64encode(buf.getvalue()).decode('ascii')}),
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': target_user['user_id']
+                    }
+                }
+            }
+        }
+
+        response = MeInfoIconCreate(params, {}, dynamodb=self.dynamodb, s3=self.s3).main()
+
+        users_table = self.dynamodb.Table(os.environ['USERS_TABLE_NAME'])
+        user_item = users_table.get_item(Key={'user_id': target_user['user_id']}).get('Item')
+
+        # response
+        image_url_path = target_user['user_id'] + '/icon/'
+        image_file_name = 'uuid.' + image_format
+        expected_item = {
+            'icon_image_url': image_url_path + image_file_name
+        }
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(json.loads(response['body']), expected_item)
+        # dynamodb
+        expected_items = {
+            'user_id': target_user['user_id'],
+            'icon_image_url': image_url_path + image_file_name
+        }
+        users_param_names = ['user_id', 'icon_image_url']
+        for key in users_param_names:
+            self.assertEqual(expected_items[key], user_item[key])
+        # s3
+        expected_size = (settings.USER_ICON_WIDTH - 100, settings.USER_ICON_HEIGHT)
+        self.assertTrue(self.equal_size_to_s3_image(image_url_path + image_file_name, expected_size))
+
 
     def test_validation_with_no_params(self):
         params = {
