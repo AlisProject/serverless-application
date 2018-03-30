@@ -337,7 +337,6 @@ class TestMeInfoIconCreate(TestCase):
         expected_size = (settings.USER_ICON_WIDTH - 100, settings.USER_ICON_HEIGHT)
         self.assertTrue(self.equal_size_to_s3_image(image_url_path + image_file_name, expected_size))
 
-
     def test_validation_with_no_params(self):
         params = {
         }
