@@ -8,9 +8,7 @@ from unittest.mock import patch, MagicMock
 
 
 class TestMeArticleLikeShow(TestCase):
-    dynamodb = boto3.resource('dynamodb', endpoint_url='http://localhost:4569/')
-
-    target_tables = ['ArticleLikedUser']
+    dynamodb = TestsUtil.get_dynamodb_client()
 
     @classmethod
     def setUpClass(cls):

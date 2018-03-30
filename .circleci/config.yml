@@ -10,7 +10,7 @@ jobs:
 
     docker:
       - image: circleci/python:3.6.1
-      - image: localstack/localstack
+      - image: bluszcz/bflocalstack-dynamodb-s3
 
     working_directory: ~/repo
 
