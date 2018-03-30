@@ -8,7 +8,7 @@ from tests_util import TestsUtil
 
 
 class TestUsersArticlesPublic(TestCase):
-    dynamodb = boto3.resource('dynamodb', endpoint_url='http://localhost:4569/')
+    dynamodb = TestsUtil.get_dynamodb_client()
 
     @classmethod
     def setUpClass(cls):

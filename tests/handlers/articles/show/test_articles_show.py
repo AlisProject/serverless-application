@@ -1,5 +1,6 @@
 from unittest import TestCase
 from articles_show import ArticlesShow
+from tests_util import TestsUtil
 from unittest.mock import patch, MagicMock
 import yaml
 import os
@@ -8,27 +9,15 @@ import json
 
 
 class TestArticlesShow(TestCase):
-    dynamodb = boto3.resource('dynamodb', endpoint_url='http://localhost:4569/')
-
-    target_tables = ['ArticleInfo', 'ArticleContent']
+    dynamodb = TestsUtil.get_dynamodb_client()
 
     @classmethod
     def setUpClass(cls):
-        os.environ['ARTICLE_INFO_TABLE_NAME'] = 'ArticleInfo'
-        os.environ['ARTICLE_CONTENT_TABLE_NAME'] = 'ArticleContent'
+        TestsUtil.set_all_tables_name_to_env()
+        TestsUtil.delete_all_tables(cls.dynamodb)
 
-        f = open("./database.yaml", "r+")
-        template = yaml.load(f)
-        f.close()
-
-        for table_name in cls.target_tables:
-            create_params = {'TableName': table_name}
-            create_params.update(template['Resources'][table_name]['Properties'])
-
-            cls.dynamodb.create_table(**create_params)
-
-        article_info_table = cls.dynamodb.Table('ArticleInfo')
-        items = [
+        # create article_info_table
+        cls.article_info_table_items = [
             {
                 'article_id': 'testid000001',
                 'status': 'public',
@@ -42,12 +31,10 @@ class TestArticlesShow(TestCase):
                 'sort_key': 1520150272000001
             }
         ]
+        TestsUtil.create_table(cls.dynamodb, os.environ['ARTICLE_INFO_TABLE_NAME'], cls.article_info_table_items)
 
-        for item in items:
-            article_info_table.put_item(Item=item)
-
-        article_content_table = cls.dynamodb.Table('ArticleContent')
-        items = [
+        # create article_content_table
+        cls.article_content_table_items = [
             {
                 'article_id': 'testid000001',
                 'body': 'testid000001 body',
@@ -59,14 +46,11 @@ class TestArticlesShow(TestCase):
                 'title': 'testid000003 titile'
             }
         ]
-
-        for item in items:
-            article_content_table.put_item(Item=item)
+        TestsUtil.create_table(cls.dynamodb, os.environ['ARTICLE_CONTENT_TABLE_NAME'], cls.article_content_table_items)
 
     @classmethod
     def tearDownClass(cls):
-        for table_name in cls.target_tables:
-            cls.dynamodb.Table(table_name).delete()
+        TestsUtil.delete_all_tables(cls.dynamodb)
 
     def assert_bad_request(self, params):
         function = ArticlesShow(params, {}, self.dynamodb)

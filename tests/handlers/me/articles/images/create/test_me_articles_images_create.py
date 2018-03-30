@@ -13,7 +13,7 @@ import tempfile
 
 
 class TestMeArticlesImagesCreate(TestCase):
-    dynamodb = boto3.resource('dynamodb', endpoint_url='http://localhost:4569/')
+    dynamodb = TestsUtil.get_dynamodb_client()
     s3 = boto3.resource('s3', endpoint_url='http://localhost:4572/')
 
     @classmethod
