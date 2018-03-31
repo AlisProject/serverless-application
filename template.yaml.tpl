@@ -58,9 +58,9 @@ Resources:
       Policies:
         PasswordPolicy:
           MinimumLength: 8
-          RequireLowercase: true
-          RequireNumbers: true
-          RequireSymbols: true
+          RequireLowercase: false
+          RequireNumbers: false
+          RequireSymbols: false
           RequireUppercase: false
       UserPoolName:
         Ref: AWS::StackName
