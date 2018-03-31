@@ -80,7 +80,7 @@ Resources:
           StringAttributeConstraints:
             MaxLength: "2048"
             MinLength: "0"
-          Required: true
+          Required: false
       SmsConfiguration:
         ExternalId: !Join
           - ''
