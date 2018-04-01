@@ -259,6 +259,11 @@ Resources:
             properties:
               icon_image:
                 type: string
+          ArticleImage:
+            type: object
+            properties:
+              article_image:
+                type: string
         paths:
           /articles/recent:
             get:
@@ -469,16 +474,21 @@ Resources:
               - application/json
                 application/octet-stream
               parameters:
+                - name: 'Content-Type'
+                  in: 'header'
+                  required: true
+                  type: 'string'
                 - name: 'article_id'
-                  in: 'path'
                   description: '対象記事の指定するために使用'
+                  in: 'path'
                   required: true
                   type: 'string'
-                - name: 'article_image'
-                  in: 'body'
-                  description: '対象記事の画像データ'
+                - in: 'body'
+                  name: 'ArticleImage'
+                  description: 'article image object'
                   required: true
-                  type: 'string'
+                  schema:
+                    $ref: '#/definitions/ArticleImage'
               responses:
                 '200':
                   description: '登録した画像データのURL'
