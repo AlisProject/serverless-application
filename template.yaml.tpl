@@ -410,6 +410,8 @@ Resources:
               responses:
                 '200':
                   description: 'successful operation'
+              security:
+                - cognitoUserPool: []
               x-amazon-apigateway-integration:
                 responses:
                   default:
