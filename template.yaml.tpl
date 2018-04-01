@@ -189,16 +189,6 @@ Resources:
           Fn::GetAtt:
           - AuthenticatedRole
           - Arn
-  RestApiAuthorizer:
-    Type: "AWS::ApiGateway::Authorizer"
-    Properties:
-      IdentitySource: "method.request.header.Authorization"
-      Name: "RestApiAuth"
-      ProviderARNs:
-        - !GetAtt UserPool.Arn
-      RestApiId:
-        Ref: RestApi
-      Type: "COGNITO_USER_POOLS"
   RestApi:
     Type: AWS::Serverless::Api
     Properties:
@@ -392,7 +382,7 @@ Resources:
                       article_id:
                         type: 'string'
               security:
-                - RestApiAuth: []
+                - cognitoUserPool: []
               x-amazon-apigateway-integration:
                 responses:
                   default:
@@ -764,7 +754,16 @@ Resources:
                     \n    }\n}\n"
                 contentHandling: "CONVERT_TO_TEXT"
                 type: aws
-
+        securityDefinitions:
+          cognitoUserPool:
+            type: apiKey
+            name: Authorization
+            in: header
+            x-amazon-apigateway-authtype: cognito_user_pools
+            x-amazon-apigateway-authorizer:
+              type: cognito_user_pools
+              providerARNs:
+                - !GetAtt UserPool.Arn
   LambdaRole:
     Type: "AWS::IAM::Role"
     Properties:
