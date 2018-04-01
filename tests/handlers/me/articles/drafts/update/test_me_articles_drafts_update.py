@@ -10,9 +10,7 @@ from tests_util import TestsUtil
 
 
 class TestMeArticlesDraftsUpdate(TestCase):
-    dynamodb = boto3.resource('dynamodb', endpoint_url='http://localhost:4569/')
-
-    target_tables = ['ArticleInfo', 'ArticleContent']
+    dynamodb = TestsUtil.get_dynamodb_client()
 
     @classmethod
     def setUpClass(cls):
@@ -22,8 +20,8 @@ class TestMeArticlesDraftsUpdate(TestCase):
     def setUp(self):
         TestsUtil.delete_all_tables(self.dynamodb)
 
-        self.article_info_table = self.dynamodb.Table('ArticleInfo')
-        self.article_content_table = self.dynamodb.Table('ArticleContent')
+        self.article_info_table = self.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
+        self.article_content_table = self.dynamodb.Table(os.environ['ARTICLE_CONTENT_TABLE_NAME'])
 
         article_info_items = [
             {

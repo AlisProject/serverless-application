@@ -1,5 +1,6 @@
 from unittest import TestCase
 from articles_alis_tokens_show import ArticlesAlisTokensShow
+from tests_util import TestsUtil
 from unittest.mock import patch, MagicMock
 import yaml
 import os
@@ -8,30 +9,15 @@ import json
 
 
 class TestArticlesAlisTokensShow(TestCase):
-    dynamodb = boto3.resource('dynamodb', endpoint_url='http://localhost:4569/')
-
-    target_tables = ['ArticleAlisToken', 'ArticleEvaluatedManage']
+    dynamodb = TestsUtil.get_dynamodb_client()
 
     @classmethod
     def setUpClass(cls):
-        os.environ['ARTICLE_ALIS_TOKEN_TABLE_NAME'] = 'ArticleAlisToken'
-        os.environ['ARTICLE_EVALUATED_MANAGE_TABLE_NAME'] = 'ArticleEvaluatedManage'
+        TestsUtil.set_all_tables_name_to_env()
+        TestsUtil.delete_all_tables(cls.dynamodb)
 
-        f = open("./database.yaml", "r+")
-        template = yaml.load(f)
-        f.close()
-
-        for table_name in cls.target_tables:
-            create_params = {'TableName': table_name}
-            create_params.update(template['Resources'][table_name]['Properties'])
-
-            cls.dynamodb.create_table(**create_params)
-
-        article_evaluated_manage_table = cls.dynamodb.Table('ArticleEvaluatedManage')
-        article_evaluated_manage_table.put_item(Item={'active_evaluated_at': 1520150272000000})
-
-        article_alis_token_table = cls.dynamodb.Table('ArticleAlisToken')
-        article_alis_tokens = [
+        # create article_alis_token_table
+        article_alis_token_items = [
             {
                 'article_id': 'testid000001',
                 'alis_token': 100,
@@ -53,14 +39,21 @@ class TestArticlesAlisTokensShow(TestCase):
                 'evaluated_at': 1520150572000000
             }
         ]
+        TestsUtil.create_table(cls.dynamodb, os.environ['ARTICLE_ALIS_TOKEN_TABLE_NAME'], article_alis_token_items)
 
-        for article_alis_token in article_alis_tokens:
-            article_alis_token_table.put_item(Item=article_alis_token)
+        # create article_evaluated_manage_table
+        article_evaluated_manage_items = [
+            {'active_evaluated_at': 1520150272000000}
+        ]
+        TestsUtil.create_table(
+            cls.dynamodb,
+            os.environ['ARTICLE_EVALUATED_MANAGE_TABLE_NAME'],
+            article_evaluated_manage_items
+        )
 
     @classmethod
     def tearDownClass(cls):
-        for table_name in cls.target_tables:
-            cls.dynamodb.Table(table_name).delete()
+        TestsUtil.delete_all_tables(cls.dynamodb)
 
     def assert_bad_request(self, params):
         function = ArticlesAlisTokensShow(params, {}, self.dynamodb)

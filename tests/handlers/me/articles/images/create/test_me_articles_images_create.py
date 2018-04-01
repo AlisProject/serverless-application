@@ -13,17 +13,17 @@ import tempfile
 
 
 class TestMeArticlesImagesCreate(TestCase):
-    dynamodb = boto3.resource('dynamodb', endpoint_url='http://localhost:4569/')
+    dynamodb = TestsUtil.get_dynamodb_client()
     s3 = boto3.resource('s3', endpoint_url='http://localhost:4572/')
 
     @classmethod
     def setUpClass(cls):
         TestsUtil.set_all_tables_name_to_env()
-        TestsUtil.set_s3_env()
+        TestsUtil.set_all_s3_buckets_name_to_env()
         TestsUtil.delete_all_tables(cls.dynamodb)
 
         # create s3 bucket
-        TestsUtil.create_s3_bucket(cls.s3)
+        TestsUtil.create_all_s3_buckets(cls.s3)
 
         # create article_info_table
         cls.article_info_table_items = [

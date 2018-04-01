@@ -11,6 +11,8 @@ Globals:
       Variables:
         ARTICLE_INFO_TABLE_NAME: !Ref ArticleInfo
         ARTICLE_CONTENT_TABLE_NAME: !Ref ArticleContent
+        ARTICLE_HISTORY_TABLE_NAME: !Ref ArticleHistory
+        ARTICLE_CONTENT_EDIT_TABLE_NAME: !Ref ArticleContentEdit
         ARTICLE_EVALUATED_MANAGE_TABLE_NAME: !Ref ArticleEvaluatedManage
         ARTICLE_ALIS_TOKEN_TABLE_NAME: !Ref ArticleAlisToken
         ARTICLE_LIKED_USER_TABLE_NAME: !Ref ArticleLikedUser
@@ -58,9 +60,9 @@ Resources:
       Policies:
         PasswordPolicy:
           MinimumLength: 8
-          RequireLowercase: true
-          RequireNumbers: true
-          RequireSymbols: true
+          RequireLowercase: false
+          RequireNumbers: false
+          RequireSymbols: false
           RequireUppercase: false
       UserPoolName:
         Ref: AWS::StackName
@@ -80,7 +82,7 @@ Resources:
           StringAttributeConstraints:
             MaxLength: "2048"
             MinLength: "0"
-          Required: true
+          Required: false
       SmsConfiguration:
         ExternalId: !Join
           - ''
@@ -252,6 +254,16 @@ Resources:
                 type: string
               self_introduction:
                 type: string
+          MeInfoIcon:
+            type: object
+            properties:
+              icon_image:
+                type: string
+          ArticleImage:
+            type: object
+            properties:
+              article_image:
+                type: string
         paths:
           /articles/recent:
             get:
@@ -381,11 +393,35 @@ Resources:
                     properties:
                       article_id:
                         type: 'string'
+              security:
+                - cognitoUserPool: []
               x-amazon-apigateway-integration:
                 responses:
                   default:
                     statusCode: '200'
                 uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesDraftsCreate.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /me/articles/{article_id}/drafts/publish:
+            put:
+              description: "指定された article_id の下書き記事を公開"
+              parameters:
+              - name: 'article_id'
+                in: 'path'
+                description: '対象記事の指定するために使用'
+                required: true
+                type: 'string'
+              responses:
+                '200':
+                  description: 'successful operation'
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesDraftsPublish.Arn}/invocations
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
@@ -406,6 +442,8 @@ Resources:
                     properties:
                       liked:
                         type: boolean
+              security:
+                - cognitoUserPool: []
               x-amazon-apigateway-integration:
                 responses:
                   default:
@@ -419,6 +457,8 @@ Resources:
               responses:
                 '200':
                   description: '「いいね」の実施成功'
+              security:
+                - cognitoUserPool: []
               x-amazon-apigateway-integration:
                 responses:
                   default:
@@ -434,16 +474,21 @@ Resources:
               - application/json
                 application/octet-stream
               parameters:
+                - name: 'Content-Type'
+                  in: 'header'
+                  required: true
+                  type: 'string'
                 - name: 'article_id'
-                  in: 'path'
                   description: '対象記事の指定するために使用'
+                  in: 'path'
                   required: true
                   type: 'string'
-                - name: 'article_image'
-                  in: 'body'
-                  description: '対象記事の画像データ'
+                - in: 'body'
+                  name: 'ArticleImage'
+                  description: 'article image object'
                   required: true
-                  type: 'string'
+                  schema:
+                    $ref: '#/definitions/ArticleImage'
               responses:
                 '200':
                   description: '登録した画像データのURL'
@@ -452,6 +497,8 @@ Resources:
                     properties:
                       image_url:
                         type: 'string'
+              security:
+                - cognitoUserPool: []
               x-amazon-apigateway-integration:
                 responses:
                   default:
@@ -473,11 +520,42 @@ Resources:
               responses:
                 '200':
                   description: 'ユーザ情報更新成功'
+              security:
+                - cognitoUserPool: []
               x-amazon-apigateway-integration:
                 responses:
                   default:
                     statusCode: '200'
                 uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeInfoUpdate.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /me/info/icon:
+            post:
+              description: 'ユーザアイコンを登録'
+              produces:
+              - application/json
+                application/octet-stream
+              parameters:
+                - name: 'icon'
+                  in: 'body'
+                  description: 'icon object'
+                  required: true
+                  schema:
+                    $ref: '#/definitions/MeInfoIcon'
+              responses:
+                '200':
+                  description: '登録した画像データのURL'
+                  schema:
+                    type: object
+                    properties:
+                      image_url:
+                        type: 'string'
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeInfoIconCreate.Arn}/invocations
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
@@ -526,6 +604,8 @@ Resources:
                   description: '記事内容取得'
                   schema:
                     $ref: '#/definitions/StoryContent'
+              security:
+                - cognitoUserPool: []
               x-amazon-apigateway-integration:
                 responses:
                   default:
@@ -543,6 +623,8 @@ Resources:
                 required: true
                 schema:
                   $ref: '#/definitions/MeArticlesDraftsCreate'
+              security:
+                - cognitoUserPool: []
               x-amazon-apigateway-integration:
                 responses:
                   default:
@@ -551,7 +633,16 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
-
+        securityDefinitions:
+          cognitoUserPool:
+            type: apiKey
+            name: Authorization
+            in: header
+            x-amazon-apigateway-authtype: cognito_user_pools
+            x-amazon-apigateway-authorizer:
+              type: cognito_user_pools
+              providerARNs:
+                - !GetAtt UserPool.Arn
   LambdaRole:
     Type: "AWS::IAM::Role"
     Properties:
@@ -653,6 +744,9 @@ Resources:
         Handler: handler.lambda_handler
         Role: !GetAtt LambdaRole.Arn
         CodeUri: ./deploy/me_articles_drafts_create.zip
+        Environment:
+          Variables:
+            SALT_FOR_ARTICLE_ID: {{ SALT_FOR_ARTICLE_ID }}
         Events:
           Api:
             Type: Api
@@ -660,6 +754,19 @@ Resources:
               Path: /me/articles/drafts
               Method: post
               RestApiId: !Ref RestApi
+  MeArticlesDraftsPublish:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_articles_drafts_publish.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/articles/{article_id}/drafts/publish
+            Method: put
+            RestApiId: !Ref RestApi
   MeArticlesDraftsUpdate:
       Type: AWS::Serverless::Function
       Properties:
@@ -700,6 +807,22 @@ Resources:
             Type: Api
             Properties:
               Path: /me/articles/{article_id}/images
+              Method: post
+              RestApiId: !Ref RestApi
+  MeInfoIconCreate:
+      Type: AWS::Serverless::Function
+      Properties:
+        Handler: handler.lambda_handler
+        Role: !GetAtt LambdaRole.Arn
+        CodeUri: ./deploy/me_info_icon_create.zip
+        Environment:
+          Variables:
+            ME_INFO_ICON_BUCKET_NAME: !Ref "MeInfoIconBucket"
+        Events:
+          Api:
+            Type: Api
+            Properties:
+              Path: /me/info/icon
               Method: post
               RestApiId: !Ref RestApi
   MeArticlesLikesShow:
@@ -752,7 +875,7 @@ Resources:
     Properties:
       Handler: handler.lambda_handler
       Role: !GetAtt LambdaRole.Arn
-      CodeUri: ./src/handlers/cognito_trigger/postconfirmation/handler.py
+      CodeUri: ./deploy/cognito_trigger_postconfirmation.zip
   ArticleInfo:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -806,6 +929,34 @@ Resources:
           ReadCapacityUnits: 2
           WriteCapacityUnits: 2
   ArticleContent:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: article_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: article_id
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 2
+        WriteCapacityUnits: 2
+  ArticleHistory:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: article_id
+          AttributeType: S
+        - AttributeName: created_at
+          AttributeType: N
+      KeySchema:
+        - AttributeName: article_id
+          KeyType: HASH
+        - AttributeName: created_at
+          KeyType: RANGE
+      ProvisionedThroughput:
+        ReadCapacityUnits: 2
+        WriteCapacityUnits: 2
+  ArticleContentEdit:
     Type: AWS::DynamoDB::Table
     Properties:
       AttributeDefinitions:
@@ -885,6 +1036,10 @@ Resources:
         ReadCapacityUnits: 2
         WriteCapacityUnits: 2
   ArticlesImagesBucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      AccessControl: "PublicRead"
+  MeInfoIconBucket:
     Type: "AWS::S3::Bucket"
     Properties:
       AccessControl: "PublicRead"

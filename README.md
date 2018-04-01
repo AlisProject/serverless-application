@@ -3,7 +3,7 @@
 
 This is a serverless application using AWS SAM.
 
-# Prerequisite 
+# Prerequisite
 - pyenv
 - aws-cli
 - docker
@@ -26,16 +26,16 @@ https://docs.aws.amazon.com/cli/latest/userguide/cli-multiple-profiles.html
 git clone https://github.com/AlisProject/serverless-application.git
 cd serverless-application
 pyenv install
-  
+
 # libraries
 python -m venv venv
 . venv/bin/activate
 pip install -r requirements.txt
 pip install -r requirements_test.txt
-  
+
 # lunch docker for localstack（for macos）
 TMPDIR=/private$TMPDIR docker-compose up -d
-  
+
 # exec
 python exec_test.py
 ```
@@ -54,6 +54,7 @@ export AWS_DEFAULT_REGION=ap-northeast-1
 export CLOUDFORMATION_STACK_NAME=YOURSTACKNAMEHERE
 export DEPLOY_BUCKET_NAME=DEPLOY_BUCKET_NAME
 export COGNITO_EMAIL_VERIFY_URL=https://example.com/confirm
+export SALT_FOR_ARTICLE_ID=YOURSALTKEYNAMEHERE
 ```
 
 ## Create S3 bucket
@@ -90,6 +91,7 @@ aws cloudformation package \
 ```
 aws cloudformation deploy \
   --template-file packaged-template.yaml \
+  --s3-bucket $DEPLOY_BUCKET_NAME \
   --stack-name $CLOUDFORMATION_STACK_NAME \
   --capabilities CAPABILITY_IAM
 ```
