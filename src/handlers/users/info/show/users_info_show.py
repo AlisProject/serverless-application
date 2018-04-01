@@ -5,6 +5,7 @@ import settings
 from lambda_base import LambdaBase
 from jsonschema import validate
 from decimal_encoder import DecimalEncoder
+from record_not_found_error import RecordNotFoundError
 
 
 class UsersInfoShow(LambdaBase):
@@ -26,10 +27,7 @@ class UsersInfoShow(LambdaBase):
         response = users_table.get_item(Key={'user_id': self.params['user_id']})
 
         if response.get('Item') is None:
-            return {
-                'statusCode': 404,
-                'body': json.dumps({'message': 'Record Not Found'})
-            }
+            raise RecordNotFoundError('Record Not Found')
 
         return {
             'statusCode': 200,

@@ -264,6 +264,17 @@ Resources:
             properties:
               article_image:
                 type: string
+          UserInfo:
+            type: object
+            properties:
+              user_id:
+                type: string
+              user_display_name:
+                type: string
+              icon_image_url:
+                type: string
+              self_introduction:
+                type: string
         paths:
           /articles/recent:
             get:
@@ -633,6 +644,30 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+          /users/{user_id}/info/show:
+            get:
+              description: '指定されたユーザーのユーザ情報を取得'
+              parameters:
+              - name: 'user_id'
+                in: 'path'
+                description: '対象ユーザを指定するために使用'
+                required: true
+                type: 'string'
+              responses:
+                '200':
+                  description: '対象ユーザ情報'
+                  schema:
+                    type: array
+                    items:
+                      $ref: '#/definitions/UserInfo'
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${UsersInfo.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
         securityDefinitions:
           cognitoUserPool:
             type: apiKey
@@ -736,6 +771,19 @@ Resources:
           Type: Api
           Properties:
             Path: /users/{user_id}/articles/public
+            Method: get
+            RestApiId: !Ref RestApi
+  UsersInfo:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/users_info_show.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /users/{user_id}/info/show
             Method: get
             RestApiId: !Ref RestApi
   MeArticlesDraftsCreate:
