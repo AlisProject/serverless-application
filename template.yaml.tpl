@@ -744,6 +744,9 @@ Resources:
         Handler: handler.lambda_handler
         Role: !GetAtt LambdaRole.Arn
         CodeUri: ./deploy/me_articles_drafts_create.zip
+        Environment:
+          Variables:
+            SALT_FOR_ARTICLE_ID: {{ SALT_FOR_ARTICLE_ID }}
         Events:
           Api:
             Type: Api
