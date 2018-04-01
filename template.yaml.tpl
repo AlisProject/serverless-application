@@ -562,6 +562,8 @@ Resources:
                     properties:
                       image_url:
                         type: 'string'
+              security:
+                - cognitoUserPool: []
               x-amazon-apigateway-integration:
                 responses:
                   default:
