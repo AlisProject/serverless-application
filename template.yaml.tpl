@@ -474,7 +474,7 @@ Resources:
               - application/json
                 application/octet-stream
               parameters:
-                - name: 'Content-Type'
+                - name: 'content-type'
                   in: 'header'
                   required: true
                   type: 'string'
