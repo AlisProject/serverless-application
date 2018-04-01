@@ -67,7 +67,7 @@ class TestMeInfoIconCreate(TestCase):
         target_user = self.users_table_items[0]
         params = {
             'headers': {
-                'Content-Type': 'image/' + image_format
+                'content-type': 'image/' + image_format
             },
             'body': json.dumps({'icon_image': base64.b64encode(buf.getvalue()).decode('ascii')}),
             'requestContext': {
@@ -113,7 +113,7 @@ class TestMeInfoIconCreate(TestCase):
         target_user = self.users_table_items[1]
         params = {
             'headers': {
-                'Content-Type': 'image/' + image_format
+                'content-type': 'image/' + image_format
             },
             'body': json.dumps({'icon_image': base64.b64encode(buf.getvalue()).decode('ascii')}),
             'requestContext': {
@@ -159,7 +159,7 @@ class TestMeInfoIconCreate(TestCase):
         target_user = self.users_table_items[1]
         params = {
             'headers': {
-                'Content-Type': 'image/' + image_format
+                'content-type': 'image/' + image_format
             },
             'body': json.dumps({'icon_image': base64.b64encode(buf.getvalue()).decode('ascii')}),
             'requestContext': {
@@ -206,7 +206,7 @@ class TestMeInfoIconCreate(TestCase):
         target_user = self.users_table_items[1]
         params = {
             'headers': {
-                'Content-Type': 'image/' + image_format
+                'content-type': 'image/' + image_format
             },
             'body': json.dumps({'icon_image': base64.b64encode(buf.getvalue()).decode('ascii')}),
             'requestContext': {
@@ -253,7 +253,7 @@ class TestMeInfoIconCreate(TestCase):
         target_user = self.users_table_items[1]
         params = {
             'headers': {
-                'Content-Type': 'image/' + image_format
+                'content-type': 'image/' + image_format
             },
             'body': json.dumps({'icon_image': base64.b64encode(buf.getvalue()).decode('ascii')}),
             'requestContext': {
@@ -300,7 +300,7 @@ class TestMeInfoIconCreate(TestCase):
         target_user = self.users_table_items[1]
         params = {
             'headers': {
-                'Content-Type': 'image/' + image_format
+                'content-type': 'image/' + image_format
             },
             'body': json.dumps({'icon_image': base64.b64encode(buf.getvalue()).decode('ascii')}),
             'requestContext': {
@@ -372,7 +372,7 @@ class TestMeInfoIconCreate(TestCase):
         target_user = self.users_table_items[0]
         params = {
             'headers': {
-                'Content-Type': 'image/bmp'
+                'content-type': 'image/bmp'
             },
             'body': json.dumps({'icon_image': base64.b64encode(buf.getvalue()).decode('ascii')}),
             'requestContext': {
@@ -394,7 +394,7 @@ class TestMeInfoIconCreate(TestCase):
         target_user = self.users_table_items[0]
         params = {
             'headers': {
-                'Content-Type': 'image/' + image_format
+                'content-type': 'image/' + image_format
             },
             'body': json.dumps({}),
             'requestContext': {
@@ -416,7 +416,7 @@ class TestMeInfoIconCreate(TestCase):
         target_user = self.users_table_items[0]
         params = {
             'headers': {
-                'Content-Type': 'image/' + image_format
+                'content-type': 'image/' + image_format
             },
             'body': json.dumps({'icon_image': 'a' * (1024 * 1024 * 8)}),
             'requestContext': {
@@ -438,7 +438,7 @@ class TestMeInfoIconCreate(TestCase):
         target_user = self.users_table_items[0]
         params = {
             'headers': {
-                'Content-Type': 'image/' + image_format
+                'content-type': 'image/' + image_format
             },
             'body': json.dumps({'icon_image': 'a' * (1024 * 1024 * 8 + 1)}),
             'requestContext': {
@@ -463,7 +463,7 @@ class TestMeInfoIconCreate(TestCase):
         target_user = self.users_table_items[0]
         params = {
             'headers': {
-                'Content-Type': 'image/' + image_format
+                'content-type': 'image/' + image_format
             },
             'body': json.dumps({'icon_image': ''}),
             'requestContext': {

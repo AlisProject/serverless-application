@@ -73,7 +73,7 @@ class TestMeArticlesImagesCreate(TestCase):
         target_article_info = self.article_info_table_items[0]
         params = {
             'headers': {
-                'Content-Type': 'image/' + image_format
+                'content-type': 'image/' + image_format
             },
             'pathParameters': {
                 'article_id': target_article_info['article_id']
@@ -110,7 +110,7 @@ class TestMeArticlesImagesCreate(TestCase):
         target_article_info = self.article_info_table_items[1]
         params = {
             'headers': {
-                    'Content-Type': 'image/' + image_format
+                    'content-type': 'image/' + image_format
             },
             'pathParameters': {
                 'article_id': target_article_info['article_id']
@@ -147,7 +147,7 @@ class TestMeArticlesImagesCreate(TestCase):
         target_article_info = self.article_info_table_items[0]
         params = {
             'headers': {
-                    'Content-Type': 'image/' + image_format
+                    'content-type': 'image/' + image_format
             },
             'pathParameters': {
                 'article_id': target_article_info['article_id']
@@ -184,7 +184,7 @@ class TestMeArticlesImagesCreate(TestCase):
         target_article_info = self.article_info_table_items[0]
         params = {
             'headers': {
-                'Content-Type': 'image/' + image_format
+                'content-type': 'image/' + image_format
             },
             'pathParameters': {
                 'article_id': target_article_info['article_id']
@@ -221,7 +221,7 @@ class TestMeArticlesImagesCreate(TestCase):
         target_article_info = self.article_info_table_items[0]
         params = {
             'headers': {
-                    'Content-Type': 'image/' + image_format
+                    'content-type': 'image/' + image_format
             },
             'pathParameters': {
                 'article_id': target_article_info['article_id']
@@ -287,7 +287,7 @@ class TestMeArticlesImagesCreate(TestCase):
         target_article_info = self.article_info_table_items[0]
         params = {
             'headers': {
-                'Content-Type': 'image/' + image_format
+                'content-type': 'image/' + image_format
             },
             'pathParameters': {
             },
@@ -311,7 +311,7 @@ class TestMeArticlesImagesCreate(TestCase):
         target_article_info = self.article_info_table_items[0]
         params = {
             'headers': {
-                'Content-Type': 'image/' + image_format
+                'content-type': 'image/' + image_format
             },
             'pathParameters': {
                 'article_id': target_article_info['article_id']
@@ -336,7 +336,7 @@ class TestMeArticlesImagesCreate(TestCase):
         target_article_info = self.article_info_table_items[0]
         params = {
             'headers': {
-                'Content-Type': 'image/bmp'
+                'content-type': 'image/bmp'
             },
             'pathParameters': {
                 'article_id': target_article_info['article_id']
@@ -361,7 +361,7 @@ class TestMeArticlesImagesCreate(TestCase):
         target_article_info = self.article_info_table_items[0]
         params = {
             'headers': {
-                'Content-Type': 'image/' + image_format
+                'content-type': 'image/' + image_format
             },
             'pathParameters': {
                 'article_id': 'a' * 13
@@ -386,7 +386,7 @@ class TestMeArticlesImagesCreate(TestCase):
         target_article_info = self.article_info_table_items[0]
         params = {
             'headers': {
-                'Content-Type': 'image/' + image_format
+                'content-type': 'image/' + image_format
             },
             'pathParameters': {
                 'article_id': 'a' * 11
@@ -408,7 +408,7 @@ class TestMeArticlesImagesCreate(TestCase):
         target_article_info = self.article_info_table_items[0]
         params = {
             'headers': {
-                    'Content-Type': 'image/' + image_format
+                    'content-type': 'image/' + image_format
             },
             'pathParameters': {
                 'article_id': target_article_info['article_id']
@@ -429,7 +429,7 @@ class TestMeArticlesImagesCreate(TestCase):
         target_article_info = self.article_info_table_items[0]
         params = {
             'headers': {
-                    'Content-Type': 'image/' + image_format
+                    'content-type': 'image/' + image_format
             },
             'pathParameters': {
                 'article_id': target_article_info['article_id']
@@ -456,7 +456,7 @@ class TestMeArticlesImagesCreate(TestCase):
         target_article_info = self.article_info_table_items[0]
         params = {
             'headers': {
-                    'Content-Type': 'image/' + image_format
+                    'content-type': 'image/' + image_format
             },
             'pathParameters': {
                 'article_id': target_article_info['article_id']
@@ -481,7 +481,7 @@ class TestMeArticlesImagesCreate(TestCase):
         target_article_info = self.article_info_table_items[0]
         params = {
             'headers': {
-                    'Content-Type': 'image/' + image_format
+                    'content-type': 'image/' + image_format
             },
             'pathParameters': {
                 'article_id': target_article_info['article_id']
