@@ -569,19 +569,24 @@ Resources:
                 required: false
                 type: 'integer'
                 minimum: 1
-              - name: 'offset'
+              - name: 'article_id'
                 in: 'query'
-                description: '取得位置'
+                description: 'ページング処理における、現在のページの最後の記事のID'
+                required: false
+                type: 'string'
+              - name: 'sort_key'
+                in: 'query'
+                description: 'ページング処理における、現在のページの最後の記事のソートキー'
                 required: false
                 type: 'integer'
-                minimum: 0
+                minimum: 1
               responses:
                 '200':
                   description: '公開記事一覧'
                   schema:
                     type: array
                     items:
-                      $ref: '#/definitions/StoryInfo'
+                      $ref: '#/definitions/ArticleInfo'
               x-amazon-apigateway-integration:
                 responses:
                   default:
