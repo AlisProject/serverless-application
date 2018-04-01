@@ -1,5 +1,6 @@
 import boto3
 import json
+from tests_util import TestsUtil
 from unittest import TestCase
 from unittest.mock import MagicMock
 from jsonschema import ValidationError
@@ -9,7 +10,7 @@ from not_authorized_error import NotAuthorizedError
 
 
 class TestLambdaBase(TestCase):
-    dynamodb = boto3.resource('dynamodb', endpoint_url='http://localhost:4569/')
+    dynamodb = TestsUtil.get_dynamodb_client()
 
     class TestLambdaImpl(LambdaBase):
         def get_schema(self):

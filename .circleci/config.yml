@@ -10,7 +10,7 @@ jobs:
 
     docker:
       - image: circleci/python:3.6.1
-      - image: localstack/localstack
+      - image: bluszcz/bflocalstack-dynamodb-s3
 
     working_directory: ~/repo
 
@@ -69,6 +69,7 @@ jobs:
               --output-template-file packaged-template.yaml
             aws cloudformation deploy \
               --template-file packaged-template.yaml \
+              --s3-bucket $DEPLOY_BUCKET_NAME \
               --stack-name $CLOUDFORMATION_STACK_NAME \
               --capabilities CAPABILITY_IAM
 

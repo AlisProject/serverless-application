@@ -60,9 +60,9 @@ Resources:
       Policies:
         PasswordPolicy:
           MinimumLength: 8
-          RequireLowercase: true
-          RequireNumbers: true
-          RequireSymbols: true
+          RequireLowercase: false
+          RequireNumbers: false
+          RequireSymbols: false
           RequireUppercase: false
       UserPoolName:
         Ref: AWS::StackName
@@ -82,7 +82,7 @@ Resources:
           StringAttributeConstraints:
             MaxLength: "2048"
             MinLength: "0"
-          Required: true
+          Required: false
       SmsConfiguration:
         ExternalId: !Join
           - ''
@@ -383,6 +383,8 @@ Resources:
                     properties:
                       article_id:
                         type: 'string'
+              security:
+                - cognitoUserPool: []
               x-amazon-apigateway-integration:
                 responses:
                   default:
@@ -428,6 +430,8 @@ Resources:
                     properties:
                       liked:
                         type: boolean
+              security:
+                - cognitoUserPool: []
               x-amazon-apigateway-integration:
                 responses:
                   default:
@@ -441,6 +445,8 @@ Resources:
               responses:
                 '200':
                   description: '「いいね」の実施成功'
+              security:
+                - cognitoUserPool: []
               x-amazon-apigateway-integration:
                 responses:
                   default:
@@ -474,6 +480,8 @@ Resources:
                     properties:
                       image_url:
                         type: 'string'
+              security:
+                - cognitoUserPool: []
               x-amazon-apigateway-integration:
                 responses:
                   default:
@@ -495,6 +503,8 @@ Resources:
               responses:
                 '200':
                   description: 'ユーザ情報更新成功'
+              security:
+                - cognitoUserPool: []
               x-amazon-apigateway-integration:
                 responses:
                   default:
@@ -548,6 +558,8 @@ Resources:
                   description: '記事内容取得'
                   schema:
                     $ref: '#/definitions/StoryContent'
+              security:
+                - cognitoUserPool: []
               x-amazon-apigateway-integration:
                 responses:
                   default:
@@ -565,6 +577,8 @@ Resources:
                 required: true
                 schema:
                   $ref: '#/definitions/MeArticlesDraftsCreate'
+              security:
+                - cognitoUserPool: []
               x-amazon-apigateway-integration:
                 responses:
                   default:
@@ -573,7 +587,16 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
-
+        securityDefinitions:
+          cognitoUserPool:
+            type: apiKey
+            name: Authorization
+            in: header
+            x-amazon-apigateway-authtype: cognito_user_pools
+            x-amazon-apigateway-authorizer:
+              type: cognito_user_pools
+              providerARNs:
+                - !GetAtt UserPool.Arn
   LambdaRole:
     Type: "AWS::IAM::Role"
     Properties:

@@ -2,6 +2,7 @@ from unittest import TestCase
 from me_articles_drafts_create import MeArticlesDraftsCreate
 from unittest.mock import patch, MagicMock
 from botocore.exceptions import ClientError
+from tests_util import TestsUtil
 import yaml
 import os
 import boto3
@@ -9,33 +10,22 @@ import json
 
 
 class TestMeArticlesDraftsCreate(TestCase):
-    dynamodb = boto3.resource('dynamodb', endpoint_url='http://localhost:4569/')
-
-    target_tables = ['ArticleInfo', 'ArticleContent']
+    dynamodb = TestsUtil.get_dynamodb_client()
 
     @classmethod
     def setUpClass(cls):
-        os.environ['ARTICLE_INFO_TABLE_NAME'] = 'ArticleInfo'
-        os.environ['ARTICLE_CONTENT_TABLE_NAME'] = 'ArticleContent'
+        TestsUtil.set_all_tables_name_to_env()
+        TestsUtil.delete_all_tables(cls.dynamodb)
         os.environ['SALT_FOR_ARTICLE_ID'] = 'test_salt'
 
     def setUp(self):
-        f = open("./database.yaml", "r+")
-        template = yaml.load(f)
-        f.close()
-
-        for table_name in self.target_tables:
-            create_params = {'TableName': table_name}
-            create_params.update(template['Resources'][table_name]['Properties'])
-
-            self.dynamodb.create_table(**create_params)
-
-        self.article_info_table = self.dynamodb.Table('ArticleInfo')
-        self.article_content_table = self.dynamodb.Table('ArticleContent')
+        TestsUtil.create_table(self.dynamodb, os.environ['ARTICLE_INFO_TABLE_NAME'], [])
+        TestsUtil.create_table(self.dynamodb, os.environ['ARTICLE_CONTENT_TABLE_NAME'], [])
+        self.article_info_table = self.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
+        self.article_content_table = self.dynamodb.Table(os.environ['ARTICLE_CONTENT_TABLE_NAME'])
 
     def tearDown(self):
-        for table_name in self.target_tables:
-            self.dynamodb.Table(table_name).delete()
+        TestsUtil.delete_all_tables(self.dynamodb)
 
     def assert_bad_request(self, params):
         function = MeArticlesDraftsCreate(params, {}, self.dynamodb)

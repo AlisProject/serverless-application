@@ -1,6 +1,7 @@
 import yaml
 import os
 import boto3
+from tests_util import TestsUtil
 from unittest import TestCase
 from me_articles_like_create import MeArticlesLikeCreate
 from unittest.mock import patch, MagicMock
@@ -8,15 +9,12 @@ from boto3.dynamodb.conditions import Key
 
 
 class TestMeArticlesLikeCreate(TestCase):
-    article_liked_user_table_name = 'ArticleLikedUser'
-    article_info_table_name = 'ArticleInfo'
-
-    dynamodb = boto3.resource('dynamodb', endpoint_url='http://localhost:4569/')
+    dynamodb = TestsUtil.get_dynamodb_client()
 
     @classmethod
     def setUpClass(cls):
-        os.environ['ARTICLE_LIKED_USER_TABLE_NAME'] = cls.article_liked_user_table_name
-        os.environ['ARTICLE_INFO_TABLE_NAME'] = cls.article_info_table_name
+        TestsUtil.set_all_tables_name_to_env()
+        TestsUtil.delete_all_tables(cls.dynamodb)
 
         # create article_liked_user_table
         cls.article_liked_user_table_items = [
@@ -36,7 +34,11 @@ class TestMeArticlesLikeCreate(TestCase):
                 'sort_key': 1520150272000002
             }
         ]
-        cls.create_table(cls.article_liked_user_table_name, cls.article_liked_user_table_items)
+        TestsUtil.create_table(
+            cls.dynamodb,
+            os.environ['ARTICLE_LIKED_USER_TABLE_NAME'],
+            cls.article_liked_user_table_items
+        )
 
         # create article_info_table
         article_info_table_items = [
@@ -56,27 +58,15 @@ class TestMeArticlesLikeCreate(TestCase):
                 'sort_key': 1520150272000002
             }
         ]
-        cls.create_table(cls.article_info_table_name, article_info_table_items)
-
-    @classmethod
-    def create_table(cls, table_name, table_items):
-        f = open('./database.yaml', 'r+')
-        template = yaml.load(f)
-        f.close()
-
-        create_params = {'TableName': table_name}
-        create_params.update(template['Resources'][table_name]['Properties'])
-        cls.dynamodb.create_table(**create_params)
-
-        table = cls.dynamodb.Table(table_name)
-
-        for item in table_items:
-            table.put_item(Item=item)
+        TestsUtil.create_table(
+            cls.dynamodb,
+            os.environ['ARTICLE_INFO_TABLE_NAME'],
+            article_info_table_items
+        )
 
     @classmethod
     def tearDownClass(cls):
-        cls.dynamodb.Table(cls.article_liked_user_table_name).delete()
-        cls.dynamodb.Table(cls.article_info_table_name).delete()
+        TestsUtil.delete_all_tables(cls.dynamodb)
 
     def assert_bad_request(self, params):
         test_function = MeArticlesLikeCreate(params, {}, self.dynamodb)
@@ -99,7 +89,7 @@ class TestMeArticlesLikeCreate(TestCase):
             }
         }
 
-        article_liked_user_table = self.dynamodb.Table(self.article_liked_user_table_name)
+        article_liked_user_table = self.dynamodb.Table(os.environ['ARTICLE_LIKED_USER_TABLE_NAME'])
         article_liked_user_before = article_liked_user_table.scan()['Items']
 
         article_liked_user = MeArticlesLikeCreate(event=params, context={}, dynamodb=self.dynamodb)
