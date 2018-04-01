@@ -254,6 +254,11 @@ Resources:
                 type: string
               self_introduction:
                 type: string
+          MeInfoIcon:
+            type: object
+            properties:
+              icon_image:
+                type: string
         paths:
           /articles/recent:
             get:
@@ -513,6 +518,35 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+          /me/info/icon:
+            post:
+              description: 'ユーザアイコンを登録'
+              produces:
+              - application/json
+                application/octet-stream
+              parameters:
+                - name: 'icon'
+                  in: 'body'
+                  description: 'icon object'
+                  required: true
+                  schema:
+                    $ref: '#/definitions/MeInfoIcon'
+              responses:
+                '200':
+                  description: '登録した画像データのURL'
+                  schema:
+                    type: object
+                    properties:
+                      image_url:
+                        type: 'string'
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeInfoIconCreate.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
           /users/{user_id}/articles/public:
             get:
               description: '指定されたユーザーの公開記事一覧情報を取得'
@@ -760,6 +794,22 @@ Resources:
               Path: /me/articles/{article_id}/images
               Method: post
               RestApiId: !Ref RestApi
+  MeInfoIconCreate:
+      Type: AWS::Serverless::Function
+      Properties:
+        Handler: handler.lambda_handler
+        Role: !GetAtt LambdaRole.Arn
+        CodeUri: ./deploy/me_info_icon_create.zip
+        Environment:
+          Variables:
+            ME_INFO_ICON_BUCKET_NAME: !Ref "MeInfoIconBucket"
+        Events:
+          Api:
+            Type: Api
+            Properties:
+              Path: /me/info/icon
+              Method: post
+              RestApiId: !Ref RestApi
   MeArticlesLikesShow:
     Type: AWS::Serverless::Function
     Properties:
@@ -971,6 +1021,10 @@ Resources:
         ReadCapacityUnits: 2
         WriteCapacityUnits: 2
   ArticlesImagesBucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      AccessControl: "PublicRead"
+  MeInfoIconBucket:
     Type: "AWS::S3::Bucket"
     Properties:
       AccessControl: "PublicRead"
