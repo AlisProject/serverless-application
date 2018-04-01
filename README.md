@@ -90,6 +90,7 @@ aws cloudformation package \
 ```
 aws cloudformation deploy \
   --template-file packaged-template.yaml \
+  --s3-bucket $DEPLOY_BUCKET_NAME \
   --stack-name $CLOUDFORMATION_STACK_NAME \
   --capabilities CAPABILITY_IAM
 ```
