@@ -83,7 +83,7 @@ class TestArticlesRecent(TestCase):
             )
 
         params = {
-            'queryStringParameters': {}
+            'queryStringParameters': None
         }
         response = ArticlesRecent(params, {}, self.dynamodb).main()
 
@@ -111,11 +111,6 @@ class TestArticlesRecent(TestCase):
 
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(json.loads(response['body'])['Items'], expected_items)
-
-    def test_validation_with_no_params(self):
-        params = {}
-
-        self.assert_bad_request(params)
 
     def test_validation_limit_type(self):
         params = {

@@ -26,20 +26,14 @@ class ArticlesRecent(LambdaBase):
         }
 
     def validate_params(self):
-        params = self.event.get('queryStringParameters')
-        if params is None:
-            raise ValidationError('queryStringParameters is required')
+        ParameterUtil.cast_parameter_to_int(self.params, self.get_schema())
 
-        ParameterUtil.cast_parameter_to_int(params, self.get_schema())
-
-        validate(params, self.get_schema())
+        validate(self.params, self.get_schema())
 
     def exec_main_proc(self):
-        params = self.event.get('queryStringParameters')
-
         dynamo_tbl = self.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
 
-        limit = int(params.get('limit')) if params.get('limit') is not None else settings.article_recent_default_limit
+        limit = int(self.params.get('limit')) if self.params.get('limit') is not None else settings.article_recent_default_limit
 
         query_params = {
             'Limit': limit,
@@ -48,11 +42,11 @@ class ArticlesRecent(LambdaBase):
             'ScanIndexForward': False
         }
 
-        if params.get('article_id') is not None and params.get('sort_key') is not None:
+        if self.params.get('article_id') is not None and self.params.get('sort_key') is not None:
             LastEvaluatedKey = {
                 'status': 'public',
-                'article_id': params.get('article_id'),
-                'sort_key': params.get('sort_key')
+                'article_id': self.params.get('article_id'),
+                'sort_key': self.params.get('sort_key')
             }
 
             query_params.update({'ExclusiveStartKey': LastEvaluatedKey})

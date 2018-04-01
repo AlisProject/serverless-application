@@ -33,9 +33,10 @@ class TestsUtil:
         return boto3.resource('dynamodb', endpoint_url='http://localhost:4569/')
 
     @classmethod
-    def create_s3_bucket(cls, s3):
-        cls.set_s3_env()
-        s3.create_bucket(Bucket=os.environ['ARTICLES_IMAGES_BUCKET_NAME'])
+    def create_all_s3_buckets(cls, s3):
+        cls.set_all_s3_buckets_name_to_env()
+        for s3_bucket in cls.get_all_s3_buckets():
+            s3.create_bucket(Bucket=s3_bucket['bucket_name'])
 
     @classmethod
     def set_all_tables_name_to_env(cls):
@@ -43,8 +44,16 @@ class TestsUtil:
             os.environ[table['env_name']] = table['table_name']
 
     @classmethod
-    def set_s3_env(self):
-        os.environ['ARTICLES_IMAGES_BUCKET_NAME'] = 'test_bucket'
+    def set_all_s3_buckets_name_to_env(cls):
+        for s3_bucket in cls.get_all_s3_buckets():
+            os.environ[s3_bucket['env_name']] = s3_bucket['bucket_name']
+
+    @classmethod
+    def get_all_s3_buckets(cls):
+        return [
+            {'env_name': 'ARTICLES_IMAGES_BUCKET_NAME', 'bucket_name': 'articles_images'},
+            {'env_name': 'ME_INFO_ICON_BUCKET_NAME', 'bucket_name': 'me_info_icon'}
+        ]
 
     @classmethod
     def delete_all_tables(cls, dynamodb):
@@ -68,6 +77,8 @@ class TestsUtil:
             {'env_name': 'ARTICLE_EVALUATED_MANAGE_TABLE_NAME', 'table_name': 'ArticleEvaluatedManage'},
             {'env_name': 'ARTICLE_INFO_TABLE_NAME', 'table_name': 'ArticleInfo'},
             {'env_name': 'ARTICLE_LIKED_USER_TABLE_NAME', 'table_name': 'ArticleLikedUser'},
+            {'env_name': 'ARTICLE_HISTORY_TABLE_NAME', 'table_name': 'ArticleHistory'},
+            {'env_name': 'ARTICLE_CONTENT_EDIT_TABLE_NAME', 'table_name': 'ArticleContentEdit'},
             {'env_name': 'USERS_TABLE_NAME', 'table_name': 'Users'}
         ]
         if os.environ.get('IS_DYNAMODB_ENDPOINT_OF_AWS') is not None:
