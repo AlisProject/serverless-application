@@ -477,11 +477,13 @@ Resources:
                   required: true
                   type: 'string'
                 - name: 'article_id'
+                  description: '対象記事の指定するために使用'
                   in: 'path'
                   required: true
                   type: 'string'
                 - in: 'body'
                   name: 'ArticleImage'
+                  description: 'article image object'
                   required: true
                   schema:
                     $ref: '#/definitions/ArticleImage'
