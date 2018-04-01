@@ -390,34 +390,7 @@ Resources:
                 uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesDraftsCreate.Arn}/invocations
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
-                requestTemplates:
-                  application/json: "##  See http://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-mapping-template-reference.html\n\
-                    ##  This template will pass through all parameters including path, querystring,\
-                    \ header, stage variables, and context through to the integration endpoint\
-                    \ via the body/payload\n#set($allParams = $input.params())\n{\n\"body-json\"\
-                    \ : $input.json('$'),\n\"params\" : {\n#foreach($type in $allParams.keySet())\n\
-                    \    #set($params = $allParams.get($type))\n\"$type\" : {\n    #foreach($paramName\
-                    \ in $params.keySet())\n    \"$paramName\" : \"$util.escapeJavaScript($params.get($paramName))\"\
-                    \n        #if($foreach.hasNext),#end\n    #end\n}\n    #if($foreach.hasNext),#end\n\
-                    #end\n},\n\"stage-variables\" : {\n#foreach($key in $stageVariables.keySet())\n\
-                    \"$key\" : \"$util.escapeJavaScript($stageVariables.get($key))\"\n   \
-                    \ #if($foreach.hasNext),#end\n#end\n},\n\"context\" : {\n    \"account-id\"\
-                    \ : \"$context.identity.accountId\",\n    \"api-id\" : \"$context.apiId\"\
-                    ,\n    \"api-key\" : \"$context.identity.apiKey\",\n    \"authorizer-principal-id\"\
-                    \ : \"$context.authorizer.principalId\",\n    \"caller\" : \"$context.identity.caller\"\
-                    ,\n    \"cognito-authentication-provider\" : \"$context.identity.cognitoAuthenticationProvider\"\
-                    ,\n    \"cognito-authentication-type\" : \"$context.identity.cognitoAuthenticationType\"\
-                    ,\n    \"cognito-identity-id\" : \"$context.identity.cognitoIdentityId\"\
-                    ,\n    \"cognito-identity-pool-id\" : \"$context.identity.cognitoIdentityPoolId\"\
-                    ,\n    \"http-method\" : \"$context.httpMethod\",\n    \"stage\" : \"\
-                    $context.stage\",\n    \"source-ip\" : \"$context.identity.sourceIp\"\
-                    ,\n    \"user\" : \"$context.identity.user\",\n    \"user-agent\" : \"\
-                    $context.identity.userAgent\",\n    \"user-arn\" : \"$context.identity.userArn\"\
-                    ,\n    \"request-id\" : \"$context.requestId\",\n    \"resource-id\" :\
-                    \ \"$context.resourceId\",\n    \"resource-path\" : \"$context.resourcePath\"\
-                    \n    }\n}\n"
-                contentHandling: "CONVERT_TO_TEXT"
-                type: aws
+                type: aws_proxy
           /me/articles/{article_id}/like:
             get:
               description: '指定された article_id の記事に「いいね」を行ったかを確認'
@@ -436,7 +409,7 @@ Resources:
                       liked:
                         type: boolean
               security:
-                - RestApiAuth: []
+                - cognitoUserPool: []
               x-amazon-apigateway-integration:
                 responses:
                   default:
@@ -444,41 +417,14 @@ Resources:
                 uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesLikesShow.Arn}/invocations
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
-                requestTemplates:
-                  application/json: "##  See http://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-mapping-template-reference.html\n\
-                    ##  This template will pass through all parameters including path, querystring,\
-                    \ header, stage variables, and context through to the integration endpoint\
-                    \ via the body/payload\n#set($allParams = $input.params())\n{\n\"body-json\"\
-                    \ : $input.json('$'),\n\"params\" : {\n#foreach($type in $allParams.keySet())\n\
-                    \    #set($params = $allParams.get($type))\n\"$type\" : {\n    #foreach($paramName\
-                    \ in $params.keySet())\n    \"$paramName\" : \"$util.escapeJavaScript($params.get($paramName))\"\
-                    \n        #if($foreach.hasNext),#end\n    #end\n}\n    #if($foreach.hasNext),#end\n\
-                    #end\n},\n\"stage-variables\" : {\n#foreach($key in $stageVariables.keySet())\n\
-                    \"$key\" : \"$util.escapeJavaScript($stageVariables.get($key))\"\n   \
-                    \ #if($foreach.hasNext),#end\n#end\n},\n\"context\" : {\n    \"account-id\"\
-                    \ : \"$context.identity.accountId\",\n    \"api-id\" : \"$context.apiId\"\
-                    ,\n    \"api-key\" : \"$context.identity.apiKey\",\n    \"authorizer-principal-id\"\
-                    \ : \"$context.authorizer.principalId\",\n    \"caller\" : \"$context.identity.caller\"\
-                    ,\n    \"cognito-authentication-provider\" : \"$context.identity.cognitoAuthenticationProvider\"\
-                    ,\n    \"cognito-authentication-type\" : \"$context.identity.cognitoAuthenticationType\"\
-                    ,\n    \"cognito-identity-id\" : \"$context.identity.cognitoIdentityId\"\
-                    ,\n    \"cognito-identity-pool-id\" : \"$context.identity.cognitoIdentityPoolId\"\
-                    ,\n    \"http-method\" : \"$context.httpMethod\",\n    \"stage\" : \"\
-                    $context.stage\",\n    \"source-ip\" : \"$context.identity.sourceIp\"\
-                    ,\n    \"user\" : \"$context.identity.user\",\n    \"user-agent\" : \"\
-                    $context.identity.userAgent\",\n    \"user-arn\" : \"$context.identity.userArn\"\
-                    ,\n    \"request-id\" : \"$context.requestId\",\n    \"resource-id\" :\
-                    \ \"$context.resourceId\",\n    \"resource-path\" : \"$context.resourcePath\"\
-                    \n    }\n}\n"
-                contentHandling: "CONVERT_TO_TEXT"
-                type: aws
+                type: aws_proxy
             post:
               description: '対象記事に「いいね」を行う'
               responses:
                 '200':
                   description: '「いいね」の実施成功'
               security:
-                - RestApiAuth: []
+                - cognitoUserPool: []
               x-amazon-apigateway-integration:
                 responses:
                   default:
@@ -486,34 +432,7 @@ Resources:
                 uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesLikeCreate.Arn}/invocations
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
-                requestTemplates:
-                  application/json: "##  See http://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-mapping-template-reference.html\n\
-                    ##  This template will pass through all parameters including path, querystring,\
-                    \ header, stage variables, and context through to the integration endpoint\
-                    \ via the body/payload\n#set($allParams = $input.params())\n{\n\"body-json\"\
-                    \ : $input.json('$'),\n\"params\" : {\n#foreach($type in $allParams.keySet())\n\
-                    \    #set($params = $allParams.get($type))\n\"$type\" : {\n    #foreach($paramName\
-                    \ in $params.keySet())\n    \"$paramName\" : \"$util.escapeJavaScript($params.get($paramName))\"\
-                    \n        #if($foreach.hasNext),#end\n    #end\n}\n    #if($foreach.hasNext),#end\n\
-                    #end\n},\n\"stage-variables\" : {\n#foreach($key in $stageVariables.keySet())\n\
-                    \"$key\" : \"$util.escapeJavaScript($stageVariables.get($key))\"\n   \
-                    \ #if($foreach.hasNext),#end\n#end\n},\n\"context\" : {\n    \"account-id\"\
-                    \ : \"$context.identity.accountId\",\n    \"api-id\" : \"$context.apiId\"\
-                    ,\n    \"api-key\" : \"$context.identity.apiKey\",\n    \"authorizer-principal-id\"\
-                    \ : \"$context.authorizer.principalId\",\n    \"caller\" : \"$context.identity.caller\"\
-                    ,\n    \"cognito-authentication-provider\" : \"$context.identity.cognitoAuthenticationProvider\"\
-                    ,\n    \"cognito-authentication-type\" : \"$context.identity.cognitoAuthenticationType\"\
-                    ,\n    \"cognito-identity-id\" : \"$context.identity.cognitoIdentityId\"\
-                    ,\n    \"cognito-identity-pool-id\" : \"$context.identity.cognitoIdentityPoolId\"\
-                    ,\n    \"http-method\" : \"$context.httpMethod\",\n    \"stage\" : \"\
-                    $context.stage\",\n    \"source-ip\" : \"$context.identity.sourceIp\"\
-                    ,\n    \"user\" : \"$context.identity.user\",\n    \"user-agent\" : \"\
-                    $context.identity.userAgent\",\n    \"user-arn\" : \"$context.identity.userArn\"\
-                    ,\n    \"request-id\" : \"$context.requestId\",\n    \"resource-id\" :\
-                    \ \"$context.resourceId\",\n    \"resource-path\" : \"$context.resourcePath\"\
-                    \n    }\n}\n"
-                contentHandling: "CONVERT_TO_TEXT"
-                type: aws
+                type: aws_proxy
           /me/articles/{article_id}/images:
             post:
               description: '対象記事に画像データを登録'
@@ -540,7 +459,7 @@ Resources:
                       image_url:
                         type: 'string'
               security:
-                - RestApiAuth: []
+                - cognitoUserPool: []
               x-amazon-apigateway-integration:
                 responses:
                   default:
@@ -548,34 +467,7 @@ Resources:
                 uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesImagesCreate.Arn}/invocations
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
-                requestTemplates:
-                  application/json: "##  See http://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-mapping-template-reference.html\n\
-                    ##  This template will pass through all parameters including path, querystring,\
-                    \ header, stage variables, and context through to the integration endpoint\
-                    \ via the body/payload\n#set($allParams = $input.params())\n{\n\"body-json\"\
-                    \ : $input.json('$'),\n\"params\" : {\n#foreach($type in $allParams.keySet())\n\
-                    \    #set($params = $allParams.get($type))\n\"$type\" : {\n    #foreach($paramName\
-                    \ in $params.keySet())\n    \"$paramName\" : \"$util.escapeJavaScript($params.get($paramName))\"\
-                    \n        #if($foreach.hasNext),#end\n    #end\n}\n    #if($foreach.hasNext),#end\n\
-                    #end\n},\n\"stage-variables\" : {\n#foreach($key in $stageVariables.keySet())\n\
-                    \"$key\" : \"$util.escapeJavaScript($stageVariables.get($key))\"\n   \
-                    \ #if($foreach.hasNext),#end\n#end\n},\n\"context\" : {\n    \"account-id\"\
-                    \ : \"$context.identity.accountId\",\n    \"api-id\" : \"$context.apiId\"\
-                    ,\n    \"api-key\" : \"$context.identity.apiKey\",\n    \"authorizer-principal-id\"\
-                    \ : \"$context.authorizer.principalId\",\n    \"caller\" : \"$context.identity.caller\"\
-                    ,\n    \"cognito-authentication-provider\" : \"$context.identity.cognitoAuthenticationProvider\"\
-                    ,\n    \"cognito-authentication-type\" : \"$context.identity.cognitoAuthenticationType\"\
-                    ,\n    \"cognito-identity-id\" : \"$context.identity.cognitoIdentityId\"\
-                    ,\n    \"cognito-identity-pool-id\" : \"$context.identity.cognitoIdentityPoolId\"\
-                    ,\n    \"http-method\" : \"$context.httpMethod\",\n    \"stage\" : \"\
-                    $context.stage\",\n    \"source-ip\" : \"$context.identity.sourceIp\"\
-                    ,\n    \"user\" : \"$context.identity.user\",\n    \"user-agent\" : \"\
-                    $context.identity.userAgent\",\n    \"user-arn\" : \"$context.identity.userArn\"\
-                    ,\n    \"request-id\" : \"$context.requestId\",\n    \"resource-id\" :\
-                    \ \"$context.resourceId\",\n    \"resource-path\" : \"$context.resourcePath\"\
-                    \n    }\n}\n"
-                contentHandling: "CONVERT_TO_TEXT"
-                type: aws
+                type: aws_proxy
           /me/info:
             put:
               description: 'ユーザ情報を更新'
@@ -590,7 +482,7 @@ Resources:
                 '200':
                   description: 'ユーザ情報更新成功'
               security:
-                - RestApiAuth: []
+                - cognitoUserPool: []
               x-amazon-apigateway-integration:
                 responses:
                   default:
@@ -598,34 +490,7 @@ Resources:
                 uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeInfoUpdate.Arn}/invocations
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
-                requestTemplates:
-                  application/json: "##  See http://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-mapping-template-reference.html\n\
-                    ##  This template will pass through all parameters including path, querystring,\
-                    \ header, stage variables, and context through to the integration endpoint\
-                    \ via the body/payload\n#set($allParams = $input.params())\n{\n\"body-json\"\
-                    \ : $input.json('$'),\n\"params\" : {\n#foreach($type in $allParams.keySet())\n\
-                    \    #set($params = $allParams.get($type))\n\"$type\" : {\n    #foreach($paramName\
-                    \ in $params.keySet())\n    \"$paramName\" : \"$util.escapeJavaScript($params.get($paramName))\"\
-                    \n        #if($foreach.hasNext),#end\n    #end\n}\n    #if($foreach.hasNext),#end\n\
-                    #end\n},\n\"stage-variables\" : {\n#foreach($key in $stageVariables.keySet())\n\
-                    \"$key\" : \"$util.escapeJavaScript($stageVariables.get($key))\"\n   \
-                    \ #if($foreach.hasNext),#end\n#end\n},\n\"context\" : {\n    \"account-id\"\
-                    \ : \"$context.identity.accountId\",\n    \"api-id\" : \"$context.apiId\"\
-                    ,\n    \"api-key\" : \"$context.identity.apiKey\",\n    \"authorizer-principal-id\"\
-                    \ : \"$context.authorizer.principalId\",\n    \"caller\" : \"$context.identity.caller\"\
-                    ,\n    \"cognito-authentication-provider\" : \"$context.identity.cognitoAuthenticationProvider\"\
-                    ,\n    \"cognito-authentication-type\" : \"$context.identity.cognitoAuthenticationType\"\
-                    ,\n    \"cognito-identity-id\" : \"$context.identity.cognitoIdentityId\"\
-                    ,\n    \"cognito-identity-pool-id\" : \"$context.identity.cognitoIdentityPoolId\"\
-                    ,\n    \"http-method\" : \"$context.httpMethod\",\n    \"stage\" : \"\
-                    $context.stage\",\n    \"source-ip\" : \"$context.identity.sourceIp\"\
-                    ,\n    \"user\" : \"$context.identity.user\",\n    \"user-agent\" : \"\
-                    $context.identity.userAgent\",\n    \"user-arn\" : \"$context.identity.userArn\"\
-                    ,\n    \"request-id\" : \"$context.requestId\",\n    \"resource-id\" :\
-                    \ \"$context.resourceId\",\n    \"resource-path\" : \"$context.resourcePath\"\
-                    \n    }\n}\n"
-                contentHandling: "CONVERT_TO_TEXT"
-                type: aws
+                type: aws_proxy
           /users/{user_id}/articles/public:
             get:
               description: '指定されたユーザーの公開記事一覧情報を取得'
@@ -672,7 +537,7 @@ Resources:
                   schema:
                     $ref: '#/definitions/StoryContent'
               security:
-                - RestApiAuth: []
+                - cognitoUserPool: []
               x-amazon-apigateway-integration:
                 responses:
                   default:
@@ -680,34 +545,7 @@ Resources:
                 uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesDraftsShow.Arn}/invocations
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
-                requestTemplates:
-                  application/json: "##  See http://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-mapping-template-reference.html\n\
-                    ##  This template will pass through all parameters including path, querystring,\
-                    \ header, stage variables, and context through to the integration endpoint\
-                    \ via the body/payload\n#set($allParams = $input.params())\n{\n\"body-json\"\
-                    \ : $input.json('$'),\n\"params\" : {\n#foreach($type in $allParams.keySet())\n\
-                    \    #set($params = $allParams.get($type))\n\"$type\" : {\n    #foreach($paramName\
-                    \ in $params.keySet())\n    \"$paramName\" : \"$util.escapeJavaScript($params.get($paramName))\"\
-                    \n        #if($foreach.hasNext),#end\n    #end\n}\n    #if($foreach.hasNext),#end\n\
-                    #end\n},\n\"stage-variables\" : {\n#foreach($key in $stageVariables.keySet())\n\
-                    \"$key\" : \"$util.escapeJavaScript($stageVariables.get($key))\"\n   \
-                    \ #if($foreach.hasNext),#end\n#end\n},\n\"context\" : {\n    \"account-id\"\
-                    \ : \"$context.identity.accountId\",\n    \"api-id\" : \"$context.apiId\"\
-                    ,\n    \"api-key\" : \"$context.identity.apiKey\",\n    \"authorizer-principal-id\"\
-                    \ : \"$context.authorizer.principalId\",\n    \"caller\" : \"$context.identity.caller\"\
-                    ,\n    \"cognito-authentication-provider\" : \"$context.identity.cognitoAuthenticationProvider\"\
-                    ,\n    \"cognito-authentication-type\" : \"$context.identity.cognitoAuthenticationType\"\
-                    ,\n    \"cognito-identity-id\" : \"$context.identity.cognitoIdentityId\"\
-                    ,\n    \"cognito-identity-pool-id\" : \"$context.identity.cognitoIdentityPoolId\"\
-                    ,\n    \"http-method\" : \"$context.httpMethod\",\n    \"stage\" : \"\
-                    $context.stage\",\n    \"source-ip\" : \"$context.identity.sourceIp\"\
-                    ,\n    \"user\" : \"$context.identity.user\",\n    \"user-agent\" : \"\
-                    $context.identity.userAgent\",\n    \"user-arn\" : \"$context.identity.userArn\"\
-                    ,\n    \"request-id\" : \"$context.requestId\",\n    \"resource-id\" :\
-                    \ \"$context.resourceId\",\n    \"resource-path\" : \"$context.resourcePath\"\
-                    \n    }\n}\n"
-                contentHandling: "CONVERT_TO_TEXT"
-                type: aws
+                type: aws_proxy
             put:
               description: '下書き記事を更新'
               parameters:
@@ -718,7 +556,7 @@ Resources:
                 schema:
                   $ref: '#/definitions/MeArticlesDraftsCreate'
               security:
-                - RestApiAuth: []
+                - cognitoUserPool: []
               x-amazon-apigateway-integration:
                 responses:
                   default:
@@ -726,34 +564,7 @@ Resources:
                 uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesDraftsUpdate.Arn}/invocations
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
-                requestTemplates:
-                  application/json: "##  See http://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-mapping-template-reference.html\n\
-                    ##  This template will pass through all parameters including path, querystring,\
-                    \ header, stage variables, and context through to the integration endpoint\
-                    \ via the body/payload\n#set($allParams = $input.params())\n{\n\"body-json\"\
-                    \ : $input.json('$'),\n\"params\" : {\n#foreach($type in $allParams.keySet())\n\
-                    \    #set($params = $allParams.get($type))\n\"$type\" : {\n    #foreach($paramName\
-                    \ in $params.keySet())\n    \"$paramName\" : \"$util.escapeJavaScript($params.get($paramName))\"\
-                    \n        #if($foreach.hasNext),#end\n    #end\n}\n    #if($foreach.hasNext),#end\n\
-                    #end\n},\n\"stage-variables\" : {\n#foreach($key in $stageVariables.keySet())\n\
-                    \"$key\" : \"$util.escapeJavaScript($stageVariables.get($key))\"\n   \
-                    \ #if($foreach.hasNext),#end\n#end\n},\n\"context\" : {\n    \"account-id\"\
-                    \ : \"$context.identity.accountId\",\n    \"api-id\" : \"$context.apiId\"\
-                    ,\n    \"api-key\" : \"$context.identity.apiKey\",\n    \"authorizer-principal-id\"\
-                    \ : \"$context.authorizer.principalId\",\n    \"caller\" : \"$context.identity.caller\"\
-                    ,\n    \"cognito-authentication-provider\" : \"$context.identity.cognitoAuthenticationProvider\"\
-                    ,\n    \"cognito-authentication-type\" : \"$context.identity.cognitoAuthenticationType\"\
-                    ,\n    \"cognito-identity-id\" : \"$context.identity.cognitoIdentityId\"\
-                    ,\n    \"cognito-identity-pool-id\" : \"$context.identity.cognitoIdentityPoolId\"\
-                    ,\n    \"http-method\" : \"$context.httpMethod\",\n    \"stage\" : \"\
-                    $context.stage\",\n    \"source-ip\" : \"$context.identity.sourceIp\"\
-                    ,\n    \"user\" : \"$context.identity.user\",\n    \"user-agent\" : \"\
-                    $context.identity.userAgent\",\n    \"user-arn\" : \"$context.identity.userArn\"\
-                    ,\n    \"request-id\" : \"$context.requestId\",\n    \"resource-id\" :\
-                    \ \"$context.resourceId\",\n    \"resource-path\" : \"$context.resourcePath\"\
-                    \n    }\n}\n"
-                contentHandling: "CONVERT_TO_TEXT"
-                type: aws
+                type: aws_proxy
         securityDefinitions:
           cognitoUserPool:
             type: apiKey
