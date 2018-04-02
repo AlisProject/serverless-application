@@ -2,6 +2,7 @@ packaged-template.yaml
 venv
 deploy
 template.yaml
+vendor-package
 
 # editor
 .idea
