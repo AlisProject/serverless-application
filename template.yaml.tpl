@@ -672,6 +672,7 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess
         - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
   LambdaInvocationPermissionCognitoTriggerCustomMessage:
     Type: AWS::Lambda::Permission
     Properties:
