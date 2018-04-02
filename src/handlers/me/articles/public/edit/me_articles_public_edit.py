@@ -40,8 +40,6 @@ class MeArticlesPublicEdit(LambdaBase):
 
         article_content_edit = article_content_edit_table.get_item(Key={'article_id': self.params['article_id']}).get('Item')
 
-        items = article_content_edit_table.scan()['Items']
-
         return_value = {}
 
         if article_content_edit:
