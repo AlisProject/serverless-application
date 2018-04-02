@@ -83,6 +83,14 @@ Resources:
             MaxLength: "2048"
             MinLength: "0"
           Required: false
+        - AttributeDataType: "String"
+          DeveloperOnlyAttribute: false
+          Mutable: false
+          Name: "private_eth_address"
+          StringAttributeConstraints:
+            MaxLength: "42"
+            MinLength: "42"
+          Required: false
       SmsConfiguration:
         ExternalId: !Join
           - ''
@@ -105,6 +113,11 @@ Resources:
         WriteAttributes:
           - email
           - phone_number
+#        FIXME: You have to add below by hand.
+#        ReadAttributes:
+#          - custom:private_eth_address
+#        WriteAttributes:
+#          - custom:private_eth_address
   IdentityPool:
     Type: AWS::Cognito::IdentityPool
     Properties:
