@@ -563,6 +563,11 @@ Resources:
             get:
               description: '指定されたユーザーの公開記事一覧情報を取得'
               parameters:
+              - name: 'user_id'
+                in: 'path'
+                description: '対象ユーザを指定するために使用'
+                required: true
+                type: 'string'
               - name: 'limit'
                 in: 'query'
                 description: '取得件数'
