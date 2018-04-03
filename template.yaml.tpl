@@ -485,7 +485,7 @@ Resources:
               - application/json
                 application/octet-stream
               parameters:
-                - name: 'Content-Type'
+                - name: 'content-type'
                   in: 'header'
                   required: true
                   type: 'string'
@@ -696,6 +696,7 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess
         - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
   LambdaInvocationPermissionCognitoTriggerCustomMessage:
     Type: AWS::Lambda::Permission
     Properties:

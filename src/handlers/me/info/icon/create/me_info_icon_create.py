@@ -24,7 +24,7 @@ class MeInfoIconCreate(LambdaBase):
         return {
             'type': 'object',
             'properties': {
-                'Content-Type': {
+                'content-type': {
                     'type': 'string',
                     'enum': [
                         'image/gif',
@@ -33,7 +33,7 @@ class MeInfoIconCreate(LambdaBase):
                     ]
                 }
             },
-            'required': ['Content-Type']
+            'required': ['content-type']
         }
 
     def validate_image_data(self, image_data):
@@ -51,7 +51,7 @@ class MeInfoIconCreate(LambdaBase):
         validate(self.event.get('headers'), self.get_headers_schema())
 
     def exec_main_proc(self):
-        ext = self.headers['Content-Type'].split('/')[1]
+        ext = self.headers['content-type'].split('/')[1]
         user_id = self.event['requestContext']['authorizer']['claims']['cognito:username']
         key = user_id + '/icon/' + str(uuid.uuid4()) + '.' + ext
         image_data = self.__get_save_image_data(base64.b64decode(self.params['icon_image']), ext)
@@ -59,7 +59,7 @@ class MeInfoIconCreate(LambdaBase):
         self.s3.Bucket(os.environ['ME_INFO_ICON_BUCKET_NAME']).put_object(
             Body=image_data,
             Key=key,
-            ContentType=self.headers['Content-Type']
+            ContentType=self.headers['content-type']
         )
 
         self.__update_user_info(key)

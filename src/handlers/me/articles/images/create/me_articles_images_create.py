@@ -26,7 +26,7 @@ class MeArticlesImagesCreate(LambdaBase):
         return {
             'type': 'object',
             'properties': {
-                'Content-Type': {
+                'content-type': {
                     'type': 'string',
                     'enum': [
                         'image/gif',
@@ -35,7 +35,7 @@ class MeArticlesImagesCreate(LambdaBase):
                     ]
                 }
             },
-            'required': ['Content-Type']
+            'required': ['content-type']
         }
 
     def validate_image_data(self, image_data):
@@ -60,7 +60,7 @@ class MeArticlesImagesCreate(LambdaBase):
         )
 
     def exec_main_proc(self):
-        ext = self.headers['Content-Type'].split('/')[1]
+        ext = self.headers['content-type'].split('/')[1]
         user_id = self.event['requestContext']['authorizer']['claims']['cognito:username']
         key = user_id + '/' + self.params['article_id'] + '/' + str(uuid.uuid4()) + '.' + ext
         image_data = self.__get_save_image_data(base64.b64decode(self.params['article_image']), ext)
@@ -68,7 +68,7 @@ class MeArticlesImagesCreate(LambdaBase):
         self.s3.Bucket(os.environ['ARTICLES_IMAGES_BUCKET_NAME']).put_object(
             Body=image_data,
             Key=key,
-            ContentType=self.headers['Content-Type']
+            ContentType=self.headers['content-type']
         )
 
         return {
