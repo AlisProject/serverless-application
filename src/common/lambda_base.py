@@ -2,9 +2,11 @@ from abc import ABCMeta, abstractmethod
 import json
 import logging
 import traceback
+from user_util import UserUtil
 from jsonschema import ValidationError
 from record_not_found_error import RecordNotFoundError
 from not_authorized_error import NotAuthorizedError
+from not_verified_user_error import NotVerifiedUserError
 
 
 class LambdaBase(metaclass=ABCMeta):
@@ -33,7 +35,10 @@ class LambdaBase(metaclass=ABCMeta):
         logger.setLevel(logging.INFO)
 
         try:
-            # validation
+            # user validation
+            UserUtil.verified_phone_and_email(self.event)
+
+            # params validation
             self.validate_params()
 
             # exec main process
@@ -42,6 +47,11 @@ class LambdaBase(metaclass=ABCMeta):
             return {
                 'statusCode': 400,
                 'body': json.dumps({'message': "Invalid parameter: {0}".format(err)})
+            }
+        except NotVerifiedUserError as err:
+            return {
+                'statusCode': 400,
+                'body': json.dumps({'message': "Bad Request: {0}".format(err)})
             }
         except NotAuthorizedError as err:
             return {
