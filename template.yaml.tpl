@@ -587,25 +587,35 @@ Resources:
             get:
               description: '指定されたユーザーの公開記事一覧情報を取得'
               parameters:
+              - name: 'user_id'
+                in: 'path'
+                description: '対象ユーザを指定するために使用'
+                required: true
+                type: 'string'
               - name: 'limit'
                 in: 'query'
                 description: '取得件数'
                 required: false
                 type: 'integer'
                 minimum: 1
-              - name: 'offset'
+              - name: 'article_id'
                 in: 'query'
-                description: '取得位置'
+                description: 'ページング処理における、現在のページの最後の記事のID'
+                required: false
+                type: 'string'
+              - name: 'sort_key'
+                in: 'query'
+                description: 'ページング処理における、現在のページの最後の記事のソートキー'
                 required: false
                 type: 'integer'
-                minimum: 0
+                minimum: 1
               responses:
                 '200':
                   description: '公開記事一覧'
                   schema:
                     type: array
                     items:
-                      $ref: '#/definitions/StoryInfo'
+                      $ref: '#/definitions/ArticleInfo'
               x-amazon-apigateway-integration:
                 responses:
                   default:
