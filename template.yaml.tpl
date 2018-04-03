@@ -194,7 +194,7 @@ Resources:
   RestApi:
     Type: AWS::Serverless::Api
     Properties:
-      StageName: dev
+      StageName: api
       DefinitionBody:
         swagger: "2.0"
         info:
@@ -1176,3 +1176,63 @@ Resources:
     Type: "AWS::S3::Bucket"
     Properties:
       AccessControl: "PublicRead"
+  CloudFront:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Origins:
+        - DomainName:
+            Fn::Join:
+            - ""
+            - - Ref: RestApi
+              - ".execute-api."
+              - Ref: AWS::Region
+              - ".amazonaws.com"
+          Id: !Ref RestApi
+          OriginPath: ""
+          CustomOriginConfig:
+            OriginProtocolPolicy: "https-only"
+        Enabled: 'true'
+        Comment: !Ref "AWS::StackName"
+        DefaultCacheBehavior:
+          AllowedMethods:
+          - DELETE
+          - GET
+          - HEAD
+          - OPTIONS
+          - PATCH
+          - POST
+          - PUT
+          TargetOriginId: !Ref RestApi
+          ForwardedValues:
+            QueryString: 'false'
+            Cookies:
+              Forward: none
+          ViewerProtocolPolicy: redirect-to-https
+        CacheBehaviors:
+        - AllowedMethods:
+          - HEAD
+          - DELETE
+          - POST
+          - GET
+          - OPTIONS
+          - PUT
+          - PATCH
+          TargetOriginId: !Ref RestApi
+          ForwardedValues:
+            QueryString: 'true'
+            Cookies:
+              Forward: all
+            Headers:
+            - Authorization
+          ViewerProtocolPolicy: redirect-to-https
+          MinTTL: '0'
+          MaxTTL: '0'
+          DefaultTTL: '0'
+          PathPattern: /api/*
+        PriceClass: PriceClass_All
+        Restrictions:
+          GeoRestriction:
+            RestrictionType: none
+        ViewerCertificate:
+          CloudFrontDefaultCertificate: true
