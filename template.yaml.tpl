@@ -674,7 +674,7 @@ Resources:
                 '200':
                   description: '記事内容取得'
                   schema:
-                    $ref: '#/definitions/StoryContent'
+                    $ref: '#/definitions/ArticleContent'
               security:
                 - cognitoUserPool: []
               x-amazon-apigateway-integration:
