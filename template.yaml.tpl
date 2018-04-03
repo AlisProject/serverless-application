@@ -436,6 +436,30 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+          /me/articles/{article_id}/public:
+            get:
+              description: '指定された article_id の公開記事情報を取得'
+              parameters:
+              - name: 'article_id'
+                in: 'path'
+                description: '対象記事の指定するために使用'
+                required: true
+                type: 'string'
+              responses:
+                '200':
+                  description: '記事内容取得'
+                  schema:
+                    $ref: '#/definitions/ArticleContent'
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesPublicShow.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
           /me/articles/{article_id}/public/edit:
             get:
               description: '指定された article_id の編集記事情報を取得'
@@ -650,7 +674,7 @@ Resources:
                 '200':
                   description: '記事内容取得'
                   schema:
-                    $ref: '#/definitions/StoryContent'
+                    $ref: '#/definitions/ArticleContent'
               security:
                 - cognitoUserPool: []
               x-amazon-apigateway-integration:
@@ -863,6 +887,19 @@ Resources:
               Path: /me/articles/{article_id}/drafts
               Method: put
               RestApiId: !Ref RestApi
+  MeArticlesPublicShow:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_articles_public_show.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/articles/{article_id}/public
+            Method: get
+            RestApiId: !Ref RestApi
   MeArticlesPublicEdit:
       Type: AWS::Serverless::Function
       Properties:
