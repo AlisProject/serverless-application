@@ -646,7 +646,7 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
-          /users/{user_id}/info/show:
+          /users/{user_id}/info:
             get:
               description: '指定されたユーザーのユーザ情報を取得'
               parameters:
@@ -659,9 +659,7 @@ Resources:
                 '200':
                   description: '対象ユーザ情報'
                   schema:
-                    type: array
-                    items:
-                      $ref: '#/definitions/UserInfo'
+                    $ref: '#/definitions/UserInfo'
               x-amazon-apigateway-integration:
                 responses:
                   default:
@@ -786,7 +784,7 @@ Resources:
         Api:
           Type: Api
           Properties:
-            Path: /users/{user_id}/info/show
+            Path: /users/{user_id}/info
             Method: get
             RestApiId: !Ref RestApi
   MeArticlesDraftsCreate:
