@@ -110,14 +110,11 @@ Resources:
           - email_verified
           - phone_number
           - phone_number_verified
+          - custom:private_eth_address
         WriteAttributes:
           - email
           - phone_number
-#        FIXME: You have to add below by hand.
-#        ReadAttributes:
-#          - custom:private_eth_address
-#        WriteAttributes:
-#          - custom:private_eth_address
+          - custom:private_eth_address
   IdentityPool:
     Type: AWS::Cognito::IdentityPool
     Properties:
