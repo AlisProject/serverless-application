@@ -874,7 +874,7 @@ Resources:
             Type: Api
             Properties:
               Path: /me/articles/{article_id}/public/edit
-              Method: put
+              Method: get
               RestApiId: !Ref RestApi
   MeArticlesLikeCreate:
     Type: AWS::Serverless::Function
