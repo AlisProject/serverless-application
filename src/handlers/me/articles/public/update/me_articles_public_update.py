@@ -40,38 +40,24 @@ class MeArticlesPublicUpdate(LambdaBase):
         )
 
     def exec_main_proc(self):
-        self.__update_article_content()
-        self.__update_article_info()
+        article_content_edit_table = self.dynamodb.Table(os.environ['ARTICLE_CONTENT_EDIT_TABLE_NAME'])
+        article_content_edit = article_content_edit_table.get_item(Key={'article_id': self.params['article_id']}).get('Item')
 
-        return {
-            'statusCode': 200
-        }
-
-    def __update_article_info(self):
-        article_info_table = self.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
-
-        article_info_table.update_item(
+        article_content_edit_table.update_item(
             Key={
                 'article_id': self.params['article_id'],
             },
-            UpdateExpression="set title = :title, overview=:overview, eye_catch_url=:eye_catch_url",
+            UpdateExpression="set user_id = :user_id, title = :title, body=:body, "
+                             "overview=:overview, eye_catch_url=:eye_catch_url",
             ExpressionAttributeValues={
+                ':user_id': self.event['requestContext']['authorizer']['claims']['cognito:username'],
                 ':title': TextSanitizer.sanitize_text(self.params.get('title')),
+                ':body': TextSanitizer.sanitize_article_body(self.params.get('body')),
                 ':overview': TextSanitizer.sanitize_text(self.params.get('overview')),
                 ':eye_catch_url': self.params.get('eye_catch_url')
             }
         )
 
-    def __update_article_content(self):
-        article_content_table = self.dynamodb.Table(os.environ['ARTICLE_CONTENT_TABLE_NAME'])
-
-        article_content_table.update_item(
-            Key={
-                'article_id': self.params['article_id'],
-            },
-            UpdateExpression="set title = :title, body=:body",
-            ExpressionAttributeValues={
-                ':title': TextSanitizer.sanitize_text(self.params.get('title')),
-                ':body': TextSanitizer.sanitize_article_body(self.params.get('body'))
-            }
-        )
+        return {
+            'statusCode': 200
+        }

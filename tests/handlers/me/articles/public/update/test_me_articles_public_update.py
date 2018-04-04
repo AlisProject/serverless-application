@@ -19,14 +19,20 @@ class TestMeArticlesPublicUpdate(TestCase):
     def setUp(self):
         TestsUtil.delete_all_tables(self.dynamodb)
 
-        self.article_info_table = self.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
-        self.article_content_table = self.dynamodb.Table(os.environ['ARTICLE_CONTENT_TABLE_NAME'])
+        self.article_content_edit_table = self.dynamodb.Table(os.environ['ARTICLE_CONTENT_EDIT_TABLE_NAME'])
 
         article_info_items = [
             {
                 'article_id': 'publicId0001',
                 'user_id': 'test01',
                 'title': 'sample_title1',
+                'status': 'public',
+                'sort_key': 1520150272000000
+            },
+            {
+                'article_id': 'publicId0002',
+                'user_id': 'test02',
+                'title': 'sample_title2',
                 'status': 'public',
                 'sort_key': 1520150272000000
             }
@@ -39,10 +45,28 @@ class TestMeArticlesPublicUpdate(TestCase):
                 'article_id': 'publicId0001',
                 'title': 'sample_title1',
                 'body': 'sample_body1'
+            },
+            {
+                'article_id': 'publicId0002',
+                'title': 'sample_title2',
+                'body': 'sample_body2'
             }
         ]
 
         TestsUtil.create_table(self.dynamodb, os.environ['ARTICLE_CONTENT_TABLE_NAME'], article_content_items)
+
+        article_content_edit_items = [
+            {
+                'article_id': 'publicId0001',
+                'user_id': 'test01',
+                'title': 'edit_title1',
+                'body': 'edit_body1',
+                'overview': 'edit_overview',
+                'eye_catch_url': 'http://example.com/edit_eye_catch'
+            }
+        ]
+
+        TestsUtil.create_table(self.dynamodb, os.environ['ARTICLE_CONTENT_EDIT_TABLE_NAME'], article_content_edit_items)
 
     def tearDown(self):
         TestsUtil.delete_all_tables(self.dynamodb)
@@ -73,33 +97,66 @@ class TestMeArticlesPublicUpdate(TestCase):
             }
         }
 
+        article_content_edit_before = self.article_content_edit_table.scan()['Items']
+
         params['body'] = json.dumps(params['body'])
+        response = MeArticlesPublicUpdate(params, {}, self.dynamodb).main()
 
-        article_info_before = self.article_info_table.scan()['Items']
-        article_content_before = self.article_content_table.scan()['Items']
-
-        me_articles_public_update = MeArticlesPublicUpdate(params, {}, self.dynamodb)
-
-        response = me_articles_public_update.main()
-
-        article_info_after = self.article_info_table.scan()['Items']
-        article_content_after = self.article_content_table.scan()['Items']
+        article_content_edit_after = self.article_content_edit_table.scan()['Items']
 
         self.assertEqual(response['statusCode'], 200)
-        self.assertEqual(len(article_info_after) - len(article_info_before), 0)
-        self.assertEqual(len(article_content_after) - len(article_content_before), 0)
+        self.assertEqual(len(article_content_edit_after) - len(article_content_edit_before), 0)
 
-        article_info_param_names = ['eye_catch_url', 'title', 'overview']
-        article_content_param_names = ['title', 'body']
+        article_content_edit = self.article_content_edit_table.get_item(
+            Key={'article_id': params['pathParameters']['article_id']}
+        )['Item']
 
         self.assertEqual(params['requestContext']['authorizer']['claims']['cognito:username'],
-                         article_info_after[0]['user_id'])
+                         article_content_edit['user_id'])
 
-        for key in article_info_param_names:
-            self.assertEqual(json.loads(params['body'])[key], article_info_after[0][key])
+        for key, value in json.loads(params['body']).items():
+            self.assertEqual(value, article_content_edit[key])
 
-        for key in article_content_param_names:
-            self.assertEqual(json.loads(params['body'])[key], article_content_after[0][key])
+    def test_main_ok_with_no_article_edit_content(self):
+        prefix = 'http://'
+        params = {
+            'pathParameters': {
+                'article_id': 'publicId0002'
+            },
+            'body': {
+                'eye_catch_url': prefix + 'A' * (2048 - len(prefix)),
+                'title': 'A' * 255,
+                'body': 'A' * 65535,
+                'overview': 'A' * 100
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test02'
+                    }
+                }
+            }
+        }
+
+        article_content_edit_before = self.article_content_edit_table.scan()['Items']
+
+        params['body'] = json.dumps(params['body'])
+        response = MeArticlesPublicUpdate(params, {}, self.dynamodb).main()
+
+        article_content_edit_after = self.article_content_edit_table.scan()['Items']
+
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(len(article_content_edit_after) - len(article_content_edit_before), 1)
+
+        article_content_edit = self.article_content_edit_table.get_item(
+            Key={'article_id': params['pathParameters']['article_id']}
+        )['Item']
+
+        self.assertEqual(params['requestContext']['authorizer']['claims']['cognito:username'],
+                         article_content_edit['user_id'])
+
+        for key, value in json.loads(params['body']).items():
+            self.assertEqual(value, article_content_edit[key])
 
     def test_call_validate_article_existence(self):
         params = {
