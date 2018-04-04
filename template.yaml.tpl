@@ -194,7 +194,7 @@ Resources:
   RestApi:
     Type: AWS::Serverless::Api
     Properties:
-      StageName: dev
+      StageName: api
       DefinitionBody:
         swagger: "2.0"
         info:
@@ -448,6 +448,29 @@ Resources:
                 httpMethod: POST
                 type: aws_proxy
           /me/articles/{article_id}/public:
+            get:
+              description: '指定された article_id の公開記事情報を取得'
+              parameters:
+              - name: 'article_id'
+                in: 'path'
+                description: '対象記事の指定するために使用'
+                required: true
+                type: 'string'
+              responses:
+                '200':
+                  description: '記事内容取得'
+                  schema:
+                    $ref: '#/definitions/ArticleContent'
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesPublicShow.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
             put:
               description: '指定された article_id の編集記事情報を上書き'
               parameters:
@@ -689,7 +712,7 @@ Resources:
                 '200':
                   description: '記事内容取得'
                   schema:
-                    $ref: '#/definitions/StoryContent'
+                    $ref: '#/definitions/ArticleContent'
               security:
                 - cognitoUserPool: []
               x-amazon-apigateway-integration:
@@ -902,6 +925,19 @@ Resources:
               Path: /me/articles/{article_id}/drafts
               Method: put
               RestApiId: !Ref RestApi
+  MeArticlesPublicShow:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_articles_public_show.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/articles/{article_id}/public
+            Method: get
+            RestApiId: !Ref RestApi
   MeArticlesPublicEdit:
       Type: AWS::Serverless::Function
       Properties:
@@ -913,7 +949,7 @@ Resources:
             Type: Api
             Properties:
               Path: /me/articles/{article_id}/public/edit
-              Method: put
+              Method: get
               RestApiId: !Ref RestApi
   MeArticlesPublicUpdate:
     Type: AWS::Serverless::Function
@@ -1191,3 +1227,63 @@ Resources:
     Type: "AWS::S3::Bucket"
     Properties:
       AccessControl: "PublicRead"
+  CloudFront:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Origins:
+        - DomainName:
+            Fn::Join:
+            - ""
+            - - Ref: RestApi
+              - ".execute-api."
+              - Ref: AWS::Region
+              - ".amazonaws.com"
+          Id: !Ref RestApi
+          OriginPath: ""
+          CustomOriginConfig:
+            OriginProtocolPolicy: "https-only"
+        Enabled: 'true'
+        Comment: !Ref "AWS::StackName"
+        DefaultCacheBehavior:
+          AllowedMethods:
+          - DELETE
+          - GET
+          - HEAD
+          - OPTIONS
+          - PATCH
+          - POST
+          - PUT
+          TargetOriginId: !Ref RestApi
+          ForwardedValues:
+            QueryString: 'false'
+            Cookies:
+              Forward: none
+          ViewerProtocolPolicy: redirect-to-https
+        CacheBehaviors:
+        - AllowedMethods:
+          - HEAD
+          - DELETE
+          - POST
+          - GET
+          - OPTIONS
+          - PUT
+          - PATCH
+          TargetOriginId: !Ref RestApi
+          ForwardedValues:
+            QueryString: 'true'
+            Cookies:
+              Forward: all
+            Headers:
+            - Authorization
+          ViewerProtocolPolicy: redirect-to-https
+          MinTTL: '0'
+          MaxTTL: '0'
+          DefaultTTL: '0'
+          PathPattern: /api/*
+        PriceClass: PriceClass_All
+        Restrictions:
+          GeoRestriction:
+            RestrictionType: none
+        ViewerCertificate:
+          CloudFrontDefaultCertificate: true
