@@ -121,7 +121,7 @@ class TestUsersArticlesPublic(TestCase):
 
         for i in range(11):
             table.put_item(Item={
-                'user_id': 'test_only_sort_key',
+                'user_id': 'test-only-sort-key',
                 'article_id': 'test_limit_number' + str(i),
                 'status': 'public',
                 'sort_key': 1520150273000000 + i
@@ -130,7 +130,7 @@ class TestUsersArticlesPublic(TestCase):
 
         params = {
             'pathParameters': {
-                'user_id': 'test_only_sort_key'
+                'user_id': 'test-only-sort-key'
             },
             'queryStringParameters': {
                 'sort_key': '1520150272000002'
