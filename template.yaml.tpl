@@ -204,7 +204,7 @@ Resources:
   RestApi:
     Type: AWS::Serverless::Api
     Properties:
-      StageName: dev
+      StageName: api
       DefinitionBody:
         swagger: "2.0"
         info:
@@ -273,6 +273,17 @@ Resources:
             type: object
             properties:
               article_image:
+                type: string
+          UserInfo:
+            type: object
+            properties:
+              user_id:
+                type: string
+              user_display_name:
+                type: string
+              icon_image_url:
+                type: string
+              self_introduction:
                 type: string
         paths:
           /articles/recent:
@@ -435,6 +446,54 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+          /me/articles/{article_id}/public:
+            get:
+              description: '指定された article_id の公開記事情報を取得'
+              parameters:
+              - name: 'article_id'
+                in: 'path'
+                description: '対象記事の指定するために使用'
+                required: true
+                type: 'string'
+              responses:
+                '200':
+                  description: '記事内容取得'
+                  schema:
+                    $ref: '#/definitions/ArticleContent'
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesPublicShow.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /me/articles/{article_id}/public/edit:
+            get:
+              description: '指定された article_id の編集記事情報を取得'
+              parameters:
+              - name: 'article_id'
+                in: 'path'
+                description: '対象記事を指定するために使用'
+                required: true
+                type: 'string'
+              responses:
+                '200':
+                  description: '記事内容取得'
+                  schema:
+                    $ref: '#/definitions/ArticleContent'
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesPublicEdit.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
           /me/articles/{article_id}/like:
             get:
               description: '指定された article_id の記事に「いいね」を行ったかを確認'
@@ -561,6 +620,8 @@ Resources:
                     properties:
                       image_url:
                         type: 'string'
+              security:
+                - cognitoUserPool: []
               x-amazon-apigateway-integration:
                 responses:
                   default:
@@ -573,25 +634,35 @@ Resources:
             get:
               description: '指定されたユーザーの公開記事一覧情報を取得'
               parameters:
+              - name: 'user_id'
+                in: 'path'
+                description: '対象ユーザを指定するために使用'
+                required: true
+                type: 'string'
               - name: 'limit'
                 in: 'query'
                 description: '取得件数'
                 required: false
                 type: 'integer'
                 minimum: 1
-              - name: 'offset'
+              - name: 'article_id'
                 in: 'query'
-                description: '取得位置'
+                description: 'ページング処理における、現在のページの最後の記事のID'
+                required: false
+                type: 'string'
+              - name: 'sort_key'
+                in: 'query'
+                description: 'ページング処理における、現在のページの最後の記事のソートキー'
                 required: false
                 type: 'integer'
-                minimum: 0
+                minimum: 1
               responses:
                 '200':
                   description: '公開記事一覧'
                   schema:
                     type: array
                     items:
-                      $ref: '#/definitions/StoryInfo'
+                      $ref: '#/definitions/ArticleInfo'
               x-amazon-apigateway-integration:
                 responses:
                   default:
@@ -613,7 +684,7 @@ Resources:
                 '200':
                   description: '記事内容取得'
                   schema:
-                    $ref: '#/definitions/StoryContent'
+                    $ref: '#/definitions/ArticleContent'
               security:
                 - cognitoUserPool: []
               x-amazon-apigateway-integration:
@@ -640,6 +711,28 @@ Resources:
                   default:
                     statusCode: '200'
                 uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesDraftsUpdate.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /users/{user_id}/info:
+            get:
+              description: '指定されたユーザーのユーザ情報を取得'
+              parameters:
+              - name: 'user_id'
+                in: 'path'
+                description: '対象ユーザを指定するために使用'
+                required: true
+                type: 'string'
+              responses:
+                '200':
+                  description: '対象ユーザ情報'
+                  schema:
+                    $ref: '#/definitions/UserInfo'
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${UsersInfo.Arn}/invocations
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
@@ -749,6 +842,19 @@ Resources:
             Path: /users/{user_id}/articles/public
             Method: get
             RestApiId: !Ref RestApi
+  UsersInfo:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/users_info_show.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /users/{user_id}/info
+            Method: get
+            RestApiId: !Ref RestApi
   MeArticlesDraftsCreate:
       Type: AWS::Serverless::Function
       Properties:
@@ -790,6 +896,32 @@ Resources:
             Properties:
               Path: /me/articles/{article_id}/drafts
               Method: put
+              RestApiId: !Ref RestApi
+  MeArticlesPublicShow:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_articles_public_show.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/articles/{article_id}/public
+            Method: get
+            RestApiId: !Ref RestApi
+  MeArticlesPublicEdit:
+      Type: AWS::Serverless::Function
+      Properties:
+        Handler: handler.lambda_handler
+        Role: !GetAtt LambdaRole.Arn
+        CodeUri: ./deploy/me_articles_public_edit.zip
+        Events:
+          Api:
+            Type: Api
+            Properties:
+              Path: /me/articles/{article_id}/public/edit
+              Method: get
               RestApiId: !Ref RestApi
   MeArticlesLikeCreate:
     Type: AWS::Serverless::Function
@@ -1054,3 +1186,63 @@ Resources:
     Type: "AWS::S3::Bucket"
     Properties:
       AccessControl: "PublicRead"
+  CloudFront:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Origins:
+        - DomainName:
+            Fn::Join:
+            - ""
+            - - Ref: RestApi
+              - ".execute-api."
+              - Ref: AWS::Region
+              - ".amazonaws.com"
+          Id: !Ref RestApi
+          OriginPath: ""
+          CustomOriginConfig:
+            OriginProtocolPolicy: "https-only"
+        Enabled: 'true'
+        Comment: !Ref "AWS::StackName"
+        DefaultCacheBehavior:
+          AllowedMethods:
+          - DELETE
+          - GET
+          - HEAD
+          - OPTIONS
+          - PATCH
+          - POST
+          - PUT
+          TargetOriginId: !Ref RestApi
+          ForwardedValues:
+            QueryString: 'false'
+            Cookies:
+              Forward: none
+          ViewerProtocolPolicy: redirect-to-https
+        CacheBehaviors:
+        - AllowedMethods:
+          - HEAD
+          - DELETE
+          - POST
+          - GET
+          - OPTIONS
+          - PUT
+          - PATCH
+          TargetOriginId: !Ref RestApi
+          ForwardedValues:
+            QueryString: 'true'
+            Cookies:
+              Forward: all
+            Headers:
+            - Authorization
+          ViewerProtocolPolicy: redirect-to-https
+          MinTTL: '0'
+          MaxTTL: '0'
+          DefaultTTL: '0'
+          PathPattern: /api/*
+        PriceClass: PriceClass_All
+        Restrictions:
+          GeoRestriction:
+            RestrictionType: none
+        ViewerCertificate:
+          CloudFrontDefaultCertificate: true
