@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
 import json
-import logging
-import traceback
 import settings
 from lambda_base import LambdaBase
 from jsonschema import validate, ValidationError, FormatChecker
@@ -41,7 +39,6 @@ class MeArticlesPublicUpdate(LambdaBase):
 
     def exec_main_proc(self):
         article_content_edit_table = self.dynamodb.Table(os.environ['ARTICLE_CONTENT_EDIT_TABLE_NAME'])
-        article_content_edit = article_content_edit_table.get_item(Key={'article_id': self.params['article_id']}).get('Item')
 
         article_content_edit_table.update_item(
             Key={
