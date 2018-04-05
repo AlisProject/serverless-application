@@ -275,6 +275,17 @@ Resources:
                 type: string
               self_introduction:
                 type: string
+          UpdateArticle:
+            type: object
+            properties:
+              title:
+                type: string
+              body:
+                type: string
+              eye_catch_url:
+                type: string
+              overview:
+                type: string
         paths:
           /articles/recent:
             get:
@@ -457,6 +468,33 @@ Resources:
                   default:
                     statusCode: '200'
                 uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesPublicShow.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+            put:
+              description: '指定された article_id の編集記事情報を上書き'
+              parameters:
+              - name: 'article_id'
+                in: 'path'
+                description: '対象記事の指定するために使用'
+                required: true
+                type: 'string'
+              - name: 'article'
+                in: 'body'
+                description: 'article object'
+                required: true
+                schema:
+                  $ref: '#/definitions/UpdateArticle'
+              responses:
+                '200':
+                  description: 'successful operation'
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesPublicUpdate.Arn}/invocations
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
@@ -935,6 +973,19 @@ Resources:
               Path: /me/articles/{article_id}/public/edit
               Method: get
               RestApiId: !Ref RestApi
+  MeArticlesPublicUpdate:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_articles_public_update.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/articles/{article_id}/public
+            Method: put
+            RestApiId: !Ref RestApi
   MeArticlesPublicUnpublish:
     Type: AWS::Serverless::Function
     Properties:
