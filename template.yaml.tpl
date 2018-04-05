@@ -522,6 +522,28 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+          /me/articles/{article_id}/public/unpublish:
+            put:
+              description: '指定された article_id の公開記事を下書きに戻す'
+              parameters:
+              - name: 'article_id'
+                in: 'path'
+                description: '対象記事を指定するために使用'
+                required: true
+                type: 'string'
+              responses:
+                '200':
+                  description: 'successful operation'
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesPublicUnpublish.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
           /me/articles/{article_id}/like:
             get:
               description: '指定された article_id の記事に「いいね」を行ったかを確認'
@@ -962,6 +984,19 @@ Resources:
           Type: Api
           Properties:
             Path: /me/articles/{article_id}/public
+            Method: put
+            RestApiId: !Ref RestApi
+  MeArticlesPublicUnpublish:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_articles_public_unpublish.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/articles/{article_id}/public/unpublish
             Method: put
             RestApiId: !Ref RestApi
   MeArticlesLikeCreate:
