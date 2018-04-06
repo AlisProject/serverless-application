@@ -172,7 +172,7 @@ class TestMeArticlesImagesCreate(TestCase):
             'image_url':  image_url_path + image_file_name
         }
         self.assertEqual(json.loads(response['body']), expected_item)
-        self.assertTrue(self.equal_size_to_s3_image(image_url_path + image_file_name, (1920, 1079)))
+        self.assertTrue(self.equal_size_to_s3_image(image_url_path + image_file_name, (3840, 2159)))
 
     @patch('uuid.uuid4', MagicMock(return_value='uuid'))
     def test_main_ok_height_over_gif(self):
@@ -209,7 +209,7 @@ class TestMeArticlesImagesCreate(TestCase):
             'image_url':  image_url_path + image_file_name
         }
         self.assertEqual(json.loads(response['body']), expected_item)
-        self.assertTrue(self.equal_size_to_s3_image(image_url_path + image_file_name, (1918, 1080)))
+        self.assertTrue(self.equal_size_to_s3_image(image_url_path + image_file_name, (3838, 2160)))
 
     @patch('uuid.uuid4', MagicMock(return_value='uuid'))
     def test_main_ok_max_size_jepg(self):
