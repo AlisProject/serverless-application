@@ -13,7 +13,7 @@ parameters = {
         'type': 'string',
         'minLength': 3,
         'maxLength': 30,
-        'pattern': '^[a-zA-Z0-9\-]+$'
+        'pattern': '^(?!.*--)[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]$'
     },
     'icon_image': {
         'type': 'string',

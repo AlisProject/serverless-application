@@ -20,11 +20,7 @@ class PreSignUp(LambdaBase):
         params = self.event
         if self.event['userName'] in settings.ng_user_name:
             raise ValidationError('This username is not allowed')
-        if re.match(r"^\-", self.event['userName']) or re.match(r".*\-$", self.event['userName']):
-            raise ValidationError('not allowed hyphen at head or end')
-        if re.match(r".*\-\-.*", self.event['userName']):
-            raise ValidationError('double hyphen is not allowed')
         validate(params, self.get_schema())
 
     def exec_main_proc(self):
-        return {'statusCode': 200}
+        return self.event

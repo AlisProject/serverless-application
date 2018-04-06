@@ -100,4 +100,4 @@ class TestPostConfirmation(TestCase):
         }
         presignup = PreSignUp(event=event, context="", dynamodb=dynamodb)
         response = presignup.main()
-        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(response['userName'], 'yamasita')
