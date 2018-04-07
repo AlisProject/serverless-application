@@ -139,7 +139,7 @@ class TestMeArticlesDraftsIndex(TestCase):
 
         response = MeArticlesDraftsIndex(params, {}, self.dynamodb).main()
 
-        expected_items = [
+        not_expected_response = [
             {
                 'article_id': 'testid000001',
                 'user_id': 'test_user_id',
@@ -149,7 +149,7 @@ class TestMeArticlesDraftsIndex(TestCase):
         ]
 
         self.assertEqual(response['statusCode'], 200)
-        self.assertNotEqual(json.loads(response['body'])['Items'], expected_items)
+        self.assertNotEqual(json.loads(response['body'])['Items'], not_expected_response)
 
     def test_main_ok_with_evaluated_key_with_no_limit(self):
         table = self.dynamodb.Table('ArticleInfo')
