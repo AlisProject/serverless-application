@@ -177,6 +177,120 @@ class TestMeArticlesPublicRepublish(TestCase):
         self.assertEqual(len(article_content_edit_after) - len(article_content_edit_before), 0)
         self.assertEqual(len(article_history_after) - len(article_history_before), 0)
 
+    def test_main_ng_with_none_title(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'publicId0001'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01'
+                    }
+                }
+            }
+        }
+
+        article_content_edit = self.article_content_edit_table.update_item(
+            Key={'article_id': params['pathParameters']['article_id']},
+            UpdateExpression="set title = :title",
+            ExpressionAttributeValues={':title': None}
+        )
+
+        article_info_before = self.article_info_table.scan()['Items']
+        article_content_before = self.article_content_table.scan()['Items']
+        article_content_edit_before = self.article_content_edit_table.scan()['Items']
+        article_history_before = self.article_history_table.scan()['Items']
+
+        response = MeArticlesPublicRepublish(params, {}, self.dynamodb).main()
+
+        article_info_after = self.article_info_table.scan()['Items']
+        article_content_after = self.article_content_table.scan()['Items']
+        article_content_edit_after = self.article_content_edit_table.scan()['Items']
+        article_history_after = self.article_history_table.scan()['Items']
+
+        self.assertEqual(response['statusCode'], 400)
+        self.assertEqual(len(article_info_after) - len(article_info_before), 0)
+        self.assertEqual(len(article_content_after) - len(article_content_before), 0)
+        self.assertEqual(len(article_content_edit_after) - len(article_content_edit_before), 0)
+        self.assertEqual(len(article_history_after) - len(article_history_before), 0)
+
+    def test_main_ng_with_none_body(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'publicId0001'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01'
+                    }
+                }
+            }
+        }
+
+        article_content_edit = self.article_content_edit_table.update_item(
+            Key={'article_id': params['pathParameters']['article_id']},
+            UpdateExpression="set body = :body",
+            ExpressionAttributeValues={':body': None}
+        )
+
+        article_info_before = self.article_info_table.scan()['Items']
+        article_content_before = self.article_content_table.scan()['Items']
+        article_content_edit_before = self.article_content_edit_table.scan()['Items']
+        article_history_before = self.article_history_table.scan()['Items']
+
+        response = MeArticlesPublicRepublish(params, {}, self.dynamodb).main()
+
+        article_info_after = self.article_info_table.scan()['Items']
+        article_content_after = self.article_content_table.scan()['Items']
+        article_content_edit_after = self.article_content_edit_table.scan()['Items']
+        article_history_after = self.article_history_table.scan()['Items']
+
+        self.assertEqual(response['statusCode'], 400)
+        self.assertEqual(len(article_info_after) - len(article_info_before), 0)
+        self.assertEqual(len(article_content_after) - len(article_content_before), 0)
+        self.assertEqual(len(article_content_edit_after) - len(article_content_edit_before), 0)
+        self.assertEqual(len(article_history_after) - len(article_history_before), 0)
+
+    def test_main_ng_with_none_overview(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'publicId0001'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01'
+                    }
+                }
+            }
+        }
+
+        article_content_edit = self.article_content_edit_table.update_item(
+            Key={'article_id': params['pathParameters']['article_id']},
+            UpdateExpression="set overview = :overview",
+            ExpressionAttributeValues={':overview': None}
+        )
+
+        article_info_before = self.article_info_table.scan()['Items']
+        article_content_before = self.article_content_table.scan()['Items']
+        article_content_edit_before = self.article_content_edit_table.scan()['Items']
+        article_history_before = self.article_history_table.scan()['Items']
+
+        response = MeArticlesPublicRepublish(params, {}, self.dynamodb).main()
+
+        article_info_after = self.article_info_table.scan()['Items']
+        article_content_after = self.article_content_table.scan()['Items']
+        article_content_edit_after = self.article_content_edit_table.scan()['Items']
+        article_history_after = self.article_history_table.scan()['Items']
+
+        self.assertEqual(response['statusCode'], 400)
+        self.assertEqual(len(article_info_after) - len(article_info_before), 0)
+        self.assertEqual(len(article_content_after) - len(article_content_before), 0)
+        self.assertEqual(len(article_content_edit_after) - len(article_content_edit_before), 0)
+        self.assertEqual(len(article_history_after) - len(article_history_before), 0)
+
     def test_call_validate_article_existence(self):
         params = {
             'pathParameters': {
