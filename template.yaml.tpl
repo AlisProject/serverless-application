@@ -54,6 +54,7 @@ Resources:
       EmailVerificationMessage: "Your verification code is {{ '{' }}####}."
       EmailVerificationSubject: "Your verification code"
       LambdaConfig:
+        PreSignUp: !GetAtt CognitoTriggerPreSignUp.Arn
         CustomMessage: !GetAtt CognitoTriggerCustomMessage.Arn
         PostConfirmation: !GetAtt CognitoTriggerPostConfirmation.Arn
       MfaConfiguration: "OPTIONAL"
@@ -813,6 +814,13 @@ Resources:
         - arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess
         - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
         - arn:aws:iam::aws:policy/AmazonS3FullAccess
+  LambdaInvocationPermissionCognitoTriggerPreSignUp:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt CognitoTriggerPreSignUp.Arn
+      Principal: cognito-idp.amazonaws.com
+      SourceArn: !GetAtt UserPool.Arn
   LambdaInvocationPermissionCognitoTriggerCustomMessage:
     Type: AWS::Lambda::Permission
     Properties:
@@ -1083,6 +1091,12 @@ Resources:
             Path: /me/info
             Method: put
             RestApiId: !Ref RestApi
+  CognitoTriggerPreSignUp:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/cognito_trigger_presignup.zip
   CognitoTriggerCustomMessage:
     Type: AWS::Serverless::Function
     Properties:
