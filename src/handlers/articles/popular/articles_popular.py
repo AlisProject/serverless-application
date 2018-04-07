@@ -62,7 +62,12 @@ class ArticlesPopular(LambdaBase):
             if article_info and article_info['status'] == 'public':
                 articles.append(article_info)
 
+        results = {'Items': articles}
+
+        if responce.get('LastEvaluatedKey'):
+            results.update({'LastEvaluatedKey': responce['LastEvaluatedKey']})
+
         return {
             'statusCode': 200,
-            'body': json.dumps(articles, cls=DecimalEncoder)
+            'body': json.dumps(results, cls=DecimalEncoder)
         }

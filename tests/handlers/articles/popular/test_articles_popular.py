@@ -102,8 +102,15 @@ class TestArticlesPopular(TestCase):
             }
         ]
 
+        expected_evaluated_key = {
+            'article_id': 'testid000001',
+            'score': 12,
+            'evaluated_at': 1520150272000000
+        }
+
         self.assertEqual(response['statusCode'], 200)
-        self.assertEqual(json.loads(response['body']), expected_items)
+        self.assertEqual(json.loads(response['body'])['Items'], expected_items)
+        self.assertEqual(json.loads(response['body'])['LastEvaluatedKey'], expected_evaluated_key)
 
     def test_main_ok_with_no_limit(self):
         article_info_table = self.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
@@ -130,7 +137,7 @@ class TestArticlesPopular(TestCase):
         response = ArticlesPopular(params, {}, self.dynamodb).main()
 
         self.assertEqual(response['statusCode'], 200)
-        self.assertEqual(len(json.loads(response['body'])), 20)
+        self.assertEqual(len(json.loads(response['body'])['Items']), 20)
 
     def test_main_ok_with_evaluated_key(self):
         params = {
@@ -152,7 +159,7 @@ class TestArticlesPopular(TestCase):
         ]
 
         self.assertEqual(response['statusCode'], 200)
-        self.assertEqual(json.loads(response['body']), expected_items)
+        self.assertEqual(json.loads(response['body'])['Items'], expected_items)
 
     def test_validation_limit_type(self):
         params = {
