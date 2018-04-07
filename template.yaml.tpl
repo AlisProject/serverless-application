@@ -419,7 +419,7 @@ Resources:
                 type: 'integer'
                 minimum: 1
               responses:
-                200:
+                '200':
                   description: '下書き記事一覧'
                   schema:
                     type: array
