@@ -57,7 +57,7 @@ parameters = {
 
 article_recent_default_limit = 20
 users_articles_public_default_limit = 10
-
+USERS_ARTICLE_INDEX_DEFAULT_LIMIT = 10
 article_id_length = 12
 
 html_allowed_tags = ['a', 'b', 'blockquote', 'br', 'h2', 'h3', 'i', 'p', 'u', 'img']

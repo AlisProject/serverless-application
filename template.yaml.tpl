@@ -398,6 +398,43 @@ Resources:
                 httpMethod: POST
                 type: aws_proxy
           /me/articles/drafts:
+            get:
+              description: '下書き記事一覧情報を取得'
+              parameters:
+              - name: 'limit'
+                in: 'query'
+                description: '取得件数'
+                required: false
+                type: 'integer'
+                minimum: 1
+              - name: 'article_id'
+                in: 'query'
+                description: 'ページング処理における、現在のページの最後の記事のID'
+                required: false
+                type: 'string'
+              - name: 'sort_key'
+                in: 'query'
+                description: 'ページング処理における、現在のページの最後の記事のソートキー'
+                required: false
+                type: 'integer'
+                minimum: 1
+              responses:
+                200:
+                  description: '下書き記事一覧'
+                  schema:
+                    type: array
+                    items:
+                      $ref: '#/definitions/ArticleInfo'
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesDraftsIndex.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
             post:
               description: '下書き記事を作成'
               parameters:
@@ -903,6 +940,19 @@ Resources:
           Type: Api
           Properties:
             Path: /users/{user_id}/info
+            Method: get
+            RestApiId: !Ref RestApi
+  MeArticlesDraftsIndex:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_articles_drafts_index.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/articles/drafts
             Method: get
             RestApiId: !Ref RestApi
   MeArticlesDraftsCreate:
