@@ -78,7 +78,8 @@ class TestsUtil:
             {'env_name': 'ARTICLE_LIKED_USER_TABLE_NAME', 'table_name': 'ArticleLikedUser'},
             {'env_name': 'ARTICLE_HISTORY_TABLE_NAME', 'table_name': 'ArticleHistory'},
             {'env_name': 'ARTICLE_CONTENT_EDIT_TABLE_NAME', 'table_name': 'ArticleContentEdit'},
-            {'env_name': 'USERS_TABLE_NAME', 'table_name': 'Users'}
+            {'env_name': 'USERS_TABLE_NAME', 'table_name': 'Users'},
+            {'env_name': 'BETA_USERS_TABLE_NAME', 'table_name': 'BetaUsers'}
         ]
         if os.environ.get('IS_DYNAMODB_ENDPOINT_OF_AWS') is not None:
             for table in cls.all_tables:

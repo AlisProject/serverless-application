@@ -12,11 +12,17 @@ class TestPostConfirmation(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        pass
+        items = [
+            {'email': 'test@example.com', 'used': False},
+            {'email': 'already@example.com', 'used': True},
+        ]
+        TestsUtil.set_all_tables_name_to_env()
+        TestsUtil.delete_all_tables(dynamodb)
+        TestsUtil.create_table(dynamodb, os.environ['BETA_USERS_TABLE_NAME'], items)
 
     @classmethod
     def tearDownClass(cls):
-        pass
+        TestsUtil.delete_all_tables(dynamodb)
 
     def test_validate_ng_too_short(self):
         event = {
@@ -95,9 +101,55 @@ class TestPostConfirmation(TestCase):
         self.assertEqual(response['statusCode'], 400)
 
     def test_validate_ok(self):
+        os.environ['BETA_MODE_FLAG'] = "0"
         event = {
                 'userName': 'yamasita'
         }
         presignup = PreSignUp(event=event, context="", dynamodb=dynamodb)
         response = presignup.main()
         self.assertEqual(response['userName'], 'yamasita')
+
+    def test_correct_beta_user(self):
+        os.environ['BETA_MODE_FLAG'] = "1"
+        event = {
+                'userName': 'yamasita',
+                'request': {
+                    'userAttributes': {
+                        'phone_number': '',
+                        'email': 'test@example.com'
+                    }
+                }
+        }
+        presignup = PreSignUp(event=event, context="", dynamodb=dynamodb)
+        response = presignup.main()
+        self.assertEqual(response['userName'], 'yamasita')
+
+    def test_already_used_email(self):
+        os.environ['BETA_MODE_FLAG'] = "1"
+        event = {
+                'userName': 'yamasita2',
+                'request': {
+                    'userAttributes': {
+                        'phone_number': '',
+                        'email': 'already@example.com'
+                    }
+                }
+        }
+        presignup = PreSignUp(event=event, context="", dynamodb=dynamodb)
+        response = presignup.main()
+        self.assertEqual(response['statusCode'], 500)
+
+    def test_non_beta_user(self):
+        os.environ['BETA_MODE_FLAG'] = "1"
+        event = {
+                'userName': 'yamasita2',
+                'request': {
+                    'userAttributes': {
+                        'phone_number': '',
+                        'email': 'hoge@example.com'
+                    }
+                }
+        }
+        presignup = PreSignUp(event=event, context="", dynamodb=dynamodb)
+        response = presignup.main()
+        self.assertEqual(response['statusCode'], 500)

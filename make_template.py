@@ -10,7 +10,8 @@ data = {
     'COGNITO_EMAIL_VERIFY_URL': os.environ['COGNITO_EMAIL_VERIFY_URL'],
     'SALT_FOR_ARTICLE_ID': os.environ['SALT_FOR_ARTICLE_ID'],
     'DIST_S3_BUCKET_NAME': os.environ['DIST_S3_BUCKET_NAME'],
-    'DOMAIN': os.environ['DOMAIN']
+    'DOMAIN': os.environ['DOMAIN'],
+    'BETA_MODE_FLAG': os.environ['BETA_MODE_FLAG']
 }
 
 with open("template.yaml", "w") as f:

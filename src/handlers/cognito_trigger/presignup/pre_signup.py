@@ -23,4 +23,16 @@ class PreSignUp(LambdaBase):
         validate(params, self.get_schema())
 
     def exec_main_proc(self):
-        return self.event
+        if os.environ['BETA_MODE_FLAG'] == "1":
+            beta_table = self.dynamodb.Table(os.environ['BETA_USERS_TABLE_NAME'])
+            item = beta_table.get_item(
+                Key={
+                    'email': self.event['request']['userAttributes']['email']
+                }
+            )
+            if item.get('Item', False) and item['Item']['used'] is False:
+                return self.event
+            else:
+                raise "This email address is not avalilable"
+        else:
+            return self.event
