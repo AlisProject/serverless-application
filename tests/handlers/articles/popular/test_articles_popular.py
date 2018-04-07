@@ -41,7 +41,7 @@ class TestArticlesPopular(TestCase):
         ]
         TestsUtil.create_table(cls.dynamodb, os.environ['ARTICLE_INFO_TABLE_NAME'], article_info_items)
 
-        article_liked_score_items = [
+        article_score_items = [
             {
                 'article_id': 'draftid00001',
                 'score': 24,
@@ -63,7 +63,7 @@ class TestArticlesPopular(TestCase):
                 'evaluated_at': 1520150272000000
             }
         ]
-        TestsUtil.create_table(cls.dynamodb, os.environ['ARTICLE_LIKED_SCORE_TABLE_NAME'], article_liked_score_items)
+        TestsUtil.create_table(cls.dynamodb, os.environ['ARTICLE_SCORE_TABLE_NAME'], article_score_items)
 
         evaluated_manage_items = [
             {'active_evaluated_at': 1520150272000000}
@@ -114,7 +114,7 @@ class TestArticlesPopular(TestCase):
 
     def test_main_ok_with_no_limit(self):
         article_info_table = self.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
-        article_liked_score_table = self.dynamodb.Table(os.environ['ARTICLE_LIKED_SCORE_TABLE_NAME'])
+        article_score_table = self.dynamodb.Table(os.environ['ARTICLE_SCORE_TABLE_NAME'])
 
         for i in range(21):
             article_info_table.put_item(Item={
@@ -124,7 +124,7 @@ class TestArticlesPopular(TestCase):
                 }
             )
 
-            article_liked_score_table.put_item(Item={
+            article_score_table.put_item(Item={
                 'article_id': 'test_limit_number' + str(i),
                 'score': 30,
                 'evaluated_at': 1520150272000000

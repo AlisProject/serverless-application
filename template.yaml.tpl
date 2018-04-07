@@ -16,7 +16,7 @@ Globals:
         ARTICLE_EVALUATED_MANAGE_TABLE_NAME: !Ref ArticleEvaluatedManage
         ARTICLE_ALIS_TOKEN_TABLE_NAME: !Ref ArticleAlisToken
         ARTICLE_LIKED_USER_TABLE_NAME: !Ref ArticleLikedUser
-        ARTICLE_LIKED_SCORE_TABLE_NAME: !Ref ArticleLikedScore
+        ARTICLE_SCORE_TABLE_NAME: !Ref ArticleScore
         USERS_TABLE_NAME: !Ref Users
         COGNITO_EMAIL_VERIFY_URL: {{ COGNITO_EMAIL_VERIFY_URL }}
 
@@ -1292,7 +1292,7 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: 2
         WriteCapacityUnits: 2
-  ArticleLikedScore:
+  ArticleScore:
     Type: AWS::DynamoDB::Table
     Properties:
       AttributeDefinitions:

@@ -32,7 +32,7 @@ class ArticlesPopular(LambdaBase):
         article_evaluated_manage_table = self.dynamodb.Table(os.environ['ARTICLE_EVALUATED_MANAGE_TABLE_NAME'])
         active_evaluated_at = article_evaluated_manage_table.scan()['Items'][0]['active_evaluated_at']
 
-        article_liked_score_table = self.dynamodb.Table(os.environ['ARTICLE_LIKED_SCORE_TABLE_NAME'])
+        article_score_table = self.dynamodb.Table(os.environ['ARTICLE_SCORE_TABLE_NAME'])
 
         limit = settings.articles_popular_default_limit
         if self.params.get('limit'):
@@ -54,7 +54,7 @@ class ArticlesPopular(LambdaBase):
 
             query_params.update({'ExclusiveStartKey': LastEvaluatedKey})
 
-        responce = article_liked_score_table.query(**query_params)
+        responce = article_score_table.query(**query_params)
 
         articles = []
         for article in responce['Items']:
