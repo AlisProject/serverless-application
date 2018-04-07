@@ -448,6 +448,44 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+          /me/articles/public:
+            get:
+              description: '公開記事一覧情報を取得'
+              parameters:
+              - name: 'limit'
+                in: 'query'
+                description: '取得件数'
+                required: false
+                type: 'integer'
+                minimum: 1
+              - name: 'article_id'
+                in: 'query'
+                description: 'ページング処理における、現在のページの最後の記事のID'
+                required: false
+                type: 'string'
+              - name: 'sort_key'
+                in: 'query'
+                description: 'ページング処理における、現在のページの最後の記事のソートキー'
+                required: false
+                type: 'integer'
+                minimum: 1
+              responses:
+                '200':
+                  description: '公開記事一覧'
+                  schema:
+                    type: array
+                    items:
+                      $ref: '#/definitions/ArticleInfo'
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesPublicIndex.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
           /me/articles/{article_id}/public:
             get:
               description: '指定された article_id の公開記事情報を取得'
@@ -977,6 +1015,19 @@ Resources:
               Path: /me/articles/{article_id}/drafts
               Method: put
               RestApiId: !Ref RestApi
+  MeArticlesPublicIndex:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_articles_public_index.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/articles/public
+            Method: get
+            RestApiId: !Ref RestApi
   MeArticlesPublicShow:
     Type: AWS::Serverless::Function
     Properties:
