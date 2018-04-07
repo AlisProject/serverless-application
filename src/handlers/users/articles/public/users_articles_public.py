@@ -72,7 +72,7 @@ class UsersArticlesPublic(LambdaBase):
         if params is not None and params.get('limit') is not None:
             return int(params.get('limit'))
         else:
-            return settings.users_articles_public_default_limit
+            return settings.USERS_ARTICLE_INDEX_DEFAULT_LIMIT
 
     def __require_last_evaluatd_key(self, params):
         if params is None:
