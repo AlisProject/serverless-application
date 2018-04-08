@@ -16,6 +16,29 @@ class TestArticlesAlisTokensShow(TestCase):
         TestsUtil.set_all_tables_name_to_env()
         TestsUtil.delete_all_tables(cls.dynamodb)
 
+        # create article_info_table
+        cls.article_info_table_items = [
+            {
+                'article_id': 'testid000001',
+                'status': 'public',
+                'title': 'testid000001 titile',
+                'sort_key': 1520150272000000
+            },
+            {
+                'article_id': 'testid000002',
+                'status': 'public',
+                'title': 'testid000002 titile',
+                'sort_key': 1520150272000001
+            },
+            {
+                'article_id': 'testid000003',
+                'status': 'public',
+                'title': 'testid000002 titile',
+                'sort_key': 1520150272000001
+            }
+        ]
+        TestsUtil.create_table(cls.dynamodb, os.environ['ARTICLE_INFO_TABLE_NAME'], cls.article_info_table_items)
+
         # create article_alis_token_table
         article_alis_token_items = [
             {
@@ -89,6 +112,23 @@ class TestArticlesAlisTokensShow(TestCase):
         response = ArticlesAlisTokensShow(params, {}, self.dynamodb).main()
 
         self.assertEqual(response['statusCode'], 404)
+
+    def test_call_validate_article_existence(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'testid000001'
+            }
+        }
+
+        mock_lib = MagicMock()
+        with patch('articles_alis_tokens_show.DBUtil', mock_lib):
+            ArticlesAlisTokensShow(params, {}, self.dynamodb).main()
+            args, kwargs = mock_lib.validate_article_existence.call_args
+
+            self.assertTrue(mock_lib.validate_article_existence.called)
+            self.assertTrue(args[0])
+            self.assertEqual(args[1], 'testid000001')
+            self.assertEqual(kwargs['status'], 'public')
 
     def test_validation_with_no_params(self):
         params = {}
