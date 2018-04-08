@@ -18,6 +18,7 @@ class TestMeInfoIconCreate(TestCase):
 
     @classmethod
     def setUpClass(cls):
+        os.environ['DOMAIN'] = 'example.com'
         TestsUtil.set_all_tables_name_to_env()
         TestsUtil.delete_all_tables(cls.dynamodb)
 
@@ -47,7 +48,7 @@ class TestMeInfoIconCreate(TestCase):
         self.assertEqual(response['statusCode'], 400)
 
     def equal_size_to_s3_image(self, s3_key, target_image_size):
-        bucket = self.s3.Bucket(os.environ['ME_INFO_ICON_BUCKET_NAME'])
+        bucket = self.s3.Bucket(os.environ['DIST_S3_BUCKET_NAME'])
         image_tmp = tempfile.NamedTemporaryFile()
 
         with open(image_tmp.name, 'wb') as f:
@@ -87,21 +88,22 @@ class TestMeInfoIconCreate(TestCase):
         # response
         image_url_path = target_user['user_id'] + '/icon/'
         image_file_name = 'uuid.' + image_format
+        key = settings.S3_INFO_ICON_PATH + image_url_path + image_file_name
         expected_item = {
-            'icon_image_url':  image_url_path + image_file_name
+            'icon_image_url': 'https://' + os.environ['DOMAIN'] + '/' + key
         }
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(json.loads(response['body']), expected_item)
         # dynamodb
         expected_items = {
             'user_id': target_user['user_id'],
-            'icon_image_url': image_url_path + image_file_name
+            'icon_image_url': key
         }
         users_param_names = ['user_id', 'icon_image_url']
-        for key in users_param_names:
-            self.assertEqual(expected_items[key], user_item[key])
+        for name in users_param_names:
+            self.assertEqual(expected_items[name], user_item[name])
         # s3
-        self.assertTrue(self.equal_size_to_s3_image(image_url_path + image_file_name, image_data.size))
+        self.assertTrue(self.equal_size_to_s3_image(key, image_data.size))
 
     @patch('uuid.uuid4', MagicMock(return_value='uuid'))
     def test_main_ok_exists_icon_image_url_png(self):
@@ -133,21 +135,22 @@ class TestMeInfoIconCreate(TestCase):
         # response
         image_url_path = target_user['user_id'] + '/icon/'
         image_file_name = 'uuid.' + image_format
+        key = settings.S3_INFO_ICON_PATH + image_url_path + image_file_name
         expected_item = {
-            'icon_image_url':  image_url_path + image_file_name
+            'icon_image_url': 'https://' + os.environ['DOMAIN'] + '/' + key
         }
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(json.loads(response['body']), expected_item)
         # dynamodb
         expected_items = {
             'user_id': target_user['user_id'],
-            'icon_image_url': image_url_path + image_file_name
+            'icon_image_url': key
         }
         users_param_names = ['user_id', 'icon_image_url']
-        for key in users_param_names:
-            self.assertEqual(expected_items[key], user_item[key])
+        for name in users_param_names:
+            self.assertEqual(expected_items[name], user_item[name])
         # s3
-        self.assertTrue(self.equal_size_to_s3_image(image_url_path + image_file_name, image_data.size))
+        self.assertTrue(self.equal_size_to_s3_image(key, image_data.size))
 
     @patch('uuid.uuid4', MagicMock(return_value='uuid'))
     def test_main_ok_over_size_and_width_gt_height_jpeg(self):
@@ -179,22 +182,23 @@ class TestMeInfoIconCreate(TestCase):
         # response
         image_url_path = target_user['user_id'] + '/icon/'
         image_file_name = 'uuid.' + image_format
+        key = settings.S3_INFO_ICON_PATH + image_url_path + image_file_name
         expected_item = {
-            'icon_image_url':  image_url_path + image_file_name
+            'icon_image_url': 'https://' + os.environ['DOMAIN'] + '/' + key
         }
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(json.loads(response['body']), expected_item)
         # dynamodb
         expected_items = {
             'user_id': target_user['user_id'],
-            'icon_image_url': image_url_path + image_file_name
+            'icon_image_url': key
         }
         users_param_names = ['user_id', 'icon_image_url']
-        for key in users_param_names:
-            self.assertEqual(expected_items[key], user_item[key])
+        for name in users_param_names:
+            self.assertEqual(expected_items[name], user_item[name])
         # s3
         expected_size = (settings.USER_ICON_WIDTH, settings.USER_ICON_HEIGHT)
-        self.assertTrue(self.equal_size_to_s3_image(image_url_path + image_file_name, expected_size))
+        self.assertTrue(self.equal_size_to_s3_image(key, expected_size))
 
     @patch('uuid.uuid4', MagicMock(return_value='uuid'))
     def test_main_ok_over_size_and_height_gt_width_gif(self):
@@ -226,22 +230,23 @@ class TestMeInfoIconCreate(TestCase):
         # response
         image_url_path = target_user['user_id'] + '/icon/'
         image_file_name = 'uuid.' + image_format
+        key = settings.S3_INFO_ICON_PATH + image_url_path + image_file_name
         expected_item = {
-            'icon_image_url':  image_url_path + image_file_name
+            'icon_image_url': 'https://' + os.environ['DOMAIN'] + '/' + key
         }
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(json.loads(response['body']), expected_item)
         # dynamodb
         expected_items = {
             'user_id': target_user['user_id'],
-            'icon_image_url': image_url_path + image_file_name
+            'icon_image_url': key
         }
         users_param_names = ['user_id', 'icon_image_url']
-        for key in users_param_names:
-            self.assertEqual(expected_items[key], user_item[key])
+        for name in users_param_names:
+            self.assertEqual(expected_items[name], user_item[name])
         # s3
         expected_size = (settings.USER_ICON_WIDTH, settings.USER_ICON_HEIGHT)
-        self.assertTrue(self.equal_size_to_s3_image(image_url_path + image_file_name, expected_size))
+        self.assertTrue(self.equal_size_to_s3_image(key, expected_size))
 
     @patch('uuid.uuid4', MagicMock(return_value='uuid'))
     def test_main_ok_over_size_only_width(self):
@@ -273,22 +278,23 @@ class TestMeInfoIconCreate(TestCase):
         # response
         image_url_path = target_user['user_id'] + '/icon/'
         image_file_name = 'uuid.' + image_format
+        key = settings.S3_INFO_ICON_PATH + image_url_path + image_file_name
         expected_item = {
-            'icon_image_url': image_url_path + image_file_name
+            'icon_image_url': 'https://' + os.environ['DOMAIN'] + '/' + key
         }
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(json.loads(response['body']), expected_item)
         # dynamodb
         expected_items = {
             'user_id': target_user['user_id'],
-            'icon_image_url': image_url_path + image_file_name
+            'icon_image_url': key
         }
         users_param_names = ['user_id', 'icon_image_url']
-        for key in users_param_names:
-            self.assertEqual(expected_items[key], user_item[key])
+        for name in users_param_names:
+            self.assertEqual(expected_items[name], user_item[name])
         # s3
         expected_size = (settings.USER_ICON_WIDTH, settings.USER_ICON_HEIGHT - 100)
-        self.assertTrue(self.equal_size_to_s3_image(image_url_path + image_file_name, expected_size))
+        self.assertTrue(self.equal_size_to_s3_image(key, expected_size))
 
     @patch('uuid.uuid4', MagicMock(return_value='uuid'))
     def test_main_ok_over_size_only_height(self):
@@ -320,22 +326,23 @@ class TestMeInfoIconCreate(TestCase):
         # response
         image_url_path = target_user['user_id'] + '/icon/'
         image_file_name = 'uuid.' + image_format
+        key = settings.S3_INFO_ICON_PATH + image_url_path + image_file_name
         expected_item = {
-            'icon_image_url': image_url_path + image_file_name
+            'icon_image_url': 'https://' + os.environ['DOMAIN'] + '/' + key
         }
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(json.loads(response['body']), expected_item)
         # dynamodb
         expected_items = {
             'user_id': target_user['user_id'],
-            'icon_image_url': image_url_path + image_file_name
+            'icon_image_url': key
         }
         users_param_names = ['user_id', 'icon_image_url']
-        for key in users_param_names:
-            self.assertEqual(expected_items[key], user_item[key])
+        for name in users_param_names:
+            self.assertEqual(expected_items[name], user_item[name])
         # s3
         expected_size = (settings.USER_ICON_WIDTH - 100, settings.USER_ICON_HEIGHT)
-        self.assertTrue(self.equal_size_to_s3_image(image_url_path + image_file_name, expected_size))
+        self.assertTrue(self.equal_size_to_s3_image(key, expected_size))
 
     def test_validation_with_no_params(self):
         params = {
