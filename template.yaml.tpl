@@ -687,6 +687,23 @@ Resources:
                 httpMethod: POST
                 type: aws_proxy
           /me/info:
+            get:
+              description: 'ログインユーザ情報を取得'
+              responses:
+                '200':
+                  description: 'ログインユーザ情報'
+                  schema:
+                    $ref: '#/definitions/UserInfo'
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesLikesShow.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
             put:
               description: 'ユーザ情報を更新'
               parameters:
@@ -1176,6 +1193,19 @@ Resources:
             Path: /me/info
             Method: put
             RestApiId: !Ref RestApi
+  MeInfoShow:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_info_show.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/info
+            Method: get
+            RestApiId: !Ref RestApi
   CognitoTriggerPreSignUp:
     Type: AWS::Serverless::Function
     Properties:
@@ -1361,63 +1391,3 @@ Resources:
     Type: "AWS::S3::Bucket"
     Properties:
       AccessControl: "PublicRead"
-  CloudFront:
-    Type: AWS::CloudFront::Distribution
-    Properties:
-      DistributionConfig:
-        Origins:
-        - DomainName:
-            Fn::Join:
-            - ""
-            - - Ref: RestApi
-              - ".execute-api."
-              - Ref: AWS::Region
-              - ".amazonaws.com"
-          Id: !Ref RestApi
-          OriginPath: ""
-          CustomOriginConfig:
-            OriginProtocolPolicy: "https-only"
-        Enabled: 'true'
-        Comment: !Ref "AWS::StackName"
-        DefaultCacheBehavior:
-          AllowedMethods:
-          - DELETE
-          - GET
-          - HEAD
-          - OPTIONS
-          - PATCH
-          - POST
-          - PUT
-          TargetOriginId: !Ref RestApi
-          ForwardedValues:
-            QueryString: 'false'
-            Cookies:
-              Forward: none
-          ViewerProtocolPolicy: redirect-to-https
-        CacheBehaviors:
-        - AllowedMethods:
-          - HEAD
-          - DELETE
-          - POST
-          - GET
-          - OPTIONS
-          - PUT
-          - PATCH
-          TargetOriginId: !Ref RestApi
-          ForwardedValues:
-            QueryString: 'true'
-            Cookies:
-              Forward: all
-            Headers:
-            - Authorization
-          ViewerProtocolPolicy: redirect-to-https
-          MinTTL: '0'
-          MaxTTL: '0'
-          DefaultTTL: '0'
-          PathPattern: /api/*
-        PriceClass: PriceClass_All
-        Restrictions:
-          GeoRestriction:
-            RestrictionType: none
-        ViewerCertificate:
-          CloudFrontDefaultCertificate: true
