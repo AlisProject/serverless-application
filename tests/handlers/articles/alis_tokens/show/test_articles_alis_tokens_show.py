@@ -43,7 +43,14 @@ class TestArticlesAlisTokensShow(TestCase):
 
         # create article_evaluated_manage_table
         article_evaluated_manage_items = [
-            {'active_evaluated_at': 1520150272000000}
+            {
+                'type': 'alistoken',
+                'active_evaluated_at': 1520150272000000
+            },
+            {
+                'type': 'article_score',
+                'active_evaluated_at': 1520150273000000
+            }
         ]
         TestsUtil.create_table(
             cls.dynamodb,

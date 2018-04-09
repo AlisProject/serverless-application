@@ -66,7 +66,14 @@ class TestArticlesPopular(TestCase):
         TestsUtil.create_table(cls.dynamodb, os.environ['ARTICLE_SCORE_TABLE_NAME'], article_score_items)
 
         evaluated_manage_items = [
-            {'active_evaluated_at': 1520150272000000}
+            {
+                'type': 'article_score',
+                'active_evaluated_at': 1520150272000000
+            },
+            {
+                'type': 'alistoken',
+                'active_evaluated_at': 1520150273000000
+            }
         ]
         TestsUtil.create_table(cls.dynamodb, os.environ['ARTICLE_EVALUATED_MANAGE_TABLE_NAME'], evaluated_manage_items)
 

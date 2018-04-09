@@ -36,7 +36,7 @@ class ArticlesAlisTokensShow(LambdaBase):
         article_evaluated_manage_table = self.dynamodb.Table(os.environ['ARTICLE_EVALUATED_MANAGE_TABLE_NAME'])
         article_alis_token_table = self.dynamodb.Table(os.environ['ARTICLE_ALIS_TOKEN_TABLE_NAME'])
 
-        active_evaluated_at = article_evaluated_manage_table.scan()['Items'][0]['active_evaluated_at']
+        active_evaluated_at = article_evaluated_manage_table.get_item(Key={'type': 'alistoken'})['Item']['active_evaluated_at']
 
         responce = article_alis_token_table.get_item(
             Key={

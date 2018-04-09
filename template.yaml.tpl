@@ -1257,10 +1257,10 @@ Resources:
     Type: AWS::DynamoDB::Table
     Properties:
       AttributeDefinitions:
-        - AttributeName: active_evaluated_at
-          AttributeType: N
+        - AttributeName: type
+          AttributeType: S
       KeySchema:
-        - AttributeName: active_evaluated_at
+        - AttributeName: type
           KeyType: HASH
       ProvisionedThroughput:
         ReadCapacityUnits: 1

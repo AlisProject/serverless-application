@@ -30,7 +30,9 @@ class ArticlesPopular(LambdaBase):
     def exec_main_proc(self):
         article_info_table = self.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
         article_evaluated_manage_table = self.dynamodb.Table(os.environ['ARTICLE_EVALUATED_MANAGE_TABLE_NAME'])
-        active_evaluated_at = article_evaluated_manage_table.scan()['Items'][0]['active_evaluated_at']
+        active_evaluated_at = article_evaluated_manage_table.get_item(
+            Key={'type': 'article_score'}
+        )['Item']['active_evaluated_at']
 
         article_score_table = self.dynamodb.Table(os.environ['ARTICLE_SCORE_TABLE_NAME'])
 
