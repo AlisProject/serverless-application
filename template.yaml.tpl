@@ -18,6 +18,8 @@ Globals:
         ARTICLE_LIKED_USER_TABLE_NAME: !Ref ArticleLikedUser
         USERS_TABLE_NAME: !Ref Users
         COGNITO_EMAIL_VERIFY_URL: {{ COGNITO_EMAIL_VERIFY_URL }}
+        DIST_S3_BUCKET_NAME: {{ DIST_S3_BUCKET_NAME }}
+        DOMAIN: {{ DOMAIN }}
 
 Resources:
   SNSRole:
@@ -399,6 +401,43 @@ Resources:
                 httpMethod: POST
                 type: aws_proxy
           /me/articles/drafts:
+            get:
+              description: '下書き記事一覧情報を取得'
+              parameters:
+              - name: 'limit'
+                in: 'query'
+                description: '取得件数'
+                required: false
+                type: 'integer'
+                minimum: 1
+              - name: 'article_id'
+                in: 'query'
+                description: 'ページング処理における、現在のページの最後の記事のID'
+                required: false
+                type: 'string'
+              - name: 'sort_key'
+                in: 'query'
+                description: 'ページング処理における、現在のページの最後の記事のソートキー'
+                required: false
+                type: 'integer'
+                minimum: 1
+              responses:
+                '200':
+                  description: '下書き記事一覧'
+                  schema:
+                    type: array
+                    items:
+                      $ref: '#/definitions/ArticleInfo'
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesDraftsIndex.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
             post:
               description: '下書き記事を作成'
               parameters:
@@ -973,6 +1012,19 @@ Resources:
             Path: /users/{user_id}/info
             Method: get
             RestApiId: !Ref RestApi
+  MeArticlesDraftsIndex:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_articles_drafts_index.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/articles/drafts
+            Method: get
+            RestApiId: !Ref RestApi
   MeArticlesDraftsCreate:
       Type: AWS::Serverless::Function
       Properties:
@@ -1112,9 +1164,6 @@ Resources:
         Handler: handler.lambda_handler
         Role: !GetAtt LambdaRole.Arn
         CodeUri: ./deploy/me_articles_images_create.zip
-        Environment:
-          Variables:
-            ARTICLES_IMAGES_BUCKET_NAME: !Ref "ArticlesImagesBucket"
         Events:
           Api:
             Type: Api
@@ -1128,9 +1177,6 @@ Resources:
         Handler: handler.lambda_handler
         Role: !GetAtt LambdaRole.Arn
         CodeUri: ./deploy/me_info_icon_create.zip
-        Environment:
-          Variables:
-            ME_INFO_ICON_BUCKET_NAME: !Ref "MeInfoIconBucket"
         Events:
           Api:
             Type: Api
@@ -1354,71 +1400,3 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: 2
         WriteCapacityUnits: 2
-  ArticlesImagesBucket:
-    Type: "AWS::S3::Bucket"
-    Properties:
-      AccessControl: "PublicRead"
-  MeInfoIconBucket:
-    Type: "AWS::S3::Bucket"
-    Properties:
-      AccessControl: "PublicRead"
-  CloudFront:
-    Type: AWS::CloudFront::Distribution
-    Properties:
-      DistributionConfig:
-        Origins:
-        - DomainName:
-            Fn::Join:
-            - ""
-            - - Ref: RestApi
-              - ".execute-api."
-              - Ref: AWS::Region
-              - ".amazonaws.com"
-          Id: !Ref RestApi
-          OriginPath: ""
-          CustomOriginConfig:
-            OriginProtocolPolicy: "https-only"
-        Enabled: 'true'
-        Comment: !Ref "AWS::StackName"
-        DefaultCacheBehavior:
-          AllowedMethods:
-          - DELETE
-          - GET
-          - HEAD
-          - OPTIONS
-          - PATCH
-          - POST
-          - PUT
-          TargetOriginId: !Ref RestApi
-          ForwardedValues:
-            QueryString: 'false'
-            Cookies:
-              Forward: none
-          ViewerProtocolPolicy: redirect-to-https
-        CacheBehaviors:
-        - AllowedMethods:
-          - HEAD
-          - DELETE
-          - POST
-          - GET
-          - OPTIONS
-          - PUT
-          - PATCH
-          TargetOriginId: !Ref RestApi
-          ForwardedValues:
-            QueryString: 'true'
-            Cookies:
-              Forward: all
-            Headers:
-            - Authorization
-          ViewerProtocolPolicy: redirect-to-https
-          MinTTL: '0'
-          MaxTTL: '0'
-          DefaultTTL: '0'
-          PathPattern: /api/*
-        PriceClass: PriceClass_All
-        Restrictions:
-          GeoRestriction:
-            RestrictionType: none
-        ViewerCertificate:
-          CloudFrontDefaultCertificate: true
