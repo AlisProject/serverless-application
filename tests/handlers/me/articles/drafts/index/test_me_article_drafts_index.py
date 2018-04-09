@@ -1,13 +1,11 @@
 import os
-import boto3
 import json
 from unittest import TestCase
-from users_articles_public import UsersArticlesPublic
-from unittest.mock import patch, MagicMock
+from me_articles_drafts_index import MeArticlesDraftsIndex
 from tests_util import TestsUtil
 
 
-class TestUsersArticlesPublic(TestCase):
+class TestMeArticlesDraftsIndex(TestCase):
     dynamodb = TestsUtil.get_dynamodb_client()
 
     @classmethod
@@ -17,33 +15,33 @@ class TestUsersArticlesPublic(TestCase):
 
         items = [
             {
-                'article_id': 'draftId00001',
-                'user_id': 'TST',
-                'status': 'draft',
+                'article_id': 'publicId0001',
+                'user_id': 'test_user_id',
+                'status': 'public',
                 'sort_key': 1520150272000000
             },
             {
                 'article_id': 'testid000001',
-                'user_id': 'TST',
-                'status': 'public',
+                'user_id': 'test_user_id',
+                'status': 'draft',
                 'sort_key': 1520150272000001
             },
             {
                 'article_id': 'testid000002',
-                'user_id': 'TST',
-                'status': 'public',
+                'user_id': 'test_user_id',
+                'status': 'draft',
                 'sort_key': 1520150272000002
             },
             {
                 'article_id': 'testid000003',
-                'user_id': 'TST2',
-                'status': 'public',
+                'user_id': 'test_user_id2',
+                'status': 'draft',
                 'sort_key': 1520150272000003
             },
             {
                 'article_id': 'testid000004',
-                'user_id': 'TST',
-                'status': 'public',
+                'user_id': 'test_user_id',
+                'status': 'draft',
                 'sort_key': 1520150272000004
             }
         ]
@@ -55,34 +53,38 @@ class TestUsersArticlesPublic(TestCase):
         TestsUtil.delete_all_tables(cls.dynamodb)
 
     def assert_bad_request(self, params):
-        function = UsersArticlesPublic(params, {}, self.dynamodb)
+        function = MeArticlesDraftsIndex(params, {}, self.dynamodb)
         response = function.main()
 
         self.assertEqual(response['statusCode'], 400)
 
     def test_main_ok(self):
         params = {
-            'pathParameters': {
-                'user_id': 'TST'
-            },
             'queryStringParameters': {
                 'limit': '2'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test_user_id'
+                    }
+                }
             }
         }
 
-        response = UsersArticlesPublic(params, {}, self.dynamodb).main()
+        response = MeArticlesDraftsIndex(params, {}, self.dynamodb).main()
 
         expected_items = [
             {
                 'article_id': 'testid000004',
-                'user_id': 'TST',
-                'status': 'public',
+                'user_id': 'test_user_id',
+                'status': 'draft',
                 'sort_key': 1520150272000004
             },
             {
                 'article_id': 'testid000002',
-                'user_id': 'TST',
-                'status': 'public',
+                'user_id': 'test_user_id',
+                'status': 'draft',
                 'sort_key': 1520150272000002
             }
         ]
@@ -92,23 +94,27 @@ class TestUsersArticlesPublic(TestCase):
 
     def test_main_ok_with_evaluated_key(self):
         params = {
-            'pathParameters': {
-                'user_id': 'TST'
-            },
             'queryStringParameters': {
                 'limit': '3',
                 'article_id': 'testid000002',
                 'sort_key': '1520150272000002'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test_user_id'
+                    }
+                }
             }
         }
 
-        response = UsersArticlesPublic(params, {}, self.dynamodb).main()
+        response = MeArticlesDraftsIndex(params, {}, self.dynamodb).main()
 
         expected_items = [
             {
                 'article_id': 'testid000001',
-                'user_id': 'TST',
-                'status': 'public',
+                'user_id': 'test_user_id',
+                'status': 'draft',
                 'sort_key': 1520150272000001
             }
         ]
@@ -117,113 +123,96 @@ class TestUsersArticlesPublic(TestCase):
         self.assertEqual(json.loads(response['body'])['Items'], expected_items)
 
     def test_main_ok_with_only_sort_key(self):
-        table = self.dynamodb.Table('ArticleInfo')
-
-        for i in range(11):
-            table.put_item(Item={
-                'user_id': 'test-only-sort-key',
-                'article_id': 'test_limit_number' + str(i),
-                'status': 'public',
-                'sort_key': 1520150273000000 + i
-                }
-            )
-
         params = {
-            'pathParameters': {
-                'user_id': 'test-only-sort-key'
-            },
             'queryStringParameters': {
-                'sort_key': '1520150272000002'
+                'sort_key': '1520150272000002',
+                'limit': '1'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test_user_id'
+                    }
+                }
             }
         }
 
-        response = UsersArticlesPublic(params, {}, self.dynamodb).main()
+        response = MeArticlesDraftsIndex(params, {}, self.dynamodb).main()
+
+        not_expected_response = [
+            {
+                'article_id': 'testid000001',
+                'user_id': 'test_user_id',
+                'status': 'draft',
+                'sort_key': 1520150272000001
+            }
+        ]
 
         self.assertEqual(response['statusCode'], 200)
-        self.assertEqual(len(json.loads(response['body'])['Items']), 10)
+        self.assertNotEqual(json.loads(response['body'])['Items'], not_expected_response)
 
     def test_main_ok_with_evaluated_key_with_no_limit(self):
         table = self.dynamodb.Table('ArticleInfo')
 
         for i in range(11):
             table.put_item(Item={
-                'user_id': 'TST',
+                'user_id': 'test_user_id',
                 'article_id': 'test_limit_number' + str(i),
-                'status': 'public',
+                'status': 'draft',
                 'sort_key': 1520150273000000 + i
                 }
             )
 
         params = {
-            'pathParameters': {
-                'user_id': 'TST'
+            'queryStringParameters': None,
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test_user_id'
+                    }
+                }
             }
         }
 
-        response = UsersArticlesPublic(params, {}, self.dynamodb).main()
+        response = MeArticlesDraftsIndex(params, {}, self.dynamodb).main()
 
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(len(json.loads(response['body'])['Items']), 10)
 
     def test_main_with_no_recource(self):
         params = {
-            'pathParameters': {
-                'user_id': 'A' * 30
-            },
             'queryStringParameters': {
                 'limit': '3'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'not_exists_user_id'
+                    }
+                }
             }
         }
 
-        response = UsersArticlesPublic(params, {}, self.dynamodb).main()
+        response = MeArticlesDraftsIndex(params, {}, self.dynamodb).main()
 
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(json.loads(response['body'])['Items'], [])
 
-    def test_validation_with_no_path_params(self):
-        params = {
-            'queryStringParameters': {
-                'limit': '3'
-            }
-        }
-
-        self.assert_bad_request(params)
-
     def test_validation_with_no_query_params(self):
         params = {
-            'pathParameters': {
-                'user_id': 'TST'
+            'queryStringParameters': None,
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test_user_id'
+                    }
+                }
             }
         }
 
-        response = UsersArticlesPublic(params, {}, self.dynamodb).main()
+        response = MeArticlesDraftsIndex(params, {}, self.dynamodb).main()
 
         self.assertEqual(response['statusCode'], 200)
-
-    def test_validation_user_id_required(self):
-        params = {
-            'pathParameters': {}
-        }
-
-        self.assert_bad_request(params)
-
-    def test_validation_user_id_max(self):
-        params = {
-            'pathParameters': {
-                'user_id': 'AL'
-            }
-        }
-
-        self.assert_bad_request(params)
-
-    def test_validation_user_id_min(self):
-        params = {
-            'pathParameters': {
-                'user_id': 'A' * 31
-            }
-        }
-
-        self.assert_bad_request(params)
 
     def test_validation_limit_type(self):
         params = {
