@@ -18,6 +18,8 @@ Globals:
         ARTICLE_LIKED_USER_TABLE_NAME: !Ref ArticleLikedUser
         USERS_TABLE_NAME: !Ref Users
         COGNITO_EMAIL_VERIFY_URL: {{ COGNITO_EMAIL_VERIFY_URL }}
+        DIST_S3_BUCKET_NAME: {{ DIST_S3_BUCKET_NAME }}
+        DOMAIN: {{ DOMAIN }}
 
 Resources:
   SNSRole:
@@ -1111,9 +1113,6 @@ Resources:
         Handler: handler.lambda_handler
         Role: !GetAtt LambdaRole.Arn
         CodeUri: ./deploy/me_articles_images_create.zip
-        Environment:
-          Variables:
-            ARTICLES_IMAGES_BUCKET_NAME: !Ref "ArticlesImagesBucket"
         Events:
           Api:
             Type: Api
@@ -1127,9 +1126,6 @@ Resources:
         Handler: handler.lambda_handler
         Role: !GetAtt LambdaRole.Arn
         CodeUri: ./deploy/me_info_icon_create.zip
-        Environment:
-          Variables:
-            ME_INFO_ICON_BUCKET_NAME: !Ref "MeInfoIconBucket"
         Events:
           Api:
             Type: Api
@@ -1353,71 +1349,3 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: 2
         WriteCapacityUnits: 2
-  ArticlesImagesBucket:
-    Type: "AWS::S3::Bucket"
-    Properties:
-      AccessControl: "PublicRead"
-  MeInfoIconBucket:
-    Type: "AWS::S3::Bucket"
-    Properties:
-      AccessControl: "PublicRead"
-  CloudFront:
-    Type: AWS::CloudFront::Distribution
-    Properties:
-      DistributionConfig:
-        Origins:
-        - DomainName:
-            Fn::Join:
-            - ""
-            - - Ref: RestApi
-              - ".execute-api."
-              - Ref: AWS::Region
-              - ".amazonaws.com"
-          Id: !Ref RestApi
-          OriginPath: ""
-          CustomOriginConfig:
-            OriginProtocolPolicy: "https-only"
-        Enabled: 'true'
-        Comment: !Ref "AWS::StackName"
-        DefaultCacheBehavior:
-          AllowedMethods:
-          - DELETE
-          - GET
-          - HEAD
-          - OPTIONS
-          - PATCH
-          - POST
-          - PUT
-          TargetOriginId: !Ref RestApi
-          ForwardedValues:
-            QueryString: 'false'
-            Cookies:
-              Forward: none
-          ViewerProtocolPolicy: redirect-to-https
-        CacheBehaviors:
-        - AllowedMethods:
-          - HEAD
-          - DELETE
-          - POST
-          - GET
-          - OPTIONS
-          - PUT
-          - PATCH
-          TargetOriginId: !Ref RestApi
-          ForwardedValues:
-            QueryString: 'true'
-            Cookies:
-              Forward: all
-            Headers:
-            - Authorization
-          ViewerProtocolPolicy: redirect-to-https
-          MinTTL: '0'
-          MaxTTL: '0'
-          DefaultTTL: '0'
-          PathPattern: /api/*
-        PriceClass: PriceClass_All
-        Restrictions:
-          GeoRestriction:
-            RestrictionType: none
-        ViewerCertificate:
-          CloudFrontDefaultCertificate: true
