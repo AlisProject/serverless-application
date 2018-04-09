@@ -11,10 +11,9 @@ import json
 class TestArticlesPopular(TestCase):
     dynamodb = TestsUtil.get_dynamodb_client()
 
-    @classmethod
-    def setUpClass(cls):
+    def setUp(self):
         TestsUtil.set_all_tables_name_to_env()
-        TestsUtil.delete_all_tables(cls.dynamodb)
+        TestsUtil.delete_all_tables(self.dynamodb)
 
         # create article_info_table
         article_info_items = [
@@ -39,7 +38,7 @@ class TestArticlesPopular(TestCase):
                 'sort_key': 1520150272000003
             }
         ]
-        TestsUtil.create_table(cls.dynamodb, os.environ['ARTICLE_INFO_TABLE_NAME'], article_info_items)
+        TestsUtil.create_table(self.dynamodb, os.environ['ARTICLE_INFO_TABLE_NAME'], article_info_items)
 
         article_score_items = [
             {
@@ -63,7 +62,7 @@ class TestArticlesPopular(TestCase):
                 'evaluated_at': 1520150272000000
             }
         ]
-        TestsUtil.create_table(cls.dynamodb, os.environ['ARTICLE_SCORE_TABLE_NAME'], article_score_items)
+        TestsUtil.create_table(self.dynamodb, os.environ['ARTICLE_SCORE_TABLE_NAME'], article_score_items)
 
         evaluated_manage_items = [
             {
@@ -75,11 +74,10 @@ class TestArticlesPopular(TestCase):
                 'active_evaluated_at': 1520150273000000
             }
         ]
-        TestsUtil.create_table(cls.dynamodb, os.environ['ARTICLE_EVALUATED_MANAGE_TABLE_NAME'], evaluated_manage_items)
+        TestsUtil.create_table(self.dynamodb, os.environ['ARTICLE_EVALUATED_MANAGE_TABLE_NAME'], evaluated_manage_items)
 
-    @classmethod
-    def tearDownClass(cls):
-        TestsUtil.delete_all_tables(cls.dynamodb)
+    def tearDown(self):
+        TestsUtil.delete_all_tables(self.dynamodb)
 
     def assert_bad_request(self, params):
         function = ArticlesPopular(params, {}, self.dynamodb)
@@ -167,6 +165,21 @@ class TestArticlesPopular(TestCase):
 
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(json.loads(response['body'])['Items'], expected_items)
+
+    def test_main_no_evaluated_manager(self):
+        article_evaluated_manage_table = self.dynamodb.Table(os.environ['ARTICLE_EVALUATED_MANAGE_TABLE_NAME'])
+        article_evaluated_manage_table.delete_item(Key={'type': 'article_score'})
+
+        params = {
+            'queryStringParameters': {
+                'limit': '3'
+            }
+        }
+
+        response = ArticlesPopular(params, {}, self.dynamodb).main()
+
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(json.loads(response['body']), [])
 
     def test_validation_limit_type(self):
         params = {
