@@ -1375,8 +1375,6 @@ Resources:
           AttributeType: S
         - AttributeName: user_id
           AttributeType: S
-        - AttributeName: created_at
-          AttributeType: N
         - AttributeName: sort_key
           AttributeType: N
       KeySchema:
