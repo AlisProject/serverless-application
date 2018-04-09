@@ -1,0 +1,2 @@
+class NotVerifiedUserError(Exception):
+    pass

@@ -53,10 +53,11 @@ class MeInfoIconCreate(LambdaBase):
     def exec_main_proc(self):
         ext = self.headers['content-type'].split('/')[1]
         user_id = self.event['requestContext']['authorizer']['claims']['cognito:username']
-        key = user_id + '/icon/' + str(uuid.uuid4()) + '.' + ext
+        key = settings.S3_INFO_ICON_PATH + \
+            user_id + '/icon/' + str(uuid.uuid4()) + '.' + ext
         image_data = self.__get_save_image_data(base64.b64decode(self.params['icon_image']), ext)
 
-        self.s3.Bucket(os.environ['ME_INFO_ICON_BUCKET_NAME']).put_object(
+        self.s3.Bucket(os.environ['DIST_S3_BUCKET_NAME']).put_object(
             Body=image_data,
             Key=key,
             ContentType=self.headers['content-type']
@@ -66,7 +67,7 @@ class MeInfoIconCreate(LambdaBase):
 
         return {
             'statusCode': 200,
-            'body': json.dumps({'icon_image_url': key})
+            'body': json.dumps({'icon_image_url': 'https://' + os.environ['DOMAIN'] + '/' + key})
         }
 
     def __update_user_info(self, icon_image_url):

@@ -18,6 +18,8 @@ Globals:
         ARTICLE_LIKED_USER_TABLE_NAME: !Ref ArticleLikedUser
         USERS_TABLE_NAME: !Ref Users
         COGNITO_EMAIL_VERIFY_URL: {{ COGNITO_EMAIL_VERIFY_URL }}
+        DIST_S3_BUCKET_NAME: {{ DIST_S3_BUCKET_NAME }}
+        DOMAIN: {{ DOMAIN }}
 
 Resources:
   SNSRole:
@@ -54,6 +56,7 @@ Resources:
       EmailVerificationMessage: "Your verification code is {{ '{' }}####}."
       EmailVerificationSubject: "Your verification code"
       LambdaConfig:
+        PreSignUp: !GetAtt CognitoTriggerPreSignUp.Arn
         CustomMessage: !GetAtt CognitoTriggerCustomMessage.Arn
         PostConfirmation: !GetAtt CognitoTriggerPostConfirmation.Arn
       MfaConfiguration: "OPTIONAL"
@@ -288,6 +291,17 @@ Resources:
                 type: string
               self_introduction:
                 type: string
+          UpdateArticle:
+            type: object
+            properties:
+              title:
+                type: string
+              body:
+                type: string
+              eye_catch_url:
+                type: string
+              overview:
+                type: string
         paths:
           /articles/recent:
             get:
@@ -400,6 +414,43 @@ Resources:
                 httpMethod: POST
                 type: aws_proxy
           /me/articles/drafts:
+            get:
+              description: '下書き記事一覧情報を取得'
+              parameters:
+              - name: 'limit'
+                in: 'query'
+                description: '取得件数'
+                required: false
+                type: 'integer'
+                minimum: 1
+              - name: 'article_id'
+                in: 'query'
+                description: 'ページング処理における、現在のページの最後の記事のID'
+                required: false
+                type: 'string'
+              - name: 'sort_key'
+                in: 'query'
+                description: 'ページング処理における、現在のページの最後の記事のソートキー'
+                required: false
+                type: 'integer'
+                minimum: 1
+              responses:
+                '200':
+                  description: '下書き記事一覧'
+                  schema:
+                    type: array
+                    items:
+                      $ref: '#/definitions/ArticleInfo'
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesDraftsIndex.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
             post:
               description: '下書き記事を作成'
               parameters:
@@ -473,6 +524,33 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+            put:
+              description: '指定された article_id の編集記事情報を上書き'
+              parameters:
+              - name: 'article_id'
+                in: 'path'
+                description: '対象記事の指定するために使用'
+                required: true
+                type: 'string'
+              - name: 'article'
+                in: 'body'
+                description: 'article object'
+                required: true
+                schema:
+                  $ref: '#/definitions/UpdateArticle'
+              responses:
+                '200':
+                  description: 'successful operation'
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesPublicUpdate.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
           /me/articles/{article_id}/public/edit:
             get:
               description: '指定された article_id の編集記事情報を取得'
@@ -494,6 +572,50 @@ Resources:
                   default:
                     statusCode: '200'
                 uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesPublicEdit.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /me/articles/{article_id}/public/unpublish:
+            put:
+              description: '指定された article_id の公開記事を下書きに戻す'
+              parameters:
+              - name: 'article_id'
+                in: 'path'
+                description: '対象記事を指定するために使用'
+                required: true
+                type: 'string'
+              responses:
+                '200':
+                  description: 'successful operation'
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesPublicUnpublish.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /me/articles/{article_id}/public/republish:
+            put:
+              description: '指定された article_id の編集記事を公開する'
+              parameters:
+              - name: 'article_id'
+                in: 'path'
+                description: '対象記事を指定するために使用'
+                required: true
+                type: 'string'
+              responses:
+                '200':
+                  description: 'successful operation'
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesPublicRepublish.Arn}/invocations
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
@@ -766,6 +888,13 @@ Resources:
         - arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess
         - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
         - arn:aws:iam::aws:policy/AmazonS3FullAccess
+  LambdaInvocationPermissionCognitoTriggerPreSignUp:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt CognitoTriggerPreSignUp.Arn
+      Principal: cognito-idp.amazonaws.com
+      SourceArn: !GetAtt UserPool.Arn
   LambdaInvocationPermissionCognitoTriggerCustomMessage:
     Type: AWS::Lambda::Permission
     Properties:
@@ -858,6 +987,19 @@ Resources:
             Path: /users/{user_id}/info
             Method: get
             RestApiId: !Ref RestApi
+  MeArticlesDraftsIndex:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_articles_drafts_index.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/articles/drafts
+            Method: get
+            RestApiId: !Ref RestApi
   MeArticlesDraftsCreate:
       Type: AWS::Serverless::Function
       Properties:
@@ -926,6 +1068,45 @@ Resources:
               Path: /me/articles/{article_id}/public/edit
               Method: get
               RestApiId: !Ref RestApi
+  MeArticlesPublicUpdate:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_articles_public_update.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/articles/{article_id}/public
+            Method: put
+            RestApiId: !Ref RestApi
+  MeArticlesPublicUnpublish:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_articles_public_unpublish.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/articles/{article_id}/public/unpublish
+            Method: put
+            RestApiId: !Ref RestApi
+  MeArticlesPublicRepublish:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_articles_public_republish.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/articles/{article_id}/public/republish
+            Method: put
+            RestApiId: !Ref RestApi
   MeArticlesLikeCreate:
     Type: AWS::Serverless::Function
     Properties:
@@ -945,9 +1126,6 @@ Resources:
         Handler: handler.lambda_handler
         Role: !GetAtt LambdaRole.Arn
         CodeUri: ./deploy/me_articles_images_create.zip
-        Environment:
-          Variables:
-            ARTICLES_IMAGES_BUCKET_NAME: !Ref "ArticlesImagesBucket"
         Events:
           Api:
             Type: Api
@@ -961,9 +1139,6 @@ Resources:
         Handler: handler.lambda_handler
         Role: !GetAtt LambdaRole.Arn
         CodeUri: ./deploy/me_info_icon_create.zip
-        Environment:
-          Variables:
-            ME_INFO_ICON_BUCKET_NAME: !Ref "MeInfoIconBucket"
         Events:
           Api:
             Type: Api
@@ -1010,6 +1185,12 @@ Resources:
             Path: /me/info
             Method: put
             RestApiId: !Ref RestApi
+  CognitoTriggerPreSignUp:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/cognito_trigger_presignup.zip
   CognitoTriggerCustomMessage:
     Type: AWS::Serverless::Function
     Properties:
@@ -1181,71 +1362,3 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: 2
         WriteCapacityUnits: 2
-  ArticlesImagesBucket:
-    Type: "AWS::S3::Bucket"
-    Properties:
-      AccessControl: "PublicRead"
-  MeInfoIconBucket:
-    Type: "AWS::S3::Bucket"
-    Properties:
-      AccessControl: "PublicRead"
-  CloudFront:
-    Type: AWS::CloudFront::Distribution
-    Properties:
-      DistributionConfig:
-        Origins:
-        - DomainName:
-            Fn::Join:
-            - ""
-            - - Ref: RestApi
-              - ".execute-api."
-              - Ref: AWS::Region
-              - ".amazonaws.com"
-          Id: !Ref RestApi
-          OriginPath: ""
-          CustomOriginConfig:
-            OriginProtocolPolicy: "https-only"
-        Enabled: 'true'
-        Comment: !Ref "AWS::StackName"
-        DefaultCacheBehavior:
-          AllowedMethods:
-          - DELETE
-          - GET
-          - HEAD
-          - OPTIONS
-          - PATCH
-          - POST
-          - PUT
-          TargetOriginId: !Ref RestApi
-          ForwardedValues:
-            QueryString: 'false'
-            Cookies:
-              Forward: none
-          ViewerProtocolPolicy: redirect-to-https
-        CacheBehaviors:
-        - AllowedMethods:
-          - HEAD
-          - DELETE
-          - POST
-          - GET
-          - OPTIONS
-          - PUT
-          - PATCH
-          TargetOriginId: !Ref RestApi
-          ForwardedValues:
-            QueryString: 'true'
-            Cookies:
-              Forward: all
-            Headers:
-            - Authorization
-          ViewerProtocolPolicy: redirect-to-https
-          MinTTL: '0'
-          MaxTTL: '0'
-          DefaultTTL: '0'
-          PathPattern: /api/*
-        PriceClass: PriceClass_All
-        Restrictions:
-          GeoRestriction:
-            RestrictionType: none
-        ViewerCertificate:
-          CloudFrontDefaultCertificate: true
