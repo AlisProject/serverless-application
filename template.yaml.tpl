@@ -1349,12 +1349,3 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: 2
         WriteCapacityUnits: 2
-
-  ArticlesImagesBucket:
-    Type: "AWS::S3::Bucket"
-    Properties:
-      AccessControl: "PublicRead"
-  MeInfoIconBucket:
-    Type: "AWS::S3::Bucket"
-    Properties:
-      AccessControl: "PublicRead"
