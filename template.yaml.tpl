@@ -341,7 +341,7 @@ Resources:
                 type: 'string'
               - name: 'score'
                 in: 'query'
-                description: 'ページング処理における、現在のページの最後の記事のいいね数'
+                description: 'ページング処理における、現在のページの最後の記事のスコア数'
                 required: false
                 type: 'integer'
                 minimum: 1

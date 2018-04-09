@@ -146,7 +146,7 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: 2
         WriteCapacityUnits: 2
-  ArticleLikedScore:
+  ArticleScore:
     Type: AWS::DynamoDB::Table
     Properties:
       AttributeDefinitions:
