@@ -100,6 +100,23 @@ class TestArticlesShow(TestCase):
 
         self.assertEqual(response['statusCode'], 404)
 
+    def test_call_validate_article_existence(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'testid000001'
+            }
+        }
+
+        mock_lib = MagicMock()
+        with patch('articles_show.DBUtil', mock_lib):
+            ArticlesShow(params, {}, self.dynamodb).main()
+            args, kwargs = mock_lib.validate_article_existence.call_args
+
+            self.assertTrue(mock_lib.validate_article_existence.called)
+            self.assertTrue(args[0])
+            self.assertEqual(args[1], 'testid000001')
+            self.assertEqual(kwargs['status'], 'public')
+
     def test_validation_with_no_params(self):
         params = {}
 
