@@ -47,19 +47,24 @@ python exec_test.py
 * AWS_DEFAULT_REGION is used by aws cli.
 * CLOUDFORMATION_STACK_NAME is used by stack name of cloudformation. ⚠ You can not use a hyphen.
 * DEPLOY_BUCKET_NAME is used by deploy of lambda.
-* COGNITO_EMAIL_VERIFY_URL is used by cognito email validation
+* DIST_S3_BUCKET_NAME is userd by upload static content. 
+* COGNITO_EMAIL_VERIFY_URL is used by cognito email validation.
+* SALT_FOR_ARTICLE_ID is used by make id of article.
+* DOMAIN is used by service.
 
 ```bash
 export AWS_DEFAULT_REGION=ap-northeast-1
 export CLOUDFORMATION_STACK_NAME=YOURSTACKNAMEHERE
 export DEPLOY_BUCKET_NAME=DEPLOY_BUCKET_NAME
+export DIST_S3_BUCKET_NAME=DIST_BUCKET_NAME
 export COGNITO_EMAIL_VERIFY_URL=https://example.com/confirm
 export SALT_FOR_ARTICLE_ID=YOURSALTKEYNAMEHERE
+export DOMAIN=DOMAINNAME
 ```
 
 ## Create S3 bucket
 
-You have to change `YOUR_DEPLOY_BUCKET_NAME` to your AWS S3 bucket name you want.
+You have to change `YOUR_DEPLOY_BUCKET_NAME` or `DIST_S3_BUCKET_NAME` to your AWS S3 bucket name you want.
 ```bash
 aws s3api create-bucket --bucket $DEPLOY_BUCKET_NAME \
   --create-bucket-configuration LocationConstraint=ap-northeast-1
