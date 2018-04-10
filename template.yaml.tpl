@@ -16,6 +16,9 @@ Globals:
         ARTICLE_EVALUATED_MANAGE_TABLE_NAME: !Ref ArticleEvaluatedManage
         ARTICLE_ALIS_TOKEN_TABLE_NAME: !Ref ArticleAlisToken
         ARTICLE_LIKED_USER_TABLE_NAME: !Ref ArticleLikedUser
+        ARTICLE_FRAUD_USER_TABLE_NAME: !Ref ArticleFraudUser
+        ARTICLE_PV_USER_TABLE_NAME: !Ref ArticlePvUser
+        ARTICLE_SCORE_TABLE_NAME: !Ref ArticleScore
         USERS_TABLE_NAME: !Ref Users
         COGNITO_EMAIL_VERIFY_URL: {{ COGNITO_EMAIL_VERIFY_URL }}
         DIST_S3_BUCKET_NAME: {{ DIST_S3_BUCKET_NAME }}
@@ -328,6 +331,42 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+          /articles/popular:
+            get:
+              description: '人気記事一覧情報を取得'
+              parameters:
+              - name: 'limit'
+                in: 'query'
+                description: '取得件数'
+                required: false
+                type: 'integer'
+                minimum: 1
+              - name: 'article_id'
+                in: 'query'
+                description: 'ページング処理における、現在のページの最後の記事のID'
+                required: false
+                type: 'string'
+              - name: 'score'
+                in: 'query'
+                description: 'ページング処理における、現在のページの最後の記事のスコア数'
+                required: false
+                type: 'integer'
+                minimum: 1
+              responses:
+                '200':
+                  description: '人気記事一覧'
+                  schema:
+                    type: array
+                    items:
+                      $ref: '#/definitions/ArticleInfo'
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ArticlesPopular.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
           /articles/{article_id}:
             get:
               description: "指定されたarticle_idの記事情報を取得"
@@ -486,6 +525,44 @@ Resources:
                   default:
                     statusCode: '200'
                 uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesDraftsPublish.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /me/articles/public:
+            get:
+              description: '公開記事一覧情報を取得'
+              parameters:
+              - name: 'limit'
+                in: 'query'
+                description: '取得件数'
+                required: false
+                type: 'integer'
+                minimum: 1
+              - name: 'article_id'
+                in: 'query'
+                description: 'ページング処理における、現在のページの最後の記事のID'
+                required: false
+                type: 'string'
+              - name: 'sort_key'
+                in: 'query'
+                description: 'ページング処理における、現在のページの最後の記事のソートキー'
+                required: false
+                type: 'integer'
+                minimum: 1
+              responses:
+                '200':
+                  description: '公開記事一覧'
+                  schema:
+                    type: array
+                    items:
+                      $ref: '#/definitions/ArticleInfo'
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesPublicIndex.Arn}/invocations
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
@@ -650,6 +727,22 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+          /me/articles/{article_id}/fraud:
+            post:
+              description: '対象記事に不正報告を行う'
+              responses:
+                '200':
+                  description: '不正報告の実施成功'
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesFraudCreate.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
           /me/articles/{article_id}/images:
             post:
               description: '対象記事に画像データを登録'
@@ -691,6 +784,23 @@ Resources:
                 httpMethod: POST
                 type: aws_proxy
           /me/info:
+            get:
+              description: 'ログインユーザ情報を取得'
+              responses:
+                '200':
+                  description: 'ログインユーザ情報'
+                  schema:
+                    $ref: '#/definitions/UserInfo'
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeInfoShow.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
             put:
               description: 'ユーザ情報を更新'
               parameters:
@@ -828,6 +938,22 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+          /me/articles/{article_id}/pv:
+            post:
+              description: '対象記事の閲覧をカウント'
+              responses:
+                '200':
+                  description: '「閲覧」のカウント成功'
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesPvCreate.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
           /users/{user_id}/info:
             get:
               description: '指定されたユーザーのユーザ情報を取得'
@@ -909,6 +1035,19 @@ Resources:
           Type: Api
           Properties:
             Path: /articles/recent
+            Method: get
+            RestApiId: !Ref RestApi
+  ArticlesPopular:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/articles_popular.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /articles/popular
             Method: get
             RestApiId: !Ref RestApi
   ArticlesShow:
@@ -1031,6 +1170,19 @@ Resources:
               Path: /me/articles/{article_id}/drafts
               Method: put
               RestApiId: !Ref RestApi
+  MeArticlesPublicIndex:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_articles_public_index.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/articles/public
+            Method: get
+            RestApiId: !Ref RestApi
   MeArticlesPublicShow:
     Type: AWS::Serverless::Function
     Properties:
@@ -1109,6 +1261,19 @@ Resources:
             Path: /articles/{article_id}/likes
             Method: post
             RestApiId: !Ref RestApi
+  MeArticlesFraudCreate:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_articles_fraud_create.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /articles/{article_id}/fraud
+            Method: post
+            RestApiId: !Ref RestApi
   MeArticlesImagesCreate:
       Type: AWS::Serverless::Function
       Properties:
@@ -1161,6 +1326,19 @@ Resources:
             Path: /me/articles/{article_id}/drafts
             Method: get
             RestApiId: !Ref RestApi
+  MeArticlesPvCreate:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_articles_pv_create.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /articles/{article_id}/pv
+            Method: post
+            RestApiId: !Ref RestApi
   MeInfoUpdate:
     Type: AWS::Serverless::Function
     Properties:
@@ -1173,6 +1351,19 @@ Resources:
           Properties:
             Path: /me/info
             Method: put
+            RestApiId: !Ref RestApi
+  MeInfoShow:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_info_show.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/info
+            Method: get
             RestApiId: !Ref RestApi
   CognitoTriggerPreSignUp:
     Type: AWS::Serverless::Function
@@ -1304,10 +1495,10 @@ Resources:
     Type: AWS::DynamoDB::Table
     Properties:
       AttributeDefinitions:
-        - AttributeName: active_evaluated_at
-          AttributeType: N
+        - AttributeName: type
+          AttributeType: S
       KeySchema:
-        - AttributeName: active_evaluated_at
+        - AttributeName: type
           KeyType: HASH
       ProvisionedThroughput:
         ReadCapacityUnits: 1
@@ -1336,6 +1527,76 @@ Resources:
               KeyType: RANGE
           Projection:
             ProjectionType: KEYS_ONLY
+      ProvisionedThroughput:
+        ReadCapacityUnits: 2
+        WriteCapacityUnits: 2
+  ArticlePvUser:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: article_id
+          AttributeType: S
+        - AttributeName: user_id
+          AttributeType: S
+        - AttributeName: sort_key
+          AttributeType: N
+      KeySchema:
+        - AttributeName: article_id
+          KeyType: HASH
+        - AttributeName: user_id
+          KeyType: RANGE
+      LocalSecondaryIndexes:
+        - IndexName: article_id-sort_key-index
+          KeySchema:
+            - AttributeName: article_id
+              KeyType: HASH
+            - AttributeName: sort_key
+              KeyType: RANGE
+          Projection:
+            ProjectionType: KEYS_ONLY
+      ProvisionedThroughput:
+        ReadCapacityUnits: 2
+        WriteCapacityUnits: 2
+  ArticleScore:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: article_id
+          AttributeType: S
+        - AttributeName: evaluated_at
+          AttributeType: N
+        - AttributeName: score
+          AttributeType: N
+      KeySchema:
+        - AttributeName: evaluated_at
+          KeyType: HASH
+        - AttributeName: article_id
+          KeyType: RANGE
+      LocalSecondaryIndexes:
+        - IndexName: evaluated_at-score-index
+          KeySchema:
+            - AttributeName: evaluated_at
+              KeyType: HASH
+            - AttributeName: score
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+      ProvisionedThroughput:
+        ReadCapacityUnits: 2
+        WriteCapacityUnits: 2
+  ArticleFraudUser:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: article_id
+          AttributeType: S
+        - AttributeName: user_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: article_id
+          KeyType: HASH
+        - AttributeName: user_id
+          KeyType: RANGE
       ProvisionedThroughput:
         ReadCapacityUnits: 2
         WriteCapacityUnits: 2
