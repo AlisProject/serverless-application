@@ -149,7 +149,8 @@ class TestArticlesPopular(TestCase):
             'queryStringParameters': {
                 'limit': '100',
                 'article_id': 'testid000001',
-                'score': '12'
+                'score': '12',
+                'evaluated_at': '1520150272000000'
             }
         }
 
@@ -248,6 +249,24 @@ class TestArticlesPopular(TestCase):
         params = {
             'queryStringParameters': {
                 'score': '0'
+            }
+        }
+
+        self.assert_bad_request(params)
+
+    def test_validation_evaluated_at_max(self):
+        params = {
+            'queryStringParameters': {
+                'evaluated_at': '2147483647000001'
+            }
+        }
+
+        self.assert_bad_request(params)
+
+    def test_validation_evaluated_at_min(self):
+        params = {
+            'queryStringParameters': {
+                'evaluated_at': '0'
             }
         }
 

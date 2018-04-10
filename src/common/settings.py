@@ -19,6 +19,11 @@ parameters = {
         'type': 'string',
         'maxLength': 8388608
     },
+    'evaluated_at': {
+        'type': 'integer',
+        'minimum': 1,
+        'maximum': 2147483647000000
+    },
     'sort_key': {
         'type': 'integer',
         'minimum': 1,
