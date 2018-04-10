@@ -883,6 +883,7 @@ Resources:
         - arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess
         - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
         - arn:aws:iam::aws:policy/AmazonS3FullAccess
+        - arn:aws:iam::aws:policy/AmazonCognitoPowerUser
   LambdaInvocationPermissionCognitoTriggerPreSignUp:
     Type: AWS::Lambda::Permission
     Properties:
