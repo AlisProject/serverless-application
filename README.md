@@ -51,6 +51,7 @@ python exec_test.py
 * COGNITO_EMAIL_VERIFY_URL is used by cognito email validation.
 * SALT_FOR_ARTICLE_ID is used by make id of article.
 * DOMAIN is used by service.
+* BETA_MODE_FLAG is used in beta mode.
 
 ```bash
 export AWS_DEFAULT_REGION=ap-northeast-1
@@ -60,6 +61,7 @@ export DIST_S3_BUCKET_NAME=DIST_BUCKET_NAME
 export COGNITO_EMAIL_VERIFY_URL=https://example.com/confirm
 export SALT_FOR_ARTICLE_ID=YOURSALTKEYNAMEHERE
 export DOMAIN=DOMAINNAME
+export BETA_MODE_FLAG=1
 ```
 
 ## Create S3 bucket

@@ -23,6 +23,8 @@ Globals:
         COGNITO_EMAIL_VERIFY_URL: {{ COGNITO_EMAIL_VERIFY_URL }}
         DIST_S3_BUCKET_NAME: {{ DIST_S3_BUCKET_NAME }}
         DOMAIN: {{ DOMAIN }}
+        BETA_MODE_FLAG: {{ BETA_MODE_FLAG }}
+        BETA_USERS_TABLE_NAME: !Ref BetaUsers
 
 Resources:
   SNSRole:
@@ -1610,3 +1612,15 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: 2
         WriteCapacityUnits: 2
+  BetaUsers:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: email
+          AttributeType: S
+      KeySchema:
+        - AttributeName: email
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
