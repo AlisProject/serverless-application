@@ -765,6 +765,23 @@ Resources:
                 httpMethod: POST
                 type: aws_proxy
           /me/info:
+            get:
+              description: 'ログインユーザ情報を取得'
+              responses:
+                '200':
+                  description: 'ログインユーザ情報'
+                  schema:
+                    $ref: '#/definitions/UserInfo'
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeInfoShow.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
             put:
               description: 'ユーザ情報を更新'
               parameters:
@@ -1302,6 +1319,19 @@ Resources:
           Properties:
             Path: /me/info
             Method: put
+            RestApiId: !Ref RestApi
+  MeInfoShow:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_info_show.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/info
+            Method: get
             RestApiId: !Ref RestApi
   CognitoTriggerPreSignUp:
     Type: AWS::Serverless::Function
