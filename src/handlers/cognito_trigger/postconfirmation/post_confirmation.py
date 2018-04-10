@@ -37,7 +37,7 @@ class PostConfirmation(LambdaBase):
             Username=self.event['userName'],
             UserAttributes=[
                 {
-                    'Name': 'custom:foobar',
+                    'Name': 'custom:private_eth_address',
                     'Value': address
                 },
             ]
