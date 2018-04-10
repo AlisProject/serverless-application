@@ -16,6 +16,7 @@ Globals:
         ARTICLE_EVALUATED_MANAGE_TABLE_NAME: !Ref ArticleEvaluatedManage
         ARTICLE_ALIS_TOKEN_TABLE_NAME: !Ref ArticleAlisToken
         ARTICLE_LIKED_USER_TABLE_NAME: !Ref ArticleLikedUser
+        ARTICLE_SCORE_TABLE_NAME: !Ref ArticleScore
         USERS_TABLE_NAME: !Ref Users
         COGNITO_EMAIL_VERIFY_URL: {{ COGNITO_EMAIL_VERIFY_URL }}
         DIST_S3_BUCKET_NAME: {{ DIST_S3_BUCKET_NAME }}
@@ -326,6 +327,42 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+          /articles/popular:
+            get:
+              description: '人気記事一覧情報を取得'
+              parameters:
+              - name: 'limit'
+                in: 'query'
+                description: '取得件数'
+                required: false
+                type: 'integer'
+                minimum: 1
+              - name: 'article_id'
+                in: 'query'
+                description: 'ページング処理における、現在のページの最後の記事のID'
+                required: false
+                type: 'string'
+              - name: 'score'
+                in: 'query'
+                description: 'ページング処理における、現在のページの最後の記事のスコア数'
+                required: false
+                type: 'integer'
+                minimum: 1
+              responses:
+                '200':
+                  description: '人気記事一覧'
+                  schema:
+                    type: array
+                    items:
+                      $ref: '#/definitions/ArticleInfo'
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ArticlesPopular.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
           /articles/{article_id}:
             get:
               description: "指定されたarticle_idの記事情報を取得"
@@ -484,6 +521,44 @@ Resources:
                   default:
                     statusCode: '200'
                 uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesDraftsPublish.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /me/articles/public:
+            get:
+              description: '公開記事一覧情報を取得'
+              parameters:
+              - name: 'limit'
+                in: 'query'
+                description: '取得件数'
+                required: false
+                type: 'integer'
+                minimum: 1
+              - name: 'article_id'
+                in: 'query'
+                description: 'ページング処理における、現在のページの最後の記事のID'
+                required: false
+                type: 'string'
+              - name: 'sort_key'
+                in: 'query'
+                description: 'ページング処理における、現在のページの最後の記事のソートキー'
+                required: false
+                type: 'integer'
+                minimum: 1
+              responses:
+                '200':
+                  description: '公開記事一覧'
+                  schema:
+                    type: array
+                    items:
+                      $ref: '#/definitions/ArticleInfo'
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesPublicIndex.Arn}/invocations
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
@@ -926,6 +1001,19 @@ Resources:
             Path: /articles/recent
             Method: get
             RestApiId: !Ref RestApi
+  ArticlesPopular:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/articles_popular.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /articles/popular
+            Method: get
+            RestApiId: !Ref RestApi
   ArticlesShow:
     Type: AWS::Serverless::Function
     Properties:
@@ -1046,6 +1134,19 @@ Resources:
               Path: /me/articles/{article_id}/drafts
               Method: put
               RestApiId: !Ref RestApi
+  MeArticlesPublicIndex:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_articles_public_index.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/articles/public
+            Method: get
+            RestApiId: !Ref RestApi
   MeArticlesPublicShow:
     Type: AWS::Serverless::Function
     Properties:
@@ -1332,10 +1433,10 @@ Resources:
     Type: AWS::DynamoDB::Table
     Properties:
       AttributeDefinitions:
-        - AttributeName: active_evaluated_at
-          AttributeType: N
+        - AttributeName: type
+          AttributeType: S
       KeySchema:
-        - AttributeName: active_evaluated_at
+        - AttributeName: type
           KeyType: HASH
       ProvisionedThroughput:
         ReadCapacityUnits: 1
@@ -1364,6 +1465,33 @@ Resources:
               KeyType: RANGE
           Projection:
             ProjectionType: KEYS_ONLY
+      ProvisionedThroughput:
+        ReadCapacityUnits: 2
+        WriteCapacityUnits: 2
+  ArticleScore:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: article_id
+          AttributeType: S
+        - AttributeName: evaluated_at
+          AttributeType: N
+        - AttributeName: score
+          AttributeType: N
+      KeySchema:
+        - AttributeName: evaluated_at
+          KeyType: HASH
+        - AttributeName: article_id
+          KeyType: RANGE
+      LocalSecondaryIndexes:
+        - IndexName: evaluated_at-score-index
+          KeySchema:
+            - AttributeName: evaluated_at
+              KeyType: HASH
+            - AttributeName: score
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
       ProvisionedThroughput:
         ReadCapacityUnits: 2
         WriteCapacityUnits: 2
