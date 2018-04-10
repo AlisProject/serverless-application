@@ -62,10 +62,11 @@ class MeArticlesImagesCreate(LambdaBase):
     def exec_main_proc(self):
         ext = self.headers['content-type'].split('/')[1]
         user_id = self.event['requestContext']['authorizer']['claims']['cognito:username']
-        key = user_id + '/' + self.params['article_id'] + '/' + str(uuid.uuid4()) + '.' + ext
+        key = settings.S3_ARTICLES_IMAGES_PATH + \
+            user_id + '/' + self.params['article_id'] + '/' + str(uuid.uuid4()) + '.' + ext
         image_data = self.__get_save_image_data(base64.b64decode(self.params['article_image']), ext)
 
-        self.s3.Bucket(os.environ['ARTICLES_IMAGES_BUCKET_NAME']).put_object(
+        self.s3.Bucket(os.environ['DIST_S3_BUCKET_NAME']).put_object(
             Body=image_data,
             Key=key,
             ContentType=self.headers['content-type']
@@ -73,7 +74,7 @@ class MeArticlesImagesCreate(LambdaBase):
 
         return {
             'statusCode': 200,
-            'body': json.dumps({'image_url': key})
+            'body': json.dumps({'image_url': 'https://' + os.environ['DOMAIN'] + '/' + key})
         }
 
     def __get_save_image_data(self, image_data, ext):

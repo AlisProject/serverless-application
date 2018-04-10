@@ -6,6 +6,7 @@ import json
 import logging
 import traceback
 import settings
+from db_util import DBUtil
 from lambda_base import LambdaBase
 from boto3.dynamodb.conditions import Key, Attr
 from jsonschema import validate, ValidationError
@@ -23,12 +24,19 @@ class ArticlesShow(LambdaBase):
         }
 
     def validate_params(self):
+        # single
         params = self.event.get('pathParameters')
 
         if params is None:
             raise ValidationError('pathParameters is required')
 
         validate(params, self.get_schema())
+        # relation
+        DBUtil.validate_article_existence(
+            self.dynamodb,
+            params['article_id'],
+            status='public'
+        )
 
     def exec_main_proc(self):
         params = self.event.get('pathParameters')

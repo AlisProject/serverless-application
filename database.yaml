@@ -111,10 +111,10 @@ Resources:
     Type: AWS::DynamoDB::Table
     Properties:
       AttributeDefinitions:
-        - AttributeName: active_evaluated_at
-          AttributeType: N
+        - AttributeName: type
+          AttributeType: S
       KeySchema:
-        - AttributeName: active_evaluated_at
+        - AttributeName: type
           KeyType: HASH
       ProvisionedThroughput:
         ReadCapacityUnits: 1
@@ -140,6 +140,33 @@ Resources:
             - AttributeName: article_id
               KeyType: HASH
             - AttributeName: sort_key
+              KeyType: RANGE
+          Projection:
+            ProjectionType: KEYS_ONLY
+      ProvisionedThroughput:
+        ReadCapacityUnits: 2
+        WriteCapacityUnits: 2
+  ArticleScore:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: article_id
+          AttributeType: S
+        - AttributeName: evaluated_at
+          AttributeType: N
+        - AttributeName: score
+          AttributeType: N
+      KeySchema:
+        - AttributeName: evaluated_at
+          KeyType: HASH
+        - AttributeName: article_id
+          KeyType: RANGE
+      LocalSecondaryIndexes:
+        - IndexName: evaluated_at-score-index
+          KeySchema:
+            - AttributeName: evaluated_at
+              KeyType: HASH
+            - AttributeName: score
               KeyType: RANGE
           Projection:
             ProjectionType: KEYS_ONLY
