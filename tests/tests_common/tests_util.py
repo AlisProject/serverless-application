@@ -80,7 +80,6 @@ class TestsUtil:
             {'env_name': 'ARTICLE_HISTORY_TABLE_NAME', 'table_name': 'ArticleHistory'},
             {'env_name': 'ARTICLE_CONTENT_EDIT_TABLE_NAME', 'table_name': 'ArticleContentEdit'},
             {'env_name': 'ARTICLE_FRAUD_USER_TABLE_NAME', 'table_name': 'ArticleFraudUser'},
-            {'env_name': 'USERS_TABLE_NAME', 'table_name': 'Users'}
             {'env_name': 'ARTICLE_PV_USER_TABLE_NAME', 'table_name': 'ArticlePvUser'},
             {'env_name': 'USERS_TABLE_NAME', 'table_name': 'Users'},
         ]
