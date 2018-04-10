@@ -6,5 +6,5 @@ dynamodb = boto3.resource('dynamodb')
 
 
 def lambda_handler(event, context):
-    article_alis_token_show = ArticleAlisTokenShow(event, context, dynamodb)
-    return article_alis_token_show.main()
+    articles_alis_tokens_show = ArticlesAlisTokensShow(event, context, dynamodb)
+    return articles_alis_tokens_show.main()
