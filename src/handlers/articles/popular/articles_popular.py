@@ -18,7 +18,8 @@ class ArticlesPopular(LambdaBase):
             'properties': {
                 'limit': settings.parameters['limit'],
                 'article_id': settings.parameters['article_id'],
-                'score': settings.parameters['score']
+                'score': settings.parameters['score'],
+                'evaluated_at': settings.parameters['evaluated_at']
             }
         }
 
@@ -51,9 +52,12 @@ class ArticlesPopular(LambdaBase):
             'ScanIndexForward': False
         }
 
-        if self.params.get('article_id') is not None and self.params.get('score') is not None:
+        if self.params.get('article_id') is not None and \
+                self.params.get('score') is not None and \
+                self.params.get('evaluated_at') is not None:
+
             LastEvaluatedKey = {
-                'evaluated_at': article_evaluated_manage['Item']['active_evaluated_at'],
+                'evaluated_at': self.params.get('evaluated_at'),
                 'article_id': self.params.get('article_id'),
                 'score': self.params.get('score')
             }
