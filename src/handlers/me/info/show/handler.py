@@ -6,5 +6,5 @@ dynamodb = boto3.resource('dynamodb')
 
 
 def lambda_handler(event, context):
-    users_info_show = UsersInfoShow(event=event, context=context, dynamodb=dynamodb)
-    return users_info_show.main()
+    me_info_show = MeInfoShow(event=event, context=context, dynamodb=dynamodb)
+    return me_info_show.main()
