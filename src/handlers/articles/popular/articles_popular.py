@@ -64,18 +64,18 @@ class ArticlesPopular(LambdaBase):
 
             query_params.update({'ExclusiveStartKey': LastEvaluatedKey})
 
-        responce = article_score_table.query(**query_params)
+        response = article_score_table.query(**query_params)
 
         articles = []
-        for article in responce['Items']:
+        for article in response['Items']:
             article_info = article_info_table.get_item(Key={'article_id': article['article_id']}).get('Item')
             if article_info and article_info['status'] == 'public':
                 articles.append(article_info)
 
         results = {'Items': articles}
 
-        if responce.get('LastEvaluatedKey'):
-            results.update({'LastEvaluatedKey': responce['LastEvaluatedKey']})
+        if response.get('LastEvaluatedKey'):
+            results.update({'LastEvaluatedKey': response['LastEvaluatedKey']})
 
         return {
             'statusCode': 200,
