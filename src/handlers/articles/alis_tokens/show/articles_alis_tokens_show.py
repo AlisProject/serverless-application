@@ -7,6 +7,7 @@ import logging
 import decimal
 import traceback
 import settings
+from db_util import DBUtil
 from lambda_base import LambdaBase
 from boto3.dynamodb.conditions import Key, Attr
 from jsonschema import validate, ValidationError
@@ -25,18 +26,25 @@ class ArticlesAlisTokensShow(LambdaBase):
         }
 
     def validate_params(self):
+        # single
         params = self.event.get('pathParameters')
 
         if params is None:
             raise ValidationError('pathParameters is required')
 
         validate(params, self.get_schema())
+        # relation
+        DBUtil.validate_article_existence(
+            self.dynamodb,
+            params['article_id'],
+            status='public'
+        )
 
     def exec_main_proc(self):
         article_evaluated_manage_table = self.dynamodb.Table(os.environ['ARTICLE_EVALUATED_MANAGE_TABLE_NAME'])
         article_alis_token_table = self.dynamodb.Table(os.environ['ARTICLE_ALIS_TOKEN_TABLE_NAME'])
 
-        active_evaluated_at = article_evaluated_manage_table.scan()['Items'][0]['active_evaluated_at']
+        active_evaluated_at = article_evaluated_manage_table.get_item(Key={'type': 'alistoken'})['Item']['active_evaluated_at']
 
         responce = article_alis_token_table.get_item(
             Key={
