@@ -214,7 +214,7 @@ class TestMeArticlesImagesCreate(TestCase):
             'image_url':  'https://' + os.environ['DOMAIN'] + '/' + key
         }
         self.assertEqual(json.loads(response['body']), expected_item)
-        self.assertTrue(self.equal_size_to_s3_image(key, (3838, 1080)))
+        self.assertTrue(self.equal_size_to_s3_image(key, (3838, 2160)))
 
     @patch('uuid.uuid4', MagicMock(return_value='uuid'))
     def test_main_ok_max_size_jepg(self):
