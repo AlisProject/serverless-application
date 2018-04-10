@@ -20,6 +20,7 @@ Globals:
         COGNITO_EMAIL_VERIFY_URL: {{ COGNITO_EMAIL_VERIFY_URL }}
         DIST_S3_BUCKET_NAME: {{ DIST_S3_BUCKET_NAME }}
         DOMAIN: {{ DOMAIN }}
+        PRIVATE_CHAIN_API: {{ PRIVATE_CHAIN_API }}
 
 Resources:
   SNSRole:
