@@ -88,7 +88,7 @@ Resources:
           Required: false
         - AttributeDataType: "String"
           DeveloperOnlyAttribute: false
-          Mutable: false
+          Mutable: true
           Name: "private_eth_address"
           StringAttributeConstraints:
             MaxLength: "42"
@@ -116,11 +116,6 @@ Resources:
         WriteAttributes:
           - email
           - phone_number
-#        FIXME: You have to add below by hand.
-#        ReadAttributes:
-#          - custom:private_eth_address
-#        WriteAttributes:
-#          - custom:private_eth_address
   IdentityPool:
     Type: AWS::Cognito::IdentityPool
     Properties:
