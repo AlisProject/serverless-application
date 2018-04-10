@@ -76,9 +76,13 @@ class TestsUtil:
             {'env_name': 'ARTICLE_EVALUATED_MANAGE_TABLE_NAME', 'table_name': 'ArticleEvaluatedManage'},
             {'env_name': 'ARTICLE_INFO_TABLE_NAME', 'table_name': 'ArticleInfo'},
             {'env_name': 'ARTICLE_LIKED_USER_TABLE_NAME', 'table_name': 'ArticleLikedUser'},
+            {'env_name': 'ARTICLE_SCORE_TABLE_NAME', 'table_name': 'ArticleScore'},
             {'env_name': 'ARTICLE_HISTORY_TABLE_NAME', 'table_name': 'ArticleHistory'},
             {'env_name': 'ARTICLE_CONTENT_EDIT_TABLE_NAME', 'table_name': 'ArticleContentEdit'},
-            {'env_name': 'USERS_TABLE_NAME', 'table_name': 'Users'}
+            {'env_name': 'ARTICLE_FRAUD_USER_TABLE_NAME', 'table_name': 'ArticleFraudUser'},
+            {'env_name': 'ARTICLE_PV_USER_TABLE_NAME', 'table_name': 'ArticlePvUser'},
+            {'env_name': 'USERS_TABLE_NAME', 'table_name': 'Users'},
+            {'env_name': 'BETA_USERS_TABLE_NAME', 'table_name': 'BetaUsers'}
         ]
         if os.environ.get('IS_DYNAMODB_ENDPOINT_OF_AWS') is not None:
             for table in cls.all_tables:

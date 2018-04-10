@@ -16,16 +16,29 @@ class TestPostConfirmation(TestCase):
         user_tables_items = [
             {'user_id': 'testid000000', 'user_display_name': 'testid000000'}
         ]
+        beta_tables = [
+            {'email': 'test@example.com', 'used': False},
+        ]
         TestsUtil.set_all_tables_name_to_env()
         TestsUtil.delete_all_tables(dynamodb)
         TestsUtil.create_table(dynamodb, os.environ['USERS_TABLE_NAME'], user_tables_items)
+        TestsUtil.create_table(dynamodb, os.environ['BETA_USERS_TABLE_NAME'], beta_tables)
 
     @classmethod
     def tearDownClass(cls):
         TestsUtil.delete_all_tables(dynamodb)
 
     def test_create_userid(self):
-        event = {'userName': 'hogehoge'}
+        os.environ['BETA_MODE_FLAG'] = "0"
+        event = {
+                'userName': 'hogehoge',
+                'request': {
+                    'userAttributes': {
+                        'phone_number': '',
+                        'email': 'already@example.com'
+                    }
+                }
+        }
         postconfirmation = PostConfirmation(event=event, context="", dynamodb=dynamodb)
         self.assertEqual(postconfirmation.main(), True)
         table = dynamodb.Table(os.environ['USERS_TABLE_NAME'])
@@ -33,7 +46,33 @@ class TestPostConfirmation(TestCase):
         self.assertEqual(items['Item']['user_id'], items['Item']['user_display_name'])
 
     def test_create_userid_already_exists(self):
-        event = {'userName': 'testid000000'}
+        os.environ['BETA_MODE_FLAG'] = "0"
+        event = {
+                'userName': 'testid000000',
+                'request': {
+                    'userAttributes': {
+                        'phone_number': '',
+                        'email': 'already@example.com'
+                    }
+                }
+        }
         postconfirmation = PostConfirmation(event=event, context="", dynamodb=dynamodb)
         response = postconfirmation.main()
         self.assertEqual(response['statusCode'], 500)
+
+    def test_beta_user_confirm(self):
+        os.environ['BETA_MODE_FLAG'] = "1"
+        event = {
+                'userName': 'hugahuga',
+                'request': {
+                    'userAttributes': {
+                        'phone_number': '',
+                        'email': 'test@example.com'
+                    }
+                }
+        }
+        postconfirmation = PostConfirmation(event=event, context="", dynamodb=dynamodb)
+        response = postconfirmation.main()
+        table = dynamodb.Table(os.environ['BETA_USERS_TABLE_NAME'])
+        items = table.get_item(Key={"email": "test@example.com"})
+        self.assertEqual(items['Item']['used'], True)

@@ -21,6 +21,13 @@ class PostConfirmation(LambdaBase):
             'user_display_name': self.event['userName']
         }
         users.put_item(Item=user, ConditionExpression='attribute_not_exists(user_id)')
+        if os.environ['BETA_MODE_FLAG'] == "1":
+            beta_users = self.dynamodb.Table(os.environ['BETA_USERS_TABLE_NAME'])
+            beta_user = {
+                'email': self.event['request']['userAttributes']['email'],
+                'used': True
+            }
+            beta_users.put_item(Item=beta_user)
         return True
 
     def __wallet_initialization(self):

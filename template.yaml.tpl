@@ -16,10 +16,15 @@ Globals:
         ARTICLE_EVALUATED_MANAGE_TABLE_NAME: !Ref ArticleEvaluatedManage
         ARTICLE_ALIS_TOKEN_TABLE_NAME: !Ref ArticleAlisToken
         ARTICLE_LIKED_USER_TABLE_NAME: !Ref ArticleLikedUser
+        ARTICLE_FRAUD_USER_TABLE_NAME: !Ref ArticleFraudUser
+        ARTICLE_PV_USER_TABLE_NAME: !Ref ArticlePvUser
+        ARTICLE_SCORE_TABLE_NAME: !Ref ArticleScore
         USERS_TABLE_NAME: !Ref Users
         COGNITO_EMAIL_VERIFY_URL: {{ COGNITO_EMAIL_VERIFY_URL }}
         DIST_S3_BUCKET_NAME: {{ DIST_S3_BUCKET_NAME }}
         DOMAIN: {{ DOMAIN }}
+        BETA_MODE_FLAG: {{ BETA_MODE_FLAG }}
+        BETA_USERS_TABLE_NAME: !Ref BetaUsers
         PRIVATE_CHAIN_API: {{ PRIVATE_CHAIN_API }}
 
 Resources:
@@ -86,14 +91,6 @@ Resources:
           StringAttributeConstraints:
             MaxLength: "2048"
             MinLength: "0"
-          Required: false
-        - AttributeDataType: "String"
-          DeveloperOnlyAttribute: false
-          Mutable: true
-          Name: "private_eth_address"
-          StringAttributeConstraints:
-            MaxLength: "42"
-            MinLength: "42"
           Required: false
       SmsConfiguration:
         ExternalId: !Join
@@ -884,7 +881,6 @@ Resources:
         - arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess
         - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
         - arn:aws:iam::aws:policy/AmazonS3FullAccess
-        - arn:aws:iam::aws:policy/AmazonCognitoPowerUser
   LambdaInvocationPermissionCognitoTriggerPreSignUp:
     Type: AWS::Lambda::Permission
     Properties:

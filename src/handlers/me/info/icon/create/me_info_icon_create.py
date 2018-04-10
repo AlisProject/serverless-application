@@ -63,11 +63,12 @@ class MeInfoIconCreate(LambdaBase):
             ContentType=self.headers['content-type']
         )
 
-        self.__update_user_info(key)
+        icon_image_url = 'https://' + os.environ['DOMAIN'] + '/' + key
+        self.__update_user_info(icon_image_url)
 
         return {
             'statusCode': 200,
-            'body': json.dumps({'icon_image_url': 'https://' + os.environ['DOMAIN'] + '/' + key})
+            'body': json.dumps({'icon_image_url': icon_image_url})
         }
 
     def __update_user_info(self, icon_image_url):
