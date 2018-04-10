@@ -16,6 +16,7 @@ Globals:
         ARTICLE_EVALUATED_MANAGE_TABLE_NAME: !Ref ArticleEvaluatedManage
         ARTICLE_ALIS_TOKEN_TABLE_NAME: !Ref ArticleAlisToken
         ARTICLE_LIKED_USER_TABLE_NAME: !Ref ArticleLikedUser
+        ARTICLE_FRAUD_USER_TABLE_NAME: !Ref ArticleFraudUser
         ARTICLE_PV_USER_TABLE_NAME: !Ref ArticlePvUser
         ARTICLE_SCORE_TABLE_NAME: !Ref ArticleScore
         USERS_TABLE_NAME: !Ref Users
@@ -724,6 +725,22 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+          /me/articles/{article_id}/fraud:
+            post:
+              description: '対象記事に不正報告を行う'
+              responses:
+                '200':
+                  description: '不正報告の実施成功'
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesFraudCreate.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
           /me/articles/{article_id}/images:
             post:
               description: '対象記事に画像データを登録'
@@ -1242,6 +1259,19 @@ Resources:
             Path: /articles/{article_id}/likes
             Method: post
             RestApiId: !Ref RestApi
+  MeArticlesFraudCreate:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_articles_fraud_create.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /articles/{article_id}/fraud
+            Method: post
+            RestApiId: !Ref RestApi
   MeArticlesImagesCreate:
       Type: AWS::Serverless::Function
       Properties:
@@ -1549,6 +1579,22 @@ Resources:
               KeyType: RANGE
           Projection:
             ProjectionType: ALL
+      ProvisionedThroughput:
+        ReadCapacityUnits: 2
+        WriteCapacityUnits: 2
+  ArticleFraudUser:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: article_id
+          AttributeType: S
+        - AttributeName: user_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: article_id
+          KeyType: HASH
+        - AttributeName: user_id
+          KeyType: RANGE
       ProvisionedThroughput:
         ReadCapacityUnits: 2
         WriteCapacityUnits: 2
