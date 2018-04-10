@@ -24,6 +24,11 @@ parameters = {
         'minimum': 1,
         'maximum': 2147483647000000
     },
+    'score': {
+        'type': 'integer',
+        'minimum': 1,
+        'maximum': 2147483647000000
+    },
     'title': {
         'type': 'string',
         'maxLength': 255,
@@ -57,6 +62,9 @@ parameters = {
 }
 
 article_recent_default_limit = 20
+users_articles_public_default_limit = 10
+articles_popular_default_limit = 20
+
 USERS_ARTICLE_INDEX_DEFAULT_LIMIT = 10
 article_id_length = 12
 
