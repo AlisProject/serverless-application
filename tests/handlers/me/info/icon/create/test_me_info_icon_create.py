@@ -89,15 +89,16 @@ class TestMeInfoIconCreate(TestCase):
         image_url_path = target_user['user_id'] + '/icon/'
         image_file_name = 'uuid.' + image_format
         key = settings.S3_INFO_ICON_PATH + image_url_path + image_file_name
+        icon_image_url = 'https://' + os.environ['DOMAIN'] + '/' + key
         expected_item = {
-            'icon_image_url': 'https://' + os.environ['DOMAIN'] + '/' + key
+            'icon_image_url': icon_image_url
         }
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(json.loads(response['body']), expected_item)
         # dynamodb
         expected_items = {
             'user_id': target_user['user_id'],
-            'icon_image_url': key
+            'icon_image_url': icon_image_url
         }
         users_param_names = ['user_id', 'icon_image_url']
         for name in users_param_names:
@@ -136,15 +137,16 @@ class TestMeInfoIconCreate(TestCase):
         image_url_path = target_user['user_id'] + '/icon/'
         image_file_name = 'uuid.' + image_format
         key = settings.S3_INFO_ICON_PATH + image_url_path + image_file_name
+        icon_image_url = 'https://' + os.environ['DOMAIN'] + '/' + key
         expected_item = {
-            'icon_image_url': 'https://' + os.environ['DOMAIN'] + '/' + key
+            'icon_image_url': icon_image_url
         }
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(json.loads(response['body']), expected_item)
         # dynamodb
         expected_items = {
             'user_id': target_user['user_id'],
-            'icon_image_url': key
+            'icon_image_url': icon_image_url
         }
         users_param_names = ['user_id', 'icon_image_url']
         for name in users_param_names:
@@ -183,15 +185,16 @@ class TestMeInfoIconCreate(TestCase):
         image_url_path = target_user['user_id'] + '/icon/'
         image_file_name = 'uuid.' + image_format
         key = settings.S3_INFO_ICON_PATH + image_url_path + image_file_name
+        icon_image_url = 'https://' + os.environ['DOMAIN'] + '/' + key
         expected_item = {
-            'icon_image_url': 'https://' + os.environ['DOMAIN'] + '/' + key
+            'icon_image_url': icon_image_url
         }
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(json.loads(response['body']), expected_item)
         # dynamodb
         expected_items = {
             'user_id': target_user['user_id'],
-            'icon_image_url': key
+            'icon_image_url': icon_image_url
         }
         users_param_names = ['user_id', 'icon_image_url']
         for name in users_param_names:
@@ -231,15 +234,16 @@ class TestMeInfoIconCreate(TestCase):
         image_url_path = target_user['user_id'] + '/icon/'
         image_file_name = 'uuid.' + image_format
         key = settings.S3_INFO_ICON_PATH + image_url_path + image_file_name
+        icon_image_url = 'https://' + os.environ['DOMAIN'] + '/' + key
         expected_item = {
-            'icon_image_url': 'https://' + os.environ['DOMAIN'] + '/' + key
+            'icon_image_url': icon_image_url
         }
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(json.loads(response['body']), expected_item)
         # dynamodb
         expected_items = {
             'user_id': target_user['user_id'],
-            'icon_image_url': key
+            'icon_image_url': icon_image_url
         }
         users_param_names = ['user_id', 'icon_image_url']
         for name in users_param_names:
@@ -279,15 +283,16 @@ class TestMeInfoIconCreate(TestCase):
         image_url_path = target_user['user_id'] + '/icon/'
         image_file_name = 'uuid.' + image_format
         key = settings.S3_INFO_ICON_PATH + image_url_path + image_file_name
+        icon_image_url = 'https://' + os.environ['DOMAIN'] + '/' + key
         expected_item = {
-            'icon_image_url': 'https://' + os.environ['DOMAIN'] + '/' + key
+            'icon_image_url': icon_image_url
         }
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(json.loads(response['body']), expected_item)
         # dynamodb
         expected_items = {
             'user_id': target_user['user_id'],
-            'icon_image_url': key
+            'icon_image_url': icon_image_url
         }
         users_param_names = ['user_id', 'icon_image_url']
         for name in users_param_names:
@@ -327,15 +332,16 @@ class TestMeInfoIconCreate(TestCase):
         image_url_path = target_user['user_id'] + '/icon/'
         image_file_name = 'uuid.' + image_format
         key = settings.S3_INFO_ICON_PATH + image_url_path + image_file_name
+        icon_image_url = 'https://' + os.environ['DOMAIN'] + '/' + key
         expected_item = {
-            'icon_image_url': 'https://' + os.environ['DOMAIN'] + '/' + key
+            'icon_image_url': icon_image_url
         }
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(json.loads(response['body']), expected_item)
         # dynamodb
         expected_items = {
             'user_id': target_user['user_id'],
-            'icon_image_url': key
+            'icon_image_url': icon_image_url
         }
         users_param_names = ['user_id', 'icon_image_url']
         for name in users_param_names:
