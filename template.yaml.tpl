@@ -16,6 +16,7 @@ Globals:
         ARTICLE_EVALUATED_MANAGE_TABLE_NAME: !Ref ArticleEvaluatedManage
         ARTICLE_ALIS_TOKEN_TABLE_NAME: !Ref ArticleAlisToken
         ARTICLE_LIKED_USER_TABLE_NAME: !Ref ArticleLikedUser
+        ARTICLE_PV_USER_TABLE_NAME: !Ref ArticlePvUser
         ARTICLE_SCORE_TABLE_NAME: !Ref ArticleScore
         USERS_TABLE_NAME: !Ref Users
         COGNITO_EMAIL_VERIFY_URL: {{ COGNITO_EMAIL_VERIFY_URL }}
@@ -901,6 +902,22 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+          /me/articles/{article_id}/pv:
+            post:
+              description: '対象記事の閲覧をカウント'
+              responses:
+                '200':
+                  description: '「閲覧」のカウント成功'
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesPvCreate.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
           /users/{user_id}/info:
             get:
               description: '指定されたユーザーのユーザ情報を取得'
@@ -1260,6 +1277,19 @@ Resources:
             Path: /me/articles/{article_id}/drafts
             Method: get
             RestApiId: !Ref RestApi
+  MeArticlesPvCreate:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_articles_pv_create.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /articles/{article_id}/pv
+            Method: post
+            RestApiId: !Ref RestApi
   MeInfoUpdate:
     Type: AWS::Serverless::Function
     Properties:
@@ -1412,6 +1442,33 @@ Resources:
         ReadCapacityUnits: 1
         WriteCapacityUnits: 1
   ArticleLikedUser:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: article_id
+          AttributeType: S
+        - AttributeName: user_id
+          AttributeType: S
+        - AttributeName: sort_key
+          AttributeType: N
+      KeySchema:
+        - AttributeName: article_id
+          KeyType: HASH
+        - AttributeName: user_id
+          KeyType: RANGE
+      LocalSecondaryIndexes:
+        - IndexName: article_id-sort_key-index
+          KeySchema:
+            - AttributeName: article_id
+              KeyType: HASH
+            - AttributeName: sort_key
+              KeyType: RANGE
+          Projection:
+            ProjectionType: KEYS_ONLY
+      ProvisionedThroughput:
+        ReadCapacityUnits: 2
+        WriteCapacityUnits: 2
+  ArticlePvUser:
     Type: AWS::DynamoDB::Table
     Properties:
       AttributeDefinitions:

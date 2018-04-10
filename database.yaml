@@ -173,6 +173,33 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: 2
         WriteCapacityUnits: 2
+  ArticlePvUser:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: article_id
+          AttributeType: S
+        - AttributeName: user_id
+          AttributeType: S
+        - AttributeName: sort_key
+          AttributeType: N
+      KeySchema:
+        - AttributeName: article_id
+          KeyType: HASH
+        - AttributeName: user_id
+          KeyType: RANGE
+      LocalSecondaryIndexes:
+        - IndexName: article_id-sort_key-index
+          KeySchema:
+            - AttributeName: article_id
+              KeyType: HASH
+            - AttributeName: sort_key
+              KeyType: RANGE
+          Projection:
+            ProjectionType: KEYS_ONLY
+      ProvisionedThroughput:
+        ReadCapacityUnits: 2
+        WriteCapacityUnits: 2
   Users:
     Type: AWS::DynamoDB::Table
     Properties:
