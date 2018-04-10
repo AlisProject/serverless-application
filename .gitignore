@@ -4,5 +4,9 @@ deploy
 template.yaml
 vendor-package
 
+# for tests
+tmp_tests
+tests/**/database.yaml
+
 # editor
 .idea
