@@ -24,6 +24,11 @@ parameters = {
         'minimum': 1,
         'maximum': 2147483647000000
     },
+    'score': {
+        'type': 'integer',
+        'minimum': 1,
+        'maximum': 2147483647000000
+    },
     'title': {
         'type': 'string',
         'maxLength': 255,
@@ -57,6 +62,9 @@ parameters = {
 }
 
 article_recent_default_limit = 20
+users_articles_public_default_limit = 10
+articles_popular_default_limit = 20
+
 USERS_ARTICLE_INDEX_DEFAULT_LIMIT = 10
 article_id_length = 12
 
@@ -100,8 +108,8 @@ ng_user_name = [
 
 LIKED_RETRY_COUNT = 3
 
-ARTICLE_IMAGE_MAX_WIDTH = 1920
-ARTICLE_IMAGE_MAX_HEIGHT = 1080
+ARTICLE_IMAGE_MAX_WIDTH = 3840
+ARTICLE_IMAGE_MAX_HEIGHT = 2160
 
 USER_ICON_WIDTH = 240
 USER_ICON_HEIGHT = 240
