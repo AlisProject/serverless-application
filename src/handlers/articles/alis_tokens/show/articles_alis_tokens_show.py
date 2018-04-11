@@ -43,20 +43,25 @@ class ArticlesAlisTokensShow(LambdaBase):
     def exec_main_proc(self):
         article_evaluated_manage_table = self.dynamodb.Table(os.environ['ARTICLE_EVALUATED_MANAGE_TABLE_NAME'])
         article_alis_token_table = self.dynamodb.Table(os.environ['ARTICLE_ALIS_TOKEN_TABLE_NAME'])
+        article_evaluated_manage = article_evaluated_manage_table.get_item(Key={'type': 'alistoken'})
 
-        active_evaluated_at = article_evaluated_manage_table.get_item(Key={'type': 'alistoken'})['Item']['active_evaluated_at']
+        if article_evaluated_manage.get('Item') is None:
+            return {
+                'statusCode': 200,
+                'body': json.dumps({'article_id': self.params['article_id'], 'alis_token': 0})
+            }
 
         responce = article_alis_token_table.get_item(
             Key={
-                'evaluated_at': active_evaluated_at,
+                'evaluated_at': article_evaluated_manage['Item']['active_evaluated_at'],
                 'article_id': self.event['pathParameters']['article_id']
             }
         )
 
         if responce.get('Item') is None:
             return {
-               'statusCode': 404,
-               'body': json.dumps({'message': 'Record Not Found'})
+                'statusCode': 200,
+                'body': json.dumps({'article_id': self.params['article_id'], 'alis_token': 0})
             }
 
         return {

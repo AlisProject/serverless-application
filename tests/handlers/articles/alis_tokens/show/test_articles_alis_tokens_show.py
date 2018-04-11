@@ -109,6 +109,21 @@ class TestArticlesAlisTokensShow(TestCase):
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(json.loads(response['body']), expected_item)
 
+    def test_main_with_no_article_evalueted_management(self):
+        article_evaluated_manage_table = self.dynamodb.Table(os.environ['ARTICLE_EVALUATED_MANAGE_TABLE_NAME'])
+        article_evaluated_manage_table.delete_item(Key={'type': 'alistoken'})
+
+        params = {
+            'pathParameters': {
+                'article_id': 'testid000001'
+            }
+        }
+
+        response = ArticlesAlisTokensShow(params, {}, self.dynamodb).main()
+
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(json.loads(response['body']), {'article_id': 'testid000001', 'alis_token': 0})
+
     def test_record_not_found(self):
         params = {
             'pathParameters': {
@@ -118,7 +133,8 @@ class TestArticlesAlisTokensShow(TestCase):
 
         response = ArticlesAlisTokensShow(params, {}, self.dynamodb).main()
 
-        self.assertEqual(response['statusCode'], 404)
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(json.loads(response['body']), {'article_id': 'testid000003', 'alis_token': 0})
 
     def test_call_validate_article_existence(self):
         params = {
