@@ -19,6 +19,11 @@ parameters = {
         'type': 'string',
         'maxLength': 8388608
     },
+    'evaluated_at': {
+        'type': 'integer',
+        'minimum': 1,
+        'maximum': 2147483647000000
+    },
     'sort_key': {
         'type': 'integer',
         'minimum': 1,
@@ -68,8 +73,8 @@ articles_popular_default_limit = 20
 USERS_ARTICLE_INDEX_DEFAULT_LIMIT = 10
 article_id_length = 12
 
-html_allowed_tags = ['a', 'b', 'blockquote', 'br', 'h2', 'h3', 'i', 'p', 'u', 'img']
-html_allowed_attributes = {'a': ['href'], 'img': ['src', 'alt']}
+html_allowed_tags = ['a', 'b', 'blockquote', 'br', 'h2', 'h3', 'i', 'p', 'u', 'img', 'hr',
+                     'div', 'figure', 'figcaption']
 
 ng_user_name = [
     'about', 'account', 'activity', 'add', 'admin', 'all', 'alpha', 'analysis',
