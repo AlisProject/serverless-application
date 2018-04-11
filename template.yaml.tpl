@@ -1437,6 +1437,8 @@ Resources:
           WriteCapacityUnits: 2
   ArticleContent:
     Type: AWS::DynamoDB::Table
+    DependsOn:
+    - ArticleInfo
     Properties:
       AttributeDefinitions:
         - AttributeName: article_id
@@ -1449,6 +1451,8 @@ Resources:
         WriteCapacityUnits: 2
   ArticleHistory:
     Type: AWS::DynamoDB::Table
+    DependsOn:
+    - ArticleInfo
     Properties:
       AttributeDefinitions:
         - AttributeName: article_id
@@ -1465,6 +1469,8 @@ Resources:
         WriteCapacityUnits: 2
   ArticleContentEdit:
     Type: AWS::DynamoDB::Table
+    DependsOn:
+    - ArticleInfo
     Properties:
       AttributeDefinitions:
         - AttributeName: article_id
@@ -1477,6 +1483,8 @@ Resources:
         WriteCapacityUnits: 2
   ArticleAlisToken:
     Type: AWS::DynamoDB::Table
+    DependsOn:
+    - ArticleInfo
     Properties:
       AttributeDefinitions:
         - AttributeName: article_id
@@ -1493,6 +1501,8 @@ Resources:
           WriteCapacityUnits: 2
   ArticleEvaluatedManage:
     Type: AWS::DynamoDB::Table
+    DependsOn:
+    - ArticleInfo
     Properties:
       AttributeDefinitions:
         - AttributeName: type
@@ -1505,6 +1515,8 @@ Resources:
         WriteCapacityUnits: 1
   ArticleLikedUser:
     Type: AWS::DynamoDB::Table
+    DependsOn:
+    - ArticleInfo
     Properties:
       AttributeDefinitions:
         - AttributeName: article_id
@@ -1532,6 +1544,8 @@ Resources:
         WriteCapacityUnits: 2
   ArticlePvUser:
     Type: AWS::DynamoDB::Table
+    DependsOn:
+    - ArticleInfo
     Properties:
       AttributeDefinitions:
         - AttributeName: article_id
@@ -1559,6 +1573,8 @@ Resources:
         WriteCapacityUnits: 2
   ArticleScore:
     Type: AWS::DynamoDB::Table
+    DependsOn:
+    - ArticleInfo
     Properties:
       AttributeDefinitions:
         - AttributeName: article_id
@@ -1586,6 +1602,8 @@ Resources:
         WriteCapacityUnits: 2
   ArticleFraudUser:
     Type: AWS::DynamoDB::Table
+    DependsOn:
+    - ArticleInfo
     Properties:
       AttributeDefinitions:
         - AttributeName: article_id
