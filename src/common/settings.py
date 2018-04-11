@@ -15,6 +15,12 @@ parameters = {
         'maxLength': 30,
         'pattern': '^(?!.*--)[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]$'
     },
+    'phone_number': {
+        'type': 'string',
+        'minLength': 12,
+        'maxLength': 13,
+        'pattern': '^\+81\d+$'
+    },
     'icon_image': {
         'type': 'string',
         'maxLength': 8388608

@@ -1003,6 +1003,7 @@ Resources:
         - arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess
         - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
         - arn:aws:iam::aws:policy/AmazonS3FullAccess
+        - arn:aws:iam::aws:policy/AmazonCognitoReadOnly
   LambdaInvocationPermissionCognitoTriggerPreSignUp:
     Type: AWS::Lambda::Permission
     Properties:
@@ -1376,7 +1377,7 @@ Resources:
     Properties:
       Handler: handler.lambda_handler
       Role: !GetAtt LambdaRole.Arn
-      CodeUri: ./src/handlers/cognito_trigger/custommessage/handler.py
+      CodeUri: ./deploy/cognito_trigger_custommessage.zip
   CognitoTriggerPostConfirmation:
     Type: AWS::Serverless::Function
     Properties:
