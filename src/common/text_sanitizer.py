@@ -1,5 +1,7 @@
 import settings
 import bleach
+import os
+from urllib.parse import urlparse
 
 
 class TextSanitizer:
@@ -11,6 +13,46 @@ class TextSanitizer:
         return bleach.clean(text=text)
 
     @staticmethod
+    def allow_img_src(tag, name, value):
+        if name in 'alt':
+            return True
+        if name == 'src':
+            p = urlparse(value)
+            return (not p.netloc) or p.netloc == os.environ['DOMAIN']
+        return False
+
+    @staticmethod
+    def allow_div_class(tag, name, value):
+        if name == 'class':
+            allow_classes = [
+                'medium-insert-images',
+                'medium-insert-images medium-insert-images-left',
+                'medium-insert-images medium-insert-images-right',
+                'medium-insert-images medium-insert-images-grid',
+                'medium-insert-images medium-insert-active'
+            ]
+            if value in allow_classes:
+                return True
+        return False
+
+    @staticmethod
+    def allow_figure_contenteditable(tag, name, value):
+        if name == 'contenteditable':
+            if value == 'false':
+                return True
+        return False
+
+    @staticmethod
+    def allow_figcaption_attributes(tag, name, value):
+        if name == 'class':
+            if value == '':
+                return True
+        if name == 'contenteditable':
+            if value == 'true':
+                return True
+        return False
+
+    @staticmethod
     def sanitize_article_body(text):
         if text is None:
             return
@@ -18,5 +60,11 @@ class TextSanitizer:
         return bleach.clean(
             text=text,
             tags=settings.html_allowed_tags,
-            attributes=settings.html_allowed_attributes,
+            attributes={
+                'a': ['href'],
+                'img': TextSanitizer.allow_img_src,
+                'div': TextSanitizer.allow_div_class,
+                'figure': TextSanitizer.allow_figure_contenteditable,
+                'figcaption': TextSanitizer.allow_figcaption_attributes
+            }
         )
