@@ -17,9 +17,9 @@ parameters = {
     },
     'phone_number': {
         'type': 'string',
-        'minLength': 12,
+        'minLength': 13,
         'maxLength': 13,
-        'pattern': '^\+81\d+$'
+        'pattern': '^\+81[6-9]0\d{8}$'
     },
     'icon_image': {
         'type': 'string',

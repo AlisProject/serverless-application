@@ -4,6 +4,7 @@ import boto3
 from unittest import TestCase
 from custom_message import CustomMessage
 from tests_util import TestsUtil
+from jsonschema import validate, ValidationError
 
 
 dynamodb = TestsUtil.get_dynamodb_client()
@@ -53,7 +54,7 @@ class TestCustomMessage(TestCase):
         response = custommessage.main()
         self.assertNotEqual(response['response']['emailMessage'], None)
 
-    def test_phone_number_non_japan(self):
+    def test_invalid_phone_number(self):
         os.environ['COGNITO_EMAIL_VERIFY_URL'] = "https://alis.example.com/confirm.html"
         event = {
                     'version': '1',
@@ -72,7 +73,7 @@ class TestCustomMessage(TestCase):
                             'cognito:user_status': 'CONFIRMED',
                             'cognito:email_alias': 'hoge3@example.net',
                             'phone_number_verified': 'false',
-                            'phone_number': '+448012345678',
+                            'phone_number': '',
                             'email': 'hoge3@example.net'
                         },
                         'codeParameter': '{####}',
@@ -84,6 +85,30 @@ class TestCustomMessage(TestCase):
                         'emailSubject': None
                     }
                 }
+        # 桁が足りない
+        event['request']['userAttributes']['phone_number'] = "+810801234567"
         custommessage = CustomMessage(event=event, context="", dynamodb=dynamodb)
         response = custommessage.main()
         self.assertEqual(response['statusCode'],  400)
+        # 桁が多い
+        event['request']['userAttributes']['phone_number'] = "+81080123456789"
+        custommessage = CustomMessage(event=event, context="", dynamodb=dynamodb)
+        response = custommessage.main()
+        self.assertEqual(response['statusCode'],  400)
+        # 日本の番号ではない
+        event['request']['userAttributes']['phone_number'] = "+4408012345678"
+        custommessage = CustomMessage(event=event, context="", dynamodb=dynamodb)
+        response = custommessage.main()
+        self.assertEqual(response['statusCode'],  400)
+        # 090,080,070,060以外で始まる番号
+        event['request']['userAttributes']['phone_number'] = "+8105012345678"
+        custommessage = CustomMessage(event=event, context="", dynamodb=dynamodb)
+        response = custommessage.main()
+        self.assertEqual(response['statusCode'],  400)
+
+    def test_correct_phone_number(self):
+        custommessage = CustomMessage(event={}, context="", dynamodb=dynamodb)
+        result = validate({'phone_number': '+818012345678'}, custommessage.get_schema())
+        self.assertEqual(result,  None)
+        result = validate({'phone_number': '+816012345678'}, custommessage.get_schema())
+        self.assertEqual(result,  None)
