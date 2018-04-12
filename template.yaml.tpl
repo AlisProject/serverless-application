@@ -119,6 +119,7 @@ Resources:
           - email_verified
           - phone_number
           - phone_number_verified
+          - custom:private_eth_address
         WriteAttributes:
           - email
           - phone_number
