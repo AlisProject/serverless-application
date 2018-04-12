@@ -25,6 +25,7 @@ Globals:
         DOMAIN: {{ DOMAIN }}
         BETA_MODE_FLAG: {{ BETA_MODE_FLAG }}
         BETA_USERS_TABLE_NAME: !Ref BetaUsers
+        PRIVATE_CHAIN_API: {{ PRIVATE_CHAIN_API }}
 
 Resources:
   SNSRole:
@@ -91,6 +92,14 @@ Resources:
             MaxLength: "2048"
             MinLength: "0"
           Required: false
+        - AttributeDataType: "String"
+          DeveloperOnlyAttribute: false
+          Mutable: true
+          Name: "private_eth_address"
+          StringAttributeConstraints:
+            MaxLength: "42"
+            MinLength: "42"
+          Required: false
       SmsConfiguration:
         ExternalId: !Join
           - ''
@@ -110,6 +119,7 @@ Resources:
           - email_verified
           - phone_number
           - phone_number_verified
+          - custom:private_eth_address
         WriteAttributes:
           - email
           - phone_number
@@ -1003,6 +1013,7 @@ Resources:
         - arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess
         - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
         - arn:aws:iam::aws:policy/AmazonS3FullAccess
+        - arn:aws:iam::aws:policy/AmazonCognitoPowerUser
   LambdaInvocationPermissionCognitoTriggerPreSignUp:
     Type: AWS::Lambda::Permission
     Properties:

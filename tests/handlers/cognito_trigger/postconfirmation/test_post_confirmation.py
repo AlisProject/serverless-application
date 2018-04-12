@@ -4,6 +4,7 @@ import boto3
 from unittest import TestCase
 from post_confirmation import PostConfirmation
 from tests_util import TestsUtil
+from unittest.mock import patch, MagicMock
 
 
 dynamodb = TestsUtil.get_dynamodb_client()
@@ -28,6 +29,8 @@ class TestPostConfirmation(TestCase):
     def tearDownClass(cls):
         TestsUtil.delete_all_tables(dynamodb)
 
+    @patch("post_confirmation.PostConfirmation._PostConfirmation__wallet_initialization",
+           MagicMock(return_value=True))
     def test_create_userid(self):
         os.environ['BETA_MODE_FLAG'] = "0"
         event = {
@@ -45,6 +48,8 @@ class TestPostConfirmation(TestCase):
         items = table.get_item(Key={"user_id": "hogehoge"})
         self.assertEqual(items['Item']['user_id'], items['Item']['user_display_name'])
 
+    @patch("post_confirmation.PostConfirmation._PostConfirmation__wallet_initialization",
+           MagicMock(return_value=True))
     def test_create_userid_already_exists(self):
         os.environ['BETA_MODE_FLAG'] = "0"
         event = {
@@ -60,6 +65,8 @@ class TestPostConfirmation(TestCase):
         response = postconfirmation.main()
         self.assertEqual(response['statusCode'], 500)
 
+    @patch("post_confirmation.PostConfirmation._PostConfirmation__wallet_initialization",
+           MagicMock(return_value=True))
     def test_beta_user_confirm(self):
         os.environ['BETA_MODE_FLAG'] = "1"
         event = {
