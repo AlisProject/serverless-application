@@ -66,6 +66,7 @@ class LambdaBase(metaclass=ABCMeta):
 
         except Exception as err:
             logger.fatal(err)
+            logger.info(self.event)
             traceback.print_exc()
 
             return {
