@@ -10,11 +10,12 @@ from not_verified_user_error import NotVerifiedUserError
 
 
 class LambdaBase(metaclass=ABCMeta):
-    def __init__(self, event, context, dynamodb=None, s3=None):
+    def __init__(self, event, context, dynamodb=None, s3=None, cognito=None):
         self.event = event
         self.context = context
         self.dynamodb = dynamodb
         self.s3 = s3
+        self.cognito = cognito
         self.params = self.__get_params()
         self.headers = self.__get_headers()
 
