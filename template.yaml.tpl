@@ -1387,7 +1387,7 @@ Resources:
     Properties:
       Handler: handler.lambda_handler
       Role: !GetAtt LambdaRole.Arn
-      CodeUri: ./src/handlers/cognito_trigger/custommessage/handler.py
+      CodeUri: ./deploy/cognito_trigger_custommessage.zip
   CognitoTriggerPostConfirmation:
     Type: AWS::Serverless::Function
     Properties:
