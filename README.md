@@ -52,6 +52,8 @@ python exec_test.py
 * SALT_FOR_ARTICLE_ID is used by make id of article.
 * DOMAIN is used by service.
 * BETA_MODE_FLAG is used in beta mode.
+* PRIVATE_CHAIN_API is the URL of the ALIS PoA private chain API.
+  - https://github.com/AlisProject/private-chain
 
 ```bash
 export AWS_DEFAULT_REGION=ap-northeast-1
@@ -62,6 +64,7 @@ export COGNITO_EMAIL_VERIFY_URL=https://example.com/confirm
 export SALT_FOR_ARTICLE_ID=YOURSALTKEYNAMEHERE
 export DOMAIN=DOMAINNAME
 export BETA_MODE_FLAG=1
+export PRIVATE_CHAIN_API=https://api.example.com
 ```
 
 ## Create S3 bucket

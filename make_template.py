@@ -11,7 +11,8 @@ data = {
     'SALT_FOR_ARTICLE_ID': os.environ['SALT_FOR_ARTICLE_ID'],
     'DIST_S3_BUCKET_NAME': os.environ['DIST_S3_BUCKET_NAME'],
     'DOMAIN': os.environ['DOMAIN'],
-    'BETA_MODE_FLAG': os.environ['BETA_MODE_FLAG']
+    'BETA_MODE_FLAG': os.environ['BETA_MODE_FLAG'],
+    'PRIVATE_CHAIN_API': os.environ['PRIVATE_CHAIN_API']
 }
 
 with open("template.yaml", "w") as f:
