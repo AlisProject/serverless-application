@@ -18,9 +18,19 @@ class PreSignUp(LambdaBase):
 
     def validate_params(self):
         params = self.event
-        if self.event['userName'] in settings.ng_user_name:
+        if params['userName'] in settings.ng_user_name:
             raise ValidationError('This username is not allowed')
         validate(params, self.get_schema())
+        if params['triggerSource'] == 'PreSignUp_SignUp':
+            client = boto3.client('cognito-idp')
+            response = client.list_users(
+                    UserPoolId=params['userPoolId'],
+                    Filter='email = "%s"' % params['request']['userAttributes']['email'],
+                )
+            for user in response['Users']:
+                for attribute in user['Attributes']:
+                    if attribute['Name'] == 'email_verified' and attribute['Value'] == 'true':
+                        raise ValidationError('This phone_number is already exists')
 
     def exec_main_proc(self):
         if os.environ['BETA_MODE_FLAG'] == "1":

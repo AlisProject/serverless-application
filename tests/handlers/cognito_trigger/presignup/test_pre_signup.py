@@ -103,7 +103,8 @@ class TestPostConfirmation(TestCase):
     def test_validate_ok(self):
         os.environ['BETA_MODE_FLAG'] = "0"
         event = {
-                'userName': 'yamasita'
+                'userName': 'yamasita',
+                'triggerSource': ''
         }
         presignup = PreSignUp(event=event, context="", dynamodb=dynamodb)
         response = presignup.main()
@@ -118,7 +119,8 @@ class TestPostConfirmation(TestCase):
                         'phone_number': '',
                         'email': 'test@example.com'
                     }
-                }
+                },
+                'triggerSource': ''
         }
         presignup = PreSignUp(event=event, context="", dynamodb=dynamodb)
         response = presignup.main()
