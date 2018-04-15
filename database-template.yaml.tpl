@@ -55,6 +55,7 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: {{ MIN_DYNAMO_READ_CAPACITTY }}
         WriteCapacityUnits: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
+    DeletionPolicy: Retain
   ArticleContent:
     Type: AWS::DynamoDB::Table
     DependsOn:
@@ -69,6 +70,7 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: {{ MIN_DYNAMO_READ_CAPACITTY }}
         WriteCapacityUnits: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
+    DeletionPolicy: Retain
   ArticleHistory:
     Type: AWS::DynamoDB::Table
     DependsOn:
@@ -87,6 +89,7 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: {{ MIN_DYNAMO_READ_CAPACITTY }}
         WriteCapacityUnits: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
+    DeletionPolicy: Retain
   ArticleContentEdit:
     Type: AWS::DynamoDB::Table
     DependsOn:
@@ -101,6 +104,7 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: {{ MIN_DYNAMO_READ_CAPACITTY }}
         WriteCapacityUnits: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
+    DeletionPolicy: Retain
   ArticleAlisToken:
     Type: AWS::DynamoDB::Table
     DependsOn:
@@ -119,6 +123,7 @@ Resources:
       ProvisionedThroughput:
           ReadCapacityUnits: {{ MIN_DYNAMO_READ_CAPACITTY }}
           WriteCapacityUnits: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
+    DeletionPolicy: Retain
   ArticleEvaluatedManage:
     Type: AWS::DynamoDB::Table
     DependsOn:
@@ -133,6 +138,7 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: {{ MIN_DYNAMO_READ_CAPACITTY }}
         WriteCapacityUnits: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
+    DeletionPolicy: Retain
   ArticleLikedUser:
     Type: AWS::DynamoDB::Table
     DependsOn:
@@ -162,6 +168,7 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: {{ MIN_DYNAMO_READ_CAPACITTY }}
         WriteCapacityUnits: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
+    DeletionPolicy: Retain
   ArticlePvUser:
     Type: AWS::DynamoDB::Table
     DependsOn:
@@ -191,6 +198,7 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: {{ MIN_DYNAMO_READ_CAPACITTY }}
         WriteCapacityUnits: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
+    DeletionPolicy: Retain
   ArticleScore:
     Type: AWS::DynamoDB::Table
     DependsOn:
@@ -220,6 +228,7 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: {{ MIN_DYNAMO_READ_CAPACITTY }}
         WriteCapacityUnits: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
+    DeletionPolicy: Retain
   ArticleFraudUser:
     Type: AWS::DynamoDB::Table
     DependsOn:
@@ -238,6 +247,7 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: {{ MIN_DYNAMO_READ_CAPACITTY }}
         WriteCapacityUnits: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
+    DeletionPolicy: Retain
   Users:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -250,6 +260,7 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: {{ MIN_DYNAMO_READ_CAPACITTY }}
         WriteCapacityUnits: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
+    DeletionPolicy: Retain
   BetaUsers:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -262,6 +273,7 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: {{ MIN_DYNAMO_READ_CAPACITTY }}
         WriteCapacityUnits: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
+    DeletionPolicy: Retain
   ScalingRole:
     Type: 'AWS::IAM::Role'
     Properties:

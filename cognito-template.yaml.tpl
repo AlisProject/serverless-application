@@ -101,6 +101,7 @@ Resources:
         SnsCallerArn: !GetAtt SNSRole.Arn
       SmsAuthenticationMessage:  "Your authentication code is {{ '{' }}####}."
       SmsVerificationMessage: "Your verification code is {{ '{' }}####}."
+    DeletionPolicy: Retain
   UserPoolClient:
     Type: AWS::Cognito::UserPoolClient
     Properties:
@@ -116,6 +117,7 @@ Resources:
         WriteAttributes:
           - email
           - phone_number
+    DeletionPolicy: Retain
   IdentityPool:
     Type: AWS::Cognito::IdentityPool
     Properties:
@@ -130,6 +132,7 @@ Resources:
               - .amazonaws.com/
               - Ref: UserPool
       AllowUnauthenticatedIdentities: false
+    DeletionPolicy: Retain
   UnauthenticatedPolicy:
     Type: AWS::IAM::ManagedPolicy
     Properties:
