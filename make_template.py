@@ -12,7 +12,11 @@ data = {
     'DIST_S3_BUCKET_NAME': os.environ['DIST_S3_BUCKET_NAME'],
     'DOMAIN': os.environ['DOMAIN'],
     'BETA_MODE_FLAG': os.environ['BETA_MODE_FLAG'],
-    'PRIVATE_CHAIN_API': os.environ['PRIVATE_CHAIN_API']
+    'PRIVATE_CHAIN_API': os.environ['PRIVATE_CHAIN_API'],
+    'MIN_DYNAMO_WRITE_CAPACITTY': os.environ['MIN_DYNAMO_WRITE_CAPACITTY'],
+    'MAX_DYNAMO_WRITE_CAPACITTY': os.environ['MAX_DYNAMO_WRITE_CAPACITTY'],
+    'MIN_DYNAMO_READ_CAPACITTY': os.environ['MIN_DYNAMO_READ_CAPACITTY'],
+    'MAX_DYNAMO_READ_CAPACITTY': os.environ['MAX_DYNAMO_READ_CAPACITTY']
 }
 
 with open("template.yaml", "w") as f:
