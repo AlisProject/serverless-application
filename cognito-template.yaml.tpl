@@ -2,6 +2,12 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: Create Lambda function by using AWS SAM.
 
+Globals:
+  Function:
+    Runtime: python3.6
+    Timeout: 15
+    MemorySize: 256
+
 Resources:
   SNSRole:
     Type: "AWS::IAM::Role"
