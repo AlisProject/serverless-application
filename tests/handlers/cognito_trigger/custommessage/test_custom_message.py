@@ -52,7 +52,8 @@ class TestCustomMessage(TestCase):
                 }
         custommessage = CustomMessage(event=event, context="", dynamodb=dynamodb)
         response = custommessage.main()
-        self.assertNotEqual(response['response']['emailMessage'], None)
+        self.assertRegex(response['response']['emailMessage'], '^E メールアドレスを検証するには')
+        self.assertEqual(response['response']['emailSubject'], 'Email確認リンク')
 
     def test_invalid_phone_number(self):
         os.environ['COGNITO_EMAIL_VERIFY_URL'] = "https://alis.example.com/confirm.html"
@@ -112,3 +113,40 @@ class TestCustomMessage(TestCase):
         self.assertEqual(result,  None)
         result = validate({'phone_number': '+816012345678'}, custommessage.get_schema())
         self.assertEqual(result,  None)
+
+    def test_reset_password(self):
+        event = {
+                    'version': '1',
+                    'region': 'us-east-1',
+                    'userPoolId': 'us-east-1_xxxxxxxxx',
+                    'userName': 'resetuser',
+                    'callerContext': {
+                        'awsSdkVersion': 'aws-sdk-js-2.6.4',
+                        'clientId': 'abcdefghijklmnopqrstuvwxy'
+                    },
+                    'triggerSource': 'CustomMessage_ForgotPassword',
+                    'request': {
+                        'userAttributes': {
+                                'sub': '11111111-2222-3333-4444-555555555555',
+                                'email_verified': 'true',
+                                'cognito:user_status': 'CONFIRMED',
+                                'cognito:email_alias': 'y1@example.net',
+                                'phone_number_verified': 'true',
+                                'cognito:phone_number_alias': '+818012345678',
+                                'phone_number': '+818012345678',
+                                'email': 'y1@example.net'
+                            },
+                        'codeParameter': '{####}',
+                        'usernameParameter': None
+                    },
+                    'response': {
+                        'smsMessage': None,
+                        'emailMessage': None,
+                        'emailSubject': None
+                    }
+            }
+        custommessage = CustomMessage(event=event, context="", dynamodb=dynamodb)
+        response = custommessage.main()
+        self.assertEqual(response['response']['emailSubject'], 'パスワード再設定コード')
+        self.assertEqual(response['response']['emailMessage'], 'resetuserさんのパスワード再設定コードは {####} です')
+        self.assertEqual(response['response']['smsMessage'], 'resetuserさんのパスワード再設定コードは {####} です。')

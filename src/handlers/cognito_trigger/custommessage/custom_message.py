@@ -30,11 +30,19 @@ class CustomMessage(LambdaBase):
                         raise ValidationError('This phone_number is already exists')
 
     def exec_main_proc(self):
-        self.event['response']['smsMessage'] = '{user}さんの検証コードは {code} です。'.format(
-            user=self.event['userName'], code=self.event['request']['codeParameter'])
-        self.event['response']['emailSubject'] = 'Email確認リンク'
-        self.event['response']['emailMessage'] = "E メールアドレスを検証するには、次のリンクをクリックしてください\n{url}?code={code}&user={user}".format(
-            url=os.environ['COGNITO_EMAIL_VERIFY_URL'],
-            code=self.event['request']['codeParameter'],
-            user=self.event['userName'])
+        if self.event['triggerSource'] == 'CustomMessage_ForgotPassword':
+            self.event['response']['smsMessage'] = '{user}さんのパスワード再設定コードは {code} です。'.format(
+                user=self.event['userName'], code=self.event['request']['codeParameter'])
+            self.event['response']['emailSubject'] = 'パスワード再設定コード'
+            self.event['response']['emailMessage'] = "{user}さんのパスワード再設定コードは {code} です".format(
+                code=self.event['request']['codeParameter'],
+                user=self.event['userName'])
+        else:
+            self.event['response']['smsMessage'] = '{user}さんの検証コードは {code} です。'.format(
+                user=self.event['userName'], code=self.event['request']['codeParameter'])
+            self.event['response']['emailSubject'] = 'Email確認リンク'
+            self.event['response']['emailMessage'] = "E メールアドレスを検証するには、次のリンクをクリックしてください\n{url}?code={code}&user={user}".format(
+                url=os.environ['COGNITO_EMAIL_VERIFY_URL'],
+                code=self.event['request']['codeParameter'],
+                user=self.event['userName'])
         return self.event
