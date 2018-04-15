@@ -17,7 +17,7 @@ class CustomMessage(LambdaBase):
 
     def validate_params(self):
         params = self.event['request']['userAttributes']
-        if params.get('phone_number', '') != '':
+        if params.get('phone_number', '') != '' and params.get('phone_number_verified', '') != 'true':
             validate(params, self.get_schema())
             client = boto3.client('cognito-idp')
             response = client.list_users(
