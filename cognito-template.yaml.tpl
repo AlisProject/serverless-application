@@ -7,6 +7,14 @@ Globals:
     Runtime: python3.6
     Timeout: 15
     MemorySize: 256
+    Environment:
+      Variables:
+        USERS_TABLE_NAME: {{ USERS_TABLE_NAME }}
+        COGNITO_EMAIL_VERIFY_URL: {{ COGNITO_EMAIL_VERIFY_URL }}
+        BETA_MODE_FLAG: {{ BETA_MODE_FLAG }}
+        BETA_USERS_TABLE_NAME: {{ BETA_USERS_TABLE_NAME }}
+        PRIVATE_CHAIN_API: {{ PRIVATE_CHAIN_API }}
+        DOMAIN: {{ DOMAIN }}
 
 Resources:
   SNSRole:
