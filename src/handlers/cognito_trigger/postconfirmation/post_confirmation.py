@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import os
-import urllib.request
 import json
+import requests
+from aws_requests_auth.aws_auth import AWSRequestsAuth
 from lambda_base import LambdaBase
 
 
@@ -45,12 +46,11 @@ class PostConfirmation(LambdaBase):
 
     @staticmethod
     def __create_new_account():
-        empty_data = json.dumps({}).encode('utf-8')
-        headers = {'Content-Type': 'application/json'}
-        url = os.environ['PRIVATE_CHAIN_API'] + '/accounts/new'
-        request = urllib.request.Request(url, data=empty_data, method='POST', headers=headers)
-
-        with urllib.request.urlopen(request) as response:
-            response_data = response.read().decode('utf-8')
-
-        return json.loads(response_data)['result']
+        auth = AWSRequestsAuth(aws_access_key=os.environ['PRIVATE_CHAIN_AWS_ACCESS_KEY'],
+                               aws_secret_access_key=os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'],
+                               aws_host=os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'],
+                               aws_region='ap-northeast-1',
+                               aws_service='execute-api')
+        response = requests.post('https://' + os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'] +
+                                 '/production/accounts/new', auth=auth)
+        return json.loads(response.text)['result']
