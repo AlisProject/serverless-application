@@ -47,7 +47,7 @@ class PostConfirmation(LambdaBase):
     @staticmethod
     def __create_new_account():
         auth = AWSRequestsAuth(aws_access_key=os.environ['PRIVATE_CHAIN_AWS_ACCESS_KEY'],
-                               aws_secret_access_key=os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'],
+                               aws_secret_access_key=os.environ['PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY'],
                                aws_host=os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'],
                                aws_region='ap-northeast-1',
                                aws_service='execute-api')
