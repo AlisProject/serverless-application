@@ -41,8 +41,28 @@ class CustomMessage(LambdaBase):
             self.event['response']['smsMessage'] = '{user}さんの検証コードは {code} です。'.format(
                 user=self.event['userName'], code=self.event['request']['codeParameter'])
             self.event['response']['emailSubject'] = 'Email確認リンク'
-            self.event['response']['emailMessage'] = "E メールアドレスを検証するには、次のリンクをクリックしてください\n{url}?code={code}&user={user}".format(
+            self.event['response']['emailMessage'] = """\
+{user}様
+
+ALISをご利用いただきありがとうございます。
+
+仮登録が完了しました。
+下記URLにアクセスし、ログインをして登録手続きを完了してください。
+
+{url}?code={code}&user={user}
+
+※注意事項
+・24時間以内に手続きを完了しない場合、上記URLは無効になります。最初から手続きをやり直してください。
+・上記URLをクリックしてもページが開かない場合は、URLをコピーし、ブラウザのアドレス欄に貼り付けてください。
+・このメールにお心当たりの無い場合は、恐れ入りますが、下記までお問合せください。
+ &nbsp;&nbsp; お問合せ（https://{domain}/help）
+・このメールアドレスは配信専用となっております。本メールに返信していただきましても、お問合せにはお答えできませんのでご了承ください。
+
+ALIS：https://alismedia.jp
+            """.format(
                 url=os.environ['COGNITO_EMAIL_VERIFY_URL'],
+                domain=os.environ['DOMAIN'],
                 code=self.event['request']['codeParameter'],
-                user=self.event['userName'])
+                user=self.event['userName']
+            ).replace("\n", "<br />")
         return self.event

@@ -22,6 +22,7 @@ class TestCustomMessage(TestCase):
 
     def test_email_verify(self):
         os.environ['COGNITO_EMAIL_VERIFY_URL'] = "https://alis.example.com/confirm.html"
+        os.environ['DOMAIN'] = "alis.example.com"
         event = {
                     'version': '1',
                     'region': 'us-east-1',
@@ -52,7 +53,7 @@ class TestCustomMessage(TestCase):
                 }
         custommessage = CustomMessage(event=event, context="", dynamodb=dynamodb)
         response = custommessage.main()
-        self.assertRegex(response['response']['emailMessage'], '^E メールアドレスを検証するには')
+        self.assertRegex(response['response']['emailMessage'], '.*ALISをご利用いただきありがとうございます。.*')
         self.assertEqual(response['response']['emailSubject'], 'Email確認リンク')
 
     def test_invalid_phone_number(self):
