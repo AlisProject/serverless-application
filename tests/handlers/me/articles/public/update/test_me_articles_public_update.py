@@ -117,6 +117,45 @@ class TestMeArticlesPublicUpdate(TestCase):
         for key, value in json.loads(params['body']).items():
             self.assertEqual(value, article_content_edit[key])
 
+    def test_main_ok_with_empty_string(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'publicId0001'
+            },
+            'body': {
+                'eye_catch_url': 'http://example.com/update',
+                'title': '',
+                'body': '',
+                'overview': ''
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01'
+                    }
+                }
+            }
+        }
+
+        params['body'] = json.dumps(params['body'])
+        response = MeArticlesPublicUpdate(params, {}, self.dynamodb).main()
+        article_content_edit = self.article_content_edit_table.get_item(
+            Key={'article_id': params['pathParameters']['article_id']}
+        )['Item']
+
+        self.assertEqual(response['statusCode'], 200)
+
+        expected_items = {
+            'article_id': 'publicId0001',
+            'eye_catch_url': 'http://example.com/update',
+            'title': None,
+            'body': None,
+            'overview': None,
+            'user_id': 'test01'
+        }
+
+        self.assertEqual(article_content_edit, expected_items)
+
     def test_main_ok_with_no_article_edit_content(self):
         prefix = 'http://'
         params = {

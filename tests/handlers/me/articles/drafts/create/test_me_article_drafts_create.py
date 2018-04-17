@@ -82,6 +82,37 @@ class TestMeArticlesDraftsCreate(TestCase):
         for key in article_content_param_names:
             self.assertEqual(json.loads(params['body'])[key], article_content_after[0][key])
 
+    @patch("me_articles_drafts_create.MeArticlesDraftsCreate._MeArticlesDraftsCreate__generate_article_id",
+           MagicMock(return_value='HOGEHOGEHOGE'))
+    def test_main_ok_with_empty_string(self):
+        params = {
+            'body': {
+                'eye_catch_url': 'http://example.com',
+                'title': '',
+                'body': '',
+                'overview': ''
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test_user_id'
+                    }
+                }
+            }
+        }
+
+        params['body'] = json.dumps(params['body'])
+
+        response = MeArticlesDraftsCreate(params, {}, self.dynamodb).main()
+        article_info = self.article_info_table.get_item(Key={'article_id': 'HOGEHOGEHOGE'})['Item']
+        article_content = self.article_content_table.get_item(Key={'article_id': 'HOGEHOGEHOGE'})['Item']
+
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(article_info['title'], None)
+        self.assertEqual(article_info['overview'], None)
+        self.assertEqual(article_content['title'], None)
+        self.assertEqual(article_content['body'], None)
+
     @patch("me_articles_drafts_create.validate", MagicMock(side_effect=Exception()))
     def test_main_with_internal_server_error_on_create_article_info(self):
         params = {
