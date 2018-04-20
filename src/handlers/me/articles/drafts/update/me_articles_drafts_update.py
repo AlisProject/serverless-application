@@ -51,28 +51,34 @@ class MeArticlesDraftsUpdate(LambdaBase):
     def __update_article_info(self):
         article_info_table = self.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
 
+        expression_attribute_values = {
+            ':title': TextSanitizer.sanitize_text(self.params.get('title')),
+            ':overview': TextSanitizer.sanitize_text(self.params.get('overview')),
+            ':eye_catch_url': self.params.get('eye_catch_url')
+        }
+        DBUtil.items_values_empty_to_none(expression_attribute_values)
+
         article_info_table.update_item(
             Key={
                 'article_id': self.params['article_id'],
             },
             UpdateExpression="set title = :title, overview=:overview, eye_catch_url=:eye_catch_url",
-            ExpressionAttributeValues={
-                ':title': TextSanitizer.sanitize_text(self.params.get('title')),
-                ':overview': TextSanitizer.sanitize_text(self.params.get('overview')),
-                ':eye_catch_url': self.params.get('eye_catch_url')
-            }
+            ExpressionAttributeValues=expression_attribute_values
         )
 
     def __update_article_content(self):
         article_content_table = self.dynamodb.Table(os.environ['ARTICLE_CONTENT_TABLE_NAME'])
+
+        expression_attribute_values = {
+            ':title': TextSanitizer.sanitize_text(self.params.get('title')),
+            ':body': TextSanitizer.sanitize_article_body(self.params.get('body'))
+        }
+        DBUtil.items_values_empty_to_none(expression_attribute_values)
 
         article_content_table.update_item(
             Key={
                 'article_id': self.params['article_id'],
             },
             UpdateExpression="set title = :title, body=:body",
-            ExpressionAttributeValues={
-                ':title': TextSanitizer.sanitize_text(self.params.get('title')),
-                ':body': TextSanitizer.sanitize_article_body(self.params.get('body'))
-            }
+            ExpressionAttributeValues=expression_attribute_values
         )

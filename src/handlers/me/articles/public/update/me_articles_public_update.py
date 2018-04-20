@@ -40,19 +40,22 @@ class MeArticlesPublicUpdate(LambdaBase):
     def exec_main_proc(self):
         article_content_edit_table = self.dynamodb.Table(os.environ['ARTICLE_CONTENT_EDIT_TABLE_NAME'])
 
+        expression_attribute_values = {
+            ':user_id': self.event['requestContext']['authorizer']['claims']['cognito:username'],
+            ':title': TextSanitizer.sanitize_text(self.params.get('title')),
+            ':body': TextSanitizer.sanitize_article_body(self.params.get('body')),
+            ':overview': TextSanitizer.sanitize_text(self.params.get('overview')),
+            ':eye_catch_url': self.params.get('eye_catch_url')
+        }
+        DBUtil.items_values_empty_to_none(expression_attribute_values)
+
         article_content_edit_table.update_item(
             Key={
                 'article_id': self.params['article_id'],
             },
             UpdateExpression="set user_id = :user_id, title = :title, body=:body, "
                              "overview=:overview, eye_catch_url=:eye_catch_url",
-            ExpressionAttributeValues={
-                ':user_id': self.event['requestContext']['authorizer']['claims']['cognito:username'],
-                ':title': TextSanitizer.sanitize_text(self.params.get('title')),
-                ':body': TextSanitizer.sanitize_article_body(self.params.get('body')),
-                ':overview': TextSanitizer.sanitize_text(self.params.get('overview')),
-                ':eye_catch_url': self.params.get('eye_catch_url')
-            }
+            ExpressionAttributeValues=expression_attribute_values
         )
 
         return {

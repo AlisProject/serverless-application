@@ -124,6 +124,43 @@ class TestMeArticlesDraftsUpdate(TestCase):
         for key in article_content_param_names:
             self.assertEqual(json.loads(params['body'])[key], article_content_after[0][key])
 
+    def test_main_ok_with_empty_string(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'draftId00001'
+            },
+            'body': {
+                'eye_catch_url': 'http://example.com/update',
+                'title': '',
+                'body': '',
+                'overview': ''
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01'
+                    }
+                }
+            }
+        }
+
+        params['body'] = json.dumps(params['body'])
+
+        response = MeArticlesDraftsUpdate(params, {}, self.dynamodb).main()
+        article_info = self.article_info_table.get_item(
+            Key={'article_id': params['pathParameters']['article_id']}
+        )['Item']
+
+        article_content = self.article_content_table.get_item(
+            Key={'article_id': params['pathParameters']['article_id']}
+        )['Item']
+
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(article_info['title'], None)
+        self.assertEqual(article_info['overview'], None)
+        self.assertEqual(article_content['title'], None)
+        self.assertEqual(article_content['body'], None)
+
     def test_main_ok_article_content_not_exists(self):
         params = {
             'pathParameters': {

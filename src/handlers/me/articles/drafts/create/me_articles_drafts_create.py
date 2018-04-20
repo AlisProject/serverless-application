@@ -11,6 +11,7 @@ from jsonschema import validate, ValidationError, FormatChecker
 from hashids import Hashids
 from text_sanitizer import TextSanitizer
 from time_util import TimeUtil
+from db_util import DBUtil
 
 
 class MeArticlesDraftsCreate(LambdaBase):
@@ -73,6 +74,7 @@ class MeArticlesDraftsCreate(LambdaBase):
             'sort_key': sort_key,
             'created_at': int(time.time())
         }
+        DBUtil.items_values_empty_to_none(article_info)
 
         article_info_table.put_item(
             Item=article_info,
@@ -88,6 +90,7 @@ class MeArticlesDraftsCreate(LambdaBase):
             'title': TextSanitizer.sanitize_text(params.get('title')),
             'created_at': int(time.time())
         }
+        DBUtil.items_values_empty_to_none(article_content)
 
         article_content_table.put_item(
             Item=article_content,
