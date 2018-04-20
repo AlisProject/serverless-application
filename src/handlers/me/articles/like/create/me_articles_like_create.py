@@ -50,10 +50,12 @@ class MeArticlesLikeCreate(LambdaBase):
         }
 
     def __create_article_liked_user(self, article_liked_user_table):
+        epoch = int(time.time())
         article_liked_user = {
             'article_id': self.event['pathParameters']['article_id'],
             'user_id': self.event['requestContext']['authorizer']['claims']['cognito:username'],
-            'created_at': int(time.time()),
+            'created_at': epoch,
+            'target_date': time.strftime('%Y-%m-%d', time.gmtime(epoch)),
             'sort_key': TimeUtil.generate_sort_key()
         }
         article_liked_user_table.put_item(

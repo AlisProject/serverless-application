@@ -149,6 +149,8 @@ Resources:
           AttributeType: S
         - AttributeName: user_id
           AttributeType: S
+        - AttributeName: target_date
+          AttributeType: S
         - AttributeName: sort_key
           AttributeType: N
       KeySchema:
@@ -165,6 +167,18 @@ Resources:
               KeyType: RANGE
           Projection:
             ProjectionType: KEYS_ONLY
+      GlobalSecondaryIndexes:
+        - IndexName: target_date-sort_key-index
+          KeySchema:
+            - AttributeName: target_date
+              KeyType: HASH
+            - AttributeName: sort_key
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: {{ MIN_DYNAMO_READ_CAPACITTY }}
+            WriteCapacityUnits: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
       ProvisionedThroughput:
         ReadCapacityUnits: {{ MIN_DYNAMO_READ_CAPACITTY }}
         WriteCapacityUnits: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
@@ -179,6 +193,8 @@ Resources:
           AttributeType: S
         - AttributeName: user_id
           AttributeType: S
+        - AttributeName: target_date
+          AttributeType: S
         - AttributeName: sort_key
           AttributeType: N
       KeySchema:
@@ -195,6 +211,18 @@ Resources:
               KeyType: RANGE
           Projection:
             ProjectionType: KEYS_ONLY
+      GlobalSecondaryIndexes:
+        - IndexName: target_date-sort_key-index
+          KeySchema:
+            - AttributeName: target_date
+              KeyType: HASH
+            - AttributeName: sort_key
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: {{ MIN_DYNAMO_READ_CAPACITTY }}
+            WriteCapacityUnits: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
       ProvisionedThroughput:
         ReadCapacityUnits: {{ MIN_DYNAMO_READ_CAPACITTY }}
         WriteCapacityUnits: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
@@ -772,6 +800,50 @@ Resources:
         ScaleOutCooldown: 60
         PredefinedMetricSpecification:
           PredefinedMetricType: DynamoDBWriteCapacityUtilization
+  ArticleLikedUserTargetDateSortKeyIndexReadCapacityScalableTarget:
+    Type: AWS::ApplicationAutoScaling::ScalableTarget
+    DependsOn: ScalingRole
+    Properties:
+      MaxCapacity: {{ MAX_DYNAMO_READ_CAPACITTY }}
+      MinCapacity: {{ MIN_DYNAMO_READ_CAPACITTY }}
+      ResourceId: !Sub 'table/${ArticleLikedUser}/index/target_date-sort_key-index'
+      RoleARN: !GetAtt ScalingRole.Arn
+      ScalableDimension: dynamodb:index:ReadCapacityUnits
+      ServiceNamespace: dynamodb
+  ArticleLikedUserTargetDateSortKeyIndexWriteCapacityScalableTarget:
+    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
+    DependsOn: ScalingRole
+    Properties:
+      MaxCapacity: {{ MAX_DYNAMO_WRITE_CAPACITTY }}
+      MinCapacity: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
+      ResourceId: !Sub 'table/${ArticleLikedUser}/index/target_date-sort_key-index'
+      RoleARN: !GetAtt ScalingRole.Arn
+      ScalableDimension: dynamodb:index:WriteCapacityUnits
+      ServiceNamespace: dynamodb
+  ArticleLikedUserTargetDateSortKeyIndexReadScalingPolicy:
+    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
+    Properties:
+      PolicyName: ReadAutoScalingPolicy
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId: !Ref ArticleLikedUserTargetDateSortKeyIndexReadCapacityScalableTarget
+      TargetTrackingScalingPolicyConfiguration:
+        TargetValue: 50.0
+        ScaleInCooldown: 60
+        ScaleOutCooldown: 60
+        PredefinedMetricSpecification:
+          PredefinedMetricType: DynamoDBReadCapacityUtilization
+  ArticleLikedUserTargetDateSortKeyIndexWriteScalingPolicy:
+    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
+    Properties:
+      PolicyName: WriteAutoScalingPolicy
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId: !Ref ArticleLikedUserTargetDateSortKeyIndexWriteCapacityScalableTarget
+      TargetTrackingScalingPolicyConfiguration:
+        TargetValue: 50.0
+        ScaleInCooldown: 60
+        ScaleOutCooldown: 60
+        PredefinedMetricSpecification:
+          PredefinedMetricType: DynamoDBWriteCapacityUtilization
   ArticlePvUserTableReadCapacityScalableTarget:
     Type: AWS::ApplicationAutoScaling::ScalableTarget
     DependsOn: ScalingRole
@@ -816,6 +888,50 @@ Resources:
       PolicyName: WriteAutoScalingPolicy
       PolicyType: TargetTrackingScaling
       ScalingTargetId: !Ref ArticlePvUserTableWriteCapacityScalableTarget
+      TargetTrackingScalingPolicyConfiguration:
+        TargetValue: 50.0
+        ScaleInCooldown: 60
+        ScaleOutCooldown: 60
+        PredefinedMetricSpecification:
+          PredefinedMetricType: DynamoDBWriteCapacityUtilization
+  ArticlePvUserTargetDateSortKeyIndexReadCapacityScalableTarget:
+    Type: AWS::ApplicationAutoScaling::ScalableTarget
+    DependsOn: ScalingRole
+    Properties:
+      MaxCapacity: {{ MAX_DYNAMO_READ_CAPACITTY }}
+      MinCapacity: {{ MIN_DYNAMO_READ_CAPACITTY }}
+      ResourceId: !Sub 'table/${ArticlePvUser}/index/target_date-sort_key-index'
+      RoleARN: !GetAtt ScalingRole.Arn
+      ScalableDimension: dynamodb:index:ReadCapacityUnits
+      ServiceNamespace: dynamodb
+  ArticlePvUserTargetDateSortKeyIndexWriteCapacityScalableTarget:
+    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
+    DependsOn: ScalingRole
+    Properties:
+      MaxCapacity: {{ MAX_DYNAMO_WRITE_CAPACITTY }}
+      MinCapacity: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
+      ResourceId: !Sub 'table/${ArticlePvUser}/index/target_date-sort_key-index'
+      RoleARN: !GetAtt ScalingRole.Arn
+      ScalableDimension: dynamodb:index:WriteCapacityUnits
+      ServiceNamespace: dynamodb
+  ArticlePvUserTargetDateSortKeyIndexReadScalingPolicy:
+    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
+    Properties:
+      PolicyName: ReadAutoScalingPolicy
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId: !Ref ArticlePvUserTargetDateSortKeyIndexReadCapacityScalableTarget
+      TargetTrackingScalingPolicyConfiguration:
+        TargetValue: 50.0
+        ScaleInCooldown: 60
+        ScaleOutCooldown: 60
+        PredefinedMetricSpecification:
+          PredefinedMetricType: DynamoDBReadCapacityUtilization
+  ArticlePvUserTargetDateSortKeyIndexWriteScalingPolicy:
+    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
+    Properties:
+      PolicyName: WriteAutoScalingPolicy
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId: !Ref ArticlePvUserTargetDateSortKeyIndexWriteCapacityScalableTarget
       TargetTrackingScalingPolicyConfiguration:
         TargetValue: 50.0
         ScaleInCooldown: 60

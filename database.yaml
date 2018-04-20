@@ -139,6 +139,8 @@ Resources:
           AttributeType: S
         - AttributeName: user_id
           AttributeType: S
+        - AttributeName: target_date
+          AttributeType: S
         - AttributeName: sort_key
           AttributeType: N
       KeySchema:
@@ -155,6 +157,18 @@ Resources:
               KeyType: RANGE
           Projection:
             ProjectionType: KEYS_ONLY
+      GlobalSecondaryIndexes:
+        - IndexName: target_date-sort_key-index
+          KeySchema:
+            - AttributeName: target_date
+              KeyType: HASH
+            - AttributeName: sort_key
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: 2
+            WriteCapacityUnits: 2
       ProvisionedThroughput:
         ReadCapacityUnits: 2
         WriteCapacityUnits: 2
@@ -168,6 +182,8 @@ Resources:
           AttributeType: S
         - AttributeName: user_id
           AttributeType: S
+        - AttributeName: target_date
+          AttributeType: S
         - AttributeName: sort_key
           AttributeType: N
       KeySchema:
@@ -184,6 +200,18 @@ Resources:
               KeyType: RANGE
           Projection:
             ProjectionType: KEYS_ONLY
+      GlobalSecondaryIndexes:
+        - IndexName: target_date-sort_key-index
+          KeySchema:
+            - AttributeName: target_date
+              KeyType: HASH
+            - AttributeName: sort_key
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: 2
+            WriteCapacityUnits: 2
       ProvisionedThroughput:
         ReadCapacityUnits: 2
         WriteCapacityUnits: 2
