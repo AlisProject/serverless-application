@@ -54,6 +54,7 @@ class MeArticlesLikeCreate(LambdaBase):
         article_liked_user = {
             'article_id': self.event['pathParameters']['article_id'],
             'user_id': self.event['requestContext']['authorizer']['claims']['cognito:username'],
+            'article_user_id': self.__get_article_user_id(self.event['pathParameters']['article_id']),
             'created_at': epoch,
             'target_date': time.strftime('%Y-%m-%d', time.gmtime(epoch)),
             'sort_key': TimeUtil.generate_sort_key()
@@ -62,3 +63,7 @@ class MeArticlesLikeCreate(LambdaBase):
             Item=article_liked_user,
             ConditionExpression='attribute_not_exists(article_id)'
         )
+
+    def __get_article_user_id(self, article_id):
+        article_info_table = self.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
+        return article_info_table.get_item(Key={'article_id': article_id}).get('Item').get('user_id')

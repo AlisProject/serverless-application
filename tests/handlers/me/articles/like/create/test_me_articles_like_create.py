@@ -45,16 +45,19 @@ class TestMeArticlesLikeCreate(TestCase):
             {
                 'article_id': 'testid000000',
                 'status': 'public',
+                'user_id': 'article_user_id_00',
                 'sort_key': 1520150272000000
             },
             {
                 'article_id': 'testid000001',
                 'status': 'public',
+                'user_id': 'article_user_id_01',
                 'sort_key': 1520150272000001
             },
             {
                 'article_id': 'testid000002',
                 'status': 'draft',
+                'user_id': 'article_user_id_01',
                 'sort_key': 1520150272000002
             }
         ]
@@ -105,6 +108,7 @@ class TestMeArticlesLikeCreate(TestCase):
         expected_items = {
             'article_id': target_article_id,
             'user_id': target_user_id,
+            'article_user_id': 'article_user_id_00',
             'created_at': 1520150272,
             'target_date': '2018-03-04',
             'sort_key': 1520150272000003
@@ -112,7 +116,7 @@ class TestMeArticlesLikeCreate(TestCase):
 
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(len(article_liked_user_after), len(article_liked_user_before) + 1)
-        article_liked_user_param_names = ['article_id', 'user_id', 'created_at', 'target_date', 'sort_key']
+        article_liked_user_param_names = ['article_id', 'user_id', 'article_user_id', 'created_at', 'target_date', 'sort_key']
         for key in article_liked_user_param_names:
             self.assertEqual(expected_items[key], article_liked_user[key])
 
