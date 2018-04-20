@@ -1085,7 +1085,7 @@ Resources:
         Api:
           Type: Api
           Properties:
-            Path: /articles/{article_id}/likes
+            Path: /me/articles/{article_id}/likes
             Method: post
             RestApiId: !Ref RestApi
   MeArticlesFraudCreate:
@@ -1098,7 +1098,7 @@ Resources:
         Api:
           Type: Api
           Properties:
-            Path: /articles/{article_id}/fraud
+            Path: /me/articles/{article_id}/fraud
             Method: post
             RestApiId: !Ref RestApi
   MeArticlesImagesCreate:
@@ -1163,7 +1163,7 @@ Resources:
         Api:
           Type: Api
           Properties:
-            Path: /articles/{article_id}/pv
+            Path: /me/articles/{article_id}/pv
             Method: post
             RestApiId: !Ref RestApi
   MeInfoUpdate:
