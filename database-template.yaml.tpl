@@ -257,6 +257,25 @@ Resources:
         ReadCapacityUnits: {{ MIN_DYNAMO_READ_CAPACITTY }}
         WriteCapacityUnits: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
     DeletionPolicy: Retain
+  ArticleTokenAggregation:
+    Type: AWS::DynamoDB::Table
+    DependsOn:
+    - ArticleInfo
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: evaluated_at
+          AttributeType: N
+        - AttributeName: article_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: evaluated_at
+          KeyType: HASH
+        - AttributeName: article_id
+          KeyType: RANGE
+      ProvisionedThroughput:
+        ReadCapacityUnits: {{ MIN_DYNAMO_READ_CAPACITTY }}
+        WriteCapacityUnits: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
+    DeletionPolicy: Retain
   ArticleFraudUser:
     Type: AWS::DynamoDB::Table
     DependsOn:
@@ -982,6 +1001,56 @@ Resources:
       PolicyName: WriteAutoScalingPolicy
       PolicyType: TargetTrackingScaling
       ScalingTargetId: !Ref ArticleScoreTableWriteCapacityScalableTarget
+      TargetTrackingScalingPolicyConfiguration:
+        TargetValue: 50.0
+        ScaleInCooldown: 60
+        ScaleOutCooldown: 60
+        PredefinedMetricSpecification:
+          PredefinedMetricType: DynamoDBWriteCapacityUtilization
+  ArticleTokenAggregationTableReadCapacityScalableTarget:
+    Type: AWS::ApplicationAutoScaling::ScalableTarget
+    DependsOn: ScalingRole
+    Properties:
+      MaxCapacity: {{ MAX_DYNAMO_READ_CAPACITTY }}
+      MinCapacity: {{ MIN_DYNAMO_READ_CAPACITTY }}
+      ResourceId: !Join
+        - /
+        - - table
+          - !Ref ArticleTokenAggregation
+      RoleARN: !GetAtt ScalingRole.Arn
+      ScalableDimension: dynamodb:table:ReadCapacityUnits
+      ServiceNamespace: dynamodb
+  ArticleTokenAggregationTableWriteCapacityScalableTarget:
+    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
+    DependsOn: ScalingRole
+    Properties:
+      MaxCapacity: {{ MAX_DYNAMO_WRITE_CAPACITTY }}
+      MinCapacity: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
+      ResourceId: !Join
+        - /
+        - - table
+          - !Ref ArticleTokenAggregation
+      RoleARN: !GetAtt ScalingRole.Arn
+      ScalableDimension: dynamodb:table:WriteCapacityUnits
+      ServiceNamespace: dynamodb
+  ArticleTokenAggregationTableReadScalingPolicy:
+    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
+    Properties:
+      PolicyName: ReadAutoScalingPolicy
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId: !Ref ArticleTokenAggregationTableReadCapacityScalableTarget
+      TargetTrackingScalingPolicyConfiguration:
+        TargetValue: 50.0
+        ScaleInCooldown: 60
+        ScaleOutCooldown: 60
+        PredefinedMetricSpecification:
+          PredefinedMetricType: DynamoDBReadCapacityUtilization
+  ArticleTokenAggregationTableWriteScalingPolicy:
+    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
+    Properties:
+      PolicyName: WriteAutoScalingPolicy
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId: !Ref ArticleTokenAggregationTableWriteCapacityScalableTarget
       TargetTrackingScalingPolicyConfiguration:
         TargetValue: 50.0
         ScaleInCooldown: 60

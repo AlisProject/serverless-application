@@ -244,6 +244,25 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: 2
         WriteCapacityUnits: 2
+  ArticleTokenAggregation:
+    Type: AWS::DynamoDB::Table
+    DependsOn:
+    - ArticleInfo
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: evaluated_at
+          AttributeType: N
+        - AttributeName: article_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: evaluated_at
+          KeyType: HASH
+        - AttributeName: article_id
+          KeyType: RANGE
+      ProvisionedThroughput:
+        ReadCapacityUnits: 2
+        WriteCapacityUnits: 2
+    DeletionPolicy: Retain
   ArticleFraudUser:
     Type: AWS::DynamoDB::Table
     DependsOn:
