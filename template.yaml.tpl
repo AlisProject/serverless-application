@@ -543,6 +543,12 @@ Resources:
                 type: aws_proxy
             post:
               description: '対象記事に「いいね」を行う'
+              parameters:
+              - name: 'article_id'
+                in: 'path'
+                description: '対象記事の指定するために使用'
+                required: true
+                type: 'string'
               responses:
                 '200':
                   description: '「いいね」の実施成功'
@@ -559,6 +565,12 @@ Resources:
           /me/articles/{article_id}/fraud:
             post:
               description: '対象記事に不正報告を行う'
+              parameters:
+              - name: 'article_id'
+                in: 'path'
+                description: '対象記事の指定するために使用'
+                required: true
+                type: 'string'
               responses:
                 '200':
                   description: '不正報告の実施成功'
@@ -770,6 +782,12 @@ Resources:
           /me/articles/{article_id}/pv:
             post:
               description: '対象記事の閲覧をカウント'
+              parameters:
+              - name: 'article_id'
+                in: 'path'
+                description: '対象記事の指定するために使用'
+                required: true
+                type: 'string'
               responses:
                 '200':
                   description: '「閲覧」のカウント成功'
@@ -1067,7 +1085,7 @@ Resources:
         Api:
           Type: Api
           Properties:
-            Path: /articles/{article_id}/likes
+            Path: /me/articles/{article_id}/likes
             Method: post
             RestApiId: !Ref RestApi
   MeArticlesFraudCreate:
@@ -1080,7 +1098,7 @@ Resources:
         Api:
           Type: Api
           Properties:
-            Path: /articles/{article_id}/fraud
+            Path: /me/articles/{article_id}/fraud
             Method: post
             RestApiId: !Ref RestApi
   MeArticlesImagesCreate:
@@ -1145,7 +1163,7 @@ Resources:
         Api:
           Type: Api
           Properties:
-            Path: /articles/{article_id}/pv
+            Path: /me/articles/{article_id}/pv
             Method: post
             RestApiId: !Ref RestApi
   MeInfoUpdate:
