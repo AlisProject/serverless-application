@@ -54,7 +54,7 @@ class ArticlesAlisTokensShow(LambdaBase):
         responce = article_alis_token_table.get_item(
             Key={
                 'evaluated_at': article_evaluated_manage['Item']['active_evaluated_at'],
-                'article_id': self.event['pathParameters']['article_id']
+                'article_id': self.params['article_id']
             }
         )
 
