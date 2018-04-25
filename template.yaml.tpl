@@ -844,7 +844,7 @@ Resources:
                     statusCode: "200"
                 uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeWalletBalance.Arn}/invocations
                 passthroughBehavior: when_no_templates
-                httpMethod: GET
+                httpMethod: POST
                 type: aws_proxy
         securityDefinitions:
           cognitoUserPool:
