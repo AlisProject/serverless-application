@@ -52,24 +52,13 @@ aws s3api create-bucket --bucket $DEPLOY_BUCKET_NAME \
   --create-bucket-configuration LocationConstraint=$AWS_DEFAULT_REGION
 ```
 
-## Create templates
-
-```bash
-python make_template.py
-```
-
 ## Packaging and deployment
 
 
 ### Packaging
 
 ```bash
-docker image build --tag deploy-image .
-docker container run -it --name deploy-container deploy-image
-docker container cp deploy-container:/workdir/vendor-package .
-docker container rm deploy-container
-docker image rm deploy-image
-python make_deploy_zip.py
+./packaging.sh
 ```
 
 ### DynamoDB
@@ -77,6 +66,9 @@ python make_deploy_zip.py
 ./deploy.sh database
   
 # Add all of table names to .envrc
+aws dynamodb list-tables |grep $CLOUDFORMATION_STACK_NAME |sort |tr -d ' ' >> .envrc
+
+# fix
 direnv edit
 ```
 

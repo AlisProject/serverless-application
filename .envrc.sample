@@ -35,8 +35,6 @@ export AWS_SECRET_ACCESS_KEY=iU6/q6ls5i5pDBPxxxxxxxxxxxxxxxxxxxx
 
 ## Cognito
 ## API GatewayでAPIにCognito認証を付加するために使用している
-## TODO: 現状の構成では一度、Cognitoを作成したあとでこの値を設定し
-##       再度 `make_template.py` を実行してからAPI Gatewayを作成する必要がある
 export COGNITO_USER_POOL_ARN=arn:aws:cognito-idp:ap-northeast-1:090xxxxxxxxx:userpool/ap-northeast-1_Ouxxxxxxx
 
 
@@ -66,17 +64,17 @@ export MAX_DYNAMO_READ_CAPACITTY=5
 export MAX_DYNAMO_WRITE_CAPACITTY=5
 
 ### テーブル名
-export ARTICLE_INFO_TABLE_NAME=ishii-ArticleInfo-xxxxxxxxxxxx
-export ARTICLE_CONTENT_TABLE_NAME=ishii-ArticleContent-xxxxxxxxxxxx
-export ARTICLE_HISTORY_TABLE_NAME=ishii-ArticleHistory-xxxxxxxxxxxx
-export ARTICLE_CONTENT_EDIT_TABLE_NAME=ishii-ArticleContentEdit-xxxxxxxxxxxx
-export ARTICLE_EVALUATED_MANAGE_TABLE_NAME=ishii-ArticleEvaluatedManage-xxxxxxxxxxxx
 export ARTICLE_ALIS_TOKEN_TABLE_NAME=ishii-ArticleAlisToken-xxxxxxxxxxxx
-export ARTICLE_LIKED_USER_TABLE_NAME=ishii-ArticleLikedUser-xxxxxxxxxxxx
+export ARTICLE_CONTENT_EDIT_TABLE_NAME=ishii-ArticleContentEdit-xxxxxxxxxxxx
+export ARTICLE_CONTENT_TABLE_NAME=ishii-ArticleContent-xxxxxxxxxxxx
+export ARTICLE_EVALUATED_MANAGE_TABLE_NAME=ishii-ArticleEvaluatedManage-xxxxxxxxxxxx
 export ARTICLE_FRAUD_USER_TABLE_NAME=ishii-ArticleFraudUser-xxxxxxxxxxxx
+export ARTICLE_HISTORY_TABLE_NAME=ishii-ArticleHistory-xxxxxxxxxxxx
+export ARTICLE_INFO_TABLE_NAME=ishii-ArticleInfo-xxxxxxxxxxxx
+export ARTICLE_LIKED_USER_TABLE_NAME=ishii-ArticleLikedUser-xxxxxxxxxxxx
 export ARTICLE_PV_USER_TABLE_NAME=ishii-ArticlePvUser-xxxxxxxxxxxx
 export ARTICLE_SCORE_TABLE_NAME=ishii-ArticleScore-xxxxxxxxxxxx
 export ARTICLE_TOKEN_AGGREGATION_TABLE_NAME=ishii-ArticleTokenAggregation-xxxxxxxxxxxx
-export USERS_TABLE_NAME=ishii-Users-xxxxxxxxxxxx
 export BETA_USERS_TABLE_NAME=ishii-BetaUsers-xxxxxxxxxxxx
 export LIKE_TOKEN_AGGREGATION_TABLE_NAME=ishii-likeTokenAggregation-xxxxxxxxxxxx
+export USERS_TABLE_NAME=ishii-Users-xxxxxxxxxxxx
