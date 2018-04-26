@@ -32,5 +32,5 @@ class MeWalletBalance(LambdaBase):
 
         return {
             'statusCode': 200,
-            'body': '{result: "' + json.loads(response.text)["result"] + '"}',
+            'body': json.dumps({'result': json.loads(response.text)["result"]})
         }
