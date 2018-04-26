@@ -7,12 +7,28 @@ env = Environment(loader=FileSystemLoader('.'))
 target_template_names = ['template.yaml.tpl', 'cognito-template.yaml.tpl', 'database-template.yaml.tpl']
 
 data = {
-    'COGNITO_EMAIL_VERIFY_URL': os.environ['COGNITO_EMAIL_VERIFY_URL'],
-    'SALT_FOR_ARTICLE_ID': os.environ['SALT_FOR_ARTICLE_ID'],
-    'DIST_S3_BUCKET_NAME': os.environ['DIST_S3_BUCKET_NAME'],
+    # --- ALIS ---
+
     'DOMAIN': os.environ['DOMAIN'],
     'BETA_MODE_FLAG': os.environ['BETA_MODE_FLAG'],
-    'PRIVATE_CHAIN_API': os.environ['PRIVATE_CHAIN_API'],
+    'SALT_FOR_ARTICLE_ID': os.environ['SALT_FOR_ARTICLE_ID'],
+
+    ## ALIS PoA Private Chain
+    'PRIVATE_CHAIN_AWS_ACCESS_KEY': os.environ['PRIVATE_CHAIN_AWS_ACCESS_KEY'],
+    'PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY': os.environ['PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY'],
+    'PRIVATE_CHAIN_EXECUTE_API_HOST': os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'],
+
+
+    # --- AWS ---
+
+    # Cognito
+    'COGNITO_USER_POOL_ARN': os.environ['COGNITO_USER_POOL_ARN'],
+
+
+    'DIST_S3_BUCKET_NAME': os.environ['DIST_S3_BUCKET_NAME'],
+
+
+
     'MIN_DYNAMO_WRITE_CAPACITTY': os.environ['MIN_DYNAMO_WRITE_CAPACITTY'],
     'MAX_DYNAMO_WRITE_CAPACITTY': os.environ['MAX_DYNAMO_WRITE_CAPACITTY'],
     'MIN_DYNAMO_READ_CAPACITTY': os.environ['MIN_DYNAMO_READ_CAPACITTY'],
@@ -28,11 +44,8 @@ data = {
     'ARTICLE_PV_USER_TABLE_NAME': os.environ['ARTICLE_PV_USER_TABLE_NAME'],
     'ARTICLE_SCORE_TABLE_NAME': os.environ['ARTICLE_SCORE_TABLE_NAME'],
     'USERS_TABLE_NAME': os.environ['USERS_TABLE_NAME'],
-    'BETA_USERS_TABLE_NAME': os.environ['BETA_USERS_TABLE_NAME'],
-    'COGNITO_USER_POOL_ARN': os.environ['COGNITO_USER_POOL_ARN'],
-    'PRIVATE_CHAIN_AWS_ACCESS_KEY': os.environ['PRIVATE_CHAIN_AWS_ACCESS_KEY'],
-    'PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY': os.environ['PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY'],
-    'PRIVATE_CHAIN_EXECUTE_API_HOST': os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST']
+    'BETA_USERS_TABLE_NAME': os.environ['BETA_USERS_TABLE_NAME']
+
 }
 
 for target in target_template_names:

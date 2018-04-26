@@ -5,6 +5,7 @@ template.yaml
 cognito-template.yaml
 database-template.yaml
 vendor-package
+.envrc
 
 # for tests
 tmp_tests

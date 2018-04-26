@@ -20,12 +20,13 @@ Globals:
         ARTICLE_PV_USER_TABLE_NAME: {{ ARTICLE_PV_USER_TABLE_NAME }}
         ARTICLE_SCORE_TABLE_NAME: {{ ARTICLE_SCORE_TABLE_NAME }}
         USERS_TABLE_NAME: {{ USERS_TABLE_NAME }}
-        COGNITO_EMAIL_VERIFY_URL: {{ COGNITO_EMAIL_VERIFY_URL }}
         DIST_S3_BUCKET_NAME: {{ DIST_S3_BUCKET_NAME }}
         DOMAIN: {{ DOMAIN }}
         BETA_MODE_FLAG: {{ BETA_MODE_FLAG }}
         BETA_USERS_TABLE_NAME: {{ BETA_USERS_TABLE_NAME }}
-        PRIVATE_CHAIN_API: {{ PRIVATE_CHAIN_API }}
+        PRIVATE_CHAIN_AWS_ACCESS_KEY: {{ PRIVATE_CHAIN_AWS_ACCESS_KEY }}
+        PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY: {{ PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY }}
+        PRIVATE_CHAIN_EXECUTE_API_HOST: {{ PRIVATE_CHAIN_EXECUTE_API_HOST }}
 
 Resources:
   RestApi:
@@ -832,6 +833,7 @@ Resources:
             x-amazon-apigateway-authorizer:
               type: cognito_user_pools
               providerARNs:
+                # FIXME: Cognitoが生成される前に叩かれ場合がある。その場合は後から修正が必要
                 - {{ COGNITO_USER_POOL_ARN }}
   LambdaRole:
     Type: "AWS::IAM::Role"
