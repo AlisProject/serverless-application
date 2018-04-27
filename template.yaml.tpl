@@ -26,6 +26,9 @@ Globals:
         BETA_MODE_FLAG: {{ BETA_MODE_FLAG }}
         BETA_USERS_TABLE_NAME: {{ BETA_USERS_TABLE_NAME }}
         PRIVATE_CHAIN_API: {{ PRIVATE_CHAIN_API }}
+        PRIVATE_CHAIN_AWS_ACCESS_KEY: {{ PRIVATE_CHAIN_AWS_ACCESS_KEY }}
+        PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY: {{ PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY }}
+        PRIVATE_CHAIN_EXECUTE_API_HOST: {{ PRIVATE_CHAIN_EXECUTE_API_HOST }}
 
 Resources:
   RestApi:
@@ -122,6 +125,11 @@ Resources:
               eye_catch_url:
                 type: string
               overview:
+                type: string
+          MeWalletBalance:
+            type: object
+            properties:
+              private_eth_address:
                 type: string
         paths:
           /articles/recent:
@@ -823,6 +831,24 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+          /me/wallet/balance:
+            get:
+              description: 'ログインユーザ情報を取得'
+              responses:
+                '200':
+                  description: 'ログインユーザ情報'
+                  schema:
+                   $ref: '#/definitions/MeWalletBalance'
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeWalletBalance.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
         securityDefinitions:
           cognitoUserPool:
             type: apiKey
@@ -1190,5 +1216,18 @@ Resources:
           Type: Api
           Properties:
             Path: /me/info
+            Method: get
+            RestApiId: !Ref RestApi
+  MeWalletBalance:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_wallet_balance.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/wallet/balance
             Method: get
             RestApiId: !Ref RestApi
