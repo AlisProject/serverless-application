@@ -5,8 +5,8 @@ Description: Create Lambda function by using AWS SAM.
 Globals:
   Function:
     Runtime: python3.6
-    Timeout: 15
-    MemorySize: 256
+    Timeout: 300
+    MemorySize: 3008
     Environment:
       Variables:
         ARTICLE_INFO_TABLE_NAME: {{ ARTICLE_INFO_TABLE_NAME }}
