@@ -182,7 +182,7 @@ class TestMeArticlesDraftsPublish(TestCase):
         self.assertEqual(len(article_content_edit_after) - len(article_content_edit_before), -1)
 
     @patch('time_util.TimeUtil.generate_sort_key', MagicMock(return_value=1520150552000000))
-    @patch('time.time', MagicMock(return_value=1525000000.000000))
+    @patch('time.time', MagicMock(return_value=1999000000.000000))
     def test_main_ok_article_history_arleady_exists(self):
         params = {
             'pathParameters': {
