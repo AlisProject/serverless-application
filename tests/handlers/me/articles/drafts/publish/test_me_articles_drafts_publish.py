@@ -41,7 +41,8 @@ class TestMeArticlesDraftsPublish(TestCase):
                 'article_id': 'draftId00003',
                 'user_id': 'test01',
                 'status': 'draft',
-                'sort_key': 1520150272000000
+                'sort_key': 1520150272000000,
+                'published_at': 1520150000
             }
         ]
         TestsUtil.create_table(self.dynamodb, os.environ['ARTICLE_INFO_TABLE_NAME'], article_info_items)
@@ -96,6 +97,8 @@ class TestMeArticlesDraftsPublish(TestCase):
 
         self.assertEqual(response['statusCode'], 400)
 
+    @patch('time_util.TimeUtil.generate_sort_key', MagicMock(return_value=1520150552000000))
+    @patch('time.time', MagicMock(return_value=1525000000.000000))
     def test_main_ok(self):
         params = {
             'pathParameters': {
@@ -130,6 +133,8 @@ class TestMeArticlesDraftsPublish(TestCase):
 
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(article_info['status'], 'public')
+        self.assertEqual(article_info['sort_key'], 1520150552000000)
+        self.assertEqual(article_info['published_at'], 1525000000)
         self.assertEqual(article_content['title'], article_history['title'])
         self.assertEqual(article_content['body'], article_history['body'])
         self.assertEqual(len(article_info_after) - len(article_info_before), 0)
@@ -176,6 +181,8 @@ class TestMeArticlesDraftsPublish(TestCase):
         self.assertEqual(len(article_history_after) - len(article_history_before), 1)
         self.assertEqual(len(article_content_edit_after) - len(article_content_edit_before), -1)
 
+    @patch('time_util.TimeUtil.generate_sort_key', MagicMock(return_value=1520150552000000))
+    @patch('time.time', MagicMock(return_value=1999000000.000000))
     def test_main_ok_article_history_arleady_exists(self):
         params = {
             'pathParameters': {
@@ -212,6 +219,8 @@ class TestMeArticlesDraftsPublish(TestCase):
         self.assertEqual(article_info['status'], 'public')
         self.assertEqual(article_content['title'], article_history['title'])
         self.assertEqual(article_content['body'], article_history['body'])
+        self.assertEqual(article_info['sort_key'], 1520150272000000)
+        self.assertEqual(article_info['published_at'], 1520150000)
         self.assertEqual(len(article_info_after) - len(article_info_before), 0)
         self.assertEqual(len(article_history_after) - len(article_history_before), 1)
         self.assertEqual(len(article_content_edit_after) - len(article_content_edit_before), 0)
