@@ -1,0 +1,80 @@
+# --- ALIS ---
+
+export DOMAIN=alis.to
+
+### β版登録ユーザーか否かの判定に使用する。
+### TODO: β版が完了した場合、オープンβとなった場合は除却
+export BETA_MODE_FLAG=1
+
+### 記事IDを生成するためのsalt
+export SALT_FOR_ARTICLE_ID=YOURSALTKEYNAMEHERE
+
+## ALIS PoA Private Chain
+## プライベートチェーンの機能を利用する場合に必要な情報
+##   - see: https://github.com/AlisProject/private-chain
+## 具体的には、プライベートチェーンのAPI GatewayがIAM認証で保護されているため
+## その権限を与えられたIAMユーザの認証情報。
+## なお、この権限にはIAMロールだけでなくIAMユーザが必須である。
+## このIAMユーザの作成自体はCloud formationで自動化されていないので注意。
+export PRIVATE_CHAIN_AWS_ACCESS_KEY=AKIAIVGQILXXXXXXXXXX
+export PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY=ZCFj5dn0k031G/hMfiAgxxxxxxxxxxxxxxxxxxxx
+export PRIVATE_CHAIN_EXECUTE_API_HOST=xxxxxxxxxx.execute-api.ap-northeast-1.amazonaws.com
+
+
+# --- AWS ---
+
+## aws-cli
+## aws-cliが依存する環境変数。
+##   - see: https://qiita.com/n-oshiro/items/4a7774ee6e1d11bb55d2
+## .credentialsファイルよりもこちらの環境変数が優先される
+## Cloud formationのデプロイやS3作成など重要な操作を行うため、管理者レベルの権限を持つ必要がある。
+export AWS_DEFAULT_REGION=ap-northeast-1
+export AWS_ACCESS_KEY_ID=AKIAJZCGSXXXXXXXXXX
+export AWS_SECRET_ACCESS_KEY=iU6/q6ls5i5pDBPxxxxxxxxxxxxxxxxxxxx
+
+
+## Cognito
+## API GatewayでAPIにCognito認証を付加するために使用している
+export COGNITO_USER_POOL_ARN=arn:aws:cognito-idp:ap-northeast-1:090xxxxxxxxx:userpool/ap-northeast-1_Ouxxxxxxx
+
+
+## Cloud Formation
+## デプロイを行う際のStack名。テストの際にも使用している
+## ⚠ ハイフンを含めるとエラーとなる
+export CLOUDFORMATION_STACK_NAME=yourstacknamehere
+
+
+## S3
+## アプリケーションのファイル(画像など)を配置するためのS3バケット名
+## フロントエンドアプリケーションと共通の値を使用する
+##   - see: https://github.com/AlisProject/frontend-application
+## また、テストでも使用している
+export DIST_S3_BUCKET_NAME=yourdistbucketnamehere
+
+## CloudFormationでデプロイを行う際に資材を置いておくためのS3バケットの名前
+## CI環境で使用している
+export DEPLOY_BUCKET_NAME=yourdeploybucketnamehere
+
+
+## DynamoDB
+### 各種設定項目
+export MIN_DYNAMO_READ_CAPACITTY=2
+export MIN_DYNAMO_WRITE_CAPACITTY=2
+export MAX_DYNAMO_READ_CAPACITTY=5
+export MAX_DYNAMO_WRITE_CAPACITTY=5
+
+### テーブル名
+export ARTICLE_ALIS_TOKEN_TABLE_NAME=ishii-ArticleAlisToken-xxxxxxxxxxxx
+export ARTICLE_CONTENT_EDIT_TABLE_NAME=ishii-ArticleContentEdit-xxxxxxxxxxxx
+export ARTICLE_CONTENT_TABLE_NAME=ishii-ArticleContent-xxxxxxxxxxxx
+export ARTICLE_EVALUATED_MANAGE_TABLE_NAME=ishii-ArticleEvaluatedManage-xxxxxxxxxxxx
+export ARTICLE_FRAUD_USER_TABLE_NAME=ishii-ArticleFraudUser-xxxxxxxxxxxx
+export ARTICLE_HISTORY_TABLE_NAME=ishii-ArticleHistory-xxxxxxxxxxxx
+export ARTICLE_INFO_TABLE_NAME=ishii-ArticleInfo-xxxxxxxxxxxx
+export ARTICLE_LIKED_USER_TABLE_NAME=ishii-ArticleLikedUser-xxxxxxxxxxxx
+export ARTICLE_PV_USER_TABLE_NAME=ishii-ArticlePvUser-xxxxxxxxxxxx
+export ARTICLE_SCORE_TABLE_NAME=ishii-ArticleScore-xxxxxxxxxxxx
+export ARTICLE_TOKEN_AGGREGATION_TABLE_NAME=ishii-ArticleTokenAggregation-xxxxxxxxxxxx
+export BETA_USERS_TABLE_NAME=ishii-BetaUsers-xxxxxxxxxxxx
+export LIKE_TOKEN_AGGREGATION_TABLE_NAME=ishii-likeTokenAggregation-xxxxxxxxxxxx
+export USERS_TABLE_NAME=ishii-Users-xxxxxxxxxxxx

@@ -21,7 +21,6 @@ class TestCustomMessage(TestCase):
         pass
 
     def test_email_verify(self):
-        os.environ['COGNITO_EMAIL_VERIFY_URL'] = "https://alis.example.com/confirm.html"
         os.environ['DOMAIN'] = "alis.example.com"
         event = {
                     'version': '1',
@@ -57,7 +56,7 @@ class TestCustomMessage(TestCase):
         self.assertEqual(response['response']['emailSubject'], 'Email確認リンク')
 
     def test_invalid_phone_number(self):
-        os.environ['COGNITO_EMAIL_VERIFY_URL'] = "https://alis.example.com/confirm.html"
+        os.environ['DOMAIN'] = "alis.example.com"
         event = {
                     'version': '1',
                     'region': 'us-east-1',
