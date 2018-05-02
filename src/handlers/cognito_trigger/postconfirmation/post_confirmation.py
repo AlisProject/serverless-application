@@ -32,6 +32,9 @@ class PostConfirmation(LambdaBase):
         return True
 
     def __wallet_initialization(self):
+        if 'custom:private_eth_address' in self.event['request']['userAttributes']:
+            return True
+
         address = self.__create_new_account()
         self.cognito.admin_update_user_attributes(
             UserPoolId=self.event['userPoolId'],
