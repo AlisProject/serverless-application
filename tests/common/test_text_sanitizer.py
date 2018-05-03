@@ -67,6 +67,7 @@ class TestTextSanitizer(TestCase):
             </figure>
         </div>
         <a href="http://example.com">link</a>
+        <div data-alis-iframely-url="https://twitter.com/hoge">hoge</div>
         '''.format(domain=os.environ['DOMAIN'])
 
         result = TextSanitizer.sanitize_article_body(target_html)
@@ -132,6 +133,23 @@ class TestTextSanitizer(TestCase):
         expected_html = '''
         <h2>sample h2</h2>
         <div></div>
+        '''
+
+        result = TextSanitizer.sanitize_article_body(target_html)
+
+        self.assertEqual(result, expected_html)
+
+    def test_sanitize_article_body_with_div_unauthorized_url(self):
+        target_html = '''
+        <h2>sample h2</h2>
+        <div class='hoge piyo' data='aaa'></div>
+        <div data-alis-iframely-url="https://example.com/hoge">hoge</div>
+        '''
+
+        expected_html = '''
+        <h2>sample h2</h2>
+        <div></div>
+        <div>hoge</div>
         '''
 
         result = TextSanitizer.sanitize_article_body(target_html)

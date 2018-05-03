@@ -22,7 +22,7 @@ class TextSanitizer:
         return False
 
     @staticmethod
-    def allow_div_class(tag, name, value):
+    def allow_div_attributes(tag, name, value):
         if name == 'class':
             allow_classes = [
                 'medium-insert-images',
@@ -33,6 +33,9 @@ class TextSanitizer:
             ]
             if value in allow_classes:
                 return True
+        if name == 'data-alis-iframely-url':
+            p = urlparse(value)
+            return p.netloc == 'twitter.com'
         return False
 
     @staticmethod
@@ -63,7 +66,7 @@ class TextSanitizer:
             attributes={
                 'a': ['href'],
                 'img': TextSanitizer.allow_img_src,
-                'div': TextSanitizer.allow_div_class,
+                'div': TextSanitizer.allow_div_attributes,
                 'figure': TextSanitizer.allow_figure_contenteditable,
                 'figcaption': TextSanitizer.allow_figcaption_attributes
             }
