@@ -49,9 +49,9 @@ class MeArticlesPublicIndex(LambdaBase):
 
             query_params.update({'ExclusiveStartKey': LastEvaluatedKey})
 
-        responce = article_info_table.query(**query_params)
+        response = article_info_table.query(**query_params)
 
         return {
             'statusCode': 200,
-            'body': json.dumps(responce, cls=DecimalEncoder)
+            'body': json.dumps(response, cls=DecimalEncoder)
         }
