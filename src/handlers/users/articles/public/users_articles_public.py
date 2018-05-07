@@ -61,11 +61,29 @@ class UsersArticlesPublic(LambdaBase):
 
             query_params.update({'ExclusiveStartKey': LastEvaluatedKey})
 
-        responce = article_info_table.query(**query_params)
+        response = article_info_table.query(**query_params)
+
+        items = response['Items']
+
+        while 'LastEvaluatedKey' in response and len(response['Items']) < limit:
+            query_params.update({'ExclusiveStartKey': response['LastEvaluatedKey']})
+            response = article_info_table.query(**query_params)
+            items.extend(response['Items'])
+
+            if len(items) >= limit:
+                LastEvaluatedKey = {
+                    'user_id': self.params['user_id'],
+                    'article_id': items[limit - 1]['article_id'],
+                    'sort_key': int(items[limit - 1]['sort_key'])
+                }
+                response.update({'LastEvaluatedKey': LastEvaluatedKey})
+                break
+
+        response['Items'] = items[:limit]
 
         return {
             'statusCode': 200,
-            'body': json.dumps(responce, cls=DecimalEncoder)
+            'body': json.dumps(response, cls=DecimalEncoder)
         }
 
     def __get_index_limit(self, params):
