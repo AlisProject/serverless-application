@@ -213,7 +213,7 @@ class TestMeArticlesPublicIndex(TestCase):
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(len(json.loads(response['body'])['Items']), 3)
 
-        expected_evaluated_key  = {
+        expected_evaluated_key = {
             'user_id': 'draft_test_user',
             'article_id': 'test_limit_3',
             'sort_key': 1520150273000003
