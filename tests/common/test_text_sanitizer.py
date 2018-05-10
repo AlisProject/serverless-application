@@ -43,13 +43,13 @@ class TestTextSanitizer(TestCase):
                 <figcaption class="" contenteditable="true">aaaaaa</figcaption>
             </figure>
         </div>
-        <div class="medium-insert-images medium-insert-images-left">
+        <div class="medium-insert-images medium-insert-images-left" contenteditable="false">
             <figure contenteditable="false">
                 <img src="http://{domain}/hoge">
                 <figcaption class="" contenteditable="true"></figcaption>
             </figure>
         </div>
-        <div class="medium-insert-images medium-insert-images-right">
+        <div class="medium-insert-images medium-insert-images-right" contenteditable="false">
             <figure contenteditable="false">
                 <img src="http://{domain}/hoge">
                 <figcaption contenteditable="true">aaaaaa</figcaption>
@@ -142,7 +142,7 @@ class TestTextSanitizer(TestCase):
     def test_sanitize_article_body_with_div_unauthorized_url(self):
         target_html = '''
         <h2>sample h2</h2>
-        <div class='hoge piyo' data='aaa'></div>
+        <div class='hoge piyo' data='aaa' contenteditable='true'></div>
         <div data-alis-iframely-url="https://example.com/hoge">hoge</div>
         '''
 
