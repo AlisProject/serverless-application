@@ -36,6 +36,9 @@ class TextSanitizer:
         if name == 'data-alis-iframely-url':
             p = urlparse(value)
             return p.netloc == 'twitter.com'
+        if name == 'contenteditable':
+            if value == 'false':
+                return True
         return False
 
     @staticmethod
