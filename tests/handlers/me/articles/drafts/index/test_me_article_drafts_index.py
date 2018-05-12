@@ -179,6 +179,47 @@ class TestMeArticlesDraftsIndex(TestCase):
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(len(json.loads(response['body'])['Items']), 10)
 
+    def test_main_ok_with_pubilc_articles(self):
+        table = self.dynamodb.Table('ArticleInfo')
+
+        for i in range(10):
+            # draft,public,public,draft,public,public,draft,draft,draft,draft
+            # の順でステータスが検索されるようにテストデータを生成する
+            status = 'draft' if i % 3 == 0 or i < 4 else 'public'
+
+            table.put_item(Item={
+                'user_id': 'public_test_user',
+                'article_id': 'test_limit_' + str(i),
+                'status': status,
+                'sort_key': 1520150273000000 + i
+                }
+            )
+
+        params = {
+            'queryStringParameters': {
+                'limit': '3'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'public_test_user'
+                    }
+                }
+            }
+        }
+
+        response = MeArticlesDraftsIndex(params, {}, self.dynamodb).main()
+
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(len(json.loads(response['body'])['Items']), 3)
+
+        expected_evaluated_key = {
+            'user_id': 'public_test_user',
+            'article_id': 'test_limit_3',
+            'sort_key': 1520150273000003
+        }
+        self.assertEqual(json.loads(response['body'])['LastEvaluatedKey'], expected_evaluated_key)
+
     def test_main_with_no_recource(self):
         params = {
             'queryStringParameters': {
