@@ -129,6 +129,19 @@ Resources:
             properties:
               private_eth_address:
                 type: string
+          Notification:
+            type: object
+            properties:
+              user_id:
+                type: string
+              sort_key:
+                type: integer
+              type:
+                type: string
+              acted_user_id:
+                type: string
+              created_at:
+                type: integer
         paths:
           /articles/recent:
             get:
@@ -847,6 +860,26 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+          /me/notifications:
+            get:
+              description: ログインユーザーの通知の一覧を取得
+              responses:
+                '200':
+                  description: 'ログインユーザーの通知の一覧'
+                  schema:
+                    type: array
+                    items:
+                      $ref: '#/definitions/Notification'
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeNotificationsIndex.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
           /me/unread_notification_managers:
             get:
               description: 'ログインユーザーの通知の未読情報を取得'
@@ -1266,6 +1299,19 @@ Resources:
             Path: /me/wallet/balance
             Method: get
             RestApiId: !Ref RestApi
+  MeNotificationsIndex:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_notifications_index.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/notifications
+            Method: get
+            RestApiId: !Ref RestApi
   MeUnreadNotificationManagersShow:
     Type: AWS::Serverless::Function
     Properties:
@@ -1276,7 +1322,7 @@ Resources:
         Api:
           Type: Api
           Properties:
-            Path: /me/info
+            Path: /me/unread_notification_managers
             Method: get
             RestApiId: !Ref RestApi
   MeUnreadNotificationManagersUpdate:
