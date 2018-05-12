@@ -847,6 +847,42 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+          /me/unread_notification_managers:
+            get:
+              description: 'ログインユーザーの通知の未読情報を取得'
+              responses:
+                '200':
+                  description: '対象ユーザの通知未読情報'
+                  schema:
+                    type: object
+                    properties:
+                      unread:
+                        type: boolean
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeUnreadNotificationManagersShow.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+            put:
+              description: 'ログインユーザーの通知の未読情報を未読に更新する'
+              responses:
+                '200':
+                  description: 'successful operation'
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeUnreadNotificationManagersUpdate.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
         securityDefinitions:
           cognitoUserPool:
             type: apiKey
@@ -1229,4 +1265,30 @@ Resources:
           Properties:
             Path: /me/wallet/balance
             Method: get
+            RestApiId: !Ref RestApi
+  MeUnreadNotificationManagersShow:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_unread_notification_managers_show.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/info
+            Method: get
+            RestApiId: !Ref RestApi
+  MeUnreadNotificationManagersUpdate:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_unread_notification_managers_show.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/unread_notification_managers
+            Method: put
             RestApiId: !Ref RestApi

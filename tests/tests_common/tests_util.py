@@ -82,7 +82,9 @@ class TestsUtil:
             {'env_name': 'ARTICLE_FRAUD_USER_TABLE_NAME', 'table_name': 'ArticleFraudUser'},
             {'env_name': 'ARTICLE_PV_USER_TABLE_NAME', 'table_name': 'ArticlePvUser'},
             {'env_name': 'USERS_TABLE_NAME', 'table_name': 'Users'},
-            {'env_name': 'BETA_USERS_TABLE_NAME', 'table_name': 'BetaUsers'}
+            {'env_name': 'BETA_USERS_TABLE_NAME', 'table_name': 'BetaUsers'},
+            {'env_name': 'NOTIFICATION_TABLE_NAME', 'table_name': 'Notification'},
+            {'env_name': 'UNREAD_NOTIFICATION_MANAGER_TABLE_NAME', 'table_name': 'UnreadNotificationManager'}
         ]
         if os.environ.get('IS_DYNAMODB_ENDPOINT_OF_AWS') is not None:
             for table in cls.all_tables:
