@@ -43,7 +43,7 @@ class TestMeUnreadNotificationManagersShow(TestCase):
                 'created_at': 1520150272
             }
         ]
-        TestsUtil.create_table(cls.dynamodb, os.environ['NOTIFICATION_TABLE_NAME'],cls.notification_items)
+        TestsUtil.create_table(cls.dynamodb, os.environ['NOTIFICATION_TABLE_NAME'], cls.notification_items)
 
     @classmethod
     def tearDownClass(cls):
