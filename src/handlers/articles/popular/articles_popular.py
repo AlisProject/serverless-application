@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
 import json
-import logging
-import traceback
 import settings
 from lambda_base import LambdaBase
 from boto3.dynamodb.conditions import Key
