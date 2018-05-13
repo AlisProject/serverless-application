@@ -145,7 +145,7 @@ class TestMeArticlesLikeCreate(TestCase):
     def test_create_notification_and_unread_notification_manager(self):
         params = {
             'pathParameters': {
-                'article_id': self.article_liked_user_table_items[0]['article_id']
+                'article_id': self.article_liked_user_table_items[1]['article_id']
             },
             'requestContext': {
                 'authorizer': {
@@ -170,10 +170,10 @@ class TestMeArticlesLikeCreate(TestCase):
 
         expected_notifications = [
             {
-                'user_id': 'article_user_id_00',
+                'user_id': 'article_user_id_01',
                 'sort_key': 1520150272000003,
-                'article_id': 'testid000000',
-                'article_title': 'title1',
+                'article_id': 'testid000001',
+                'article_title': 'title2',
                 'type': 'like',
                 'acted_user_id': 'test06',
                 'created_at': 1520150272
@@ -181,7 +181,7 @@ class TestMeArticlesLikeCreate(TestCase):
         ]
 
         unread_notification_manager = unread_notification_manager_table.get_item(
-            Key={'user_id': 'article_user_id_00'}
+            Key={'user_id': 'article_user_id_01'}
         ).get('Item')
 
         self.assertEqual(response['statusCode'], 200)
