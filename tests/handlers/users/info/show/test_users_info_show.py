@@ -87,14 +87,6 @@ class TestUsersArticlesPublic(TestCase):
 
         self.assert_bad_request(params)
 
-    def test_validation_with_no_user_id_param(self):
-        params = {
-            'pathParameters': {
-            }
-        }
-
-        self.assert_bad_request(params)
-
     def test_validation_user_id_min(self):
         params = {
             'pathParameters': {

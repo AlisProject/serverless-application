@@ -1,4 +1,3 @@
-import boto3
 import os
 from db_util import DBUtil
 from tests_util import TestsUtil

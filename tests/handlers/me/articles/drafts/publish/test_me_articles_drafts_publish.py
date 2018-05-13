@@ -1,6 +1,5 @@
 import os
 import boto3
-import json
 import time
 from boto3.dynamodb.conditions import Key
 from unittest import TestCase
@@ -241,7 +240,7 @@ class TestMeArticlesDraftsPublish(TestCase):
 
         mock_lib = MagicMock()
         with patch('me_articles_drafts_publish.DBUtil', mock_lib):
-            response = MeArticlesDraftsPublish(params, {}, self.dynamodb).main()
+            MeArticlesDraftsPublish(params, {}, self.dynamodb).main()
             args, kwargs = mock_lib.validate_article_existence.call_args
 
             self.assertTrue(mock_lib.validate_article_existence.called)
