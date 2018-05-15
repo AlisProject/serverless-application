@@ -92,7 +92,7 @@ class TestsUtil:
     @classmethod
     def table_name_to_id(cls, table_name):
         client = boto3.client('cloudformation')
-        response = client.list_stack_resources(StackName=os.environ['CLOUDFORMATION_STACK_NAME'])
+        response = client.list_stack_resources(StackName=os.environ['ALIS_APP_ID'])
         for r in response['StackResourceSummaries']:
             if r['ResourceType'] == 'AWS::DynamoDB::Table' and r['LogicalResourceId'] == table_name:
                 return(r['PhysicalResourceId'])

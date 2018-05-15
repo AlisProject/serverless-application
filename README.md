@@ -64,13 +64,13 @@ aws s3api create-bucket --bucket $DEPLOY_BUCKET_NAME \
 ### DynamoDB
 ```bash
 ./deploy.sh database
-  
-# Add all of table names to .envrc
-aws dynamodb list-tables |grep $CLOUDFORMATION_STACK_NAME |sort |tr -d ' ' >> .envrc
 
-# fix
-direnv edit
+# Show all tables.
+aws dynamodb list-tables |grep ${ALIS_APP_ID}database |sort |tr -d ' '
 ```
+
+And add all of generated table names to SSM.
+- See: https://github.com/AlisProject/environment
 
 
 ### Cognito
@@ -78,10 +78,11 @@ direnv edit
 
 ```bash
 ./deploy.sh cognito
-  
-# Specify Generated Cognito User Pool ARN to in .envrc
-direnv edit  
 ```
+
+Specify generated Cognito User Pool ARN to SSM.
+- See: https://github.com/AlisProject/environment
+
 
 ### Lambda & API Gateway
 ```bash
