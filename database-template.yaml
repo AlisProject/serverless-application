@@ -11,10 +11,10 @@ Parameters:
     Default: 2
   MaxDynamoReadCapacitty:
     Type: String
-    Default: 2
+    Default: 50
   MaxDynamoWriteCapacitty:
     Type: String
-    Default: 2
+    Default: 50
 
 Resources:
   ArticleInfo:
