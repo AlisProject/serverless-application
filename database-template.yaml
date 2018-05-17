@@ -5,10 +5,10 @@ Description: The databases for the ALIS application.
 Parameters:
   MinDynamoReadCapacitty:
     Type: String
-    Default: 2
+    Default: 1
   MinDynamoWriteCapacitty:
     Type: String
-    Default: 2
+    Default: 1
   MaxDynamoReadCapacitty:
     Type: String
     Default: 50
@@ -69,7 +69,6 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: !Ref MinDynamoReadCapacitty
         WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
-    DeletionPolicy: Retain
   ArticleContent:
     Type: AWS::DynamoDB::Table
     DependsOn:
@@ -84,7 +83,6 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: !Ref MinDynamoReadCapacitty
         WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
-    DeletionPolicy: Retain
   ArticleHistory:
     Type: AWS::DynamoDB::Table
     DependsOn:
@@ -103,7 +101,6 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: !Ref MinDynamoReadCapacitty
         WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
-    DeletionPolicy: Retain
   ArticleContentEdit:
     Type: AWS::DynamoDB::Table
     DependsOn:
@@ -118,7 +115,6 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: !Ref MinDynamoReadCapacitty
         WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
-    DeletionPolicy: Retain
   ArticleAlisToken:
     Type: AWS::DynamoDB::Table
     DependsOn:
@@ -137,7 +133,6 @@ Resources:
       ProvisionedThroughput:
           ReadCapacityUnits: !Ref MinDynamoReadCapacitty
           WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
-    DeletionPolicy: Retain
   ArticleEvaluatedManage:
     Type: AWS::DynamoDB::Table
     DependsOn:
@@ -152,7 +147,6 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: !Ref MinDynamoReadCapacitty
         WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
-    DeletionPolicy: Retain
   ArticleLikedUser:
     Type: AWS::DynamoDB::Table
     DependsOn:
@@ -196,7 +190,6 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: !Ref MinDynamoReadCapacitty
         WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
-    DeletionPolicy: Retain
   ArticlePvUser:
     Type: AWS::DynamoDB::Table
     DependsOn:
@@ -240,7 +233,6 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: !Ref MinDynamoReadCapacitty
         WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
-    DeletionPolicy: Retain
   ArticleScore:
     Type: AWS::DynamoDB::Table
     DependsOn:
@@ -270,7 +262,6 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: !Ref MinDynamoReadCapacitty
         WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
-    DeletionPolicy: Retain
   ArticleTokenAggregation:
     Type: AWS::DynamoDB::Table
     DependsOn:
@@ -308,7 +299,6 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: !Ref MinDynamoReadCapacitty
         WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
-    DeletionPolicy: Retain
   Users:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -321,7 +311,6 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: !Ref MinDynamoReadCapacitty
         WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
-    DeletionPolicy: Retain
   BetaUsers:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -334,7 +323,6 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: !Ref MinDynamoReadCapacitty
         WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
-    DeletionPolicy: Retain
   ScalingRole:
     Type: 'AWS::IAM::Role'
     Properties:
