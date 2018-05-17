@@ -60,7 +60,10 @@ class ArticlesPopular(LambdaBase):
                 'score': self.params.get('score')
             }
 
-            query_params.update({'ExclusiveStartKey': LastEvaluatedKey})
+            query_params.update({
+                'ExclusiveStartKey': LastEvaluatedKey,
+                'KeyConditionExpression': Key('evaluated_at').eq(self.params.get('evaluated_at'))
+            })
 
         response = article_score_table.query(**query_params)
 
