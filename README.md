@@ -43,12 +43,17 @@ TMPDIR=/private$TMPDIR docker-compose up -d
 python exec_test.py
 ```
 
+# Set SSM valuables
+You have to specify SSM valuables as can as possible.
+- See: https://github.com/AlisProject/environment
+
+
 # Deployment via AWS Cloud Formation
 
 ## Create S3 bucket
 
 ```bash
-aws s3api create-bucket --bucket $DEPLOY_BUCKET_NAME \
+aws s3api create-bucket --bucket ${ALIS_APP_ID}-serverless-deploy-bucket \
   --create-bucket-configuration LocationConstraint=$AWS_DEFAULT_REGION
 ```
 
@@ -88,3 +93,6 @@ Specify generated Cognito User Pool ARN to SSM.
 ```bash
 ./deploy.sh api
 ```
+
+And fill other valuables to SSM.
+- See: https://github.com/AlisProject/environment

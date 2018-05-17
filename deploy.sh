@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 
-python make_template.py
-
 target=
 if [ $1 ] ; then
   target="${1}-"
+else
+  echo "You have to specify the target to deployment."
+  exit 1
 fi
 
 # SSMに登録するパラメータは、ALIS_APP_IDを含めた値がPrefixとして定義される
@@ -27,9 +28,20 @@ aws cloudformation deploy \
     PrivateChainAwsAccessKey=${SSM_PARAMS_PREFIX}PrivateChainAwsAccessKey \
     PrivateChainAwsSecretAccessKey=${SSM_PARAMS_PREFIX}PrivateChainAwsSecretAccessKey \
     PrivateChainExecuteApiHost=${SSM_PARAMS_PREFIX}PrivateChainExecuteApiHost \
-    UsersTableName=${SSM_PARAMS_PREFIX}UsersTableName \
-    BetaUsersTableName=${SSM_PARAMS_PREFIX}BetaUsersTableName \
     BetaModeFlag=${SSM_PARAMS_PREFIX}BetaModeFlag \
     SaltForArticleId=${SSM_PARAMS_PREFIX}SaltForArticleId \
     CognitoUserPoolArn=${SSM_PARAMS_PREFIX}CognitoUserPoolArn \
+    ArticleInfoTableName=${SSM_PARAMS_PREFIX}ArticleInfoTableName \
+    ArticleContentTableName=${SSM_PARAMS_PREFIX}ArticleContentTableName \
+    ArticleHistoryTableName=${SSM_PARAMS_PREFIX}ArticleHistoryTableName \
+    ArticleContentEditTableName=${SSM_PARAMS_PREFIX}ArticleContentEditTableName \
+    ArticleEvaluatedManageTableName=${SSM_PARAMS_PREFIX}ArticleEvaluatedManageTableName \
+    ArticleAlisTokenTableName=${SSM_PARAMS_PREFIX}ArticleAlisTokenTableName \
+    ArticleLikedUserTableName=${SSM_PARAMS_PREFIX}ArticleLikedUserTableName \
+    ArticleFraudUserTableName=${SSM_PARAMS_PREFIX}ArticleFraudUserTableName \
+    ArticlePvUserTableName=${SSM_PARAMS_PREFIX}ArticlePvUserTableName \
+    ArticleScoreTableName=${SSM_PARAMS_PREFIX}ArticleScoreTableName \
+    UsersTableName=${SSM_PARAMS_PREFIX}UsersTableName \
+    BetaUsersTableName=${SSM_PARAMS_PREFIX}BetaUsersTableName \
+    DistS3BucketName=${SSM_PARAMS_PREFIX}DistS3BucketName \
   --capabilities CAPABILITY_IAM
