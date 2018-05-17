@@ -22,4 +22,14 @@ aws cloudformation deploy \
   --template-file ${target}packaged-template.yaml \
   --s3-bucket $DEPLOY_BUCKET_NAME \
   --stack-name ${ALIS_APP_ID}${1} \
+  --parameter-overrides \
+    AlisAppDomain=${SSM_PARAMS_PREFIX}AlisAppDomain \
+    PrivateChainAwsAccessKey=${SSM_PARAMS_PREFIX}PrivateChainAwsAccessKey \
+    PrivateChainAwsSecretAccessKey=${SSM_PARAMS_PREFIX}PrivateChainAwsSecretAccessKey \
+    PrivateChainExecuteApiHost=${SSM_PARAMS_PREFIX}PrivateChainExecuteApiHost \
+    UsersTableName=${SSM_PARAMS_PREFIX}UsersTableName \
+    BetaUsersTableName=${SSM_PARAMS_PREFIX}BetaUsersTableName \
+    BetaModeFlag=${SSM_PARAMS_PREFIX}BetaModeFlag \
+    SaltForArticleId=${SSM_PARAMS_PREFIX}SaltForArticleId \
+    CognitoUserPoolArn=${SSM_PARAMS_PREFIX}CognitoUserPoolArn \
   --capabilities CAPABILITY_IAM
