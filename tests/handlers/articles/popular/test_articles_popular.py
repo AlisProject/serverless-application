@@ -1,10 +1,7 @@
 from unittest import TestCase
 from articles_popular import ArticlesPopular
 from tests_util import TestsUtil
-from unittest.mock import patch, MagicMock
-import yaml
 import os
-import boto3
 import json
 
 

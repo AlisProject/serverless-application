@@ -1,10 +1,8 @@
-import yaml
 import os
-import boto3
 from unittest import TestCase
 from custom_message import CustomMessage
 from tests_util import TestsUtil
-from jsonschema import validate, ValidationError
+from jsonschema import validate
 
 
 dynamodb = TestsUtil.get_dynamodb_client()

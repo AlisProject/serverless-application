@@ -1,7 +1,7 @@
 # coding: utf-8
 
 import os
-from jinja2 import Template, Environment, FileSystemLoader
+from jinja2 import Environment, FileSystemLoader
 
 env = Environment(loader=FileSystemLoader('.'))
 target_template_names = ['template.yaml.tpl', 'cognito-template.yaml.tpl', 'database-template.yaml.tpl']

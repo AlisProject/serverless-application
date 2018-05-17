@@ -191,7 +191,7 @@ class TestMeArticlesPublicRepublish(TestCase):
             }
         }
 
-        article_content_edit = self.article_content_edit_table.update_item(
+        self.article_content_edit_table.update_item(
             Key={'article_id': params['pathParameters']['article_id']},
             UpdateExpression="set title = :title",
             ExpressionAttributeValues={':title': None}
@@ -229,7 +229,7 @@ class TestMeArticlesPublicRepublish(TestCase):
             }
         }
 
-        article_content_edit = self.article_content_edit_table.update_item(
+        self.article_content_edit_table.update_item(
             Key={'article_id': params['pathParameters']['article_id']},
             UpdateExpression="set body = :body",
             ExpressionAttributeValues={':body': None}
@@ -267,7 +267,7 @@ class TestMeArticlesPublicRepublish(TestCase):
             }
         }
 
-        article_content_edit = self.article_content_edit_table.update_item(
+        self.article_content_edit_table.update_item(
             Key={'article_id': params['pathParameters']['article_id']},
             UpdateExpression="set overview = :overview",
             ExpressionAttributeValues={':overview': None}
