@@ -93,6 +93,3 @@ Specify generated Cognito User Pool ARN to SSM.
 ```bash
 ./deploy.sh api
 ```
-
-And fill other valuables to SSM.
-- See: https://github.com/AlisProject/environment
