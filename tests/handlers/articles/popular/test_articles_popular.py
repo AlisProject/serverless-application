@@ -179,7 +179,7 @@ class TestArticlesPopular(TestCase):
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(json.loads(response['body']), [])
 
-    def test_scnario_evaluated_at_changed_within_pagenation(self):
+    def test_scenario_evaluated_at_changed_within_pagination(self):
         # 初回の記事一覧取得
         params = {
             'queryStringParameters': {
