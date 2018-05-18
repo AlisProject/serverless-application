@@ -1,13 +1,10 @@
 # -*- coding: utf-8 -*-
 import os
-import json
-import logging
-import traceback
 import settings
 import time
 from boto3.dynamodb.conditions import Key
 from lambda_base import LambdaBase
-from jsonschema import validate, ValidationError, FormatChecker
+from jsonschema import validate
 from db_util import DBUtil
 from time_util import TimeUtil
 

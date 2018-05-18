@@ -1,4 +1,3 @@
-import boto3
 import json
 from tests_util import TestsUtil
 from unittest import TestCase

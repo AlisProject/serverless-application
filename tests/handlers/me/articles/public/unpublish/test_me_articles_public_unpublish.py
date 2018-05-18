@@ -1,6 +1,5 @@
 import os
 import boto3
-from boto3.dynamodb.conditions import Key
 from unittest import TestCase
 from me_articles_public_unpublish import MeArticlesPublicUnpublish
 from unittest.mock import patch, MagicMock
@@ -95,9 +94,6 @@ class TestMeArticlesPublicUnpublish(TestCase):
         article_content_edit_after = self.article_content_edit_table.scan()['Items']
 
         article_info = self.article_info_table.get_item(Key={'article_id': params['pathParameters']['article_id']})['Item']
-        article_content = self.article_content_table.get_item(
-            Key={'article_id': params['pathParameters']['article_id']}
-        )['Item']
 
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(article_info['status'], 'draft')
@@ -127,9 +123,6 @@ class TestMeArticlesPublicUnpublish(TestCase):
         article_content_edit_after = self.article_content_edit_table.scan()['Items']
 
         article_info = self.article_info_table.get_item(Key={'article_id': params['pathParameters']['article_id']})['Item']
-        article_content = self.article_content_table.get_item(
-            Key={'article_id': params['pathParameters']['article_id']}
-        )['Item']
 
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(article_info['status'], 'draft')
@@ -152,7 +145,7 @@ class TestMeArticlesPublicUnpublish(TestCase):
 
         mock_lib = MagicMock()
         with patch('me_articles_public_unpublish.DBUtil', mock_lib):
-            response = MeArticlesPublicUnpublish(params, {}, self.dynamodb).main()
+            MeArticlesPublicUnpublish(params, {}, self.dynamodb).main()
             args, kwargs = mock_lib.validate_article_existence.call_args
 
             self.assertTrue(mock_lib.validate_article_existence.called)

@@ -3,9 +3,7 @@ from me_articles_drafts_create import MeArticlesDraftsCreate
 from unittest.mock import patch, MagicMock
 from botocore.exceptions import ClientError
 from tests_util import TestsUtil
-import yaml
 import os
-import boto3
 import json
 
 
@@ -307,8 +305,6 @@ class TestMeArticlesDraftsCreate(TestCase):
         self.assert_bad_request(params)
 
     def test_validation_eye_catch_url_format(self):
-        prefix = 'http://'
-
         params = {
             'body': {
                 'eye_catch_url': 'ALIS-invalid-url',

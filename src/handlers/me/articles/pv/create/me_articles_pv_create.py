@@ -2,7 +2,6 @@
 import os
 import settings
 import time
-import json
 from db_util import DBUtil
 from botocore.exceptions import ClientError
 from lambda_base import LambdaBase

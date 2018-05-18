@@ -1,10 +1,7 @@
 from unittest import TestCase
 from articles_popular import ArticlesPopular
 from tests_util import TestsUtil
-from unittest.mock import patch, MagicMock
-import yaml
 import os
-import boto3
 import json
 
 
@@ -181,6 +178,53 @@ class TestArticlesPopular(TestCase):
 
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(json.loads(response['body']), [])
+
+    def test_scenario_evaluated_at_changed_within_pagination(self):
+        # 初回の記事一覧取得
+        params = {
+            'queryStringParameters': {
+                'limit': '2'
+            }
+        }
+
+        response = ArticlesPopular(params, {}, self.dynamodb).main()
+        evaluated_key = json.loads(response['body'])['LastEvaluatedKey']
+        self.assertEqual(response['statusCode'], 200)
+
+        # 2回目の記事一覧取得、初回で得られたevaluated_keyを利用
+        # かつ処理の途中でバッチが実行されたことを想定して、ArticleEvaluatedManageを更新する
+        article_evaluated_manage_table = self.dynamodb.Table(os.environ['ARTICLE_EVALUATED_MANAGE_TABLE_NAME'])
+        article_evaluated_manage_table.put_item(Item={
+            'type': 'article_score',
+            'active_evaluated_at': 1520150272000100
+        })
+
+        params = {
+            'queryStringParameters': {
+                'limit': '2',
+                'article_id': evaluated_key['article_id'],
+                'score': str(evaluated_key['score']),
+                'evaluated_at': str(evaluated_key['evaluated_at'])
+            }
+        }
+
+        response = ArticlesPopular(params, {}, self.dynamodb).main()
+
+        expected_items = [
+            {
+                'article_id': 'testid000001',
+                'status': 'public',
+                'sort_key': 1520150272000001
+            },
+            {
+                'article_id': 'testid000003',
+                'status': 'public',
+                'sort_key': 1520150272000003
+            }
+        ]
+
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(json.loads(response['body'])['Items'], expected_items)
 
     def test_validation_limit_type(self):
         params = {

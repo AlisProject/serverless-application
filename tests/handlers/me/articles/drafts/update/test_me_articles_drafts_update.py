@@ -1,11 +1,8 @@
-import boto3
 import json
-import yaml
 import os
 from unittest import TestCase
 from me_articles_drafts_update import MeArticlesDraftsUpdate
 from unittest.mock import patch, MagicMock
-from botocore.exceptions import ClientError
 from tests_util import TestsUtil
 
 
@@ -235,7 +232,7 @@ class TestMeArticlesDraftsUpdate(TestCase):
 
         mock_lib = MagicMock()
         with patch('me_articles_drafts_update.DBUtil', mock_lib):
-            response = MeArticlesDraftsUpdate(params, {}, self.dynamodb).main()
+            MeArticlesDraftsUpdate(params, {}, self.dynamodb).main()
             args, kwargs = mock_lib.validate_article_existence.call_args
 
             self.assertTrue(mock_lib.validate_article_existence.called)
@@ -318,8 +315,6 @@ class TestMeArticlesDraftsUpdate(TestCase):
         self.assert_bad_request(params)
 
     def test_validation_eye_catch_url_format(self):
-        prefix = 'http://'
-
         params = {
             'body': {
                 'eye_catch_url': 'ALIS-invalid-url',

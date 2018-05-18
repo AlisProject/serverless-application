@@ -43,6 +43,12 @@ jobs:
             pycodestyle src tests ./*.py
 
       - run:
+          name: run pyflakes for python code
+          command: |
+            . venv/bin/activate
+            pyflakes src tests ./*.py
+
+      - run:
           name: run tests
           command: |
             . venv/bin/activate

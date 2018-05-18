@@ -2,9 +2,7 @@ from unittest import TestCase
 from articles_alis_tokens_show import ArticlesAlisTokensShow
 from tests_util import TestsUtil
 from unittest.mock import patch, MagicMock
-import yaml
 import os
-import boto3
 import json
 
 

@@ -2,7 +2,6 @@
 import os
 import boto3
 import settings
-import re
 from jsonschema import validate, ValidationError
 from lambda_base import LambdaBase
 

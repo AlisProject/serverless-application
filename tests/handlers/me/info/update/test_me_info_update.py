@@ -1,5 +1,4 @@
 import os
-import boto3
 import json
 import settings
 from unittest import TestCase

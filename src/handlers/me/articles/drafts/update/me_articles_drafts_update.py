@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import json
-import logging
-import traceback
 import settings
-from botocore.exceptions import ClientError
 from lambda_base import LambdaBase
 from jsonschema import validate, ValidationError, FormatChecker
 from text_sanitizer import TextSanitizer
