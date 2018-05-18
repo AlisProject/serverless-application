@@ -62,7 +62,7 @@ class MeArticlesLikeCreate(LambdaBase):
                 'article_id': article_info['article_id'],
                 'article_title': article_info['title'],
                 'sort_key': TimeUtil.generate_sort_key(),
-                'type': 'like',
+                'type': settings.LIKE_NOTIFICATION_TYPE,
                 'acted_user_id': self.event['requestContext']['authorizer']['claims']['cognito:username'],
                 'created_at': int(time.time())
             }
