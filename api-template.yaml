@@ -898,7 +898,6 @@ Resources:
             x-amazon-apigateway-authorizer:
               type: cognito_user_pools
               providerARNs:
-                # FIXME: Cognitoが生成される前に叩かれ場合がある。その場合は後から修正が必要
                 - !Ref CognitoUserPoolArn
   LambdaRole:
     Type: "AWS::IAM::Role"
