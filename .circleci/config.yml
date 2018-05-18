@@ -68,16 +68,7 @@ jobs:
           name: run deploy
           command: |
             . venv/bin/activate
-            python make_template.py
-            aws cloudformation package \
-              --template-file template.yaml \
-              --s3-bucket $DEPLOY_BUCKET_NAME \
-              --output-template-file packaged-template.yaml
-            aws cloudformation deploy \
-              --template-file packaged-template.yaml \
-              --s3-bucket $DEPLOY_BUCKET_NAME \
-              --stack-name $CLOUDFORMATION_STACK_NAME \
-              --capabilities CAPABILITY_IAM
+            ./deploy.sh api
 
       - store_artifacts:
           path: test-reports

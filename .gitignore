@@ -1,9 +1,6 @@
 *packaged-template.yaml
 venv
 deploy
-template.yaml
-cognito-template.yaml
-database-template.yaml
 vendor-package
 .envrc
 
