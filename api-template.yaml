@@ -27,6 +27,10 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   BetaUsersTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
+  NotificationTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  UnreadNotificationManagerTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
   AlisAppDomain:
     Type: 'AWS::SSM::Parameter::Value<String>'
   PrivateChainAwsAccessKey:
@@ -63,6 +67,8 @@ Globals:
         ARTICLE_SCORE_TABLE_NAME: !Ref ArticleScoreTableName
         USERS_TABLE_NAME: !Ref UsersTableName
         BETA_USERS_TABLE_NAME: !Ref BetaUsersTableName
+        NOTIFICATION_TABLE_NAME: !Ref NotificationTableName
+        UNREAD_NOTIFICATION_MANAGER_TABLE_NAME: !Ref UnreadNotificationManagerTableName
         DOMAIN: !Ref AlisAppDomain
         PRIVATE_CHAIN_AWS_ACCESS_KEY: !Ref PrivateChainAwsAccessKey
         PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY: !Ref PrivateChainAwsSecretAccessKey
