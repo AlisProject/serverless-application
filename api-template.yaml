@@ -1,6 +1,48 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: Create Lambda function by using AWS SAM.
+Description: Lambda functions and API Gateway resources for the ALIS application.
+
+Parameters:
+  ArticleInfoTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  ArticleContentTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  ArticleHistoryTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  ArticleContentEditTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  ArticleEvaluatedManageTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  ArticleAlisTokenTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  ArticleLikedUserTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  ArticleFraudUserTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  ArticlePvUserTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  ArticleScoreTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  UsersTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  BetaUsersTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  AlisAppDomain:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  PrivateChainAwsAccessKey:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  PrivateChainAwsSecretAccessKey:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  PrivateChainExecuteApiHost:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  BetaModeFlag:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  DistS3BucketName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  CognitoUserPoolArn:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  SaltForArticleId:
+    Type: 'AWS::SSM::Parameter::Value<String>'
 
 Globals:
   Function:
@@ -9,24 +51,24 @@ Globals:
     MemorySize: 3008
     Environment:
       Variables:
-        ARTICLE_INFO_TABLE_NAME: {{ ARTICLE_INFO_TABLE_NAME }}
-        ARTICLE_CONTENT_TABLE_NAME: {{ ARTICLE_CONTENT_TABLE_NAME }}
-        ARTICLE_HISTORY_TABLE_NAME: {{ ARTICLE_HISTORY_TABLE_NAME }}
-        ARTICLE_CONTENT_EDIT_TABLE_NAME: {{ ARTICLE_CONTENT_EDIT_TABLE_NAME }}
-        ARTICLE_EVALUATED_MANAGE_TABLE_NAME: {{ ARTICLE_EVALUATED_MANAGE_TABLE_NAME }}
-        ARTICLE_ALIS_TOKEN_TABLE_NAME: {{ ARTICLE_ALIS_TOKEN_TABLE_NAME }}
-        ARTICLE_LIKED_USER_TABLE_NAME: {{ ARTICLE_LIKED_USER_TABLE_NAME }}
-        ARTICLE_FRAUD_USER_TABLE_NAME: {{ ARTICLE_FRAUD_USER_TABLE_NAME }}
-        ARTICLE_PV_USER_TABLE_NAME: {{ ARTICLE_PV_USER_TABLE_NAME }}
-        ARTICLE_SCORE_TABLE_NAME: {{ ARTICLE_SCORE_TABLE_NAME }}
-        USERS_TABLE_NAME: {{ USERS_TABLE_NAME }}
-        DIST_S3_BUCKET_NAME: {{ DIST_S3_BUCKET_NAME }}
-        DOMAIN: {{ DOMAIN }}
-        BETA_MODE_FLAG: {{ BETA_MODE_FLAG }}
-        BETA_USERS_TABLE_NAME: {{ BETA_USERS_TABLE_NAME }}
-        PRIVATE_CHAIN_AWS_ACCESS_KEY: {{ PRIVATE_CHAIN_AWS_ACCESS_KEY }}
-        PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY: {{ PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY }}
-        PRIVATE_CHAIN_EXECUTE_API_HOST: {{ PRIVATE_CHAIN_EXECUTE_API_HOST }}
+        ARTICLE_INFO_TABLE_NAME: !Ref ArticleInfoTableName
+        ARTICLE_CONTENT_TABLE_NAME: !Ref ArticleContentTableName
+        ARTICLE_HISTORY_TABLE_NAME: !Ref ArticleHistoryTableName
+        ARTICLE_CONTENT_EDIT_TABLE_NAME: !Ref ArticleContentEditTableName
+        ARTICLE_EVALUATED_MANAGE_TABLE_NAME: !Ref ArticleEvaluatedManageTableName
+        ARTICLE_ALIS_TOKEN_TABLE_NAME: !Ref ArticleAlisTokenTableName
+        ARTICLE_LIKED_USER_TABLE_NAME: !Ref ArticleLikedUserTableName
+        ARTICLE_FRAUD_USER_TABLE_NAME: !Ref ArticleFraudUserTableName
+        ARTICLE_PV_USER_TABLE_NAME: !Ref ArticlePvUserTableName
+        ARTICLE_SCORE_TABLE_NAME: !Ref ArticleScoreTableName
+        USERS_TABLE_NAME: !Ref UsersTableName
+        BETA_USERS_TABLE_NAME: !Ref BetaUsersTableName
+        DOMAIN: !Ref AlisAppDomain
+        PRIVATE_CHAIN_AWS_ACCESS_KEY: !Ref PrivateChainAwsAccessKey
+        PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY: !Ref PrivateChainAwsSecretAccessKey
+        PRIVATE_CHAIN_EXECUTE_API_HOST: !Ref PrivateChainExecuteApiHost
+        BETA_MODE_FLAG: !Ref BetaModeFlag
+        DIST_S3_BUCKET_NAME: !Ref DistS3BucketName
 
 Resources:
   RestApi:
@@ -925,8 +967,7 @@ Resources:
             x-amazon-apigateway-authorizer:
               type: cognito_user_pools
               providerARNs:
-                # FIXME: Cognitoが生成される前に叩かれ場合がある。その場合は後から修正が必要
-                - {{ COGNITO_USER_POOL_ARN }}
+                - !Ref CognitoUserPoolArn
   LambdaRole:
     Type: "AWS::IAM::Role"
     Properties:
@@ -1057,7 +1098,7 @@ Resources:
         CodeUri: ./deploy/me_articles_drafts_create.zip
         Environment:
           Variables:
-            SALT_FOR_ARTICLE_ID: {{ SALT_FOR_ARTICLE_ID }}
+            SALT_FOR_ARTICLE_ID: !Ref SaltForArticleId
         Events:
           Api:
             Type: Api

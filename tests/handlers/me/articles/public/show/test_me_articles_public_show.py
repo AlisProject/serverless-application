@@ -1,5 +1,4 @@
 import os
-import boto3
 import json
 from unittest import TestCase
 from me_articles_public_show import MeArticlesPublicShow
@@ -95,7 +94,7 @@ class TestMeArticlesPublicShow(TestCase):
 
         mock_lib = MagicMock()
         with patch('me_articles_public_show.DBUtil', mock_lib):
-            response = MeArticlesPublicShow(params, {}, self.dynamodb).main()
+            MeArticlesPublicShow(params, {}, self.dynamodb).main()
             args, kwargs = mock_lib.validate_article_existence.call_args
 
             self.assertTrue(mock_lib.validate_article_existence.called)

@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
-import boto3
 import json
-import logging
-import decimal
-import traceback
 import settings
 from lambda_base import LambdaBase
 from boto3.dynamodb.conditions import Key, Attr

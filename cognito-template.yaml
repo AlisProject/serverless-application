@@ -1,6 +1,22 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: Create Lambda function by using AWS SAM.
+Description: The Cognito settings for the ALIS application.
+
+Parameters:
+  AlisAppDomain:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  PrivateChainAwsAccessKey:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  PrivateChainAwsSecretAccessKey:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  PrivateChainExecuteApiHost:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  BetaModeFlag:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  UsersTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  BetaUsersTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
 
 Globals:
   Function:
@@ -9,13 +25,13 @@ Globals:
     MemorySize: 256
     Environment:
       Variables:
-        DOMAIN: {{ DOMAIN }}
-        PRIVATE_CHAIN_AWS_ACCESS_KEY: {{ PRIVATE_CHAIN_AWS_ACCESS_KEY }}
-        PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY: {{ PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY }}
-        PRIVATE_CHAIN_EXECUTE_API_HOST: {{ PRIVATE_CHAIN_EXECUTE_API_HOST }}
-        USERS_TABLE_NAME: {{ USERS_TABLE_NAME }}
-        BETA_USERS_TABLE_NAME: {{ BETA_USERS_TABLE_NAME }}
-        BETA_MODE_FLAG: {{ BETA_MODE_FLAG }}
+        DOMAIN: !Ref AlisAppDomain
+        PRIVATE_CHAIN_AWS_ACCESS_KEY: !Ref PrivateChainAwsAccessKey
+        PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY: !Ref PrivateChainAwsSecretAccessKey
+        PRIVATE_CHAIN_EXECUTE_API_HOST: !Ref PrivateChainExecuteApiHost
+        BETA_MODE_FLAG: !Ref BetaModeFlag
+        USERS_TABLE_NAME: !Ref UsersTableName
+        BETA_USERS_TABLE_NAME: !Ref BetaUsersTableName
 
 Resources:
   SNSRole:
@@ -67,7 +83,7 @@ Resources:
         - phone_number
       AutoVerifiedAttributes:
         - email
-      EmailVerificationMessage: "Your verification code is {{ '{' }}####}."
+      EmailVerificationMessage: "Your verification code is {####}."
       EmailVerificationSubject: "Your verification code"
       LambdaConfig:
         PreSignUp: !GetAtt CognitoTriggerPreSignUp.Arn
@@ -114,9 +130,8 @@ Resources:
           - - 'external-'
             - !Ref "AWS::StackName"
         SnsCallerArn: !GetAtt SNSRole.Arn
-      SmsAuthenticationMessage:  "Your authentication code is {{ '{' }}####}."
-      SmsVerificationMessage: "Your verification code is {{ '{' }}####}."
-    DeletionPolicy: Retain
+      SmsAuthenticationMessage:  "Your authentication code is {####}."
+      SmsVerificationMessage: "Your verification code is {####}."
   UserPoolClient:
     Type: AWS::Cognito::UserPoolClient
     Properties:
@@ -132,7 +147,6 @@ Resources:
         WriteAttributes:
           - email
           - phone_number
-    DeletionPolicy: Retain
   IdentityPool:
     Type: AWS::Cognito::IdentityPool
     Properties:
@@ -147,7 +161,6 @@ Resources:
               - .amazonaws.com/
               - Ref: UserPool
       AllowUnauthenticatedIdentities: false
-    DeletionPolicy: Retain
   UnauthenticatedPolicy:
     Type: AWS::IAM::ManagedPolicy
     Properties:

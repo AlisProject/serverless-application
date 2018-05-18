@@ -1,5 +1,4 @@
 import os
-import boto3
 from unittest import TestCase
 from pre_signup import PreSignUp
 from tests_util import TestsUtil

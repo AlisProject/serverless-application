@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
 import json
-import logging
-import traceback
 import settings
 from lambda_base import LambdaBase
 from boto3.dynamodb.conditions import Key
@@ -62,7 +60,10 @@ class ArticlesPopular(LambdaBase):
                 'score': self.params.get('score')
             }
 
-            query_params.update({'ExclusiveStartKey': LastEvaluatedKey})
+            query_params.update({
+                'ExclusiveStartKey': LastEvaluatedKey,
+                'KeyConditionExpression': Key('evaluated_at').eq(self.params.get('evaluated_at'))
+            })
 
         response = article_score_table.query(**query_params)
 

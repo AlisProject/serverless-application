@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
 import os
-import json
-import logging
-import traceback
 import settings
 from lambda_base import LambdaBase
-from jsonschema import validate, ValidationError, FormatChecker
+from jsonschema import validate
 from db_util import DBUtil
 
 

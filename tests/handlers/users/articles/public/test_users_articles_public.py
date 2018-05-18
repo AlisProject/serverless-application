@@ -1,9 +1,7 @@
 import os
-import boto3
 import json
 from unittest import TestCase
 from users_articles_public import UsersArticlesPublic
-from unittest.mock import patch, MagicMock
 from tests_util import TestsUtil
 
 

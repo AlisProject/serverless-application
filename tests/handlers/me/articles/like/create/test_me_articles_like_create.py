@@ -206,7 +206,7 @@ class TestMeArticlesLikeCreate(TestCase):
 
         mock_lib = MagicMock()
         with patch('me_articles_like_create.DBUtil', mock_lib):
-            response = MeArticlesLikeCreate(event=params, context={}, dynamodb=self.dynamodb).main()
+            MeArticlesLikeCreate(event=params, context={}, dynamodb=self.dynamodb).main()
             args, kwargs = mock_lib.validate_article_existence.call_args
 
             self.assertTrue(mock_lib.validate_article_existence.called)

@@ -1,6 +1,4 @@
-import yaml
 import os
-import boto3
 from unittest import TestCase
 from post_confirmation import PostConfirmation
 from tests_util import TestsUtil
@@ -79,7 +77,7 @@ class TestPostConfirmation(TestCase):
                 }
         }
         postconfirmation = PostConfirmation(event=event, context="", dynamodb=dynamodb)
-        response = postconfirmation.main()
+        postconfirmation.main()
         table = dynamodb.Table(os.environ['BETA_USERS_TABLE_NAME'])
         items = table.get_item(Key={"email": "test@example.com"})
         self.assertEqual(items['Item']['used'], True)

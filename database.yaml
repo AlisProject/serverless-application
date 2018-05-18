@@ -263,6 +263,24 @@ Resources:
         ReadCapacityUnits: 2
         WriteCapacityUnits: 2
     DeletionPolicy: Retain
+  LikeTokenAggregation:
+    Type: AWS::DynamoDB::Table
+    DependsOn:
+    - ArticleTokenAggregation
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: evaluated_at
+          AttributeType: N
+        - AttributeName: user_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: evaluated_at
+          KeyType: HASH
+        - AttributeName: user_id
+          KeyType: RANGE
+      ProvisionedThroughput:
+        ReadCapacityUnits: 2
+        WriteCapacityUnits: 2
   ArticleFraudUser:
     Type: AWS::DynamoDB::Table
     DependsOn:
