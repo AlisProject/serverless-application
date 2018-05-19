@@ -3,6 +3,8 @@ import os
 import settings
 import time
 import json
+import logging
+import traceback
 from db_util import DBUtil
 from botocore.exceptions import ClientError
 from lambda_base import LambdaBase
@@ -45,10 +47,14 @@ class MeArticlesLikeCreate(LambdaBase):
             else:
                 raise
 
-        article_info_table = self.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
-        article_info = article_info_table.get_item(Key={'article_id': self.params['article_id']}).get('Item')
-        self.__create_like_notification(article_info)
-        self.__update_unread_notification_manager(article_info)
+        try:
+            article_info_table = self.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
+            article_info = article_info_table.get_item(Key={'article_id': self.params['article_id']}).get('Item')
+            self.__create_like_notification(article_info)
+            self.__update_unread_notification_manager(article_info)
+        except Exception as e:
+            logging.fatal(e)
+            traceback.print_exc()
 
         return {
             'statusCode': 200

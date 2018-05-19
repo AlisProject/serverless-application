@@ -190,6 +190,27 @@ class TestMeArticlesLikeCreate(TestCase):
         self.assertEqual(unread_notification_manager['unread'], True)
         self.assertEqual(len(unread_notification_manager_after), len(unread_notification_manager_before) + 1)
 
+    @patch('me_articles_like_create.MeArticlesLikeCreate._MeArticlesLikeCreate__create_like_notification',
+           MagicMock(side_effect=Exception()))
+    def test_raise_exception_in_creating_notification(self):
+        params = {
+            'pathParameters': {
+                'article_id': self.article_liked_user_table_items[0]['article_id']
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test05'
+                    }
+                }
+            }
+        }
+
+        article_liked_user = MeArticlesLikeCreate(event=params, context={}, dynamodb=self.dynamodb)
+        response = article_liked_user.main()
+
+        self.assertEqual(response['statusCode'], 200)
+
     def test_call_validate_article_existence(self):
         params = {
             'pathParameters': {
