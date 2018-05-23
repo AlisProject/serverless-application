@@ -340,7 +340,6 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: !Ref MinDynamoReadCapacitty
         WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
-    DeletionPolicy: Retain
   Notification:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -357,7 +356,6 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: !Ref MinDynamoReadCapacitty
         WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
-    DeletionPolicy: Retain
   UnreadNotificationManager:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -370,7 +368,6 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: !Ref MinDynamoReadCapacitty
         WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
-    DeletionPolicy: Retain
   ScalingRole:
     Type: 'AWS::IAM::Role'
     Properties:
