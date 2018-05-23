@@ -43,5 +43,7 @@ aws cloudformation deploy \
     ArticleScoreTableName=${SSM_PARAMS_PREFIX}ArticleScoreTableName \
     UsersTableName=${SSM_PARAMS_PREFIX}UsersTableName \
     BetaUsersTableName=${SSM_PARAMS_PREFIX}BetaUsersTableName \
+    NotificationTableName=${SSM_PARAMS_PREFIX}NotificationTableName \
+    UnreadNotificationManagerTableName=${SSM_PARAMS_PREFIX}UnreadNotificationManagerTableName \
     DistS3BucketName=${SSM_PARAMS_PREFIX}DistS3BucketName \
   --capabilities CAPABILITY_IAM

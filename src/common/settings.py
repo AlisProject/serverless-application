@@ -77,6 +77,8 @@ users_articles_public_default_limit = 10
 articles_popular_default_limit = 20
 
 USERS_ARTICLE_INDEX_DEFAULT_LIMIT = 10
+NOTIFICATION_INDEX_DEFAULT_LIMIT = 10
+
 article_id_length = 12
 
 html_allowed_tags = ['a', 'b', 'blockquote', 'br', 'h2', 'h3', 'i', 'p', 'u', 'img', 'hr',
@@ -127,3 +129,5 @@ USER_ICON_HEIGHT = 240
 
 S3_ARTICLES_IMAGES_PATH = 'd/api/articles_images/'
 S3_INFO_ICON_PATH = 'd/api/info_icon/'
+
+LIKE_NOTIFICATION_TYPE = 'like'

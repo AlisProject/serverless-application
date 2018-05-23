@@ -39,7 +39,7 @@ class MeInfoIconCreate(LambdaBase):
     def validate_image_data(self, image_data):
         try:
             Image.open(BytesIO(base64.b64decode(image_data)))
-        except Exception as e:
+        except Exception:
             raise ValidationError('Bad Request: No supported image format')
 
     def validate_params(self):
