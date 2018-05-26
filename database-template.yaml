@@ -340,7 +340,6 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: !Ref MinDynamoReadCapacitty
         WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
-    DeletionPolicy: Retain
   Notification:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -357,7 +356,6 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: !Ref MinDynamoReadCapacitty
         WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
-    DeletionPolicy: Retain
   UnreadNotificationManager:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -370,7 +368,6 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: !Ref MinDynamoReadCapacitty
         WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
-    DeletionPolicy: Retain
   ScalingRole:
     Type: 'AWS::IAM::Role'
     Properties:
@@ -1261,8 +1258,8 @@ Resources:
     Type: AWS::ApplicationAutoScaling::ScalableTarget
     DependsOn: ScalingRole
     Properties:
-      MaxCapacity: {{ MAX_DYNAMO_READ_CAPACITTY }}
-      MinCapacity: {{ MIN_DYNAMO_READ_CAPACITTY }}
+      MaxCapacity: !Ref MaxDynamoWriteCapacitty
+      MinCapacity: !Ref MinDynamoWriteCapacitty
       ResourceId: !Join
         - /
         - - table
@@ -1274,8 +1271,8 @@ Resources:
     Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
     DependsOn: ScalingRole
     Properties:
-      MaxCapacity: {{ MAX_DYNAMO_WRITE_CAPACITTY }}
-      MinCapacity: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
+      MaxCapacity: !Ref MaxDynamoWriteCapacitty
+      MinCapacity: !Ref MinDynamoWriteCapacitty
       ResourceId: !Join
         - /
         - - table
@@ -1311,8 +1308,8 @@ Resources:
     Type: AWS::ApplicationAutoScaling::ScalableTarget
     DependsOn: ScalingRole
     Properties:
-      MaxCapacity: {{ MAX_DYNAMO_READ_CAPACITTY }}
-      MinCapacity: {{ MIN_DYNAMO_READ_CAPACITTY }}
+      MaxCapacity: !Ref MaxDynamoWriteCapacitty
+      MinCapacity: !Ref MinDynamoWriteCapacitty
       ResourceId: !Join
         - /
         - - table
@@ -1324,8 +1321,8 @@ Resources:
     Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
     DependsOn: ScalingRole
     Properties:
-      MaxCapacity: {{ MAX_DYNAMO_WRITE_CAPACITTY }}
-      MinCapacity: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
+      MaxCapacity: !Ref MaxDynamoWriteCapacitty
+      MinCapacity: !Ref MinDynamoWriteCapacitty
       ResourceId: !Join
         - /
         - - table
