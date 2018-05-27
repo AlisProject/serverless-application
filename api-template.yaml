@@ -1226,7 +1226,7 @@ Resources:
         Api:
           Type: Api
           Properties:
-            Path: /me/articles/{article_id}/likes
+            Path: /me/articles/{article_id}/like
             Method: post
             RestApiId: !Ref RestApi
   MeArticlesFraudCreate:
