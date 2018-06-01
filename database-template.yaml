@@ -130,6 +130,16 @@ Resources:
           KeyType: HASH
         - AttributeName: evaluated_at
           KeyType: RANGE
+      GlobalSecondaryIndexes:
+        - IndexName: evaluated_at-index
+          KeySchema:
+            - AttributeName: evaluated_at
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: !Ref MinDynamoReadCapacitty
+            WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
       ProvisionedThroughput:
           ReadCapacityUnits: !Ref MinDynamoReadCapacitty
           WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
