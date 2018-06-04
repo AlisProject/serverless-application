@@ -15,7 +15,7 @@ class TestMeUnreadNotificationManagersUpdate(TestCase):
         cls.unread_notification_manager_items = [
             {
                 'user_id': 'test01',
-                'unread': False
+                'unread': True
             }
         ]
         TestsUtil.create_table(cls.dynamodb, os.environ['UNREAD_NOTIFICATION_MANAGER_TABLE_NAME'],
@@ -48,7 +48,7 @@ class TestMeUnreadNotificationManagersUpdate(TestCase):
 
         expected_items = {
             'user_id': target_data['user_id'],
-            'unread': True
+            'unread': False
         }
 
         self.assertEqual(response['statusCode'], 200)
@@ -75,7 +75,7 @@ class TestMeUnreadNotificationManagersUpdate(TestCase):
 
         expected_items = {
             'user_id': 'test2',
-            'unread': True
+            'unread': False
         }
 
         self.assertEqual(response['statusCode'], 200)
