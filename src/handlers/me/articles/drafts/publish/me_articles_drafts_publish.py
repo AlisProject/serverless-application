@@ -7,6 +7,7 @@ from lambda_base import LambdaBase
 from jsonschema import validate
 from db_util import DBUtil
 from time_util import TimeUtil
+from es_util import ESUtil
 
 
 class MeArticlesDraftsPublish(LambdaBase):
@@ -43,6 +44,8 @@ class MeArticlesDraftsPublish(LambdaBase):
             ExpressionAttributeNames={'#attr': 'status'},
             ExpressionAttributeValues={':article_status': 'public'}
         )
+
+        self.__post_elastic_search()
 
         return {
             'statusCode': 200
@@ -85,3 +88,24 @@ class MeArticlesDraftsPublish(LambdaBase):
                 'created_at': int(time.time())
             }
         )
+
+    def __post_elastic_search(self):
+        tbl_info = self.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
+        tbl_info_expression = "user_id, created_at, overview, #st, eye_catch_url, sort_key, article_id, published_at, title"
+        response_info = tbl_info.get_item(
+                Key={
+                    'article_id': self.params['article_id']
+                },
+                ProjectionExpression=tbl_info_expression,
+                ExpressionAttributeNames={
+                    '#st': 'status'
+                }
+        )
+        tbl_content = self.dynamodb.Table(os.environ['ARTICLE_CONTENT_TABLE_NAME'])
+        response_content = tbl_content.get_item(
+                Key={
+                    'article_id': self.params['article_id']
+                },
+                ProjectionExpression='body'
+        )
+        ESUtil.post_article(self.elasticsearch, response_info, response_content)

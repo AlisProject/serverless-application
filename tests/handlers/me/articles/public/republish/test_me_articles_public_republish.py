@@ -6,9 +6,13 @@ from unittest import TestCase
 from me_articles_public_republish import MeArticlesPublicRepublish
 from unittest.mock import patch, MagicMock
 from tests_util import TestsUtil
+from elasticsearch import Elasticsearch
 
 
 class TestMeArticlesPublicRepublish(TestCase):
+    elasticsearch = Elasticsearch(
+        hosts=[{'host': 'localhost'}]
+    )
     dynamodb = boto3.resource('dynamodb', endpoint_url='http://localhost:4569/')
 
     @classmethod
@@ -79,7 +83,7 @@ class TestMeArticlesPublicRepublish(TestCase):
         TestsUtil.delete_all_tables(cls.dynamodb)
 
     def assert_bad_request(self, params):
-        function = MeArticlesPublicRepublish(params, {}, self.dynamodb)
+        function = MeArticlesPublicRepublish(params, {}, self.dynamodb, elasticsearch=self.elasticsearch)
         response = function.main()
 
         self.assertEqual(response['statusCode'], 400)
@@ -103,7 +107,7 @@ class TestMeArticlesPublicRepublish(TestCase):
         article_content_edit_before = self.article_content_edit_table.scan()['Items']
         article_history_before = self.article_history_table.scan()['Items']
 
-        response = MeArticlesPublicRepublish(params, {}, self.dynamodb).main()
+        response = MeArticlesPublicRepublish(params, {}, self.dynamodb, elasticsearch=self.elasticsearch).main()
 
         article_info_after = self.article_info_table.scan()['Items']
         article_content_after = self.article_content_table.scan()['Items']
@@ -164,7 +168,7 @@ class TestMeArticlesPublicRepublish(TestCase):
         article_content_edit_before = self.article_content_edit_table.scan()['Items']
         article_history_before = self.article_history_table.scan()['Items']
 
-        response = MeArticlesPublicRepublish(params, {}, self.dynamodb).main()
+        response = MeArticlesPublicRepublish(params, {}, self.dynamodb, elasticsearch=self.elasticsearch).main()
 
         article_info_after = self.article_info_table.scan()['Items']
         article_content_after = self.article_content_table.scan()['Items']
@@ -202,7 +206,7 @@ class TestMeArticlesPublicRepublish(TestCase):
         article_content_edit_before = self.article_content_edit_table.scan()['Items']
         article_history_before = self.article_history_table.scan()['Items']
 
-        response = MeArticlesPublicRepublish(params, {}, self.dynamodb).main()
+        response = MeArticlesPublicRepublish(params, {}, self.dynamodb, elasticsearch=self.elasticsearch).main()
 
         article_info_after = self.article_info_table.scan()['Items']
         article_content_after = self.article_content_table.scan()['Items']
@@ -240,7 +244,7 @@ class TestMeArticlesPublicRepublish(TestCase):
         article_content_edit_before = self.article_content_edit_table.scan()['Items']
         article_history_before = self.article_history_table.scan()['Items']
 
-        response = MeArticlesPublicRepublish(params, {}, self.dynamodb).main()
+        response = MeArticlesPublicRepublish(params, {}, self.dynamodb, elasticsearch=self.elasticsearch).main()
 
         article_info_after = self.article_info_table.scan()['Items']
         article_content_after = self.article_content_table.scan()['Items']
@@ -278,7 +282,7 @@ class TestMeArticlesPublicRepublish(TestCase):
         article_content_edit_before = self.article_content_edit_table.scan()['Items']
         article_history_before = self.article_history_table.scan()['Items']
 
-        response = MeArticlesPublicRepublish(params, {}, self.dynamodb).main()
+        response = MeArticlesPublicRepublish(params, {}, self.dynamodb, elasticsearch=self.elasticsearch).main()
 
         article_info_after = self.article_info_table.scan()['Items']
         article_content_after = self.article_content_table.scan()['Items']
@@ -307,7 +311,7 @@ class TestMeArticlesPublicRepublish(TestCase):
 
         mock_lib = MagicMock()
         with patch('me_articles_public_republish.DBUtil', mock_lib):
-            MeArticlesPublicRepublish(params, {}, self.dynamodb).main()
+            MeArticlesPublicRepublish(params, {}, self.dynamodb, elasticsearch=self.elasticsearch).main()
             args, kwargs = mock_lib.validate_article_existence.call_args
 
             self.assertTrue(mock_lib.validate_article_existence.called)

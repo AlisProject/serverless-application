@@ -6,9 +6,13 @@ from unittest import TestCase
 from me_articles_drafts_publish import MeArticlesDraftsPublish
 from unittest.mock import patch, MagicMock
 from tests_util import TestsUtil
+from elasticsearch import Elasticsearch
 
 
 class TestMeArticlesDraftsPublish(TestCase):
+    elasticsearch = Elasticsearch(
+        hosts=[{'host': 'localhost'}]
+    )
     dynamodb = boto3.resource('dynamodb', endpoint_url='http://localhost:4569/')
 
     @classmethod
@@ -91,7 +95,7 @@ class TestMeArticlesDraftsPublish(TestCase):
         TestsUtil.delete_all_tables(cls.dynamodb)
 
     def assert_bad_request(self, params):
-        function = MeArticlesDraftsPublish(params, {}, self.dynamodb)
+        function = MeArticlesDraftsPublish(params, {}, self.dynamodb, elasticsearch=self.elasticsearch)
         response = function.main()
 
         self.assertEqual(response['statusCode'], 400)
@@ -116,7 +120,7 @@ class TestMeArticlesDraftsPublish(TestCase):
         article_history_before = self.article_history_table.scan()['Items']
         article_content_edit_before = self.article_content_edit_table.scan()['Items']
 
-        response = MeArticlesDraftsPublish(params, {}, self.dynamodb).main()
+        response = MeArticlesDraftsPublish(params, {}, self.dynamodb, elasticsearch=self.elasticsearch).main()
 
         article_info_after = self.article_info_table.scan()['Items']
         article_history_after = self.article_history_table.scan()['Items']
@@ -158,7 +162,7 @@ class TestMeArticlesDraftsPublish(TestCase):
         article_history_before = self.article_history_table.scan()['Items']
         article_content_edit_before = self.article_content_edit_table.scan()['Items']
 
-        response = MeArticlesDraftsPublish(params, {}, self.dynamodb).main()
+        response = MeArticlesDraftsPublish(params, {}, self.dynamodb, elasticsearch=self.elasticsearch).main()
 
         article_info_after = self.article_info_table.scan()['Items']
         article_history_after = self.article_history_table.scan()['Items']
@@ -200,7 +204,7 @@ class TestMeArticlesDraftsPublish(TestCase):
         article_history_before = self.article_history_table.scan()['Items']
         article_content_edit_before = self.article_content_edit_table.scan()['Items']
 
-        response = MeArticlesDraftsPublish(params, {}, self.dynamodb).main()
+        response = MeArticlesDraftsPublish(params, {}, self.dynamodb, elasticsearch=self.elasticsearch).main()
 
         article_info_after = self.article_info_table.scan()['Items']
         article_history_after = self.article_history_table.scan()['Items']
@@ -240,7 +244,7 @@ class TestMeArticlesDraftsPublish(TestCase):
 
         mock_lib = MagicMock()
         with patch('me_articles_drafts_publish.DBUtil', mock_lib):
-            MeArticlesDraftsPublish(params, {}, self.dynamodb).main()
+            MeArticlesDraftsPublish(params, {}, self.dynamodb, elasticsearch=self.elasticsearch).main()
             args, kwargs = mock_lib.validate_article_existence.call_args
 
             self.assertTrue(mock_lib.validate_article_existence.called)
