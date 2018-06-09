@@ -1377,7 +1377,7 @@ Resources:
     Properties:
       Handler: handler.lambda_handler
       Role: !GetAtt LambdaRole.Arn
-      CodeUri: ./deploy/me_unread_notification_managers_show.zip
+      CodeUri: ./deploy/me_unread_notification_managers_update.zip
       Events:
         Api:
           Type: Api
