@@ -17,7 +17,7 @@ class MeUnreadNotificationManagersUpdate(LambdaBase):
         unread_notification_manager_table.update_item(
             Key={'user_id': user_id},
             UpdateExpression='set unread = :unread',
-            ExpressionAttributeValues={':unread': True}
+            ExpressionAttributeValues={':unread': False}
         )
 
         return {
