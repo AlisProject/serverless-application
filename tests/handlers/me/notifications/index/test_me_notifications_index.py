@@ -198,6 +198,15 @@ class TestMeUnreadNotificationManagersShow(TestCase):
 
         self.assertEqual(response['statusCode'], 200)
 
+    def test_validation_notification_id_max(self):
+        params = {
+            'queryStringParameters': {
+                'notification_id': 'A' * 61
+            }
+        }
+
+        self.assert_bad_request(params)
+
     def test_validation_limit_type(self):
         params = {
             'queryStringParameters': {

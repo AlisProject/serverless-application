@@ -15,6 +15,7 @@ class MeNotificationsIndex(LambdaBase):
             'type': 'object',
             'properties': {
                 'limit': settings.parameters['limit'],
+                'notification_id': settings.parameters['notification_id'],
                 'sort_key': settings.parameters['sort_key']
             }
         }

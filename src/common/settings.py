@@ -70,6 +70,10 @@ parameters = {
         'type': 'string',
         'maxLength': 100
     },
+    'notification_id': {
+        'type': 'string',
+        'maxLength': 60
+    }
 }
 
 article_recent_default_limit = 20
