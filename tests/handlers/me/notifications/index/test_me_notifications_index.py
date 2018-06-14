@@ -201,7 +201,7 @@ class TestMeUnreadNotificationManagersShow(TestCase):
     def test_validation_notification_id_max(self):
         params = {
             'queryStringParameters': {
-                'notification_id': 'A' * 61
+                'notification_id': 'A' * 81
             }
         }
 

@@ -72,7 +72,7 @@ parameters = {
     },
     'notification_id': {
         'type': 'string',
-        'maxLength': 60
+        'maxLength': 80
     }
 }
 
