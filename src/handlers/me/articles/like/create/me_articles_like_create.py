@@ -5,6 +5,7 @@ import time
 import json
 import logging
 import traceback
+from boto3.dynamodb.conditions import Key
 from db_util import DBUtil
 from botocore.exceptions import ClientError
 from lambda_base import LambdaBase
@@ -62,17 +63,35 @@ class MeArticlesLikeCreate(LambdaBase):
 
     def __create_like_notification(self, article_info):
         notification_table = self.dynamodb.Table(os.environ['NOTIFICATION_TABLE_NAME'])
+        notification_id = '-'.join([settings.LIKE_NOTIFICATION_TYPE, article_info['user_id'], article_info['article_id']])
+        notification = notification_table.get_item(Key={'notification_id': notification_id}).get('Item')
 
-        notification_table.put_item(Item={
-                'user_id': article_info['user_id'],
-                'article_id': article_info['article_id'],
-                'article_title': article_info['title'],
-                'sort_key': TimeUtil.generate_sort_key(),
-                'type': settings.LIKE_NOTIFICATION_TYPE,
-                'acted_user_id': self.event['requestContext']['authorizer']['claims']['cognito:username'],
-                'created_at': int(time.time())
-            }
-        )
+        liked_count = self.__get_article_likes_count()
+
+        if notification:
+            notification_table.update_item(
+                Key={
+                    'notification_id': notification_id
+                },
+                UpdateExpression="set sort_key = :sort_key, article_title = :article_title, liked_count = :liked_count",
+                ExpressionAttributeValues={
+                    ':sort_key': TimeUtil.generate_sort_key(),
+                    ':article_title': article_info['title'],
+                    ':liked_count': liked_count
+                }
+            )
+        else:
+            notification_table.put_item(Item={
+                    'notification_id': notification_id,
+                    'user_id': article_info['user_id'],
+                    'article_id': article_info['article_id'],
+                    'article_title': article_info['title'],
+                    'sort_key': TimeUtil.generate_sort_key(),
+                    'type': settings.LIKE_NOTIFICATION_TYPE,
+                    'liked_count': liked_count,
+                    'created_at': int(time.time())
+                }
+            )
 
     def __update_unread_notification_manager(self, article_info):
         unread_notification_manager_table = self.dynamodb.Table(os.environ['UNREAD_NOTIFICATION_MANAGER_TABLE_NAME'])
@@ -101,3 +120,13 @@ class MeArticlesLikeCreate(LambdaBase):
     def __get_article_user_id(self, article_id):
         article_info_table = self.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
         return article_info_table.get_item(Key={'article_id': article_id}).get('Item').get('user_id')
+
+    def __get_article_likes_count(self):
+        query_params = {
+            'KeyConditionExpression': Key('article_id').eq(self.event['pathParameters']['article_id']),
+            'Select': 'COUNT'
+        }
+        article_liked_user_table = self.dynamodb.Table(os.environ['ARTICLE_LIKED_USER_TABLE_NAME'])
+        response = article_liked_user_table.query(**query_params)
+
+        return response['Count']

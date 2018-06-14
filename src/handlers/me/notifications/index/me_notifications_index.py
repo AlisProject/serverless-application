@@ -15,6 +15,7 @@ class MeNotificationsIndex(LambdaBase):
             'type': 'object',
             'properties': {
                 'limit': settings.parameters['limit'],
+                'notification_id': settings.parameters['notification_id'],
                 'sort_key': settings.parameters['sort_key']
             }
         }
@@ -33,12 +34,14 @@ class MeNotificationsIndex(LambdaBase):
 
         query_params = {
             'Limit': limit,
+            'IndexName': 'user_id-sort_key-index',
             'KeyConditionExpression': Key('user_id').eq(user_id),
             'ScanIndexForward': False
         }
 
-        if self.params.get('sort_key') is not None:
+        if self.params.get('notification_id') is not None and self.params.get('sort_key') is not None:
             LastEvaluatedKey = {
+                'notification_id': self.params.get('notification_id'),
                 'user_id': user_id,
                 'sort_key': int(self.params['sort_key'])
             }
