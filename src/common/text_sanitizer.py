@@ -26,10 +26,10 @@ class TextSanitizer:
         if name == 'class':
             allow_classes = [
                 'medium-insert-images',
+                'medium-insert-images medium-insert-images-wide',
                 'medium-insert-images medium-insert-images-left',
                 'medium-insert-images medium-insert-images-right',
-                'medium-insert-images medium-insert-images-grid',
-                'medium-insert-images medium-insert-active'
+                'medium-insert-images medium-insert-images-grid'
             ]
             if value in allow_classes:
                 return True
