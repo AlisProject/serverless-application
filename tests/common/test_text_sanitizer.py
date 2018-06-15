@@ -61,7 +61,7 @@ class TestTextSanitizer(TestCase):
                 <figcaption class="">aaaaaa</figcaption>
             </figure>
         </div>
-        <div class="medium-insert-images medium-insert-active">
+        <div class="medium-insert-images medium-insert-images-wide">
             <figure contenteditable="false">
                 <img src="http://{domain}/hoge">
             </figure>
