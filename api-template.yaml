@@ -190,6 +190,21 @@ Resources:
                 type: string
               created_at:
                 type: integer
+          Comment:
+            type: object
+            properties:
+              comment_id:
+                type: string
+              article_id:
+                type: string
+              sort_key:
+                type: integer
+              user_id:
+                type: string
+              text:
+                type: string
+              created_at:
+                type: integer
         paths:
           /articles/recent:
             get:
@@ -626,6 +641,51 @@ Resources:
                   default:
                     statusCode: "200"
                 uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesLikeCreate.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /me/articles/{article_id}/comments:
+            get:
+              description: '指定された article_id の記事のコメントの一覧を取得する'
+              parameters:
+              - name: 'article_id'
+                in: 'path'
+                description: '対象記事の指定するために使用'
+                required: true
+                type: 'string'
+              responses:
+                '200':
+                  description: '対象記事のコメントの一覧'
+                  schema:
+                    $ref: '#/definitions/Comment'
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesCommentsIndex.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+            post:
+              description: '指定された article_id の記事に対してコメントを登録する'
+              parameters:
+              - name: 'article_id'
+                in: 'path'
+                description: '対象記事の指定するために使用'
+                required: true
+                type: 'string'
+              responses:
+                '200':
+                  description: 'コメント登録の完了'
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesCommentsCreate.Arn}/invocations
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
@@ -1227,6 +1287,32 @@ Resources:
           Type: Api
           Properties:
             Path: /me/articles/{article_id}/like
+            Method: post
+            RestApiId: !Ref RestApi
+  MeArticlesCommentsIndex:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_articles_comments_index.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/articles/{article_id}/comments
+            Method: get
+            RestApiId: !Ref RestApi
+  MeArticlesCommentsCreate:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_articles_comments_create.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/articles/{article_id}/comments
             Method: post
             RestApiId: !Ref RestApi
   MeArticlesFraudCreate:

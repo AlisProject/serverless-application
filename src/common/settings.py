@@ -70,6 +70,17 @@ parameters = {
         'type': 'string',
         'maxLength': 100
     },
+    'comment': {
+        'text': {
+            'type': 'string',
+            'maxLength': 65535
+        },
+        'comment_id': {
+            'type': 'string',
+            'minLength': 12,
+            'maxLength': 12
+        }
+    }
 }
 
 article_recent_default_limit = 20
@@ -78,8 +89,10 @@ articles_popular_default_limit = 20
 
 USERS_ARTICLE_INDEX_DEFAULT_LIMIT = 10
 NOTIFICATION_INDEX_DEFAULT_LIMIT = 10
+COMMENT_INDEX_DEFAULT_LIMIT = 10
 
 article_id_length = 12
+COMMENT_ID_LENGTH = 12
 
 html_allowed_tags = ['a', 'b', 'blockquote', 'br', 'h2', 'h3', 'i', 'p', 'u', 'img', 'hr',
                      'div', 'figure', 'figcaption']
