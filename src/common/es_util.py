@@ -5,9 +5,9 @@ class ESUtil:
 
     @staticmethod
     def post_article(elasticsearch, article_info, article_content):
-        id = article_info['Item']['article_id']
-        body = article_info['Item']
-        body.update(article_content['Item'])
+        id = article_info['article_id']
+        body = article_info
+        body.update(article_content)
         elasticsearch.index(
             index="articles",
             doc_type="article",

@@ -217,7 +217,7 @@ Resources:
                 responses:
                   default:
                     statusCode: "200"
-                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SearchWord.Arn}/invocations
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ElasticSearchSearchArticles.Arn}/invocations
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
@@ -1415,7 +1415,7 @@ Resources:
             Path: /me/unread_notification_managers
             Method: put
             RestApiId: !Ref RestApi
-  SearchWord:
+  ElasticSearchSearchArticles:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
@@ -1424,13 +1424,15 @@ Resources:
       Environment:
         Variables:
           ELASTIC_SEARCH_ENDPOINT: !GetAtt ElasticSearchService.DomainEndpoint
-      Events:
-        Api:
-          Type: Api
-          Properties:
-            Path: /search/articles
-            Method: get
-            RestApiId: !Ref RestApi
+  ElasticSearchSyncArticles:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/elasticsearch_sync_articles.zip
+      Environment:
+        Variables:
+          ELASTIC_SEARCH_ENDPOINT: !GetAtt ElasticSearchService.DomainEndpoint
   ElasticSearchService:
     Type: "AWS::Elasticsearch::Domain"
     Properties: 
