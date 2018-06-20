@@ -39,9 +39,13 @@ class MeArticlesDraftsPublish(LambdaBase):
             Key={
                 'article_id': self.params['article_id'],
             },
-            UpdateExpression='set #attr = :article_status',
-            ExpressionAttributeNames={'#attr': 'status'},
-            ExpressionAttributeValues={':article_status': 'public'}
+            UpdateExpression='set #attr = :article_status, #sync_elasticsearch = :zero, #updated_at = :unixtime',
+            ExpressionAttributeNames={
+                '#attr': 'status',
+                '#sync_elasticsearch': 'sync_elasticsearch',
+                '#updated_at': 'updated_at'
+            },
+            ExpressionAttributeValues={':article_status': 'public', ':zero': 0, ':unixtime': int(time.time())}
         )
 
         return {

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import json
+import time
 import requests
 from aws_requests_auth.aws_auth import AWSRequestsAuth
 from lambda_base import LambdaBase
@@ -19,7 +20,9 @@ class PostConfirmation(LambdaBase):
         users = self.dynamodb.Table(os.environ['USERS_TABLE_NAME'])
         user = {
             'user_id': self.event['userName'],
-            'user_display_name': self.event['userName']
+            'user_display_name': self.event['userName'],
+            'sync_elasticsearch': 0,
+            'updated_at': int(time.time())
         }
         users.put_item(Item=user, ConditionExpression='attribute_not_exists(user_id)')
         if os.environ['BETA_MODE_FLAG'] == "1":

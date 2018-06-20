@@ -71,11 +71,12 @@ class TestMeInfoUpdate(TestCase):
         expected_items = {
             'user_id': target_user_data['user_id'],
             'user_display_name': json.loads(params['body'])['user_display_name'],
-            'self_introduction': json.loads(params['body'])['self_introduction']
+            'self_introduction': json.loads(params['body'])['self_introduction'],
+            'sync_elasticsearch': 0
         }
 
         self.assertEqual(response['statusCode'], 200)
-        users_param_names = ['user_id', 'user_display_name', 'self_introduction']
+        users_param_names = ['user_id', 'user_display_name', 'self_introduction', 'sync_elasticsearch']
         for key in users_param_names:
             self.assertEqual(expected_items[key], user[key])
 

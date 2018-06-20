@@ -97,6 +97,7 @@ class TestMeArticlesPublicUnpublish(TestCase):
 
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(article_info['status'], 'draft')
+        self.assertEqual(article_info['sync_elasticsearch'], 0)
         self.assertEqual(len(article_info_after) - len(article_info_before), 0)
         self.assertEqual(len(article_content_edit_after) - len(article_content_edit_before), 0)
 

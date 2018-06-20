@@ -1,4 +1,4 @@
-FROM amazonlinux:latest
+FROM amazonlinux:1
 
 WORKDIR /workdir
 COPY requirements.txt ./

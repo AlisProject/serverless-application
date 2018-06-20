@@ -191,6 +191,76 @@ Resources:
               created_at:
                 type: integer
         paths:
+          /search/articles:
+            get:
+              description: "記事検索"
+              parameters:
+              - name: "query"
+                in: "query"
+                description: "検索ワード"
+                required: true
+                type: "string"
+              - name: "limit"
+                in: "query"
+                description: "取得件数"
+                required: false
+                type: "integer"
+                minimum: 1
+              - name: "page"
+                in: "query"
+                description: "ページ"
+                required: false
+                type: "integer"
+              responses:
+                "200":
+                  description: "検索記事一覧"
+                  schema:
+                    type: array
+                    items:
+                      $ref: '#/definitions/ArticleInfo'
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ElasticSearchSearchArticles.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /search/users:
+            get:
+              description: "ユーザー検索"
+              parameters:
+              - name: "query"
+                in: "query"
+                description: "検索ワード"
+                required: true
+                type: "string"
+              - name: "limit"
+                in: "query"
+                description: "取得件数"
+                required: false
+                type: "integer"
+                minimum: 1
+              - name: "page"
+                in: "query"
+                description: "ページ"
+                required: false
+                type: "integer"
+              responses:
+                "200":
+                  description: "検索ユーザー一覧"
+                  schema:
+                    type: array
+                    items:
+                      $ref: '#/definitions/UserInfo'
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ElasticSearchSearchUsers.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
           /articles/recent:
             get:
               description: "最新記事一覧情報を取得"
@@ -1385,3 +1455,65 @@ Resources:
             Path: /me/unread_notification_managers
             Method: put
             RestApiId: !Ref RestApi
+  ElasticSearchSearchArticles:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/search_articles.zip
+      Environment:
+        Variables:
+          ELASTIC_SEARCH_ENDPOINT: !GetAtt ElasticSearchService.DomainEndpoint
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /search/articles
+            Method: get
+            RestApiId: !Ref RestApi
+  ElasticSearchSearchUsers:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/search_users.zip
+      Environment:
+        Variables:
+          ELASTIC_SEARCH_ENDPOINT: !GetAtt ElasticSearchService.DomainEndpoint
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /search/users
+            Method: get
+            RestApiId: !Ref RestApi
+  ElasticSearchService:
+    Type: "AWS::Elasticsearch::Domain"
+    Properties: 
+      AccessPolicies: !Join
+        - ''
+        - - '{ "Version": "2012-10-17", "Statement": [ { "Effect": "Allow", "Principal": { "AWS": "'
+          - !GetAtt LambdaRole.Arn
+          - '" }, "Action": "es:*", "Resource": "'
+          - 'arn:aws:es:'
+          - !Ref 'AWS::Region'
+          - ':'
+          - !Ref 'AWS::AccountId'
+          - ':domain/'
+          - !Ref "AWS::StackName"
+          - '/*" } ] }'
+      AdvancedOptions:
+        rest.action.multi.allow_explicit_index: 'true'
+      DomainName: !Ref "AWS::StackName"
+      EBSOptions:
+        EBSEnabled: true
+        VolumeType: gp2
+        VolumeSize: 10
+      ElasticsearchClusterConfig:
+        InstanceType: t2.small.elasticsearch
+        InstanceCount: 1
+        DedicatedMasterEnabled: false
+        ZoneAwarenessEnabled: false
+      ElasticsearchVersion: '6.2'
+      SnapshotOptions:
+        AutomatedSnapshotStartHour: 0

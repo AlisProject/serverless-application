@@ -134,6 +134,7 @@ class TestMeArticlesDraftsPublish(TestCase):
         self.assertEqual(article_info['status'], 'public')
         self.assertEqual(article_info['sort_key'], 1520150552000000)
         self.assertEqual(article_info['published_at'], 1525000000)
+        self.assertEqual(article_info['sync_elasticsearch'], 0)
         self.assertEqual(article_content['title'], article_history['title'])
         self.assertEqual(article_content['body'], article_history['body'])
         self.assertEqual(len(article_info_after) - len(article_info_before), 0)
