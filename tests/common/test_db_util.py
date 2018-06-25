@@ -41,6 +41,18 @@ class TestDBUtil(TestCase):
         ]
         TestsUtil.create_table(cls.dynamodb, os.environ['USERS_TABLE_NAME'], cls.users_table_items)
 
+        cls.comment_items = [
+            {
+                'comment_id': 'comment00001',
+                'article_id': 'testid000001',
+                'user_id': 'test_user',
+                'text': 'hogefugapiyo',
+                'created_at': 1520150272,
+                'sort_key': 1520150272000000
+            }
+        ]
+        TestsUtil.create_table(cls.dynamodb, os.environ['COMMENT_TABLE_NAME'], cls.comment_items)
+
     @classmethod
     def tearDownClass(cls):
         TestsUtil.delete_all_tables(cls.dynamodb)
@@ -169,6 +181,34 @@ class TestDBUtil(TestCase):
     def test_validate_user_existence_ng_not_exists_user_id(self):
         with self.assertRaises(RecordNotFoundError):
             DBUtil.validate_user_existence(
+                self.dynamodb,
+                'piyopiyo'
+            )
+
+    def test_comment_existence_ok(self):
+        result = DBUtil.comment_existence(
+            self.dynamodb,
+            self.comment_items[0]['comment_id']
+        )
+        self.assertTrue(result)
+
+    def test_comment_existence_ng_not_exists_user_id(self):
+        result = DBUtil.comment_existence(
+            self.dynamodb,
+            'piyopiyo'
+        )
+        self.assertFalse(result)
+
+    def test_validate_comment_existence_ok(self):
+        result = DBUtil.validate_comment_existence(
+            self.dynamodb,
+            self.comment_items[0]['comment_id']
+        )
+        self.assertTrue(result)
+
+    def test_validate_comment_existence_ng_not_exists_user_id(self):
+        with self.assertRaises(RecordNotFoundError):
+            DBUtil.validate_comment_existence(
                 self.dynamodb,
                 'piyopiyo'
             )
