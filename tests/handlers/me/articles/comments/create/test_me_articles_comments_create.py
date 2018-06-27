@@ -5,13 +5,42 @@ from me_articles_comments_create import MeArticlesCommentsCreate
 from unittest.mock import patch, MagicMock
 from tests_util import TestsUtil
 
+
 class TestMeArticlesCommentsCreate(TestCase):
     dynamodb = TestsUtil.get_dynamodb_client()
 
     def setUp(self):
         TestsUtil.set_all_tables_name_to_env()
         TestsUtil.delete_all_tables(self.dynamodb)
+
+        self.article_info_table  = self.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
+        self.article_info_table_items = [
+            {
+                'article_id': 'publicId0001',
+                'status': 'public',
+                'title': 'testid000001 titile',
+                'sort_key': 1520150272000000
+            },
+            {
+                'article_id': 'publicId0002',
+                'status': 'public',
+                'title': 'testid000002 titile',
+                'sort_key': 1520150272000000
+            }
+        ]
+        TestsUtil.create_table(self.dynamodb, os.environ['ARTICLE_INFO_TABLE_NAME'], self.article_info_table_items)
+
         self.comment_table = self.dynamodb.Table(os.environ['COMMENT_TABLE_NAME'])
+        self.comment_items = [
+            {
+                'comment_id': 'comment00001',
+                'article_id': 'publicId0002',
+                'user_id': 'test_user_01',
+                'sort_key': 1520150271000000,
+                'created_at': 1520150272,
+                'text': 'コメントの内容1'
+            }
+        ]
         TestsUtil.create_table(self.dynamodb, os.environ['COMMENT_TABLE_NAME'], [])
 
     def tearDown(self):
@@ -23,7 +52,7 @@ class TestMeArticlesCommentsCreate(TestCase):
 
         self.assertEqual(response['statusCode'], 400)
 
-    @patch("me_articles_comments_create.MeArticlesCommentsCreate._MeArticlesCommentsCreate__generate_comment_id", MagicMock(return_value='HOGEHOGEHOGE'))
+    @patch('me_articles_comments_create.MeArticlesCommentsCreate._MeArticlesCommentsCreate__generate_comment_id', MagicMock(return_value='HOGEHOGEHOGE'))
     @patch('time_util.TimeUtil.generate_sort_key', MagicMock(return_value=1520150552000000))
     def test_main_ok(self):
         params = {
@@ -31,7 +60,7 @@ class TestMeArticlesCommentsCreate(TestCase):
                 'article_id': 'publicId0001'
             },
             'body': {
-                "text": "sample content",
+                'text': 'A',
             },
             'requestContext': {
                 'authorizer': {
@@ -46,17 +75,182 @@ class TestMeArticlesCommentsCreate(TestCase):
 
         comment_before = self.comment_table.scan()['Items']
 
-        response = MeArticlesCommentsCreate (params, {}, self.dynamodb).main()
+        response = MeArticlesCommentsCreate(params, {}, self.dynamodb).main()
 
         comment_after = self.comment_table.scan()['Items']
 
-        comment = self.comment_table.get_item(Key={'comment_id': 'HOGEHOGEHOGE'})['Item']
+        comment = self.comment_table.get_item(Key={'comment_id': 'HOGEHOGEHOGE'}).get('Item')
 
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(len(comment_after) - len(comment_before), 1)
         self.assertEqual(comment['comment_id'], 'HOGEHOGEHOGE')
-        self.assertEqual(comment['text'], 'sample content')
+        self.assertEqual(comment['text'], 'A')
         self.assertEqual(comment['article_id'], 'publicId0001')
         self.assertEqual(comment['user_id'], 'test_user_id01')
         self.assertEqual(comment['sort_key'], 1520150552000000)
 
+    @patch('me_articles_comments_create.MeArticlesCommentsCreate._MeArticlesCommentsCreate__generate_comment_id',
+           MagicMock(return_value='FUGAFUGAFUGA'))
+    def test_main_ok_already_commented_by_myself(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'publicId0002'
+            },
+            'body': {
+                'text': 'A' * 65535,
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'like_user_01'
+                    }
+                }
+            }
+        }
+
+        params['body'] = json.dumps(params['body'])
+
+        comment_before = self.comment_table.scan()['Items']
+
+        response = MeArticlesCommentsCreate(params, {}, self.dynamodb).main()
+
+        comment_after = self.comment_table.scan()['Items']
+
+        comment = self.comment_table.get_item(Key={'comment_id': 'FUGAFUGAFUGA'}).get('Item')
+
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(len(comment_after) - len(comment_before), 1)
+        self.assertIsNotNone(comment)
+
+    def test_call_validate_comment_existence(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'publicId0003'
+            },
+            'body': {
+                'text': 'sample content',
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'like_user_01'
+                    }
+                }
+            }
+        }
+
+        params['body'] = json.dumps(params['body'])
+
+        mock_lib = MagicMock()
+        with patch('me_articles_comments_create.DBUtil', mock_lib):
+            MeArticlesCommentsCreate(params, {}, self.dynamodb).main()
+            args, kwargs = mock_lib.validate_article_existence.call_args
+
+            self.assertTrue(mock_lib.validate_article_existence.called)
+            self.assertTrue(args[0])
+            self.assertTrue(args[1])
+            self.assertEqual(kwargs['status'], 'public')
+
+    def test_validation_with_no_body(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'publicId0001'
+            },
+            'body': {
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'like_user_01'
+                    }
+                }
+            }
+        }
+
+        params['body'] = json.dumps(params['body'])
+
+        self.assert_bad_request(params)
+        
+    def test_validation_article_id_max(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'A' * 13
+            },
+            'body': {
+                'text': 'sample content',
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'like_user_01'
+                    }
+                }
+            }
+        }
+
+        params['body'] = json.dumps(params['body'])
+
+        self.assert_bad_request(params)
+
+    def test_validation_no_text(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'publicId0001'
+            },
+            'body': {
+                'text': None,
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'like_user_01'
+                    }
+                }
+            }
+        }
+
+        params['body'] = json.dumps(params['body'])
+
+        self.assert_bad_request(params)
+
+    def test_validation_empty_text(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'publicId0001'
+            },
+            'body': {
+                'text': '',
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'like_user_01'
+                    }
+                }
+            }
+        }
+
+        params['body'] = json.dumps(params['body'])
+
+        self.assert_bad_request(params)
+
+    def test_validation_text_max(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'publicId0001'
+            },
+            'body': {
+                'text': 'A' * 65536,
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'like_user_01'
+                    }
+                }
+            }
+        }
+
+        params['body'] = json.dumps(params['body'])
+
+        self.assert_bad_request(params)

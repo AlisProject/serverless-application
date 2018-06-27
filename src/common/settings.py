@@ -73,6 +73,7 @@ parameters = {
     'comment': {
         'text': {
             'type': 'string',
+            'minLength': 1,
             'maxLength': 65535
         },
         'comment_id': {

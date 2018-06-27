@@ -3,6 +3,7 @@ import os
 import settings
 import time
 
+from db_util import DBUtil
 from hashids import Hashids
 from lambda_base import LambdaBase
 from jsonschema import validate, ValidationError
@@ -17,14 +18,17 @@ class MeArticlesCommentsCreate(LambdaBase):
             'properties': {
                 'article_id': settings.parameters['article_id'],
                 'text': settings.parameters['comment']['text']
-            }
+            },
+            'required': ['article_id', 'text']
         }
 
     def validate_params(self):
-        if self.event.get('body') is None:
+        if not self.event.get('body'):
             raise ValidationError('Request parameter is required')
 
         validate(self.params, self.get_schema())
+        DBUtil.validate_article_existence(self.dynamodb, self.params['article_id'], status='public')
+
 
     def exec_main_proc(self):
         sort_key = TimeUtil.generate_sort_key()
