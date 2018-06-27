@@ -836,6 +836,9 @@ Resources:
                 required: true
                 schema:
                   $ref: '#/definitions/MeArticlesDraftsCreate'
+              responses:
+                '200':
+                  description: 'successful operation'
               security:
                 - cognitoUserPool: []
               x-amazon-apigateway-integration:
