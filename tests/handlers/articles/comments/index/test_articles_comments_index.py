@@ -1,10 +1,11 @@
 import os
 import json
 from unittest import TestCase
-from me_articles_comments_index import MeArticlesCommentsIndex
+from articles_comments_index import ArticlesCommentsIndex
 from tests_util import TestsUtil
 
-class TestMeArticlesCommentsIndex(TestCase):
+
+class TestArticlesCommentsIndex(TestCase):
     dynamodb = TestsUtil.get_dynamodb_client()
 
     @classmethod
@@ -54,7 +55,7 @@ class TestMeArticlesCommentsIndex(TestCase):
         TestsUtil.delete_all_tables(self.dynamodb)
 
     def assert_bad_request(self, params):
-        response = MeArticlesCommentsIndex(params, {}, self.dynamodb).main()
+        response = ArticlesCommentsIndex(params, {}, self.dynamodb).main()
         self.assertEqual(response['statusCode'], 400)
 
     def test_main_ok(self):
@@ -74,7 +75,7 @@ class TestMeArticlesCommentsIndex(TestCase):
             }
         }
 
-        response = MeArticlesCommentsIndex (params, {}, self.dynamodb).main()
+        response = ArticlesCommentsIndex(params, {}, self.dynamodb).main()
 
         expected_items = [self.comment_items[2], self.comment_items[1]]
         expected_last_evaluated_key = {
@@ -107,7 +108,7 @@ class TestMeArticlesCommentsIndex(TestCase):
             }
         }
 
-        response = MeArticlesCommentsIndex(params, {}, self.dynamodb).main()
+        response = ArticlesCommentsIndex(params, {}, self.dynamodb).main()
 
         expected_items = [self.comment_items[0]]
 
@@ -132,16 +133,16 @@ class TestMeArticlesCommentsIndex(TestCase):
         comment_table = self.dynamodb.Table(os.environ['COMMENT_TABLE_NAME'])
         for i in range(11):
             comment_table.put_item(Item={
-                    'comment_id': 'comment1000' + str(i),
-                    'article_id': 'publicId0001',
-                    'user_id': 'test_user_01',
-                    'sort_key': 152015027200000 + i,
-                    'created_at': 1520150272,
-                    'text': 'コメントの内容'
-                }
+                'comment_id': 'comment1000' + str(i),
+                'article_id': 'publicId0001',
+                'user_id': 'test_user_01',
+                'sort_key': 152015027200000 + i,
+                'created_at': 1520150272,
+                'text': 'コメントの内容'
+            }
             )
 
-        response = MeArticlesCommentsIndex(params, {}, self.dynamodb).main()
+        response = ArticlesCommentsIndex(params, {}, self.dynamodb).main()
 
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(len(json.loads(response['body'])['Items']), 10)
@@ -162,6 +163,8 @@ class TestMeArticlesCommentsIndex(TestCase):
                 }
             }
         }
+
+        self.assert_bad_request(params)
 
     def test_validation_limit_type(self):
         params = {
@@ -276,4 +279,3 @@ class TestMeArticlesCommentsIndex(TestCase):
         }
 
         self.assert_bad_request(params)
-

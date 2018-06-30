@@ -9,7 +9,7 @@ from decimal_encoder import DecimalEncoder
 from parameter_util import ParameterUtil
 
 
-class MeArticlesCommentsIndex(LambdaBase):
+class ArticlesCommentsIndex(LambdaBase):
     def get_schema(self):
         return {
             'type': 'object',
@@ -41,13 +41,13 @@ class MeArticlesCommentsIndex(LambdaBase):
         }
 
         if self.params.get('comment_id') is not None and self.params.get('sort_key') is not None:
-            LastEvaluatedKey = {
+            last_evaluated_key = {
                 'comment_id': self.params['comment_id'],
                 'article_id': self.params['article_id'],
                 'sort_key': int(self.params['sort_key'])
             }
 
-            query_params.update({'ExclusiveStartKey': LastEvaluatedKey})
+            query_params.update({'ExclusiveStartKey': last_evaluated_key})
 
         response = comment_table.query(**query_params)
 
