@@ -12,12 +12,12 @@ fi
 # See: https://github.com/AlisProject/environment
 SSM_PARAMS_PREFIX=${ALIS_APP_ID}ssm
 
-DEPLOY_BUCKET_NAME=${ALIS_APP_ID}-serverless-deploy-bucket
+DEPLOY_BUCKET_NAME=matsualisdev-serverless-deploy-bucket
 
 aws cloudformation package \
-  --template-file ${target}template.yaml \
-  --s3-bucket $DEPLOY_BUCKET_NAME \
-  --output-template-file ${target}packaged-template.yaml
+  --template-file api-template.yaml \
+  --s3-bucket matsualisdev-serverless-deploy-bucket \
+  --output-template-file api-packaged-template.yaml
 
 aws cloudformation deploy \
   --template-file ${target}packaged-template.yaml \
@@ -45,5 +45,8 @@ aws cloudformation deploy \
     BetaUsersTableName=${SSM_PARAMS_PREFIX}BetaUsersTableName \
     NotificationTableName=${SSM_PARAMS_PREFIX}NotificationTableName \
     UnreadNotificationManagerTableName=${SSM_PARAMS_PREFIX}UnreadNotificationManagerTableName \
+    CommentTableName=${SSM_PARAMS_PREFIX}CommentTableName \
+    CommentLikedUserTableName=${SSM_PARAMS_PREFIX}CommentLikedUserTableName \
+    DeletedCommentTableName=${SSM_PARAMS_PREFIX}DeletedCommentTableName \
     DistS3BucketName=${SSM_PARAMS_PREFIX}DistS3BucketName \
   --capabilities CAPABILITY_IAM
