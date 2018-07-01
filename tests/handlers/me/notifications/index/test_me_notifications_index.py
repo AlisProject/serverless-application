@@ -25,13 +25,12 @@ class TestMeUnreadNotificationManagersShow(TestCase):
                 'created_at': 1520150272
             },
             {
-                'notification_id': 'like-test01-test_article02',
+                'notification_id': 'comment-test01-test_comment01',
                 'user_id': 'test01',
                 'sort_key': 1520150272000001,
                 'article_id': 'test_article02',
                 'article_title': 'test_title02',
-                'type': 'like',
-                'liked_count': 2,
+                'type': 'comment',
                 'created_at': 1520150272
             },
             {
@@ -138,13 +137,12 @@ class TestMeUnreadNotificationManagersShow(TestCase):
 
         expected_items = [
             {
-                'notification_id': 'like-test01-test_article02',
+                'notification_id': 'comment-test01-test_comment01',
                 'user_id': 'test01',
                 'sort_key': 1520150272000001,
                 'article_id': 'test_article02',
                 'article_title': 'test_title02',
-                'type': 'like',
-                'liked_count': 2,
+                'type': 'comment',
                 'created_at': 1520150272
             }
         ]
@@ -160,7 +158,7 @@ class TestMeUnreadNotificationManagersShow(TestCase):
                     'notification_id': 'like-user_id_article_id' + str(i),
                     'user_id': 'nolimit01',
                     'sort_key': 1520150273000000 + i,
-                    'type': 'like',
+                    'type': 'like' if i / 2 == 0 else 'comment',
                     'acted_user_id': 'acted_user' + str(i),
                     'created_at': 1520150273
                 }

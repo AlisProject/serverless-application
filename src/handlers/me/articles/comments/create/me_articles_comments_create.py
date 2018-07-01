@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
+import logging
 import os
+import traceback
+
 import settings
 import time
 
@@ -29,7 +32,6 @@ class MeArticlesCommentsCreate(LambdaBase):
         validate(self.params, self.get_schema())
         DBUtil.validate_article_existence(self.dynamodb, self.params['article_id'], status='public')
 
-
     def exec_main_proc(self):
         sort_key = TimeUtil.generate_sort_key()
         user_id = self.event['requestContext']['authorizer']['claims']['cognito:username']
@@ -52,7 +54,44 @@ class MeArticlesCommentsCreate(LambdaBase):
             ConditionExpression='attribute_not_exists(comment_id)'
         )
 
-        return {'statusCode': 200}
+        # 優先度が低いため通知処理は失敗しても握り潰して200を返す（ログは出して検知できるようにする）
+        try:
+            article_info_table = self.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
+            article_info = article_info_table.get_item(Key={'article_id': self.params['article_id']})['Item']
+
+            self.__create_comment_notification(article_info, comment_id)
+            self.__update_unread_notification_manager(article_info)
+
+        except Exception as err:
+            logging.fatal(err)
+            traceback.print_exc()
+        finally:
+            return {'statusCode': 200}
+
+    def __create_comment_notification(self, article_info, comment_id):
+        notification_table = self.dynamodb.Table(os.environ['NOTIFICATION_TABLE_NAME'])
+        notification_id = '-'.join(
+            [settings.COMMENT_NOTIFICATION_TYPE, article_info['user_id'], comment_id])
+
+        notification_table.put_item(Item={
+            'notification_id': notification_id,
+            'user_id': article_info['user_id'],
+            'article_id': article_info['article_id'],
+            'article_title': article_info['title'],
+            'sort_key': TimeUtil.generate_sort_key(),
+            'type': settings.COMMENT_NOTIFICATION_TYPE,
+            'created_at': int(time.time())
+        })
+
+
+    def __update_unread_notification_manager(self, article_info):
+        unread_notification_manager_table = self.dynamodb.Table(os.environ['UNREAD_NOTIFICATION_MANAGER_TABLE_NAME'])
+
+        unread_notification_manager_table.update_item(
+            Key={'user_id': article_info['user_id']},
+            UpdateExpression='set unread = :unread',
+            ExpressionAttributeValues={':unread': True}
+        )
 
     def __generate_comment_id(self, target):
         hashids = Hashids(salt=os.environ['SALT_FOR_ARTICLE_ID'], min_length=settings.COMMENT_ID_LENGTH)

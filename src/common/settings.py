@@ -149,3 +149,4 @@ S3_ARTICLES_IMAGES_PATH = 'd/api/articles_images/'
 S3_INFO_ICON_PATH = 'd/api/info_icon/'
 
 LIKE_NOTIFICATION_TYPE = 'like'
+COMMENT_NOTIFICATION_TYPE = 'comment'
