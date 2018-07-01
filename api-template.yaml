@@ -1435,7 +1435,7 @@ Resources:
         Api:
           Type: Api
           Properties:
-            Path: /me/comments/{comment_id}/
+            Path: /me/comments/{comment_id}
             Method: delete
             RestApiId: !Ref RestApi
   MeArticlesFraudCreate:
