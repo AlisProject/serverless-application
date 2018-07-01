@@ -70,6 +70,10 @@ parameters = {
         'type': 'string',
         'maxLength': 100
     },
+    'notification_id': {
+        'type': 'string',
+        'maxLength': 80
+    },
     'comment': {
         'text': {
             'type': 'string',

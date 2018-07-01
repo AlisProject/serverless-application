@@ -327,15 +327,27 @@ Resources:
     Type: AWS::DynamoDB::Table
     Properties:
       AttributeDefinitions:
+        - AttributeName: notification_id
+          AttributeType: S
         - AttributeName: user_id
           AttributeType: S
         - AttributeName: sort_key
           AttributeType: N
       KeySchema:
-        - AttributeName: user_id
+        - AttributeName: notification_id
           KeyType: HASH
-        - AttributeName: sort_key
-          KeyType: RANGE
+      GlobalSecondaryIndexes:
+        - IndexName: user_id-sort_key-index
+          KeySchema:
+            - AttributeName: user_id
+              KeyType: HASH
+            - AttributeName: sort_key
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: 1
+            WriteCapacityUnits: 1
       ProvisionedThroughput:
         ReadCapacityUnits: 1
         WriteCapacityUnits: 1

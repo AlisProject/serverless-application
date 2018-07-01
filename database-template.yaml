@@ -363,6 +363,18 @@ Resources:
           KeyType: HASH
         - AttributeName: sort_key
           KeyType: RANGE
+      GlobalSecondaryIndexes:
+        - IndexName: user_id-sort_key-index
+          KeySchema:
+            - AttributeName: user_id
+              KeyType: HASH
+            - AttributeName: sort_key
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: !Ref MinDynamoReadCapacitty
+            WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
       ProvisionedThroughput:
         ReadCapacityUnits: !Ref MinDynamoReadCapacitty
         WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
