@@ -60,7 +60,8 @@ class TestMeArticlesCommentsCreate(TestCase):
 
         self.assertEqual(response['statusCode'], 400)
 
-    @patch('me_articles_comments_create.MeArticlesCommentsCreate._MeArticlesCommentsCreate__generate_comment_id', MagicMock(return_value='HOGEHOGEHOGE'))
+    @patch('me_articles_comments_create.MeArticlesCommentsCreate._MeArticlesCommentsCreate__generate_comment_id',
+           MagicMock(return_value='HOGEHOGEHOGE'))
     @patch('time_util.TimeUtil.generate_sort_key', MagicMock(return_value=1520150552000003))
     @patch('time.time', MagicMock(return_value=1520150552.000003))
     def test_main_ok(self):
@@ -93,7 +94,9 @@ class TestMeArticlesCommentsCreate(TestCase):
         unread_notification_manager_after = self.unread_notification_manager_table.scan()['Items']
 
         comment = self.comment_table.get_item(Key={'comment_id': 'HOGEHOGEHOGE'}).get('Item')
-        notification = self.notification_table.get_item(Key={'notification_id': 'comment-article_user01-HOGEHOGEHOGE'}).get('Item')
+        notification = self.notification_table.get_item(
+            Key={'notification_id': 'comment-article_user01-HOGEHOGEHOGE'}
+        ).get('Item')
 
         unread_manager = self.unread_notification_manager_table.get_item(Key={'user_id': 'article_user01'}).get('Item')
 

@@ -5,6 +5,7 @@ from me_comments_likes_create import MeCommentsLikesCreate
 from unittest.mock import patch, MagicMock
 from tests_util import TestsUtil
 
+
 class TestMeArticlesCommentsCreate(TestCase):
     dynamodb = TestsUtil.get_dynamodb_client()
 
@@ -99,7 +100,7 @@ class TestMeArticlesCommentsCreate(TestCase):
 
         comment_before = self.comment_liked_user_table.scan()['Items']
 
-        response = MeCommentsLikesCreate (params, {}, self.dynamodb).main()
+        response = MeCommentsLikesCreate(params, {}, self.dynamodb).main()
 
         comment_after = self.comment_liked_user_table.scan()['Items']
 
@@ -130,7 +131,7 @@ class TestMeArticlesCommentsCreate(TestCase):
 
         comment_before = self.comment_liked_user_table.scan()['Items']
 
-        response = MeCommentsLikesCreate (params, {}, self.dynamodb).main()
+        response = MeCommentsLikesCreate(params, {}, self.dynamodb).main()
 
         comment_after = self.comment_liked_user_table.scan()['Items']
 
@@ -182,5 +183,3 @@ class TestMeArticlesCommentsCreate(TestCase):
             }
         }
         self.assert_bad_request(params)
-
-

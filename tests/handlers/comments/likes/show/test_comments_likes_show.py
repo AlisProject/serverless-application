@@ -4,6 +4,7 @@ from unittest import TestCase
 from comments_likes_show import CommentsLikesShow
 from tests_util import TestsUtil
 
+
 class TestCommentsLikesShow(TestCase):
     dynamodb = TestsUtil.get_dynamodb_client()
 

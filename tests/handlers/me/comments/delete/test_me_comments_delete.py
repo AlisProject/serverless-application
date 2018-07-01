@@ -1,9 +1,9 @@
 import os
-import json
 from unittest import TestCase
 from me_comments_delete import MeCommentsDelete
 from unittest.mock import patch, MagicMock
 from tests_util import TestsUtil
+
 
 class TestMeCommentsDelete(TestCase):
     dynamodb = TestsUtil.get_dynamodb_client()
@@ -75,7 +75,7 @@ class TestMeCommentsDelete(TestCase):
     def test_main_ok(self):
         params = {
             'pathParameters': {
-                'comment_id':  self.comment_items[0]['comment_id']
+                'comment_id': self.comment_items[0]['comment_id']
             },
             'requestContext': {
                 'authorizer': {
@@ -95,7 +95,8 @@ class TestMeCommentsDelete(TestCase):
         deleted_comment_after = self.deleted_comment_table.scan()['Items']
 
         comment = self.comment_table.get_item(Key={'comment_id': self.comment_items[0]['comment_id']}).get('Item')
-        deleted_comment = self.deleted_comment_table.get_item(Key={'comment_id': self.comment_items[0]['comment_id']}).get('Item')
+        deleted_comment = self.deleted_comment_table.get_item(
+            Key={'comment_id': self.comment_items[0]['comment_id']}).get('Item')
 
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(len(comment_after) - len(comment_before), -1)
@@ -127,7 +128,8 @@ class TestMeCommentsDelete(TestCase):
         deleted_comment_after = self.deleted_comment_table.scan()['Items']
 
         comment = self.comment_table.get_item(Key={'comment_id': self.comment_items[1]['comment_id']}).get('Item')
-        deleted_comment = self.deleted_comment_table.get_item(Key={'comment_id': self.comment_items[1]['comment_id']}).get('Item')
+        deleted_comment = self.deleted_comment_table.get_item(
+            Key={'comment_id': self.comment_items[1]['comment_id']}).get('Item')
 
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(len(comment_after) - len(comment_before), -1)
@@ -163,7 +165,6 @@ class TestMeCommentsDelete(TestCase):
         self.assertEqual(response['statusCode'], 403)
         self.assertEqual(len(comment_after) - len(comment_before), 0)
         self.assertEqual(len(deleted_comment_after) - len(deleted_comment_before), 0)
-
 
     def test__is_accessable_comment_with_valid_article_user(self):
         params = {
@@ -251,5 +252,3 @@ class TestMeCommentsDelete(TestCase):
             }
         }
         self.assert_bad_request(params)
-
-

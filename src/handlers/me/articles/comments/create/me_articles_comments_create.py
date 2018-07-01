@@ -83,7 +83,6 @@ class MeArticlesCommentsCreate(LambdaBase):
             'created_at': int(time.time())
         })
 
-
     def __update_unread_notification_manager(self, article_info):
         unread_notification_manager_table = self.dynamodb.Table(os.environ['UNREAD_NOTIFICATION_MANAGER_TABLE_NAME'])
 
