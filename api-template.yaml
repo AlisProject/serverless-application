@@ -715,6 +715,28 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+          /me/comments/{comment_id}:
+            delete:
+              description: '指定されたコメントを削除する'
+              parameters:
+              - name: 'comment_id'
+                in: 'path'
+                description: '対象コメントを指定するために使用'
+                required: true
+                type: 'string'
+              responses:
+                '200':
+                  description: 'コメント削除の完了'
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeCommentsDelete.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
           /me/comments/{comment_id}/likes:
             post:
               description: '指定されたコメントに対していいねする'
@@ -1388,6 +1410,19 @@ Resources:
           Properties:
             Path: /me/comments/{comment_id}/likes
             Method: post
+            RestApiId: !Ref RestApi
+  MeCommentsDelete:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_comments_delete.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/comments/{comment_id}/
+            Method: delete
             RestApiId: !Ref RestApi
   MeArticlesFraudCreate:
     Type: AWS::Serverless::Function
