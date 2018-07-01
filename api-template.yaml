@@ -401,6 +401,14 @@ Resources:
                       count:
                         type: "number"
                         format: "double"
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CommentsLikesShow.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
           /me/articles/drafts:
             get:
               description: '下書き記事一覧情報を取得'
