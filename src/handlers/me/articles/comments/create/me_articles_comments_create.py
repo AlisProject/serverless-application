@@ -59,7 +59,7 @@ class MeArticlesCommentsCreate(LambdaBase):
             article_info_table = self.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
             article_info = article_info_table.get_item(Key={'article_id': self.params['article_id']})['Item']
 
-            self.__create_comment_notification(article_info, comment_id)
+            self.__create_comment_notification(article_info, comment_id, user_id)
             self.__update_unread_notification_manager(article_info)
 
         except Exception as err:
@@ -68,7 +68,7 @@ class MeArticlesCommentsCreate(LambdaBase):
         finally:
             return {'statusCode': 200}
 
-    def __create_comment_notification(self, article_info, comment_id):
+    def __create_comment_notification(self, article_info, comment_id, user_id):
         notification_table = self.dynamodb.Table(os.environ['NOTIFICATION_TABLE_NAME'])
         notification_id = '-'.join(
             [settings.COMMENT_NOTIFICATION_TYPE, article_info['user_id'], comment_id])
@@ -78,6 +78,7 @@ class MeArticlesCommentsCreate(LambdaBase):
             'user_id': article_info['user_id'],
             'article_id': article_info['article_id'],
             'article_title': article_info['title'],
+            'acted_user_id': user_id,
             'sort_key': TimeUtil.generate_sort_key(),
             'type': settings.COMMENT_NOTIFICATION_TYPE,
             'created_at': int(time.time())

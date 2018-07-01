@@ -119,6 +119,7 @@ class TestMeArticlesCommentsCreate(TestCase):
             'user_id': self.article_info_table_items[0]['user_id'],
             'article_id': self.article_info_table_items[0]['article_id'],
             'article_title': self.article_info_table_items[0]['title'],
+            'acted_user_id': 'test_user_id01',
             'sort_key': 1520150552000003,
             'type': 'comment',
             'created_at': 1520150552
