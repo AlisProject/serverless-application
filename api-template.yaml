@@ -1389,6 +1389,9 @@ Resources:
       Handler: handler.lambda_handler
       Role: !GetAtt LambdaRole.Arn
       CodeUri: ./deploy/me_articles_comments_create.zip
+      Environment:
+          Variables:
+            SALT_FOR_ARTICLE_ID: !Ref SaltForArticleId
       Events:
         Api:
           Type: Api
