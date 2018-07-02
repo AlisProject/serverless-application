@@ -35,7 +35,9 @@ class TextSanitizer:
                 return True
         if name == 'data-alis-iframely-url':
             p = urlparse(value)
-            return p.netloc == 'twitter.com'
+            is_url = len(p.scheme) > 0 and len(p.netloc) > 0
+            is_clean = True if bleach.clean(value) == value else False
+            return is_url and is_clean
         if name == 'contenteditable':
             if value == 'false':
                 return True

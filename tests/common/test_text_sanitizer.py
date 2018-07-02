@@ -68,6 +68,8 @@ class TestTextSanitizer(TestCase):
         </div>
         <a href="http://example.com">link</a>
         <div data-alis-iframely-url="https://twitter.com/hoge">hoge</div>
+        <div data-alis-iframely-url="https://example.com/hoge?x=1">hoge</div>
+        <div data-alis-iframely-url="http://example.com/hoge?x=1%3Cdiv%3Ehoge%3C%2Fdiv%3E">hoge</div>
         '''.format(domain=os.environ['DOMAIN'])
 
         result = TextSanitizer.sanitize_article_body(target_html)
@@ -143,7 +145,7 @@ class TestTextSanitizer(TestCase):
         target_html = '''
         <h2>sample h2</h2>
         <div class='hoge piyo' data='aaa' contenteditable='true'></div>
-        <div data-alis-iframely-url="https://example.com/hoge">hoge</div>
+        <div data-alis-iframely-url="https://example.com/hoge?<script>piyo</script>">hoge</div>
         '''
 
         expected_html = '''
