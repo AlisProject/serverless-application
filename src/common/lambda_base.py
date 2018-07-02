@@ -45,21 +45,33 @@ class LambdaBase(metaclass=ABCMeta):
             # exec main process
             return self.exec_main_proc()
         except ValidationError as err:
+            logger.fatal(err)
+            logger.info(self.event)
+
             return {
                 'statusCode': 400,
                 'body': json.dumps({'message': "Invalid parameter: {0}".format(err)})
             }
         except NotVerifiedUserError as err:
+            logger.fatal(err)
+            logger.info(self.event)
+
             return {
                 'statusCode': 400,
                 'body': json.dumps({'message': "Bad Request: {0}".format(err)})
             }
         except NotAuthorizedError as err:
+            logger.fatal(err)
+            logger.info(self.event)
+
             return {
                 'statusCode': 403,
                 'body': json.dumps({'message': str(err)})
             }
         except RecordNotFoundError as err:
+            logger.fatal(err)
+            logger.info(self.event)
+
             return {
                 'statusCode': 404,
                 'body': json.dumps({'message': str(err)})
