@@ -78,7 +78,7 @@ parameters = {
         'text': {
             'type': 'string',
             'minLength': 1,
-            'maxLength': 65535
+            'maxLength': 400
         },
         'comment_id': {
             'type': 'string',

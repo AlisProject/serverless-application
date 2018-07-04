@@ -142,7 +142,7 @@ class TestMeArticlesCommentsCreate(TestCase):
                 'article_id': 'publicId0002'
             },
             'body': {
-                'text': 'A' * 65535,
+                'text': 'A' * 400,
             },
             'requestContext': {
                 'authorizer': {
@@ -310,7 +310,7 @@ class TestMeArticlesCommentsCreate(TestCase):
                 'article_id': 'publicId0001'
             },
             'body': {
-                'text': 'A' * 65536,
+                'text': 'A' * 401,
             },
             'requestContext': {
                 'authorizer': {
