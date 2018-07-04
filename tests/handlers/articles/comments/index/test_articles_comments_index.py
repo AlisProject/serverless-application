@@ -15,6 +15,16 @@ class TestArticlesCommentsIndex(TestCase):
         TestsUtil.set_all_tables_name_to_env()
         TestsUtil.delete_all_tables(cls.dynamodb)
 
+        article_info_items = [
+            {
+                'article_id': 'publicId0001',
+                'user_id': 'test01',
+                'status': 'public',
+                'sort_key': 1520150272000000
+            }
+        ]
+        TestsUtil.create_table(cls.dynamodb, os.environ['ARTICLE_INFO_TABLE_NAME'], article_info_items)
+
         cls.comment_items = [
             {
                 'comment_id': 'comment00001',
@@ -157,7 +167,7 @@ class TestArticlesCommentsIndex(TestCase):
         }
 
         mock_lib = MagicMock()
-        with patch('articles_likes_show.DBUtil', mock_lib):
+        with patch('articles_comments_index.DBUtil', mock_lib):
             ArticlesCommentsIndex(event=params, context={}, dynamodb=self.dynamodb).main()
             args, kwargs = mock_lib.validate_article_existence.call_args
 
