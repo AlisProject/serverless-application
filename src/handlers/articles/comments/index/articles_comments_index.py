@@ -2,6 +2,7 @@
 import os
 import json
 import settings
+from db_util import DBUtil
 from lambda_base import LambdaBase
 from boto3.dynamodb.conditions import Key
 from jsonschema import validate
@@ -25,6 +26,8 @@ class ArticlesCommentsIndex(LambdaBase):
     def validate_params(self):
         ParameterUtil.cast_parameter_to_int(self.params, self.get_schema())
         validate(self.params, self.get_schema())
+
+        DBUtil.validate_article_existence(self.dynamodb, self.params['article_id'], status='public')
 
     def exec_main_proc(self):
         comment_table = self.dynamodb.Table(os.environ['COMMENT_TABLE_NAME'])

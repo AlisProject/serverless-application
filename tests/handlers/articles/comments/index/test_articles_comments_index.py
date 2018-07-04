@@ -1,6 +1,8 @@
 import os
 import json
 from unittest import TestCase
+from unittest.mock import MagicMock, patch
+
 from articles_comments_index import ArticlesCommentsIndex
 from tests_util import TestsUtil
 
@@ -146,6 +148,23 @@ class TestArticlesCommentsIndex(TestCase):
 
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(len(json.loads(response['body'])['Items']), 10)
+
+    def test_call_validate_article_existence(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'testidlike02'
+            }
+        }
+
+        mock_lib = MagicMock()
+        with patch('articles_likes_show.DBUtil', mock_lib):
+            ArticlesCommentsIndex(event=params, context={}, dynamodb=self.dynamodb).main()
+            args, kwargs = mock_lib.validate_article_existence.call_args
+
+            self.assertTrue(mock_lib.validate_article_existence.called)
+            self.assertTrue(args[0])
+            self.assertTrue(args[1])
+            self.assertEqual(kwargs['status'], 'public')
 
     def test_validation_comment_id_max(self):
         params = {
