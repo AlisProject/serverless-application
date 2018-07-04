@@ -238,6 +238,54 @@ class TestMeCommentsDelete(TestCase):
         response = MeCommentsDelete(params, {}, self.dynamodb)._MeCommentsDelete__is_accessable_comment(comment)
         self.assertEqual(response, False)
 
+    def test_call_get_validated_comment_existence(self):
+        params = {
+            'pathParameters': {
+                'comment_id': 'comment00008'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'comment_user_01'
+                    }
+                }
+            }
+        }
+
+        mock_lib = MagicMock()
+        with patch('me_comments_delete.DBUtil', mock_lib):
+            MeCommentsDelete(params, {}, self.dynamodb).main()
+            args, _ = mock_lib.get_validated_comment.call_args
+
+            self.assertTrue(mock_lib.get_validated_comment.called)
+            self.assertEqual(args[1], 'comment00008')
+
+    def test_call_validate_article_existence(self):
+        params = {
+            'pathParameters': {
+                'comment_id': 'comment00001'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'comment_user_01'
+                    }
+                }
+            }
+        }
+
+        mock_lib = MagicMock()
+        with patch('me_comments_delete.DBUtil', mock_lib):
+            mock_lib.get_validated_comment.return_value = self.comment_items[0]
+
+            MeCommentsDelete(params, {}, self.dynamodb).main()
+            args, kwargs = mock_lib.validate_article_existence.call_args
+
+            self.assertTrue(mock_lib.validate_article_existence.called)
+            self.assertTrue(args[0])
+            self.assertEqual(args[1], 'publicId0001')
+            self.assertEqual(kwargs['status'], 'public')
+
     def test_validation_comment_id_max(self):
         params = {
             'pathParameters': {

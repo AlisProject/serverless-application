@@ -12,8 +12,18 @@ class TestMeArticlesCommentsCreate(TestCase):
     def setUp(self):
         TestsUtil.set_all_tables_name_to_env()
         TestsUtil.delete_all_tables(self.dynamodb)
-        self.comment_liked_user_table = self.dynamodb.Table(os.environ['COMMENT_LIKED_USER_TABLE_NAME'])
+        self.article_info_table = self.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
+        self.article_info_items = [
+            {
+                'article_id': 'publicId0001',
+                'user_id': 'test01',
+                'status': 'public',
+                'sort_key': 1520150272000000
+            }
+        ]
+        TestsUtil.create_table(self.dynamodb, os.environ['ARTICLE_INFO_TABLE_NAME'], self.article_info_items)
 
+        self.comment_liked_user_table = self.dynamodb.Table(os.environ['COMMENT_LIKED_USER_TABLE_NAME'])
         self.comment_items = [
             {
                 'comment_id': 'comment00001',
@@ -147,7 +157,7 @@ class TestMeArticlesCommentsCreate(TestCase):
         self.assertEqual(len(comment_after) - len(comment_before), 0)
         self.assertIsNone(liked_user)
 
-    def test_call_validate_comment_existence(self):
+    def test_call_get_validated_comment_existence(self):
         params = {
             'pathParameters': {
                 'comment_id': 'comment00008'
@@ -164,10 +174,36 @@ class TestMeArticlesCommentsCreate(TestCase):
         mock_lib = MagicMock()
         with patch('me_comments_likes_create.DBUtil', mock_lib):
             MeCommentsLikesCreate(params, {}, self.dynamodb).main()
-            args, _ = mock_lib.validate_comment_existence.call_args
+            args, _ = mock_lib.get_validated_comment.call_args
 
-            self.assertTrue(mock_lib.validate_comment_existence.called)
+            self.assertTrue(mock_lib.get_validated_comment.called)
             self.assertEqual(args[1], 'comment00008')
+
+    def test_call_validate_article_existence(self):
+        params = {
+            'pathParameters': {
+                'comment_id': 'comment00001'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'like_user_01'
+                    }
+                }
+            }
+        }
+
+        mock_lib = MagicMock()
+        with patch('me_comments_likes_create.DBUtil', mock_lib):
+            mock_lib.get_validated_comment.return_value = self.comment_items[0]
+
+            MeCommentsLikesCreate(params, {}, self.dynamodb).main()
+            args, kwargs = mock_lib.validate_article_existence.call_args
+
+            self.assertTrue(mock_lib.validate_article_existence.called)
+            self.assertTrue(args[0])
+            self.assertEqual(args[1], 'publicId0001')
+            self.assertEqual(kwargs['status'], 'public')
 
     def test_validation_comment_id_max(self):
         params = {

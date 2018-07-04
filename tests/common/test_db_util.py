@@ -192,7 +192,7 @@ class TestDBUtil(TestCase):
         )
         self.assertTrue(result)
 
-    def test_comment_existence_ng_not_exists_user_id(self):
+    def test_comment_existence_ng_not_exists_comment_id(self):
         result = DBUtil.comment_existence(
             self.dynamodb,
             'piyopiyo'
@@ -206,9 +206,23 @@ class TestDBUtil(TestCase):
         )
         self.assertTrue(result)
 
-    def test_validate_comment_existence_ng_not_exists_user_id(self):
+    def test_validate_comment_existence_ng_not_exists_comment_id(self):
         with self.assertRaises(RecordNotFoundError):
             DBUtil.validate_comment_existence(
+                self.dynamodb,
+                'piyopiyo'
+            )
+
+    def test_get_validated_comment_existence_ok(self):
+        result = DBUtil.get_validated_comment(
+            self.dynamodb,
+            self.comment_items[0]['comment_id']
+        )
+        self.assertEqual(result, self.comment_items[0])
+
+    def test_get_validated_comment_ng_not_exists_comment_id(self):
+        with self.assertRaises(RecordNotFoundError):
+            DBUtil.get_validated_comment(
                 self.dynamodb,
                 'piyopiyo'
             )

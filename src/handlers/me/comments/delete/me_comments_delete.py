@@ -21,7 +21,8 @@ class MeCommentsDelete(LambdaBase):
 
     def validate_params(self):
         validate(self.params, self.get_schema())
-        DBUtil.validate_comment_existence(self.dynamodb, self.params['comment_id'])
+        comment = DBUtil.get_validated_comment(self.dynamodb, self.params['comment_id'])
+        DBUtil.validate_article_existence(self.dynamodb, comment['article_id'], status='public')
 
     def exec_main_proc(self):
         comment_table = self.dynamodb.Table(os.environ['COMMENT_TABLE_NAME'])
