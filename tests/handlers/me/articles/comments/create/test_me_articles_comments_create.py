@@ -37,7 +37,7 @@ class TestMeArticlesCommentsCreate(TestCase):
             {
                 'comment_id': 'comment00001',
                 'article_id': 'publicId0002',
-                'user_id': 'test_user_01',
+                'user_id': 'comment_user_01',
                 'sort_key': 1520150271000000,
                 'created_at': 1520150272,
                 'text': 'コメントの内容1'
@@ -147,7 +147,7 @@ class TestMeArticlesCommentsCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'like_user_01'
+                        'cognito:username': 'comment_user_01'
                     }
                 }
             }
@@ -178,7 +178,7 @@ class TestMeArticlesCommentsCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'like_user_01'
+                        'cognito:username': 'comment_user_01'
                     }
                 }
             }
@@ -231,7 +231,7 @@ class TestMeArticlesCommentsCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'like_user_01'
+                        'cognito:username': 'comment_user_01'
                     }
                 }
             }
@@ -252,7 +252,7 @@ class TestMeArticlesCommentsCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'like_user_01'
+                        'cognito:username': 'comment_user_01'
                     }
                 }
             }
@@ -273,7 +273,7 @@ class TestMeArticlesCommentsCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'like_user_01'
+                        'cognito:username': 'comment_user_01'
                     }
                 }
             }
@@ -294,7 +294,7 @@ class TestMeArticlesCommentsCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'like_user_01'
+                        'cognito:username': 'comment_user_01'
                     }
                 }
             }
@@ -315,7 +315,7 @@ class TestMeArticlesCommentsCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'like_user_01'
+                        'cognito:username': 'comment_user_01'
                     }
                 }
             }
