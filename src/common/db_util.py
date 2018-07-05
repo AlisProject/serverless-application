@@ -41,6 +41,33 @@ class DBUtil:
         return True
 
     @staticmethod
+    def comment_existence(dynamodb, comment_id):
+        table = dynamodb.Table(os.environ['COMMENT_TABLE_NAME'])
+        comment = table.get_item(Key={'comment_id': comment_id}).get('Item')
+
+        if comment is None:
+            return False
+        return True
+
+    @staticmethod
+    def validate_comment_existence(dynamodb, comment_id):
+        table = dynamodb.Table(os.environ['COMMENT_TABLE_NAME'])
+        comment = table.get_item(Key={'comment_id': comment_id}).get('Item')
+
+        if comment is None:
+            raise RecordNotFoundError('Record Not Found')
+        return True
+
+    @staticmethod
+    def get_validated_comment(dynamodb, comment_id):
+        table = dynamodb.Table(os.environ['COMMENT_TABLE_NAME'])
+        comment = table.get_item(Key={'comment_id': comment_id}).get('Item')
+
+        if comment is None:
+            raise RecordNotFoundError('Record Not Found')
+        return comment
+
+    @staticmethod
     def items_values_empty_to_none(values):
         for k, v in values.items():
             if v == '':

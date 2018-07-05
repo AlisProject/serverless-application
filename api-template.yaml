@@ -31,6 +31,12 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   UnreadNotificationManagerTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
+  CommentTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  CommentLikedUserTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  DeletedCommentTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
   AlisAppDomain:
     Type: 'AWS::SSM::Parameter::Value<String>'
   PrivateChainAwsAccessKey:
@@ -69,6 +75,9 @@ Globals:
         BETA_USERS_TABLE_NAME: !Ref BetaUsersTableName
         NOTIFICATION_TABLE_NAME: !Ref NotificationTableName
         UNREAD_NOTIFICATION_MANAGER_TABLE_NAME: !Ref UnreadNotificationManagerTableName
+        COMMENT_TABLE_NAME: !Ref CommentTableName
+        COMMENT_LIKED_USER_TABLE_NAME: !Ref CommentLikedUserTableName
+        DELETED_COMMENT_TABLE_NAME: !Ref DeletedCommentTableName
         DOMAIN: !Ref AlisAppDomain
         PRIVATE_CHAIN_AWS_ACCESS_KEY: !Ref PrivateChainAwsAccessKey
         PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY: !Ref PrivateChainAwsSecretAccessKey
@@ -187,6 +196,21 @@ Resources:
               type:
                 type: string
               acted_user_id:
+                type: string
+              created_at:
+                type: integer
+          Comment:
+            type: object
+            properties:
+              comment_id:
+                type: string
+              article_id:
+                type: string
+              sort_key:
+                type: integer
+              user_id:
+                type: string
+              text:
                 type: string
               created_at:
                 type: integer
@@ -334,6 +358,54 @@ Resources:
                   default:
                     statusCode: "200"
                 uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ArticlesLikesShow.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /articles/{article_id}/comments:
+            get:
+              description: '指定された article_id の記事のコメントの一覧を取得する'
+              parameters:
+              - name: 'article_id'
+                in: 'path'
+                description: '対象記事の指定するために使用'
+                required: true
+                type: 'string'
+              responses:
+                '200':
+                  description: '対象記事のコメントの一覧'
+                  schema:
+                    $ref: '#/definitions/Comment'
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ArticlesCommentsIndex.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /comments/{comment_id}/likes:
+            get:
+              description: '指定されたコメントに付与されているいいね数を取得する'
+              parameters:
+              - name: 'comment_id'
+                in: 'path'
+                description: '対象コメントを指定するために使用'
+                required: true
+                type: 'string'
+              responses:
+                '200':
+                  description: '対象記事のコメントの一覧'
+                  schema:
+                    type: object
+                    properties:
+                      count:
+                        type: "number"
+                        format: "double"
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CommentsLikesShow.Arn}/invocations
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
@@ -626,6 +698,72 @@ Resources:
                   default:
                     statusCode: "200"
                 uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesLikeCreate.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /me/articles/{article_id}/comments:
+            post:
+              description: '指定された article_id の記事に対してコメントを登録する'
+              parameters:
+              - name: 'article_id'
+                in: 'path'
+                description: '対象記事の指定するために使用'
+                required: true
+                type: 'string'
+              responses:
+                '200':
+                  description: 'コメント登録の完了'
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesCommentsCreate.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /me/comments/{comment_id}:
+            delete:
+              description: '指定されたコメントを削除する'
+              parameters:
+              - name: 'comment_id'
+                in: 'path'
+                description: '対象コメントを指定するために使用'
+                required: true
+                type: 'string'
+              responses:
+                '200':
+                  description: 'コメント削除の完了'
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeCommentsDelete.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /me/comments/{comment_id}/likes:
+            post:
+              description: '指定されたコメントに対していいねする'
+              parameters:
+              - name: 'comment_id'
+                in: 'path'
+                description: '対象コメントを指定するために使用'
+                required: true
+                type: 'string'
+              responses:
+                '200':
+                  description: 'いいねの完了'
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeCommentsLikesCreate.Arn}/invocations
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
@@ -1231,6 +1369,74 @@ Resources:
           Properties:
             Path: /me/articles/{article_id}/like
             Method: post
+            RestApiId: !Ref RestApi
+  ArticlesCommentsIndex:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/articles_comments_index.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /articles/{article_id}/comments
+            Method: get
+            RestApiId: !Ref RestApi
+  MeArticlesCommentsCreate:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_articles_comments_create.zip
+      Environment:
+          Variables:
+            SALT_FOR_ARTICLE_ID: !Ref SaltForArticleId
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/articles/{article_id}/comments
+            Method: post
+            RestApiId: !Ref RestApi
+  CommentsLikesShow:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/comments_likes_show.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /comments/{comment_id}/likes
+            Method: get
+            RestApiId: !Ref RestApi
+  MeCommentsLikesCreate:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_comments_likes_create.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/comments/{comment_id}/likes
+            Method: post
+            RestApiId: !Ref RestApi
+  MeCommentsDelete:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_comments_delete.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/comments/{comment_id}
+            Method: delete
             RestApiId: !Ref RestApi
   MeArticlesFraudCreate:
     Type: AWS::Serverless::Function

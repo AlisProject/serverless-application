@@ -45,5 +45,8 @@ aws cloudformation deploy \
     BetaUsersTableName=${SSM_PARAMS_PREFIX}BetaUsersTableName \
     NotificationTableName=${SSM_PARAMS_PREFIX}NotificationTableName \
     UnreadNotificationManagerTableName=${SSM_PARAMS_PREFIX}UnreadNotificationManagerTableName \
+    CommentTableName=${SSM_PARAMS_PREFIX}CommentTableName \
+    CommentLikedUserTableName=${SSM_PARAMS_PREFIX}CommentLikedUserTableName \
+    DeletedCommentTableName=${SSM_PARAMS_PREFIX}DeletedCommentTableName \
     DistS3BucketName=${SSM_PARAMS_PREFIX}DistS3BucketName \
   --capabilities CAPABILITY_IAM
