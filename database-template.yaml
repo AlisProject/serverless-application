@@ -413,11 +413,11 @@ Resources:
           Projection:
             ProjectionType: ALL
           ProvisionedThroughput:
-            ReadCapacityUnits: 1
-            WriteCapacityUnits: 1
+            ReadCapacityUnits: !Ref MinDynamoReadCapacitty
+            WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
       ProvisionedThroughput:
-        ReadCapacityUnits: 1
-        WriteCapacityUnits: 1
+        ReadCapacityUnits: !Ref MinDynamoReadCapacitty
+        WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
   CommentLikedUser:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -432,8 +432,8 @@ Resources:
         - AttributeName: user_id
           KeyType: RANGE
       ProvisionedThroughput:
-        ReadCapacityUnits: 1
-        WriteCapacityUnits: 1
+        ReadCapacityUnits: !Ref MinDynamoReadCapacitty
+        WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
   DeletedComment:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -444,8 +444,8 @@ Resources:
         - AttributeName: comment_id
           KeyType: HASH
       ProvisionedThroughput:
-        ReadCapacityUnits: 1
-        WriteCapacityUnits: 1
+        ReadCapacityUnits: !Ref MinDynamoReadCapacitty
+        WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
   ScalingRole:
     Type: 'AWS::IAM::Role'
     Properties:
@@ -1535,7 +1535,7 @@ Resources:
       ResourceId: !Join
         - /
         - - table
-          - !Ref Comment
+          - !Ref CommentLikedUser
       RoleARN: !GetAtt ScalingRole.Arn
       ScalableDimension: dynamodb:table:ReadCapacityUnits
       ServiceNamespace: dynamodb
@@ -1548,7 +1548,7 @@ Resources:
       ResourceId: !Join
         - /
         - - table
-          - !Ref Comment
+          - !Ref CommentLikedUser
       RoleARN: !GetAtt ScalingRole.Arn
       ScalableDimension: dynamodb:table:WriteCapacityUnits
       ServiceNamespace: dynamodb
@@ -1585,7 +1585,7 @@ Resources:
       ResourceId: !Join
         - /
         - - table
-          - !Ref Comment
+          - !Ref DeletedComment
       RoleARN: !GetAtt ScalingRole.Arn
       ScalableDimension: dynamodb:table:ReadCapacityUnits
       ServiceNamespace: dynamodb
@@ -1598,7 +1598,7 @@ Resources:
       ResourceId: !Join
         - /
         - - table
-          - !Ref Comment
+          - !Ref DeletedComment
       RoleARN: !GetAtt ScalingRole.Arn
       ScalableDimension: dynamodb:table:WriteCapacityUnits
       ServiceNamespace: dynamodb
