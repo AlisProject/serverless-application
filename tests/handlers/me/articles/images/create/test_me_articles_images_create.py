@@ -103,7 +103,7 @@ class TestMeArticlesImagesCreate(TestCase):
         self.assertTrue(self.equal_size_to_s3_image(key, image_data.size))
 
     @patch('uuid.uuid4', MagicMock(return_value='uuid'))
-    def test_main_ok_status_draft(self):
+    def test_main_ok_status_draft_and_content_type_is_upper_case(self):
         image_data = Image.new('RGB', (1, 1))
         buf = BytesIO()
         image_format = 'png'
@@ -112,7 +112,7 @@ class TestMeArticlesImagesCreate(TestCase):
         target_article_info = self.article_info_table_items[1]
         params = {
             'headers': {
-                    'content-type': 'image/' + image_format
+                    'Content-Type': 'image/' + image_format
             },
             'pathParameters': {
                 'article_id': target_article_info['article_id']

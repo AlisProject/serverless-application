@@ -107,7 +107,7 @@ class TestMeInfoIconCreate(TestCase):
         self.assertTrue(self.equal_size_to_s3_image(key, image_data.size))
 
     @patch('uuid.uuid4', MagicMock(return_value='uuid'))
-    def test_main_ok_exists_icon_image_url_png(self):
+    def test_main_ok_exists_icon_image_url_png_and_content_type_is_upper_case(self):
         image_data = Image.new('RGB', (150, 120))
         buf = BytesIO()
         image_format = 'png'
@@ -116,7 +116,7 @@ class TestMeInfoIconCreate(TestCase):
         target_user = self.users_table_items[1]
         params = {
             'headers': {
-                'content-type': 'image/' + image_format
+                'Content-Type': 'image/' + image_format
             },
             'body': json.dumps({'icon_image': base64.b64encode(buf.getvalue()).decode('ascii')}),
             'requestContext': {
