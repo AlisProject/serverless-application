@@ -58,17 +58,21 @@ jobs:
       - run:
           name: make deploy package
           command: |
-            docker image build --tag deploy-image .
-            docker container run -it --name deploy-container deploy-image
-            docker container cp deploy-container:/workdir/vendor-package .
-            . venv/bin/activate
-            python make_deploy_zip.py
+            if [ $ALIS_APP_ID ]; then
+              docker image build --tag deploy-image .
+              docker container run -it --name deploy-container deploy-image
+              docker container cp deploy-container:/workdir/vendor-package .
+              . venv/bin/activate
+              python make_deploy_zip.py
+            fi
 
       - run:
           name: run deploy
           command: |
-            . venv/bin/activate
-            ./deploy.sh api
+            if [ $ALIS_APP_ID ]; then
+              . venv/bin/activate
+              ./deploy.sh api
+            fi
 
       - store_artifacts:
           path: test-reports
