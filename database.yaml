@@ -399,11 +399,23 @@ Resources:
           AttributeType: S
         - AttributeName: user_id
           AttributeType: S
+        - AttributeName: article_id
+          AttributeType: S
       KeySchema:
         - AttributeName: comment_id
           KeyType: HASH
         - AttributeName: user_id
           KeyType: RANGE
+      GlobalSecondaryIndexes:
+        - IndexName: article_id-index
+          KeySchema:
+            - AttributeName: article_id
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: 1
+            WriteCapacityUnits: 1
       ProvisionedThroughput:
         ReadCapacityUnits: 1
         WriteCapacityUnits: 1
