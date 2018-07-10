@@ -725,7 +725,7 @@ Resources:
                 type: aws_proxy
 
           /me/articles/{article_id}/comments/likes:
-            post:
+            get:
               description: '指定された記事のコメントの中で、自分がいいねを実行したコメントのIDの一覧を取得する'
               parameters:
               - name: 'article_id'
