@@ -713,6 +713,11 @@ Resources:
               responses:
                 '200':
                   description: 'コメント登録の完了'
+                  schema:
+                    type: object
+                    properties:
+                      comment_id:
+                        type: 'string'
               security:
                 - cognitoUserPool: []
               x-amazon-apigateway-integration:
