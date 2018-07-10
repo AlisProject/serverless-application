@@ -28,17 +28,20 @@ class MeCommentsLikesCreate(LambdaBase):
     def exec_main_proc(self):
         user_id = self.event['requestContext']['authorizer']['claims']['cognito:username']
 
-        comment_liked_user_table = self.dynamodb.Table(os.environ['COMMENT_LIKED_USER_TABLE_NAME'])
+        comment_liked_user_table = self.dynamodb.Table(os.environ['COMMENT_TABLE_NAME'])
+        comment = comment_liked_user_table.get_item(Key={'comment_id': self.params['comment_id']}).get('Item')
 
-        comment = {
-            'comment_id': self.params['comment_id'],
+        comment_liked_user_table = self.dynamodb.Table(os.environ['COMMENT_LIKED_USER_TABLE_NAME'])
+        comment_liked_user = {
+            'comment_id': comment['comment_id'],
             'user_id': user_id,
+            'article_id': comment['article_id'],
             'created_at': int(time.time())
         }
 
         try:
             comment_liked_user_table.put_item(
-                Item=comment,
+                Item=comment_liked_user,
                 ConditionExpression='attribute_not_exists(comment_id)'
             )
         except ClientError as e:

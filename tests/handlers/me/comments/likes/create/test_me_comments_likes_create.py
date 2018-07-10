@@ -93,6 +93,7 @@ class TestMeArticlesCommentsCreate(TestCase):
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(len(comment_after) - len(comment_before), 1)
         self.assertIsNotNone(liked_user)
+        self.assertEqual(liked_user['article_id'], self.article_info_items[0]['article_id'])
 
     def test_main_ok_already_liked_by_other_user(self):
         params = {
@@ -124,6 +125,7 @@ class TestMeArticlesCommentsCreate(TestCase):
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(len(comment_after) - len(comment_before), 1)
         self.assertIsNotNone(liked_user)
+        self.assertEqual(liked_user['article_id'], self.article_info_items[0]['article_id'])
 
     def test_main_ok_already_liked_by_myself(self):
         params = {
