@@ -40,7 +40,7 @@
 ## DBやDBへのクエリに対する変更
 
 * DBのスキーマに変更があるか
-  - [ ] 変更がある場合は[ドキュメント](https://alis-dev.esa.io/posts/58)に反映
+  - [ ] 変更がある場合は[ドキュメント](https://alismedia.atlassian.net/wiki/spaces/DEV/pages/9273460)に反映
 * 変更されるクエリ (変更前、変更後)
 * 新規に追加されるクエリ
 * 観点:

@@ -1,4 +1,6 @@
 import os
+
+from boto3.dynamodb.conditions import Key
 from db_util import DBUtil
 from tests_util import TestsUtil
 from unittest import TestCase
@@ -52,6 +54,50 @@ class TestDBUtil(TestCase):
             }
         ]
         TestsUtil.create_table(cls.dynamodb, os.environ['COMMENT_TABLE_NAME'], cls.comment_items)
+
+        article_pv_user_items = [
+            {
+                'article_id': 'article01',
+                'user_id': 'one_day_before_user1',
+                'article_user_id': 'article_user_1',
+                'target_date': '2018-05-01',
+                'created_at': 1520035200,
+                'sort_key': 1520035200000000
+            },
+            {
+                'article_id': 'one_day_before_article',
+                'user_id': 'one_day_before_user1',
+                'article_user_id': 'article_user_1',
+                'target_date': '2018-05-01',
+                'created_at': 1520035200,
+                'sort_key': 1520035200000000
+            },
+            {
+                'article_id': 'article01',
+                'user_id': 'a1_user1',
+                'article_user_id': 'article_user_1',
+                'target_date': '2018-05-01',
+                'created_at': 1520121600,
+                'sort_key': 1520121600000000
+            },
+            {
+                'article_id': 'article01',
+                'user_id': 'a1_user2',
+                'article_user_id': 'article_user_1',
+                'target_date': '2018-05-01',
+                'created_at': 1520125200,
+                'sort_key': 1520125200000000
+            },
+            {
+                'article_id': 'article02',
+                'user_id': 'a1_user2',
+                'article_user_id': 'article_user_2',
+                'target_date': '2018-05-02',
+                'created_at': 1520125200,
+                'sort_key': 1520125200000000
+            }
+        ]
+        TestsUtil.create_table(cls.dynamodb, os.environ['ARTICLE_PV_USER_TABLE_NAME'], article_pv_user_items)
 
     @classmethod
     def tearDownClass(cls):
@@ -236,3 +282,28 @@ class TestDBUtil(TestCase):
 
         self.assertEqual(values['test'], 'test')
         self.assertEqual(values['empty'], None)
+
+    def test_query_all_items_with_limit(self):
+        article_pv_user_table = self.dynamodb.Table(os.environ['ARTICLE_PV_USER_TABLE_NAME'])
+        # ユースケースとしては1MBを超え、レスポンスにLastEvaluatedKeyが付与されて返ってくる場合だが
+        # Limitを付与した際も同じレスポンスなのでLimitで代用している
+        query_params = {
+            'IndexName': 'target_date-sort_key-index',
+            'KeyConditionExpression': Key('target_date').eq('2018-05-01'),
+            'Limit': 1
+        }
+
+        response = DBUtil.query_all_items(article_pv_user_table, query_params)
+
+        self.assertEqual(len(response), 4)
+
+    def test_query_all_items_with_no_limit(self):
+        article_pv_user_table = self.dynamodb.Table(os.environ['ARTICLE_PV_USER_TABLE_NAME'])
+        query_params = {
+            'IndexName': 'target_date-sort_key-index',
+            'KeyConditionExpression': Key('target_date').eq('2018-05-01')
+        }
+
+        response = DBUtil.query_all_items(article_pv_user_table, query_params)
+
+        self.assertEqual(len(response), 4)

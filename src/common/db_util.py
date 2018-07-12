@@ -72,3 +72,16 @@ class DBUtil:
         for k, v in values.items():
             if v == '':
                 values[k] = None
+
+    @staticmethod
+    def query_all_items(dynamodb_table, query_params):
+
+        response = dynamodb_table.query(**query_params)
+        items = response['Items']
+
+        while 'LastEvaluatedKey' in response:
+            query_params.update({'ExclusiveStartKey': response['LastEvaluatedKey']})
+            response = dynamodb_table.query(**query_params)
+            items.extend(response['Items'])
+
+        return items
