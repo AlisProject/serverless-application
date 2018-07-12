@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import json
 import logging
 import os
 import traceback
@@ -66,7 +67,10 @@ class MeArticlesCommentsCreate(LambdaBase):
             logging.fatal(err)
             traceback.print_exc()
         finally:
-            return {'statusCode': 200}
+            return {
+                'statusCode': 200,
+                'body': json.dumps({'comment_id': comment_id})
+            }
 
     def __create_comment_notification(self, article_info, comment_id, user_id):
         notification_table = self.dynamodb.Table(os.environ['NOTIFICATION_TABLE_NAME'])

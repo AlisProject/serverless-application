@@ -101,6 +101,7 @@ class TestMeArticlesCommentsCreate(TestCase):
         unread_manager = self.unread_notification_manager_table.get_item(Key={'user_id': 'article_user01'}).get('Item')
 
         self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(json.loads(response['body'])['comment_id'], 'HOGEHOGEHOGE')
         self.assertEqual(len(comment_after) - len(comment_before), 1)
         self.assertEqual(len(notification_after) - len(notification_before), 1)
         self.assertEqual(len(unread_notification_manager_after) - len(unread_notification_manager_before), 1)
