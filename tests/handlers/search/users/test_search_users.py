@@ -50,7 +50,7 @@ class TestSearchUsers(TestCase):
         response = SearchUsers(params, {}, elasticsearch=self.elasticsearch).main()
         result = json.loads(response['body'])
         self.assertEqual(len(result), 20)
-        # limit 指定なし
+        # limit 指定
         params = {
                 'queryStringParameters': {
                     'limit': '10',
