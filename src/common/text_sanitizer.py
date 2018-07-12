@@ -10,7 +10,7 @@ class TextSanitizer:
         if text is None:
             return
 
-        return bleach.clean(text=text)
+        return bleach.clean(text=text, tags=[])
 
     @staticmethod
     def allow_img_src(tag, name, value):

@@ -12,11 +12,21 @@ class TestTextSanitizer(TestCase):
         target_html = '''
         Sample text
         <script>document.alert('evil')</script>
+        <b>bold</b>
+        <h2>sample h2</h2>
+        <h3>sample h3</h3>
+        <i>icon</i><p>sentence</p><u>under bar</u>
+        <b>bold</b><br><blockquote>blockquote</blockquote>
         '''
 
         expected_html = '''
         Sample text
         &lt;script&gt;document.alert('evil')&lt;/script&gt;
+        &lt;b&gt;bold&lt;/b&gt;
+        &lt;h2&gt;sample h2&lt;/h2&gt;
+        &lt;h3&gt;sample h3&lt;/h3&gt;
+        &lt;i&gt;icon&lt;/i&gt;&lt;p&gt;sentence&lt;/p&gt;&lt;u&gt;under bar&lt;/u&gt;
+        &lt;b&gt;bold&lt;/b&gt;&lt;br&gt;&lt;blockquote&gt;blockquote&lt;/blockquote&gt;
         '''
 
         result = TextSanitizer.sanitize_text(target_html)
