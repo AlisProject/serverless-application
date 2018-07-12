@@ -744,7 +744,7 @@ Resources:
                         items:
                           type: 'string'
                           enum:
-                            - "comment_id01"
+                            - "comment_id"
               security:
                 - cognitoUserPool: []
               x-amazon-apigateway-integration:
