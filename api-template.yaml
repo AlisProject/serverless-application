@@ -214,6 +214,17 @@ Resources:
                 type: string
               created_at:
                 type: integer
+          MeArticlesFraudCreate:
+            type: object
+            properties:
+              reason:
+                type: string
+              plagiarism_url:
+                type: string
+              plagiarism_description:
+                type: string
+              illegal_content:
+                type: string
         paths:
           /search/articles:
             get:
@@ -883,6 +894,11 @@ Resources:
                 description: '対象記事の指定するために使用'
                 required: true
                 type: 'string'
+              - name: 'FraudContents'
+                in: 'body'
+                description: '違反報告の内容'
+                schema:
+                  $ref: '#/definitions/MeArticlesFraudCreate'
               responses:
                 '200':
                   description: '不正報告の実施成功'
