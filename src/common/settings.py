@@ -136,7 +136,6 @@ ng_user_name = [
     'xml', 'year'
 ]
 
-
 LIKED_RETRY_COUNT = 3
 
 ARTICLE_IMAGE_MAX_WIDTH = 3840
@@ -150,3 +149,16 @@ S3_INFO_ICON_PATH = 'd/api/info_icon/'
 
 LIKE_NOTIFICATION_TYPE = 'like'
 COMMENT_NOTIFICATION_TYPE = 'comment'
+
+FRAUD_REASONS = [
+    'violence',
+    'spam',
+    'plagiarism',
+    'slander',
+    'illegal',
+    'other'
+]
+
+FRAUD_NEED_ORIGINAL_REASONS = ['plagiarism']
+
+FRAUD_NEED_DETAIL_REASONS = ['illegal', 'other']
