@@ -40,7 +40,6 @@ class MeArticlesFraudCreate(LambdaBase):
             article_fraud_user_table = self.dynamodb.Table(os.environ['ARTICLE_FRAUD_USER_TABLE_NAME'])
             self.__create_article_fraud_user(article_fraud_user_table)
         except ClientError as e:
-            print(e)
             if e.response['Error']['Code'] == 'ConditionalCheckFailedException':
                 return {
                     'statusCode': 400,
