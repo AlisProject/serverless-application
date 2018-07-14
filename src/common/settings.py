@@ -95,6 +95,32 @@ parameters = {
         'type': 'string',
         'minLength': 1,
         'maxLength': 150
+    },
+    'fraud_user': {
+        'reason': {
+            'type': 'string',
+            'enum': [
+                'violence',
+                'spam',
+                'plagiarism',
+                'slander',
+                'illegal',
+                'other'
+            ]
+        },
+        'plagiarism_url': {
+            'type': 'string',
+            'format': 'uri',
+            'maxLength': 2048
+        },
+        'plagiarism_description': {
+            'type': 'string',
+            'maxLength': 1000
+        },
+        'illegal_content': {
+            'type': 'string',
+            'maxLength': 1000
+        }
     }
 }
 
@@ -159,15 +185,6 @@ S3_INFO_ICON_PATH = 'd/api/info_icon/'
 
 LIKE_NOTIFICATION_TYPE = 'like'
 COMMENT_NOTIFICATION_TYPE = 'comment'
-
-FRAUD_REASONS = [
-    'violence',
-    'spam',
-    'plagiarism',
-    'slander',
-    'illegal',
-    'other'
-]
 
 FRAUD_NEED_ORIGINAL_REASONS = ['plagiarism']
 
