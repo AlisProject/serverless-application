@@ -85,6 +85,25 @@ parameters = {
             'minLength': 12,
             'maxLength': 12
         }
+    },
+    'fraud_user': {
+        'reason': {
+            'type': 'string',
+        },
+        'plagiarism_url': {
+            'type': 'string',
+            'format': 'uri',
+            'maxLength': 2048
+        },
+        'plagiarism_description': {
+            'type': 'string',
+            'maxLength': 65535
+        },
+        'illegal_content': {
+            'type': 'string',
+            'maxLength': 65535
+        },
+
     }
 }
 

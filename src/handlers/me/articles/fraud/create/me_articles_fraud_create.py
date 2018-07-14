@@ -15,20 +15,21 @@ class MeArticlesFraudCreate(LambdaBase):
             'type': 'object',
             'properties': {
                 'article_id': settings.parameters['article_id'],
-                'reason': {
-                    'type': 'string',
-                    'enum': settings.FRAUD_REASONS
-                },
-                'plagiarism_url': {
-                    'type': 'string',
-                },
-                'plagiarism_description': {
-                    'type': 'string'
-                },
-                'illegal_content': {
-                    'type': 'string'
-                },
+                'reason': settings.parameters['fraud_user']['reason'],
+                'plagiarism_url': settings.parameters['fraud_user']['plagiarism_url'],
+                'plagiarism_description': settings.parameters['fraud_user']['plagiarism_description'],
+                'illegal_content': settings.parameters['fraud_user']['illegal_content']
             },
+            'anyOf': [
+                {
+                    'properties': {
+                        'reason': {
+                            'enum': settings.FRAUD_REASONS
+                        },
+                    }
+
+                }
+            ],
             'required': ['article_id']
         }
 
