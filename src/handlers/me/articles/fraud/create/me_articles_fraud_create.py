@@ -18,16 +18,25 @@ class MeArticlesFraudCreate(LambdaBase):
                 'reason': {
                     'type': 'string',
                     'enum': settings.FRAUD_REASONS
-                }
+                },
+                'plagiarism_url': {
+                    'type': 'string',
+                },
+                'plagiarism_description': {
+                    'type': 'string'
+                },
+                'illegal_content': {
+                    'type': 'string'
+                },
             },
             'required': ['article_id']
         }
 
     def validate_params(self):
-        if not self.event.get('body'):
+        if self.event.get('pathParameters') is None:
             raise ValidationError('Request parameter is required')
-
         validate(self.params, self.get_schema())
+        self.__validate_reason_dependencies(self.params)
         # relation
         DBUtil.validate_article_existence(
             self.dynamodb,
@@ -63,7 +72,16 @@ class MeArticlesFraudCreate(LambdaBase):
             ConditionExpression='attribute_not_exists(article_id)'
         )
 
-    def __validate_plagiarism(self):
-        # TODO:
+    def __validate_reason_dependencies(self, params):
+        reason = params.get('reason', '')
+        if reason in settings.FRAUD_NEED_ORIGINAL_REASONS:
+            self.__validate_dependencies(params, ['plagiarism_url', 'plagiarism_description'])
 
+        if reason in settings.FRAUD_NEED_DETAIL_REASONS:
+            self.__validate_dependencies(params, ['illegal_content'])
+
+    def __validate_dependencies(self, params, required_items):
+        for item in required_items:
+            if not params[item]:
+                raise ValidationError("%s is required" % item)
 
