@@ -20,19 +20,16 @@ class TestMeArticlesFraudCreate(TestCase):
             {
                 'article_id': 'testid000000',
                 'user_id': 'test01',
-                'reason': 'violence',
                 'created_at': 1520150272
             },
             {
                 'article_id': 'testid000001',
                 'user_id': 'test01',
-                'reason': 'violence',
                 'created_at': 1520150273
             },
             {
                 'article_id': 'testid000002',
                 'user_id': 'test02',
-                'reason': 'violence',
                 'created_at': 1520150273
             }
         ]
@@ -87,7 +84,6 @@ class TestMeArticlesFraudCreate(TestCase):
             'pathParameters': {
                 'article_id': self.article_fraud_user_table_items[0]['article_id']
             },
-            'body': json.dumps({'reason': self.article_fraud_user_table_items[0]['reason']}),
             'requestContext': {
                 'authorizer': {
                     'claims': {
@@ -107,14 +103,12 @@ class TestMeArticlesFraudCreate(TestCase):
 
         target_article_id = params['pathParameters']['article_id']
         target_user_id = params['requestContext']['authorizer']['claims']['cognito:username']
-        target_reason = json.loads(params['body'])['reason']
 
         article_fraud_user = self.get_article_fraud_user(target_article_id, target_user_id)
 
         expected_items = {
             'article_id': target_article_id,
             'user_id': target_user_id,
-            'reason': target_reason,
             'created_at': 1520150272000003
         }
 
@@ -129,7 +123,6 @@ class TestMeArticlesFraudCreate(TestCase):
             'pathParameters': {
                 'article_id': 'testid000002'
             },
-            'body': json.dumps({'reason': self.article_fraud_user_table_items[0]['reason']}),
             'requestContext': {
                 'authorizer': {
                     'claims': {
@@ -154,7 +147,6 @@ class TestMeArticlesFraudCreate(TestCase):
             'pathParameters': {
                 'article_id': self.article_fraud_user_table_items[0]['article_id']
             },
-            'body': json.dumps({'reason': self.article_fraud_user_table_items[0]['reason']}),
             'requestContext': {
                 'authorizer': {
                     'claims': {
