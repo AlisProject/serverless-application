@@ -64,6 +64,10 @@ class MeArticlesFraudCreate(LambdaBase):
         article_fraud_user = {
             'article_id': self.event['pathParameters']['article_id'],
             'user_id': self.event['requestContext']['authorizer']['claims']['cognito:username'],
+            'reason': self.params.get('reason'),
+            'plagiarism_url': self.params.get('plagiarism_url'),
+            'plagiarism_description': self.params.get('plagiarism_description'),
+            'illegal_content': self.params.get('illegal_content'),
             'created_at': int(time.time())
         }
         article_fraud_user_table.put_item(

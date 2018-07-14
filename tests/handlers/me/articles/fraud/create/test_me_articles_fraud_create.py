@@ -124,7 +124,15 @@ class TestMeArticlesFraudCreate(TestCase):
 
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(len(article_fraud_user_after), len(article_fraud_user_before) + 1)
-        article_fraud_user_param_names = ['article_id', 'user_id', 'created_at']
+        article_fraud_user_param_names = [
+            'article_id',
+            'user_id',
+            'reason',
+            'plagiarism_url',
+            'plagiarism_description',
+            'illegal_content',
+            'created_at'
+        ]
         for key in article_fraud_user_param_names:
             self.assertEqual(expected_items[key], article_fraud_user[key])
 
