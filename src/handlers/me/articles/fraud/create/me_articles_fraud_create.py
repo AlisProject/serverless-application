@@ -23,11 +23,8 @@ class MeArticlesFraudCreate(LambdaBase):
             'anyOf': [
                 {
                     'properties': {
-                        'reason': {
-                            'enum': settings.FRAUD_REASONS
-                        },
+                        'reason': {'enum': settings.FRAUD_REASONS}
                     }
-
                 }
             ],
             'required': ['article_id']
