@@ -53,13 +53,8 @@ class TestMeArticlesFraudCreate(TestCase):
             },
             {
                 'article_id': 'testid000002',
-                'status': 'public',
-                'sort_key': 1520150272000002
-            },
-            {
-                'article_id': 'testid000003',
                 'status': 'draft',
-                'sort_key': 1520150272000003
+                'sort_key': 1520150272000002
             }
         ]
         TestsUtil.create_table(

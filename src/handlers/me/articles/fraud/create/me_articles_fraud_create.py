@@ -34,8 +34,9 @@ class MeArticlesFraudCreate(LambdaBase):
         }
 
     def validate_params(self):
+        # single
         if self.event.get('pathParameters') is None:
-            raise ValidationError('Request parameter is required')
+            raise ValidationError('pathParameters is required')
         validate(self.params, self.get_schema())
         self.__validate_reason_dependencies(self.params)
         # relation
