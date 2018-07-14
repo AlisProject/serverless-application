@@ -87,4 +87,3 @@ class MeArticlesFraudCreate(LambdaBase):
         for item in required_items:
             if not params[item]:
                 raise ValidationError("%s is required" % item)
-
