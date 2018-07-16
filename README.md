@@ -35,7 +35,21 @@ direnv allow
 ```
 
 # Test
+## Set up dynamoDB local
+Download and unzip the [dynamoDB local zip](https://docs.aws.amazon.com/ja_jp/amazondynamodb/latest/developerguide/DynamoDBLocal.html) in any directory
+
+For example
+```
+$ curl -O https://s3-ap-northeast-1.amazonaws.com/dynamodb-local-tokyo/dynamodb_local_latest.tar.gz
+$ tar xf ./dynamodb_local_latest.tar.gz
+$ rm ./dynamodb_local_latest.tar.gz
+```
+
+## Execute Test
 ```bash
+# Start dynamoDB local
+java -Djava.library.path=./DynamoDBLocal_lib -jar DynamoDBLocal.jar -sharedDb
+
 # lunch docker for localstack（for MAC OS）
 TMPDIR=/private$TMPDIR docker-compose up -d
 
