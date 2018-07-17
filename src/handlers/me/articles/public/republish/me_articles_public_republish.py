@@ -6,6 +6,7 @@ from lambda_base import LambdaBase
 from jsonschema import validate, ValidationError
 from db_util import DBUtil
 from record_not_found_error import RecordNotFoundError
+from es_util import ESUtil
 
 
 class MeArticlesPublicRepublish(LambdaBase):
@@ -40,6 +41,7 @@ class MeArticlesPublicRepublish(LambdaBase):
         self.__create_article_history(article_content_edit)
         self.__update_article_info(article_content_edit)
         self.__update_article_content(article_content_edit)
+        ESUtil.update_article(self.elasticsearch, article_content_edit)
 
         article_content_edit_table.delete_item(Key={'article_id': self.params['article_id']})
 

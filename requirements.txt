@@ -6,3 +6,5 @@ rfc3987
 jinja2
 pillow
 aws-requests-auth
+requests_aws4auth
+elasticsearch

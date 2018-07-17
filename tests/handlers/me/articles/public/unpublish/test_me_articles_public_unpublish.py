@@ -4,9 +4,13 @@ from unittest import TestCase
 from me_articles_public_unpublish import MeArticlesPublicUnpublish
 from unittest.mock import patch, MagicMock
 from tests_util import TestsUtil
+from elasticsearch import Elasticsearch
 
 
 class TestMeArticlesPublicUnpublish(TestCase):
+    elasticsearch = Elasticsearch(
+        hosts=[{'host': 'localhost'}]
+    )
     dynamodb = boto3.resource('dynamodb', endpoint_url='http://localhost:4569/')
 
     @classmethod
@@ -66,7 +70,7 @@ class TestMeArticlesPublicUnpublish(TestCase):
         TestsUtil.delete_all_tables(cls.dynamodb)
 
     def assert_bad_request(self, params):
-        function = MeArticlesPublicUnpublish(params, {}, self.dynamodb)
+        function = MeArticlesPublicUnpublish(params, {}, self.dynamodb, elasticsearch=self.elasticsearch)
         response = function.main()
 
         self.assertEqual(response['statusCode'], 400)
@@ -88,7 +92,7 @@ class TestMeArticlesPublicUnpublish(TestCase):
         article_info_before = self.article_info_table.scan()['Items']
         article_content_edit_before = self.article_content_edit_table.scan()['Items']
 
-        response = MeArticlesPublicUnpublish(params, {}, self.dynamodb).main()
+        response = MeArticlesPublicUnpublish(params, {}, self.dynamodb, elasticsearch=self.elasticsearch).main()
 
         article_info_after = self.article_info_table.scan()['Items']
         article_content_edit_after = self.article_content_edit_table.scan()['Items']
@@ -117,7 +121,7 @@ class TestMeArticlesPublicUnpublish(TestCase):
         article_info_before = self.article_info_table.scan()['Items']
         article_content_edit_before = self.article_content_edit_table.scan()['Items']
 
-        response = MeArticlesPublicUnpublish(params, {}, self.dynamodb).main()
+        response = MeArticlesPublicUnpublish(params, {}, self.dynamodb, elasticsearch=self.elasticsearch).main()
 
         article_info_after = self.article_info_table.scan()['Items']
         article_content_edit_after = self.article_content_edit_table.scan()['Items']
@@ -145,7 +149,7 @@ class TestMeArticlesPublicUnpublish(TestCase):
 
         mock_lib = MagicMock()
         with patch('me_articles_public_unpublish.DBUtil', mock_lib):
-            MeArticlesPublicUnpublish(params, {}, self.dynamodb).main()
+            MeArticlesPublicUnpublish(params, {}, self.dynamodb, elasticsearch=self.elasticsearch).main()
             args, kwargs = mock_lib.validate_article_existence.call_args
 
             self.assertTrue(mock_lib.validate_article_existence.called)

@@ -4,6 +4,7 @@ import settings
 from lambda_base import LambdaBase
 from jsonschema import validate
 from db_util import DBUtil
+from es_util import ESUtil
 
 
 class MeArticlesPublicUnpublish(LambdaBase):
@@ -39,6 +40,8 @@ class MeArticlesPublicUnpublish(LambdaBase):
             ExpressionAttributeNames={'#attr': 'status'},
             ExpressionAttributeValues={':article_status': 'draft'}
         )
+
+        ESUtil.delete_article(self.elasticsearch, self.params['article_id'])
 
         return {
             'statusCode': 200
