@@ -89,7 +89,8 @@ Specify generated Cognito User Pool ARN to SSM.
 - See: https://github.com/AlisProject/environment
 
 
-### Lambda & API Gateway
+### Lambda & API Gateway & ElasticSearch
 ```bash
 ./deploy.sh api
+python elasticsearch-setup.py
 ```

@@ -29,6 +29,10 @@ Resources:
           AttributeType: S
         - AttributeName: sort_key
           AttributeType: N
+        - AttributeName: sync_elasticsearch
+          AttributeType: N
+        - AttributeName: updated_at
+          AttributeType: N
       KeySchema:
         - AttributeName: article_id
           KeyType: HASH
@@ -63,6 +67,17 @@ Resources:
               KeyType: RANGE
           Projection:
             ProjectionType: KEYS_ONLY
+          ProvisionedThroughput:
+            ReadCapacityUnits: !Ref MinDynamoReadCapacitty
+            WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
+        - IndexName: sync_elasticsearch-updated_at-index
+          KeySchema:
+            - AttributeName: sync_elasticsearch
+              KeyType: HASH
+            - AttributeName: updated_at
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
           ProvisionedThroughput:
             ReadCapacityUnits: !Ref MinDynamoReadCapacitty
             WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
