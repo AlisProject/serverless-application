@@ -132,6 +132,7 @@ class TestMeArticlesPublicRepublish(TestCase):
 
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(article_info['status'], 'public')
+        self.assertEqual(article_info['sync_elasticsearch'], 1)
         self.assertEqual(params['requestContext']['authorizer']['claims']['cognito:username'], article_info['user_id'])
         for key in article_info_param_names:
             self.assertEqual(expected_item[key], article_info[key])

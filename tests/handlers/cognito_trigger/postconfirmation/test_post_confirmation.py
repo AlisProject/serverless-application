@@ -45,6 +45,7 @@ class TestPostConfirmation(TestCase):
         table = dynamodb.Table(os.environ['USERS_TABLE_NAME'])
         items = table.get_item(Key={"user_id": "hogehoge"})
         self.assertEqual(items['Item']['user_id'], items['Item']['user_display_name'])
+        self.assertEqual(items['Item']['sync_elasticsearch'], 1)
 
     @patch("post_confirmation.PostConfirmation._PostConfirmation__wallet_initialization",
            MagicMock(return_value=True))
