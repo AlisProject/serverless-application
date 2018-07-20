@@ -32,7 +32,8 @@ class MeInfoUpdate(LambdaBase):
 
         expression_attribute_values = {
             ':user_display_name': TextSanitizer.sanitize_text(self.params['user_display_name']),
-            ':self_introduction': TextSanitizer.sanitize_text(self.params['self_introduction'])
+            ':self_introduction': TextSanitizer.sanitize_text(self.params['self_introduction']),
+            ':sync_elasticsearch': 1
         }
         DBUtil.items_values_empty_to_none(expression_attribute_values)
 
@@ -40,7 +41,8 @@ class MeInfoUpdate(LambdaBase):
             Key={
                 'user_id': self.event['requestContext']['authorizer']['claims']['cognito:username'],
             },
-            UpdateExpression="set user_display_name=:user_display_name, self_introduction=:self_introduction",
+            UpdateExpression=("set user_display_name=:user_display_name, self_introduction=:self_introduction, "
+                              "sync_elasticsearch=:sync_elasticsearch"),
             ExpressionAttributeValues=expression_attribute_values
         )
 

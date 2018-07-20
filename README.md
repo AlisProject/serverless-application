@@ -89,7 +89,11 @@ Specify generated Cognito User Pool ARN to SSM.
 - See: https://github.com/AlisProject/environment
 
 
-### Lambda & API Gateway
+### Lambda & API Gateway & ElasticSearch
+
+[check your global ip](https://checkip.amazonaws.com/)
+
 ```bash
 ./deploy.sh api
+python elasticsearch-setup.py YourGlobalIP
 ```
