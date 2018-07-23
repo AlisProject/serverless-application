@@ -1,6 +1,5 @@
 import os
 import json
-import boto3
 from unittest import TestCase
 from articles_likes_show import ArticlesLikesShow
 from tests_util import TestsUtil
@@ -118,7 +117,7 @@ class TestArticlesLikesShow(TestCase):
 
         mock_lib = MagicMock()
         with patch('articles_likes_show.DBUtil', mock_lib):
-            response = ArticlesLikesShow(event=params, context={}, dynamodb=self.dynamodb).main()
+            ArticlesLikesShow(event=params, context={}, dynamodb=self.dynamodb).main()
             args, kwargs = mock_lib.validate_article_existence.call_args
 
             self.assertTrue(mock_lib.validate_article_existence.called)

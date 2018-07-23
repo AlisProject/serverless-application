@@ -11,6 +11,8 @@ Resources:
           AttributeType: S
         - AttributeName: sort_key
           AttributeType: N
+        - AttributeName: sync_elasticsearch
+          AttributeType: N
       KeySchema:
         - AttributeName: article_id
           KeyType: HASH
@@ -45,6 +47,15 @@ Resources:
               KeyType: RANGE
           Projection:
             ProjectionType: KEYS_ONLY
+          ProvisionedThroughput:
+            ReadCapacityUnits: 2
+            WriteCapacityUnits: 2
+        - IndexName: sync_elasticsearch-index
+          KeySchema:
+            - AttributeName: sync_elasticsearch
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
           ProvisionedThroughput:
             ReadCapacityUnits: 2
             WriteCapacityUnits: 2
@@ -263,6 +274,24 @@ Resources:
         ReadCapacityUnits: 2
         WriteCapacityUnits: 2
     DeletionPolicy: Retain
+  LikeTokenAggregation:
+    Type: AWS::DynamoDB::Table
+    DependsOn:
+    - ArticleTokenAggregation
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: evaluated_at
+          AttributeType: N
+        - AttributeName: user_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: evaluated_at
+          KeyType: HASH
+        - AttributeName: user_id
+          KeyType: RANGE
+      ProvisionedThroughput:
+        ReadCapacityUnits: 2
+        WriteCapacityUnits: 2
   ArticleFraudUser:
     Type: AWS::DynamoDB::Table
     DependsOn:
@@ -287,9 +316,21 @@ Resources:
       AttributeDefinitions:
         - AttributeName: user_id
           AttributeType: S
+        - AttributeName: sync_elasticsearch
+          AttributeType: N
       KeySchema:
         - AttributeName: user_id
           KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: sync_elasticsearch-index
+          KeySchema:
+            - AttributeName: sync_elasticsearch
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: 2
+            WriteCapacityUnits: 2
       ProvisionedThroughput:
         ReadCapacityUnits: 2
         WriteCapacityUnits: 2
@@ -301,6 +342,114 @@ Resources:
           AttributeType: S
       KeySchema:
         - AttributeName: email
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+  Notification:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: notification_id
+          AttributeType: S
+        - AttributeName: user_id
+          AttributeType: S
+        - AttributeName: sort_key
+          AttributeType: N
+      KeySchema:
+        - AttributeName: notification_id
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: user_id-sort_key-index
+          KeySchema:
+            - AttributeName: user_id
+              KeyType: HASH
+            - AttributeName: sort_key
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: 1
+            WriteCapacityUnits: 1
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+  UnreadNotificationManager:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: user_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: user_id
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+  Comment:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: comment_id
+          AttributeType: S
+        - AttributeName: article_id
+          AttributeType: S
+        - AttributeName: sort_key
+          AttributeType: N
+      KeySchema:
+        - AttributeName: comment_id
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: article_id-sort_key-index
+          KeySchema:
+            - AttributeName: article_id
+              KeyType: HASH
+            - AttributeName: sort_key
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: 1
+            WriteCapacityUnits: 1
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+  CommentLikedUser:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: comment_id
+          AttributeType: S
+        - AttributeName: user_id
+          AttributeType: S
+        - AttributeName: article_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: comment_id
+          KeyType: HASH
+        - AttributeName: user_id
+          KeyType: RANGE
+      GlobalSecondaryIndexes:
+        - IndexName: article_id-index
+          KeySchema:
+            - AttributeName: article_id
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: 1
+            WriteCapacityUnits: 1
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+  DeletedComment:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: comment_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: comment_id
           KeyType: HASH
       ProvisionedThroughput:
         ReadCapacityUnits: 1

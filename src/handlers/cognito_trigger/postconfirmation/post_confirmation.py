@@ -19,7 +19,8 @@ class PostConfirmation(LambdaBase):
         users = self.dynamodb.Table(os.environ['USERS_TABLE_NAME'])
         user = {
             'user_id': self.event['userName'],
-            'user_display_name': self.event['userName']
+            'user_display_name': self.event['userName'],
+            'sync_elasticsearch': 1
         }
         users.put_item(Item=user, ConditionExpression='attribute_not_exists(user_id)')
         if os.environ['BETA_MODE_FLAG'] == "1":
@@ -32,6 +33,9 @@ class PostConfirmation(LambdaBase):
         return True
 
     def __wallet_initialization(self):
+        if 'custom:private_eth_address' in self.event['request']['userAttributes']:
+            return True
+
         address = self.__create_new_account()
         self.cognito.admin_update_user_attributes(
             UserPoolId=self.event['userPoolId'],

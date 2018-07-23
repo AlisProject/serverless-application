@@ -5,7 +5,6 @@ import json
 from db_util import DBUtil
 from lambda_base import LambdaBase
 from jsonschema import validate, ValidationError
-from boto3.dynamodb.conditions import Key
 
 
 class MeArticleLikeShow(LambdaBase):

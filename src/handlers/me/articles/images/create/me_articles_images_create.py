@@ -25,23 +25,37 @@ class MeArticlesImagesCreate(LambdaBase):
     def get_headers_schema(self):
         return {
             'type': 'object',
-            'properties': {
-                'content-type': {
-                    'type': 'string',
-                    'enum': [
-                        'image/gif',
-                        'image/jpeg',
-                        'image/png'
-                    ]
-                }
-            },
-            'required': ['content-type']
+            "oneOf": [{
+                'properties': {
+                    'content-type': {
+                        'type': 'string',
+                        'enum': [
+                            'image/gif',
+                            'image/jpeg',
+                            'image/png'
+                        ]
+                    }
+                },
+                'required': ['content-type']
+            }, {
+                'properties': {
+                    'Content-Type': {
+                        'type': 'string',
+                        'enum': [
+                            'image/gif',
+                            'image/jpeg',
+                            'image/png'
+                        ]
+                    }
+                },
+                'required': ['Content-Type']
+            }]
         }
 
     def validate_image_data(self, image_data):
         try:
             Image.open(BytesIO(base64.b64decode(image_data)))
-        except Exception as e:
+        except Exception:
             raise ValidationError('Bad Request: No supported image format')
 
     def validate_params(self):
@@ -60,7 +74,9 @@ class MeArticlesImagesCreate(LambdaBase):
         )
 
     def exec_main_proc(self):
-        ext = self.headers['content-type'].split('/')[1]
+        content_type = self.headers.get('content-type') \
+            if self.headers.get('content-type') is not None else self.headers.get('Content-Type')
+        ext = content_type.split('/')[1]
         user_id = self.event['requestContext']['authorizer']['claims']['cognito:username']
         key = settings.S3_ARTICLES_IMAGES_PATH + \
             user_id + '/' + self.params['article_id'] + '/' + str(uuid.uuid4()) + '.' + ext
@@ -69,7 +85,7 @@ class MeArticlesImagesCreate(LambdaBase):
         self.s3.Bucket(os.environ['DIST_S3_BUCKET_NAME']).put_object(
             Body=image_data,
             Key=key,
-            ContentType=self.headers['content-type']
+            ContentType=content_type
         )
 
         return {

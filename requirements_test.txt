@@ -1,4 +1,5 @@
 boto3
 pycodestyle
+pyflakes
 green
 awscli

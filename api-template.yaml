@@ -1,6 +1,58 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: Create Lambda function by using AWS SAM.
+Description: Lambda functions and API Gateway resources for the ALIS application.
+
+Parameters:
+  ArticleInfoTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  ArticleContentTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  ArticleHistoryTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  ArticleContentEditTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  ArticleEvaluatedManageTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  ArticleAlisTokenTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  ArticleLikedUserTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  ArticleFraudUserTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  ArticlePvUserTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  ArticleScoreTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  UsersTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  BetaUsersTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  NotificationTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  UnreadNotificationManagerTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  CommentTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  CommentLikedUserTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  DeletedCommentTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  AlisAppDomain:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  PrivateChainAwsAccessKey:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  PrivateChainAwsSecretAccessKey:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  PrivateChainExecuteApiHost:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  BetaModeFlag:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  DistS3BucketName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  CognitoUserPoolArn:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  SaltForArticleId:
+    Type: 'AWS::SSM::Parameter::Value<String>'
 
 Globals:
   Function:
@@ -9,26 +61,29 @@ Globals:
     MemorySize: 3008
     Environment:
       Variables:
-        ARTICLE_INFO_TABLE_NAME: {{ ARTICLE_INFO_TABLE_NAME }}
-        ARTICLE_CONTENT_TABLE_NAME: {{ ARTICLE_CONTENT_TABLE_NAME }}
-        ARTICLE_HISTORY_TABLE_NAME: {{ ARTICLE_HISTORY_TABLE_NAME }}
-        ARTICLE_CONTENT_EDIT_TABLE_NAME: {{ ARTICLE_CONTENT_EDIT_TABLE_NAME }}
-        ARTICLE_EVALUATED_MANAGE_TABLE_NAME: {{ ARTICLE_EVALUATED_MANAGE_TABLE_NAME }}
-        ARTICLE_ALIS_TOKEN_TABLE_NAME: {{ ARTICLE_ALIS_TOKEN_TABLE_NAME }}
-        ARTICLE_LIKED_USER_TABLE_NAME: {{ ARTICLE_LIKED_USER_TABLE_NAME }}
-        ARTICLE_FRAUD_USER_TABLE_NAME: {{ ARTICLE_FRAUD_USER_TABLE_NAME }}
-        ARTICLE_PV_USER_TABLE_NAME: {{ ARTICLE_PV_USER_TABLE_NAME }}
-        ARTICLE_SCORE_TABLE_NAME: {{ ARTICLE_SCORE_TABLE_NAME }}
-        USERS_TABLE_NAME: {{ USERS_TABLE_NAME }}
-        COGNITO_EMAIL_VERIFY_URL: {{ COGNITO_EMAIL_VERIFY_URL }}
-        DIST_S3_BUCKET_NAME: {{ DIST_S3_BUCKET_NAME }}
-        DOMAIN: {{ DOMAIN }}
-        BETA_MODE_FLAG: {{ BETA_MODE_FLAG }}
-        BETA_USERS_TABLE_NAME: {{ BETA_USERS_TABLE_NAME }}
-        PRIVATE_CHAIN_API: {{ PRIVATE_CHAIN_API }}
-        PRIVATE_CHAIN_AWS_ACCESS_KEY: {{ PRIVATE_CHAIN_AWS_ACCESS_KEY }}
-        PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY: {{ PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY }}
-        PRIVATE_CHAIN_EXECUTE_API_HOST: {{ PRIVATE_CHAIN_EXECUTE_API_HOST }}
+        ARTICLE_INFO_TABLE_NAME: !Ref ArticleInfoTableName
+        ARTICLE_CONTENT_TABLE_NAME: !Ref ArticleContentTableName
+        ARTICLE_HISTORY_TABLE_NAME: !Ref ArticleHistoryTableName
+        ARTICLE_CONTENT_EDIT_TABLE_NAME: !Ref ArticleContentEditTableName
+        ARTICLE_EVALUATED_MANAGE_TABLE_NAME: !Ref ArticleEvaluatedManageTableName
+        ARTICLE_ALIS_TOKEN_TABLE_NAME: !Ref ArticleAlisTokenTableName
+        ARTICLE_LIKED_USER_TABLE_NAME: !Ref ArticleLikedUserTableName
+        ARTICLE_FRAUD_USER_TABLE_NAME: !Ref ArticleFraudUserTableName
+        ARTICLE_PV_USER_TABLE_NAME: !Ref ArticlePvUserTableName
+        ARTICLE_SCORE_TABLE_NAME: !Ref ArticleScoreTableName
+        USERS_TABLE_NAME: !Ref UsersTableName
+        BETA_USERS_TABLE_NAME: !Ref BetaUsersTableName
+        NOTIFICATION_TABLE_NAME: !Ref NotificationTableName
+        UNREAD_NOTIFICATION_MANAGER_TABLE_NAME: !Ref UnreadNotificationManagerTableName
+        COMMENT_TABLE_NAME: !Ref CommentTableName
+        COMMENT_LIKED_USER_TABLE_NAME: !Ref CommentLikedUserTableName
+        DELETED_COMMENT_TABLE_NAME: !Ref DeletedCommentTableName
+        DOMAIN: !Ref AlisAppDomain
+        PRIVATE_CHAIN_AWS_ACCESS_KEY: !Ref PrivateChainAwsAccessKey
+        PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY: !Ref PrivateChainAwsSecretAccessKey
+        PRIVATE_CHAIN_EXECUTE_API_HOST: !Ref PrivateChainExecuteApiHost
+        BETA_MODE_FLAG: !Ref BetaModeFlag
+        DIST_S3_BUCKET_NAME: !Ref DistS3BucketName
 
 Resources:
   RestApi:
@@ -131,7 +186,105 @@ Resources:
             properties:
               private_eth_address:
                 type: string
+          Notification:
+            type: object
+            properties:
+              user_id:
+                type: string
+              sort_key:
+                type: integer
+              type:
+                type: string
+              acted_user_id:
+                type: string
+              created_at:
+                type: integer
+          Comment:
+            type: object
+            properties:
+              comment_id:
+                type: string
+              article_id:
+                type: string
+              sort_key:
+                type: integer
+              user_id:
+                type: string
+              text:
+                type: string
+              created_at:
+                type: integer
         paths:
+          /search/articles:
+            get:
+              description: "記事検索"
+              parameters:
+              - name: "query"
+                in: "query"
+                description: "検索ワード"
+                required: true
+                type: "string"
+              - name: "limit"
+                in: "query"
+                description: "取得件数"
+                required: false
+                type: "integer"
+                minimum: 1
+              - name: "page"
+                in: "query"
+                description: "ページ"
+                required: false
+                type: "integer"
+              responses:
+                "200":
+                  description: "検索記事一覧"
+                  schema:
+                    type: array
+                    items:
+                      $ref: '#/definitions/ArticleInfo'
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ElasticSearchSearchArticles.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /search/users:
+            get:
+              description: "ユーザー検索"
+              parameters:
+              - name: "query"
+                in: "query"
+                description: "検索ワード"
+                required: true
+                type: "string"
+              - name: "limit"
+                in: "query"
+                description: "取得件数"
+                required: false
+                type: "integer"
+                minimum: 1
+              - name: "page"
+                in: "query"
+                description: "ページ"
+                required: false
+                type: "integer"
+              responses:
+                "200":
+                  description: "検索ユーザー一覧"
+                  schema:
+                    type: array
+                    items:
+                      $ref: '#/definitions/UserInfo'
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ElasticSearchSearchUsers.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
           /articles/recent:
             get:
               description: "最新記事一覧情報を取得"
@@ -275,6 +428,54 @@ Resources:
                   default:
                     statusCode: "200"
                 uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ArticlesLikesShow.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /articles/{article_id}/comments:
+            get:
+              description: '指定された article_id の記事のコメントの一覧を取得する'
+              parameters:
+              - name: 'article_id'
+                in: 'path'
+                description: '対象記事の指定するために使用'
+                required: true
+                type: 'string'
+              responses:
+                '200':
+                  description: '対象記事のコメントの一覧'
+                  schema:
+                    $ref: '#/definitions/Comment'
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ArticlesCommentsIndex.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /comments/{comment_id}/likes:
+            get:
+              description: '指定されたコメントに付与されているいいね数を取得する'
+              parameters:
+              - name: 'comment_id'
+                in: 'path'
+                description: '対象コメントを指定するために使用'
+                required: true
+                type: 'string'
+              responses:
+                '200':
+                  description: '対象記事のコメントの一覧'
+                  schema:
+                    type: object
+                    properties:
+                      count:
+                        type: "number"
+                        format: "double"
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CommentsLikesShow.Arn}/invocations
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
@@ -570,6 +771,109 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+          /me/articles/{article_id}/comments:
+            post:
+              description: '指定された article_id の記事に対してコメントを登録する'
+              parameters:
+              - name: 'article_id'
+                in: 'path'
+                description: '対象記事の指定するために使用'
+                required: true
+                type: 'string'
+              responses:
+                '200':
+                  description: 'コメント登録の完了'
+                  schema:
+                    type: object
+                    properties:
+                      comment_id:
+                        type: 'string'
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesCommentsCreate.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+
+          /me/articles/{article_id}/comments/likes:
+            get:
+              description: '指定された記事のコメントの中で、自分がいいねを実行したコメントのIDの一覧を取得する'
+              parameters:
+              - name: 'article_id'
+                in: 'path'
+                description: '対象記事を指定するために使用'
+                required: true
+                type: 'string'
+              responses:
+                '200':
+                  description: 'いいねを実施したコメントのIDの一覧'
+                  schema:
+                    type: object
+                    properties:
+                      comment_ids:
+                        type: array
+                        items:
+                          type: 'string'
+                          enum:
+                            - "comment_id"
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesCommentsLikesIndex.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /me/comments/{comment_id}:
+            delete:
+              description: '指定されたコメントを削除する'
+              parameters:
+              - name: 'comment_id'
+                in: 'path'
+                description: '対象コメントを指定するために使用'
+                required: true
+                type: 'string'
+              responses:
+                '200':
+                  description: 'コメント削除の完了'
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeCommentsDelete.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /me/comments/{comment_id}/likes:
+            post:
+              description: '指定されたコメントに対していいねする'
+              parameters:
+              - name: 'comment_id'
+                in: 'path'
+                description: '対象コメントを指定するために使用'
+                required: true
+                type: 'string'
+              responses:
+                '200':
+                  description: 'いいねの完了'
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeCommentsLikesCreate.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
           /me/articles/{article_id}/fraud:
             post:
               description: '対象記事に不正報告を行う'
@@ -777,6 +1081,9 @@ Resources:
                 required: true
                 schema:
                   $ref: '#/definitions/MeArticlesDraftsCreate'
+              responses:
+                '200':
+                  description: 'successful operation'
               security:
                 - cognitoUserPool: []
               x-amazon-apigateway-integration:
@@ -849,6 +1156,62 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+          /me/notifications:
+            get:
+              description: ログインユーザーの通知の一覧を取得
+              responses:
+                '200':
+                  description: 'ログインユーザーの通知の一覧'
+                  schema:
+                    type: array
+                    items:
+                      $ref: '#/definitions/Notification'
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeNotificationsIndex.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /me/unread_notification_managers:
+            get:
+              description: 'ログインユーザーの通知の未読情報を取得'
+              responses:
+                '200':
+                  description: '対象ユーザの通知未読情報'
+                  schema:
+                    type: object
+                    properties:
+                      unread:
+                        type: boolean
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeUnreadNotificationManagersShow.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+            put:
+              description: 'ログインユーザーの通知の未読情報を未読に更新する'
+              responses:
+                '200':
+                  description: 'successful operation'
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeUnreadNotificationManagersUpdate.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
         securityDefinitions:
           cognitoUserPool:
             type: apiKey
@@ -858,7 +1221,7 @@ Resources:
             x-amazon-apigateway-authorizer:
               type: cognito_user_pools
               providerARNs:
-                - {{ COGNITO_USER_POOL_ARN }}
+                - !Ref CognitoUserPoolArn
   LambdaRole:
     Type: "AWS::IAM::Role"
     Properties:
@@ -989,7 +1352,7 @@ Resources:
         CodeUri: ./deploy/me_articles_drafts_create.zip
         Environment:
           Variables:
-            SALT_FOR_ARTICLE_ID: {{ SALT_FOR_ARTICLE_ID }}
+            SALT_FOR_ARTICLE_ID: !Ref SaltForArticleId
         Events:
           Api:
             Type: Api
@@ -1111,8 +1474,89 @@ Resources:
         Api:
           Type: Api
           Properties:
-            Path: /me/articles/{article_id}/likes
+            Path: /me/articles/{article_id}/like
             Method: post
+            RestApiId: !Ref RestApi
+  ArticlesCommentsIndex:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/articles_comments_index.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /articles/{article_id}/comments
+            Method: get
+            RestApiId: !Ref RestApi
+  MeArticlesCommentsCreate:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_articles_comments_create.zip
+      Environment:
+          Variables:
+            SALT_FOR_ARTICLE_ID: !Ref SaltForArticleId
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/articles/{article_id}/comments
+            Method: post
+            RestApiId: !Ref RestApi
+  MeArticlesCommentsLikesIndex:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_articles_comments_likes_index.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/articles/{article_id}/comments/likes
+            Method: get
+            RestApiId: !Ref RestApi
+  CommentsLikesShow:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/comments_likes_show.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /comments/{comment_id}/likes
+            Method: get
+            RestApiId: !Ref RestApi
+  MeCommentsLikesCreate:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_comments_likes_create.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/comments/{comment_id}/likes
+            Method: post
+            RestApiId: !Ref RestApi
+  MeCommentsDelete:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_comments_delete.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/comments/{comment_id}
+            Method: delete
             RestApiId: !Ref RestApi
   MeArticlesFraudCreate:
     Type: AWS::Serverless::Function
@@ -1231,3 +1675,106 @@ Resources:
             Path: /me/wallet/balance
             Method: get
             RestApiId: !Ref RestApi
+  MeNotificationsIndex:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_notifications_index.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/notifications
+            Method: get
+            RestApiId: !Ref RestApi
+  MeUnreadNotificationManagersShow:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_unread_notification_managers_show.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/unread_notification_managers
+            Method: get
+            RestApiId: !Ref RestApi
+  MeUnreadNotificationManagersUpdate:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_unread_notification_managers_update.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/unread_notification_managers
+            Method: put
+            RestApiId: !Ref RestApi
+  ElasticSearchSearchArticles:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/search_articles.zip
+      Environment:
+        Variables:
+          ELASTIC_SEARCH_ENDPOINT: !GetAtt ElasticSearchService.DomainEndpoint
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /search/articles
+            Method: get
+            RestApiId: !Ref RestApi
+  ElasticSearchSearchUsers:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/search_users.zip
+      Environment:
+        Variables:
+          ELASTIC_SEARCH_ENDPOINT: !GetAtt ElasticSearchService.DomainEndpoint
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /search/users
+            Method: get
+            RestApiId: !Ref RestApi
+  ElasticSearchService:
+    Type: "AWS::Elasticsearch::Domain"
+    Properties: 
+      AccessPolicies: !Join
+        - ''
+        - - '{ "Version": "2012-10-17", "Statement": [ { "Effect": "Allow", "Principal": { "AWS": "'
+          - !GetAtt LambdaRole.Arn
+          - '" }, "Action": "es:*", "Resource": "'
+          - 'arn:aws:es:'
+          - !Ref 'AWS::Region'
+          - ':'
+          - !Ref 'AWS::AccountId'
+          - ':domain/'
+          - !Ref "AWS::StackName"
+          - '/*" } ] }'
+      AdvancedOptions:
+        rest.action.multi.allow_explicit_index: 'true'
+      DomainName: !Ref "AWS::StackName"
+      EBSOptions:
+        EBSEnabled: true
+        VolumeType: gp2
+        VolumeSize: 20
+      ElasticsearchClusterConfig:
+        InstanceType: m4.large.elasticsearch
+        InstanceCount: 1
+        DedicatedMasterEnabled: true
+        ZoneAwarenessEnabled: false
+        DedicatedMasterType: m4.large.elasticsearch
+        DedicatedMasterCount: 3
+      ElasticsearchVersion: '6.2'
+      SnapshotOptions:
+        AutomatedSnapshotStartHour: 0

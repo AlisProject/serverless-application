@@ -82,7 +82,12 @@ class TestsUtil:
             {'env_name': 'ARTICLE_FRAUD_USER_TABLE_NAME', 'table_name': 'ArticleFraudUser'},
             {'env_name': 'ARTICLE_PV_USER_TABLE_NAME', 'table_name': 'ArticlePvUser'},
             {'env_name': 'USERS_TABLE_NAME', 'table_name': 'Users'},
-            {'env_name': 'BETA_USERS_TABLE_NAME', 'table_name': 'BetaUsers'}
+            {'env_name': 'BETA_USERS_TABLE_NAME', 'table_name': 'BetaUsers'},
+            {'env_name': 'NOTIFICATION_TABLE_NAME', 'table_name': 'Notification'},
+            {'env_name': 'UNREAD_NOTIFICATION_MANAGER_TABLE_NAME', 'table_name': 'UnreadNotificationManager'},
+            {'env_name': 'COMMENT_TABLE_NAME', 'table_name': 'Comment'},
+            {'env_name': 'COMMENT_LIKED_USER_TABLE_NAME',  'table_name': 'CommentLikedUser'},
+            {'env_name': 'DELETED_COMMENT_TABLE_NAME',  'table_name': 'DeletedComment'}
         ]
         if os.environ.get('IS_DYNAMODB_ENDPOINT_OF_AWS') is not None:
             for table in cls.all_tables:
@@ -92,7 +97,7 @@ class TestsUtil:
     @classmethod
     def table_name_to_id(cls, table_name):
         client = boto3.client('cloudformation')
-        response = client.list_stack_resources(StackName=os.environ['CLOUDFORMATION_STACK_NAME'])
+        response = client.list_stack_resources(StackName=os.environ['ALIS_APP_ID'])
         for r in response['StackResourceSummaries']:
             if r['ResourceType'] == 'AWS::DynamoDB::Table' and r['LogicalResourceId'] == table_name:
                 return(r['PhysicalResourceId'])

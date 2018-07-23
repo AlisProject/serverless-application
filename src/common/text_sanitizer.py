@@ -10,7 +10,7 @@ class TextSanitizer:
         if text is None:
             return
 
-        return bleach.clean(text=text)
+        return bleach.clean(text=text, tags=[])
 
     @staticmethod
     def allow_img_src(tag, name, value):
@@ -22,16 +22,24 @@ class TextSanitizer:
         return False
 
     @staticmethod
-    def allow_div_class(tag, name, value):
+    def allow_div_attributes(tag, name, value):
         if name == 'class':
             allow_classes = [
                 'medium-insert-images',
+                'medium-insert-images medium-insert-images-wide',
                 'medium-insert-images medium-insert-images-left',
                 'medium-insert-images medium-insert-images-right',
-                'medium-insert-images medium-insert-images-grid',
-                'medium-insert-images medium-insert-active'
+                'medium-insert-images medium-insert-images-grid'
             ]
             if value in allow_classes:
+                return True
+        if name == 'data-alis-iframely-url':
+            p = urlparse(value)
+            is_url = len(p.scheme) > 0 and len(p.netloc) > 0
+            is_clean = True if bleach.clean(value) == value else False
+            return is_url and is_clean
+        if name == 'contenteditable':
+            if value == 'false':
                 return True
         return False
 
@@ -63,7 +71,7 @@ class TextSanitizer:
             attributes={
                 'a': ['href'],
                 'img': TextSanitizer.allow_img_src,
-                'div': TextSanitizer.allow_div_class,
+                'div': TextSanitizer.allow_div_attributes,
                 'figure': TextSanitizer.allow_figure_contenteditable,
                 'figcaption': TextSanitizer.allow_figcaption_attributes
             }

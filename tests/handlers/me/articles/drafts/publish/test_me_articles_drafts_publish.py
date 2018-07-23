@@ -1,6 +1,5 @@
 import os
 import boto3
-import json
 import time
 from boto3.dynamodb.conditions import Key
 from unittest import TestCase
@@ -135,6 +134,7 @@ class TestMeArticlesDraftsPublish(TestCase):
         self.assertEqual(article_info['status'], 'public')
         self.assertEqual(article_info['sort_key'], 1520150552000000)
         self.assertEqual(article_info['published_at'], 1525000000)
+        self.assertEqual(article_info['sync_elasticsearch'], 1)
         self.assertEqual(article_content['title'], article_history['title'])
         self.assertEqual(article_content['body'], article_history['body'])
         self.assertEqual(len(article_info_after) - len(article_info_before), 0)
@@ -182,7 +182,7 @@ class TestMeArticlesDraftsPublish(TestCase):
         self.assertEqual(len(article_content_edit_after) - len(article_content_edit_before), -1)
 
     @patch('time_util.TimeUtil.generate_sort_key', MagicMock(return_value=1520150552000000))
-    @patch('time.time', MagicMock(return_value=1525000000.000000))
+    @patch('time.time', MagicMock(return_value=1999000000.000000))
     def test_main_ok_article_history_arleady_exists(self):
         params = {
             'pathParameters': {
@@ -241,7 +241,7 @@ class TestMeArticlesDraftsPublish(TestCase):
 
         mock_lib = MagicMock()
         with patch('me_articles_drafts_publish.DBUtil', mock_lib):
-            response = MeArticlesDraftsPublish(params, {}, self.dynamodb).main()
+            MeArticlesDraftsPublish(params, {}, self.dynamodb).main()
             args, kwargs = mock_lib.validate_article_existence.call_args
 
             self.assertTrue(mock_lib.validate_article_existence.called)

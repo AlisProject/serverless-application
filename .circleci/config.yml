@@ -11,6 +11,9 @@ jobs:
     docker:
       - image: circleci/python:3.6.1
       - image: bluszcz/bflocalstack-dynamodb-s3
+      - image: docker.elastic.co/elasticsearch/elasticsearch:6.2.0
+        environment:
+          discovery.type: single-node
 
     working_directory: ~/repo
 
@@ -43,6 +46,12 @@ jobs:
             pycodestyle src tests ./*.py
 
       - run:
+          name: run pyflakes for python code
+          command: |
+            . venv/bin/activate
+            pyflakes src tests ./*.py
+
+      - run:
           name: run tests
           command: |
             . venv/bin/activate
@@ -52,26 +61,21 @@ jobs:
       - run:
           name: make deploy package
           command: |
-            docker image build --tag deploy-image .
-            docker container run -it --name deploy-container deploy-image
-            docker container cp deploy-container:/workdir/vendor-package .
-            . venv/bin/activate
-            python make_deploy_zip.py
+            if [ $ALIS_APP_ID ]; then
+              docker image build --tag deploy-image .
+              docker container run -it --name deploy-container deploy-image
+              docker container cp deploy-container:/workdir/vendor-package .
+              . venv/bin/activate
+              python make_deploy_zip.py
+            fi
 
       - run:
           name: run deploy
           command: |
-            . venv/bin/activate
-            python make_template.py
-            aws cloudformation package \
-              --template-file template.yaml \
-              --s3-bucket $DEPLOY_BUCKET_NAME \
-              --output-template-file packaged-template.yaml
-            aws cloudformation deploy \
-              --template-file packaged-template.yaml \
-              --s3-bucket $DEPLOY_BUCKET_NAME \
-              --stack-name $CLOUDFORMATION_STACK_NAME \
-              --capabilities CAPABILITY_IAM
+            if [ $ALIS_APP_ID ]; then
+              . venv/bin/activate
+              ./deploy.sh api
+            fi
 
       - store_artifacts:
           path: test-reports

@@ -10,12 +10,13 @@ from not_verified_user_error import NotVerifiedUserError
 
 
 class LambdaBase(metaclass=ABCMeta):
-    def __init__(self, event, context, dynamodb=None, s3=None, cognito=None):
+    def __init__(self, event, context, dynamodb=None, s3=None, cognito=None, elasticsearch=None):
         self.event = event
         self.context = context
         self.dynamodb = dynamodb
         self.s3 = s3
         self.cognito = cognito
+        self.elasticsearch = elasticsearch
         self.params = self.__get_params()
         self.headers = self.__get_headers()
 
@@ -45,21 +46,33 @@ class LambdaBase(metaclass=ABCMeta):
             # exec main process
             return self.exec_main_proc()
         except ValidationError as err:
+            logger.fatal(err)
+            logger.info(self.event)
+
             return {
                 'statusCode': 400,
                 'body': json.dumps({'message': "Invalid parameter: {0}".format(err)})
             }
         except NotVerifiedUserError as err:
+            logger.fatal(err)
+            logger.info(self.event)
+
             return {
                 'statusCode': 400,
                 'body': json.dumps({'message': "Bad Request: {0}".format(err)})
             }
         except NotAuthorizedError as err:
+            logger.fatal(err)
+            logger.info(self.event)
+
             return {
                 'statusCode': 403,
                 'body': json.dumps({'message': str(err)})
             }
         except RecordNotFoundError as err:
+            logger.fatal(err)
+            logger.info(self.event)
+
             return {
                 'statusCode': 404,
                 'body': json.dumps({'message': str(err)})

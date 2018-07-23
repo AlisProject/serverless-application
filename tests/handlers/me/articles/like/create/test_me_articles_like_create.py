@@ -1,6 +1,4 @@
-import yaml
 import os
-import boto3
 from tests_util import TestsUtil
 from unittest import TestCase
 from me_articles_like_create import MeArticlesLikeCreate
@@ -11,65 +9,106 @@ from boto3.dynamodb.conditions import Key
 class TestMeArticlesLikeCreate(TestCase):
     dynamodb = TestsUtil.get_dynamodb_client()
 
-    @classmethod
-    def setUpClass(cls):
+    def setUp(self):
         TestsUtil.set_all_tables_name_to_env()
-        TestsUtil.delete_all_tables(cls.dynamodb)
+        TestsUtil.delete_all_tables(self.dynamodb)
 
         # create article_liked_user_table
-        cls.article_liked_user_table_items = [
+        self.article_liked_user_table_items = [
             {
                 'article_id': 'testid000000',
                 'user_id': 'test01',
                 'sort_key': 1520150272000000
             },
             {
-                'article_id': 'testid000001',
-                'user_id': 'test02',
-                'sort_key': 1520150272000001
+                'article_id': 'testid000002',
+                'user_id': 'test03_01',
+                'sort_key': 1520150272000002
             },
             {
                 'article_id': 'testid000002',
-                'user_id': 'test03',
+                'user_id': 'test03_02',
+                'sort_key': 1520150272000002
+            },
+            {
+                'article_id': 'testid000002',
+                'user_id': 'test03_03',
+                'sort_key': 1520150272000002
+            },
+            {
+                'article_id': 'testid000002',
+                'user_id': 'test03_04',
                 'sort_key': 1520150272000002
             }
         ]
         TestsUtil.create_table(
-            cls.dynamodb,
+            self.dynamodb,
             os.environ['ARTICLE_LIKED_USER_TABLE_NAME'],
-            cls.article_liked_user_table_items
+            self.article_liked_user_table_items
         )
 
         # create article_info_table
-        article_info_table_items = [
+        self.article_info_table_items = [
             {
                 'article_id': 'testid000000',
+                'title': 'title1',
                 'status': 'public',
                 'user_id': 'article_user_id_00',
                 'sort_key': 1520150272000000
             },
             {
                 'article_id': 'testid000001',
+                'title': 'title2',
                 'status': 'public',
                 'user_id': 'article_user_id_01',
                 'sort_key': 1520150272000001
             },
             {
                 'article_id': 'testid000002',
-                'status': 'draft',
-                'user_id': 'article_user_id_01',
+                'title': 'title3_updated',
+                'status': 'public',
+                'user_id': 'article_user_id_02',
                 'sort_key': 1520150272000002
             }
         ]
         TestsUtil.create_table(
-            cls.dynamodb,
+            self.dynamodb,
             os.environ['ARTICLE_INFO_TABLE_NAME'],
-            article_info_table_items
+            self.article_info_table_items
         )
 
-    @classmethod
-    def tearDownClass(cls):
-        TestsUtil.delete_all_tables(cls.dynamodb)
+        self.notification_items = [
+            {
+                'notification_id': 'like-article_user_id_02-testid000002',
+                'user_id': 'article_user_id_02',
+                'sort_key': 1520150272000010,
+                'article_id': 'testid000002',
+                'article_title': 'title3',
+                'type': 'like',
+                'liked_count': 4,
+                'created_at': 1520150272
+            }
+        ]
+
+        TestsUtil.create_table(
+            self.dynamodb,
+            os.environ['NOTIFICATION_TABLE_NAME'],
+            self.notification_items
+        )
+
+        self.unread_notification_manager_items = [
+            {
+                'user_id': 'article_user_id_00',
+                'unread': False
+            }
+        ]
+        TestsUtil.create_table(
+            self.dynamodb, os.environ['UNREAD_NOTIFICATION_MANAGER_TABLE_NAME'],
+            self.unread_notification_manager_items
+        )
+
+    def tearDown(self):
+        TestsUtil.delete_all_tables(self.dynamodb)
 
     def assert_bad_request(self, params):
         test_function = MeArticlesLikeCreate(params, {}, self.dynamodb)
@@ -81,7 +120,7 @@ class TestMeArticlesLikeCreate(TestCase):
     def test_main_ok_exist_article_id(self):
         params = {
             'pathParameters': {
-                'article_id': self.article_liked_user_table_items[0]['article_id']
+                'article_id': self.article_info_table_items[0]['article_id']
             },
             'requestContext': {
                 'authorizer': {
@@ -93,12 +132,15 @@ class TestMeArticlesLikeCreate(TestCase):
         }
 
         article_liked_user_table = self.dynamodb.Table(os.environ['ARTICLE_LIKED_USER_TABLE_NAME'])
+        unread_notification_manager_table = self.dynamodb.Table(os.environ['UNREAD_NOTIFICATION_MANAGER_TABLE_NAME'])
         article_liked_user_before = article_liked_user_table.scan()['Items']
+        unread_notification_manager_before = unread_notification_manager_table.scan()['Items']
 
         article_liked_user = MeArticlesLikeCreate(event=params, context={}, dynamodb=self.dynamodb)
         response = article_liked_user.main()
 
         article_liked_user_after = article_liked_user_table.scan()['Items']
+        unread_notification_manager_after = unread_notification_manager_table.scan()['Items']
 
         target_article_id = params['pathParameters']['article_id']
         target_user_id = params['requestContext']['authorizer']['claims']['cognito:username']
@@ -116,9 +158,124 @@ class TestMeArticlesLikeCreate(TestCase):
 
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(len(article_liked_user_after), len(article_liked_user_before) + 1)
+        self.assertEqual(len(unread_notification_manager_after), len(unread_notification_manager_before))
         article_liked_user_param_names = ['article_id', 'user_id', 'article_user_id', 'created_at', 'target_date', 'sort_key']
         for key in article_liked_user_param_names:
             self.assertEqual(expected_items[key], article_liked_user[key])
+
+        unread_notification_manager = unread_notification_manager_table.get_item(
+            Key={'user_id': 'article_user_id_00'}
+        ).get('Item')
+        self.assertEqual(unread_notification_manager['unread'], True)
+
+    @patch('time.time', MagicMock(return_value=1520150272.000015))
+    def test_create_notification_and_unread_notification_manager(self):
+        params = {
+            'pathParameters': {
+                'article_id': self.article_info_table_items[1]['article_id']
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test06'
+                    }
+                }
+            }
+        }
+
+        notification_table = self.dynamodb.Table(os.environ['NOTIFICATION_TABLE_NAME'])
+        unread_notification_manager_table = self.dynamodb.Table(os.environ['UNREAD_NOTIFICATION_MANAGER_TABLE_NAME'])
+
+        notification_before = notification_table.scan()['Items']
+        unread_notification_manager_before = unread_notification_manager_table.scan()['Items']
+
+        article_liked_user = MeArticlesLikeCreate(event=params, context={}, dynamodb=self.dynamodb)
+        response = article_liked_user.main()
+
+        notification_after = notification_table.scan()['Items']
+        unread_notification_manager_after = unread_notification_manager_table.scan()['Items']
+
+        expected_notification = {
+            'notification_id': 'like-article_user_id_01-testid000001',
+            'user_id': 'article_user_id_01',
+            'sort_key': 1520150272000015,
+            'article_id': 'testid000001',
+            'article_title': 'title2',
+            'type': 'like',
+            'liked_count': 1,
+            'created_at': 1520150272
+        }
+
+        notification = notification_table.get_item(Key={'notification_id': 'like-article_user_id_01-testid000001'}).get('Item')
+        unread_notification_manager = unread_notification_manager_table.get_item(
+            Key={'user_id': 'article_user_id_01'}
+        ).get('Item')
+
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(notification, expected_notification)
+        self.assertEqual(len(notification_after), len(notification_before) + 1)
+        self.assertEqual(unread_notification_manager['unread'], True)
+        self.assertEqual(len(unread_notification_manager_after), len(unread_notification_manager_before) + 1)
+
+    @patch('time.time', MagicMock(return_value=1520150272.000015))
+    def test_main_with_updating_notification(self):
+        params = {
+            'pathParameters': {
+                'article_id': self.article_info_table_items[2]['article_id']
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test06'
+                    }
+                }
+            }
+        }
+
+        notification_table = self.dynamodb.Table(os.environ['NOTIFICATION_TABLE_NAME'])
+        notification_before = notification_table.scan()['Items']
+
+        response = MeArticlesLikeCreate(event=params, context={}, dynamodb=self.dynamodb).main()
+
+        notification_after = notification_table.scan()['Items']
+
+        expected_notification = {
+            'notification_id': 'like-article_user_id_02-testid000002',
+            'user_id': 'article_user_id_02',
+            'sort_key': 1520150272000015,
+            'article_id': 'testid000002',
+            'article_title': 'title3_updated',
+            'type': 'like',
+            'liked_count': 5,
+            'created_at': 1520150272
+        }
+
+        notification = notification_table.get_item(Key={'notification_id': 'like-article_user_id_02-testid000002'}).get('Item')
+
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(notification, expected_notification)
+        self.assertEqual(len(notification_after), len(notification_before))
+
+    @patch('me_articles_like_create.MeArticlesLikeCreate._MeArticlesLikeCreate__create_like_notification',
+           MagicMock(side_effect=Exception()))
+    def test_raise_exception_in_creating_notification(self):
+        params = {
+            'pathParameters': {
+                'article_id': self.article_info_table_items[0]['article_id']
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test05'
+                    }
+                }
+            }
+        }
+
+        article_liked_user = MeArticlesLikeCreate(event=params, context={}, dynamodb=self.dynamodb)
+        response = article_liked_user.main()
+
+        self.assertEqual(response['statusCode'], 200)
 
     def test_call_validate_article_existence(self):
         params = {
@@ -136,7 +293,7 @@ class TestMeArticlesLikeCreate(TestCase):
 
         mock_lib = MagicMock()
         with patch('me_articles_like_create.DBUtil', mock_lib):
-            response = MeArticlesLikeCreate(event=params, context={}, dynamodb=self.dynamodb).main()
+            MeArticlesLikeCreate(event=params, context={}, dynamodb=self.dynamodb).main()
             args, kwargs = mock_lib.validate_article_existence.call_args
 
             self.assertTrue(mock_lib.validate_article_existence.called)

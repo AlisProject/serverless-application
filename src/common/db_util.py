@@ -1,5 +1,4 @@
 import os
-from boto3.dynamodb.conditions import Key
 from record_not_found_error import RecordNotFoundError
 from not_authorized_error import NotAuthorizedError
 
@@ -42,7 +41,47 @@ class DBUtil:
         return True
 
     @staticmethod
+    def comment_existence(dynamodb, comment_id):
+        table = dynamodb.Table(os.environ['COMMENT_TABLE_NAME'])
+        comment = table.get_item(Key={'comment_id': comment_id}).get('Item')
+
+        if comment is None:
+            return False
+        return True
+
+    @staticmethod
+    def validate_comment_existence(dynamodb, comment_id):
+        table = dynamodb.Table(os.environ['COMMENT_TABLE_NAME'])
+        comment = table.get_item(Key={'comment_id': comment_id}).get('Item')
+
+        if comment is None:
+            raise RecordNotFoundError('Record Not Found')
+        return True
+
+    @staticmethod
+    def get_validated_comment(dynamodb, comment_id):
+        table = dynamodb.Table(os.environ['COMMENT_TABLE_NAME'])
+        comment = table.get_item(Key={'comment_id': comment_id}).get('Item')
+
+        if comment is None:
+            raise RecordNotFoundError('Record Not Found')
+        return comment
+
+    @staticmethod
     def items_values_empty_to_none(values):
         for k, v in values.items():
             if v == '':
                 values[k] = None
+
+    @staticmethod
+    def query_all_items(dynamodb_table, query_params):
+
+        response = dynamodb_table.query(**query_params)
+        items = response['Items']
+
+        while 'LastEvaluatedKey' in response:
+            query_params.update({'ExclusiveStartKey': response['LastEvaluatedKey']})
+            response = dynamodb_table.query(**query_params)
+            items.extend(response['Items'])
+
+        return items

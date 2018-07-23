@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
 import os
-import json
-import logging
-import traceback
 import settings
 from lambda_base import LambdaBase
-from jsonschema import validate, ValidationError, FormatChecker
+from jsonschema import validate
 from db_util import DBUtil
 
 
@@ -38,9 +35,12 @@ class MeArticlesPublicUnpublish(LambdaBase):
             Key={
                 'article_id': self.params['article_id'],
             },
-            UpdateExpression='set #attr = :article_status',
-            ExpressionAttributeNames={'#attr': 'status'},
-            ExpressionAttributeValues={':article_status': 'draft'}
+            UpdateExpression='set #attr = :article_status, #sync_elasticsearch = :one',
+            ExpressionAttributeNames={
+                '#attr': 'status',
+                '#sync_elasticsearch': 'sync_elasticsearch'
+            },
+            ExpressionAttributeValues={':article_status': 'draft', ':one': 1}
         )
 
         return {

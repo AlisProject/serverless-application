@@ -12,11 +12,21 @@ class TestTextSanitizer(TestCase):
         target_html = '''
         Sample text
         <script>document.alert('evil')</script>
+        <b>bold</b>
+        <h2>sample h2</h2>
+        <h3>sample h3</h3>
+        <i>icon</i><p>sentence</p><u>under bar</u>
+        <b>bold</b><br><blockquote>blockquote</blockquote>
         '''
 
         expected_html = '''
         Sample text
         &lt;script&gt;document.alert('evil')&lt;/script&gt;
+        &lt;b&gt;bold&lt;/b&gt;
+        &lt;h2&gt;sample h2&lt;/h2&gt;
+        &lt;h3&gt;sample h3&lt;/h3&gt;
+        &lt;i&gt;icon&lt;/i&gt;&lt;p&gt;sentence&lt;/p&gt;&lt;u&gt;under bar&lt;/u&gt;
+        &lt;b&gt;bold&lt;/b&gt;&lt;br&gt;&lt;blockquote&gt;blockquote&lt;/blockquote&gt;
         '''
 
         result = TextSanitizer.sanitize_text(target_html)
@@ -43,13 +53,13 @@ class TestTextSanitizer(TestCase):
                 <figcaption class="" contenteditable="true">aaaaaa</figcaption>
             </figure>
         </div>
-        <div class="medium-insert-images medium-insert-images-left">
+        <div class="medium-insert-images medium-insert-images-left" contenteditable="false">
             <figure contenteditable="false">
                 <img src="http://{domain}/hoge">
                 <figcaption class="" contenteditable="true"></figcaption>
             </figure>
         </div>
-        <div class="medium-insert-images medium-insert-images-right">
+        <div class="medium-insert-images medium-insert-images-right" contenteditable="false">
             <figure contenteditable="false">
                 <img src="http://{domain}/hoge">
                 <figcaption contenteditable="true">aaaaaa</figcaption>
@@ -61,12 +71,15 @@ class TestTextSanitizer(TestCase):
                 <figcaption class="">aaaaaa</figcaption>
             </figure>
         </div>
-        <div class="medium-insert-images medium-insert-active">
+        <div class="medium-insert-images medium-insert-images-wide">
             <figure contenteditable="false">
                 <img src="http://{domain}/hoge">
             </figure>
         </div>
         <a href="http://example.com">link</a>
+        <div data-alis-iframely-url="https://twitter.com/hoge">hoge</div>
+        <div data-alis-iframely-url="https://example.com/hoge?x=1">hoge</div>
+        <div data-alis-iframely-url="http://example.com/hoge?x=1%3Cdiv%3Ehoge%3C%2Fdiv%3E">hoge</div>
         '''.format(domain=os.environ['DOMAIN'])
 
         result = TextSanitizer.sanitize_article_body(target_html)
@@ -132,6 +145,23 @@ class TestTextSanitizer(TestCase):
         expected_html = '''
         <h2>sample h2</h2>
         <div></div>
+        '''
+
+        result = TextSanitizer.sanitize_article_body(target_html)
+
+        self.assertEqual(result, expected_html)
+
+    def test_sanitize_article_body_with_div_unauthorized_url(self):
+        target_html = '''
+        <h2>sample h2</h2>
+        <div class='hoge piyo' data='aaa' contenteditable='true'></div>
+        <div data-alis-iframely-url="https://example.com/hoge?<script>piyo</script>">hoge</div>
+        '''
+
+        expected_html = '''
+        <h2>sample h2</h2>
+        <div></div>
+        <div>hoge</div>
         '''
 
         result = TextSanitizer.sanitize_article_body(target_html)

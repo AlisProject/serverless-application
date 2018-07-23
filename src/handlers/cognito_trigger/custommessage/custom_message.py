@@ -49,7 +49,7 @@ ALISをご利用いただきありがとうございます。
 仮登録が完了しました。
 下記URLにアクセスし、ログインをして登録手続きを完了してください。
 
-{url}?code={code}&user={user}
+https://{domain}/confirm?code={code}&user={user}
 
 ※注意事項
 ・24時間以内に手続きを完了しない場合、上記URLは無効になります。最初から手続きをやり直してください。
@@ -60,7 +60,6 @@ ALISをご利用いただきありがとうございます。
 
 ALIS：https://alismedia.jp
             """.format(
-                url=os.environ['COGNITO_EMAIL_VERIFY_URL'],
                 domain=os.environ['DOMAIN'],
                 code=self.event['request']['codeParameter'],
                 user=self.event['userName']

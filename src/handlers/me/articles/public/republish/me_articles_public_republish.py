@@ -54,11 +54,13 @@ class MeArticlesPublicRepublish(LambdaBase):
             Key={
                 'article_id': self.params['article_id'],
             },
-            UpdateExpression="set title = :title, overview=:overview, eye_catch_url=:eye_catch_url",
+            UpdateExpression=("set title = :title, overview=:overview, eye_catch_url=:eye_catch_url, "
+                              "sync_elasticsearch=:sync_elasticsearch"),
             ExpressionAttributeValues={
                 ':title': article_content_edit['title'],
                 ':overview': article_content_edit['overview'],
-                ':eye_catch_url': article_content_edit['eye_catch_url']
+                ':eye_catch_url': article_content_edit['eye_catch_url'],
+                ':sync_elasticsearch': 1,
             }
         )
 

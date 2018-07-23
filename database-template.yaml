@@ -1,6 +1,20 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: Create Lambda function by using AWS SAM.
+Description: The databases for the ALIS application.
+
+Parameters:
+  MinDynamoReadCapacitty:
+    Type: String
+    Default: 1
+  MinDynamoWriteCapacitty:
+    Type: String
+    Default: 1
+  MaxDynamoReadCapacitty:
+    Type: String
+    Default: 50
+  MaxDynamoWriteCapacitty:
+    Type: String
+    Default: 50
 
 Resources:
   ArticleInfo:
@@ -15,6 +29,8 @@ Resources:
           AttributeType: S
         - AttributeName: sort_key
           AttributeType: N
+        - AttributeName: sync_elasticsearch
+          AttributeType: N
       KeySchema:
         - AttributeName: article_id
           KeyType: HASH
@@ -28,8 +44,8 @@ Resources:
           Projection:
             ProjectionType: ALL
           ProvisionedThroughput:
-            ReadCapacityUnits: {{ MIN_DYNAMO_READ_CAPACITTY }}
-            WriteCapacityUnits: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
+            ReadCapacityUnits: !Ref MinDynamoReadCapacitty
+            WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
         - IndexName: user_id-sort_key-index
           KeySchema:
             - AttributeName: user_id
@@ -39,8 +55,8 @@ Resources:
           Projection:
             ProjectionType: ALL
           ProvisionedThroughput:
-            ReadCapacityUnits: {{ MIN_DYNAMO_READ_CAPACITTY }}
-            WriteCapacityUnits: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
+            ReadCapacityUnits: !Ref MinDynamoReadCapacitty
+            WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
         - IndexName: article_id-status_key-index
           KeySchema:
             - AttributeName: article_id
@@ -50,12 +66,20 @@ Resources:
           Projection:
             ProjectionType: KEYS_ONLY
           ProvisionedThroughput:
-            ReadCapacityUnits: {{ MIN_DYNAMO_READ_CAPACITTY }}
-            WriteCapacityUnits: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
+            ReadCapacityUnits: !Ref MinDynamoReadCapacitty
+            WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
+        - IndexName: sync_elasticsearch-index
+          KeySchema:
+            - AttributeName: sync_elasticsearch
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: !Ref MinDynamoReadCapacitty
+            WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
       ProvisionedThroughput:
-        ReadCapacityUnits: {{ MIN_DYNAMO_READ_CAPACITTY }}
-        WriteCapacityUnits: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
-    DeletionPolicy: Retain
+        ReadCapacityUnits: !Ref MinDynamoReadCapacitty
+        WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
   ArticleContent:
     Type: AWS::DynamoDB::Table
     DependsOn:
@@ -68,9 +92,8 @@ Resources:
         - AttributeName: article_id
           KeyType: HASH
       ProvisionedThroughput:
-        ReadCapacityUnits: {{ MIN_DYNAMO_READ_CAPACITTY }}
-        WriteCapacityUnits: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
-    DeletionPolicy: Retain
+        ReadCapacityUnits: !Ref MinDynamoReadCapacitty
+        WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
   ArticleHistory:
     Type: AWS::DynamoDB::Table
     DependsOn:
@@ -87,9 +110,8 @@ Resources:
         - AttributeName: created_at
           KeyType: RANGE
       ProvisionedThroughput:
-        ReadCapacityUnits: {{ MIN_DYNAMO_READ_CAPACITTY }}
-        WriteCapacityUnits: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
-    DeletionPolicy: Retain
+        ReadCapacityUnits: !Ref MinDynamoReadCapacitty
+        WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
   ArticleContentEdit:
     Type: AWS::DynamoDB::Table
     DependsOn:
@@ -102,9 +124,8 @@ Resources:
         - AttributeName: article_id
           KeyType: HASH
       ProvisionedThroughput:
-        ReadCapacityUnits: {{ MIN_DYNAMO_READ_CAPACITTY }}
-        WriteCapacityUnits: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
-    DeletionPolicy: Retain
+        ReadCapacityUnits: !Ref MinDynamoReadCapacitty
+        WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
   ArticleAlisToken:
     Type: AWS::DynamoDB::Table
     DependsOn:
@@ -120,10 +141,19 @@ Resources:
           KeyType: HASH
         - AttributeName: evaluated_at
           KeyType: RANGE
+      GlobalSecondaryIndexes:
+        - IndexName: evaluated_at-index
+          KeySchema:
+            - AttributeName: evaluated_at
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: !Ref MinDynamoReadCapacitty
+            WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
       ProvisionedThroughput:
-          ReadCapacityUnits: {{ MIN_DYNAMO_READ_CAPACITTY }}
-          WriteCapacityUnits: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
-    DeletionPolicy: Retain
+          ReadCapacityUnits: !Ref MinDynamoReadCapacitty
+          WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
   ArticleEvaluatedManage:
     Type: AWS::DynamoDB::Table
     DependsOn:
@@ -136,9 +166,8 @@ Resources:
         - AttributeName: type
           KeyType: HASH
       ProvisionedThroughput:
-        ReadCapacityUnits: {{ MIN_DYNAMO_READ_CAPACITTY }}
-        WriteCapacityUnits: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
-    DeletionPolicy: Retain
+        ReadCapacityUnits: !Ref MinDynamoReadCapacitty
+        WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
   ArticleLikedUser:
     Type: AWS::DynamoDB::Table
     DependsOn:
@@ -177,12 +206,11 @@ Resources:
           Projection:
             ProjectionType: ALL
           ProvisionedThroughput:
-            ReadCapacityUnits: {{ MIN_DYNAMO_READ_CAPACITTY }}
-            WriteCapacityUnits: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
+            ReadCapacityUnits: !Ref MinDynamoReadCapacitty
+            WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
       ProvisionedThroughput:
-        ReadCapacityUnits: {{ MIN_DYNAMO_READ_CAPACITTY }}
-        WriteCapacityUnits: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
-    DeletionPolicy: Retain
+        ReadCapacityUnits: !Ref MinDynamoReadCapacitty
+        WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
   ArticlePvUser:
     Type: AWS::DynamoDB::Table
     DependsOn:
@@ -221,12 +249,11 @@ Resources:
           Projection:
             ProjectionType: ALL
           ProvisionedThroughput:
-            ReadCapacityUnits: {{ MIN_DYNAMO_READ_CAPACITTY }}
-            WriteCapacityUnits: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
+            ReadCapacityUnits: !Ref MinDynamoReadCapacitty
+            WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
       ProvisionedThroughput:
-        ReadCapacityUnits: {{ MIN_DYNAMO_READ_CAPACITTY }}
-        WriteCapacityUnits: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
-    DeletionPolicy: Retain
+        ReadCapacityUnits: !Ref MinDynamoReadCapacitty
+        WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
   ArticleScore:
     Type: AWS::DynamoDB::Table
     DependsOn:
@@ -254,9 +281,8 @@ Resources:
           Projection:
             ProjectionType: ALL
       ProvisionedThroughput:
-        ReadCapacityUnits: {{ MIN_DYNAMO_READ_CAPACITTY }}
-        WriteCapacityUnits: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
-    DeletionPolicy: Retain
+        ReadCapacityUnits: !Ref MinDynamoReadCapacitty
+        WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
   ArticleTokenAggregation:
     Type: AWS::DynamoDB::Table
     DependsOn:
@@ -273,9 +299,26 @@ Resources:
         - AttributeName: article_id
           KeyType: RANGE
       ProvisionedThroughput:
-        ReadCapacityUnits: {{ MIN_DYNAMO_READ_CAPACITTY }}
-        WriteCapacityUnits: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
-    DeletionPolicy: Retain
+        ReadCapacityUnits: !Ref MinDynamoReadCapacitty
+        WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
+  LikeTokenAggregation:
+    Type: AWS::DynamoDB::Table
+    DependsOn:
+    - ArticleTokenAggregation
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: evaluated_at
+          AttributeType: N
+        - AttributeName: user_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: evaluated_at
+          KeyType: HASH
+        - AttributeName: user_id
+          KeyType: RANGE
+      ProvisionedThroughput:
+        ReadCapacityUnits: !Ref MinDynamoReadCapacitty
+        WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
   ArticleFraudUser:
     Type: AWS::DynamoDB::Table
     DependsOn:
@@ -292,22 +335,32 @@ Resources:
         - AttributeName: user_id
           KeyType: RANGE
       ProvisionedThroughput:
-        ReadCapacityUnits: {{ MIN_DYNAMO_READ_CAPACITTY }}
-        WriteCapacityUnits: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
-    DeletionPolicy: Retain
+        ReadCapacityUnits: !Ref MinDynamoReadCapacitty
+        WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
   Users:
     Type: AWS::DynamoDB::Table
     Properties:
       AttributeDefinitions:
         - AttributeName: user_id
           AttributeType: S
+        - AttributeName: sync_elasticsearch
+          AttributeType: N
       KeySchema:
         - AttributeName: user_id
           KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: sync_elasticsearch-index
+          KeySchema:
+            - AttributeName: sync_elasticsearch
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: !Ref MinDynamoReadCapacitty
+            WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
       ProvisionedThroughput:
-        ReadCapacityUnits: {{ MIN_DYNAMO_READ_CAPACITTY }}
-        WriteCapacityUnits: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
-    DeletionPolicy: Retain
+        ReadCapacityUnits: !Ref MinDynamoReadCapacitty
+        WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
   BetaUsers:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -318,9 +371,116 @@ Resources:
         - AttributeName: email
           KeyType: HASH
       ProvisionedThroughput:
-        ReadCapacityUnits: {{ MIN_DYNAMO_READ_CAPACITTY }}
-        WriteCapacityUnits: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
-    DeletionPolicy: Retain
+        ReadCapacityUnits: !Ref MinDynamoReadCapacitty
+        WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
+  Notification:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: user_id
+          AttributeType: S
+        - AttributeName: sort_key
+          AttributeType: N
+      KeySchema:
+        - AttributeName: user_id
+          KeyType: HASH
+        - AttributeName: sort_key
+          KeyType: RANGE
+      GlobalSecondaryIndexes:
+        - IndexName: user_id-sort_key-index
+          KeySchema:
+            - AttributeName: user_id
+              KeyType: HASH
+            - AttributeName: sort_key
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: !Ref MinDynamoReadCapacitty
+            WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
+      ProvisionedThroughput:
+        ReadCapacityUnits: !Ref MinDynamoReadCapacitty
+        WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
+  UnreadNotificationManager:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: user_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: user_id
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: !Ref MinDynamoReadCapacitty
+        WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
+  Comment:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: comment_id
+          AttributeType: S
+        - AttributeName: article_id
+          AttributeType: S
+        - AttributeName: sort_key
+          AttributeType: N
+      KeySchema:
+        - AttributeName: comment_id
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: article_id-sort_key-index
+          KeySchema:
+            - AttributeName: article_id
+              KeyType: HASH
+            - AttributeName: sort_key
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: !Ref MinDynamoReadCapacitty
+            WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
+      ProvisionedThroughput:
+        ReadCapacityUnits: !Ref MinDynamoReadCapacitty
+        WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
+  CommentLikedUser:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: comment_id
+          AttributeType: S
+        - AttributeName: user_id
+          AttributeType: S
+        - AttributeName: article_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: comment_id
+          KeyType: HASH
+        - AttributeName: user_id
+          KeyType: RANGE
+      GlobalSecondaryIndexes:
+        - IndexName: article_id-index
+          KeySchema:
+            - AttributeName: article_id
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: !Ref MinDynamoReadCapacitty
+            WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
+      ProvisionedThroughput:
+        ReadCapacityUnits: !Ref MinDynamoReadCapacitty
+        WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
+  DeletedComment:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: comment_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: comment_id
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: !Ref MinDynamoReadCapacitty
+        WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
   ScalingRole:
     Type: 'AWS::IAM::Role'
     Properties:
@@ -353,8 +513,8 @@ Resources:
     Type: AWS::ApplicationAutoScaling::ScalableTarget
     DependsOn: ScalingRole
     Properties:
-      MaxCapacity: {{ MAX_DYNAMO_READ_CAPACITTY }}
-      MinCapacity: {{ MIN_DYNAMO_READ_CAPACITTY }}
+      MaxCapacity: !Ref MaxDynamoReadCapacitty
+      MinCapacity: !Ref MinDynamoReadCapacitty
       ResourceId: !Join
         - /
         - - table
@@ -366,8 +526,8 @@ Resources:
     Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
     DependsOn: ScalingRole
     Properties:
-      MaxCapacity: {{ MAX_DYNAMO_WRITE_CAPACITTY }}
-      MinCapacity: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
+      MaxCapacity: !Ref MaxDynamoWriteCapacitty
+      MinCapacity: !Ref MinDynamoWriteCapacitty
       ResourceId: !Join
         - /
         - - table
@@ -403,8 +563,8 @@ Resources:
     Type: AWS::ApplicationAutoScaling::ScalableTarget
     DependsOn: ScalingRole
     Properties:
-      MaxCapacity: {{ MAX_DYNAMO_READ_CAPACITTY }}
-      MinCapacity: {{ MIN_DYNAMO_READ_CAPACITTY }}
+      MaxCapacity: !Ref MaxDynamoReadCapacitty
+      MinCapacity: !Ref MinDynamoReadCapacitty
       ResourceId: !Sub 'table/${ArticleInfo}/index/status-sort_key-index'
       RoleARN: !GetAtt ScalingRole.Arn
       ScalableDimension: dynamodb:index:ReadCapacityUnits
@@ -413,8 +573,8 @@ Resources:
     Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
     DependsOn: ScalingRole
     Properties:
-      MaxCapacity: {{ MAX_DYNAMO_WRITE_CAPACITTY }}
-      MinCapacity: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
+      MaxCapacity: !Ref MaxDynamoWriteCapacitty
+      MinCapacity: !Ref MinDynamoWriteCapacitty
       ResourceId: !Sub 'table/${ArticleInfo}/index/status-sort_key-index'
       RoleARN: !GetAtt ScalingRole.Arn
       ScalableDimension: dynamodb:index:WriteCapacityUnits
@@ -447,8 +607,8 @@ Resources:
     Type: AWS::ApplicationAutoScaling::ScalableTarget
     DependsOn: ScalingRole
     Properties:
-      MaxCapacity: {{ MAX_DYNAMO_READ_CAPACITTY }}
-      MinCapacity: {{ MIN_DYNAMO_READ_CAPACITTY }}
+      MaxCapacity: !Ref MaxDynamoReadCapacitty
+      MinCapacity: !Ref MinDynamoReadCapacitty
       ResourceId: !Sub 'table/${ArticleInfo}/index/user_id-sort_key-index'
       RoleARN: !GetAtt ScalingRole.Arn
       ScalableDimension: dynamodb:index:ReadCapacityUnits
@@ -457,8 +617,8 @@ Resources:
     Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
     DependsOn: ScalingRole
     Properties:
-      MaxCapacity: {{ MAX_DYNAMO_WRITE_CAPACITTY }}
-      MinCapacity: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
+      MaxCapacity: !Ref MaxDynamoWriteCapacitty
+      MinCapacity: !Ref MinDynamoWriteCapacitty
       ResourceId: !Sub 'table/${ArticleInfo}/index/user_id-sort_key-index'
       RoleARN: !GetAtt ScalingRole.Arn
       ScalableDimension: dynamodb:index:WriteCapacityUnits
@@ -491,8 +651,8 @@ Resources:
     Type: AWS::ApplicationAutoScaling::ScalableTarget
     DependsOn: ScalingRole
     Properties:
-      MaxCapacity: {{ MAX_DYNAMO_READ_CAPACITTY }}
-      MinCapacity: {{ MIN_DYNAMO_READ_CAPACITTY }}
+      MaxCapacity: !Ref MaxDynamoReadCapacitty
+      MinCapacity: !Ref MinDynamoReadCapacitty
       ResourceId: !Sub 'table/${ArticleInfo}/index/article_id-status_key-index'
       RoleARN: !GetAtt ScalingRole.Arn
       ScalableDimension: dynamodb:index:ReadCapacityUnits
@@ -501,8 +661,8 @@ Resources:
     Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
     DependsOn: ScalingRole
     Properties:
-      MaxCapacity: {{ MAX_DYNAMO_WRITE_CAPACITTY }}
-      MinCapacity: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
+      MaxCapacity: !Ref MaxDynamoWriteCapacitty
+      MinCapacity: !Ref MinDynamoWriteCapacitty
       ResourceId: !Sub 'table/${ArticleInfo}/index/article_id-status_key-index'
       RoleARN: !GetAtt ScalingRole.Arn
       ScalableDimension: dynamodb:index:WriteCapacityUnits
@@ -535,8 +695,8 @@ Resources:
     Type: AWS::ApplicationAutoScaling::ScalableTarget
     DependsOn: ScalingRole
     Properties:
-      MaxCapacity: {{ MAX_DYNAMO_READ_CAPACITTY }}
-      MinCapacity: {{ MIN_DYNAMO_READ_CAPACITTY }}
+      MaxCapacity: !Ref MaxDynamoReadCapacitty
+      MinCapacity: !Ref MinDynamoReadCapacitty
       ResourceId: !Join
         - /
         - - table
@@ -548,8 +708,8 @@ Resources:
     Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
     DependsOn: ScalingRole
     Properties:
-      MaxCapacity: {{ MAX_DYNAMO_WRITE_CAPACITTY }}
-      MinCapacity: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
+      MaxCapacity: !Ref MaxDynamoWriteCapacitty
+      MinCapacity: !Ref MinDynamoWriteCapacitty
       ResourceId: !Join
         - /
         - - table
@@ -573,8 +733,8 @@ Resources:
     Type: AWS::ApplicationAutoScaling::ScalableTarget
     DependsOn: ScalingRole
     Properties:
-      MaxCapacity: {{ MAX_DYNAMO_READ_CAPACITTY }}
-      MinCapacity: {{ MIN_DYNAMO_READ_CAPACITTY }}
+      MaxCapacity: !Ref MaxDynamoReadCapacitty
+      MinCapacity: !Ref MinDynamoReadCapacitty
       ResourceId: !Join
         - /
         - - table
@@ -586,8 +746,8 @@ Resources:
     Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
     DependsOn: ScalingRole
     Properties:
-      MaxCapacity: {{ MAX_DYNAMO_WRITE_CAPACITTY }}
-      MinCapacity: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
+      MaxCapacity: !Ref MaxDynamoWriteCapacitty
+      MinCapacity: !Ref MinDynamoWriteCapacitty
       ResourceId: !Join
         - /
         - - table
@@ -623,8 +783,8 @@ Resources:
     Type: AWS::ApplicationAutoScaling::ScalableTarget
     DependsOn: ScalingRole
     Properties:
-      MaxCapacity: {{ MAX_DYNAMO_READ_CAPACITTY }}
-      MinCapacity: {{ MIN_DYNAMO_READ_CAPACITTY }}
+      MaxCapacity: !Ref MaxDynamoReadCapacitty
+      MinCapacity: !Ref MinDynamoReadCapacitty
       ResourceId: !Join
         - /
         - - table
@@ -636,8 +796,8 @@ Resources:
     Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
     DependsOn: ScalingRole
     Properties:
-      MaxCapacity: {{ MAX_DYNAMO_WRITE_CAPACITTY }}
-      MinCapacity: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
+      MaxCapacity: !Ref MaxDynamoWriteCapacitty
+      MinCapacity: !Ref MinDynamoWriteCapacitty
       ResourceId: !Join
         - /
         - - table
@@ -673,8 +833,8 @@ Resources:
     Type: AWS::ApplicationAutoScaling::ScalableTarget
     DependsOn: ScalingRole
     Properties:
-      MaxCapacity: {{ MAX_DYNAMO_READ_CAPACITTY }}
-      MinCapacity: {{ MIN_DYNAMO_READ_CAPACITTY }}
+      MaxCapacity: !Ref MaxDynamoReadCapacitty
+      MinCapacity: !Ref MinDynamoReadCapacitty
       ResourceId: !Join
         - /
         - - table
@@ -686,8 +846,8 @@ Resources:
     Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
     DependsOn: ScalingRole
     Properties:
-      MaxCapacity: {{ MAX_DYNAMO_WRITE_CAPACITTY }}
-      MinCapacity: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
+      MaxCapacity: !Ref MaxDynamoWriteCapacitty
+      MinCapacity: !Ref MinDynamoWriteCapacitty
       ResourceId: !Join
         - /
         - - table
@@ -723,8 +883,8 @@ Resources:
     Type: AWS::ApplicationAutoScaling::ScalableTarget
     DependsOn: ScalingRole
     Properties:
-      MaxCapacity: {{ MAX_DYNAMO_READ_CAPACITTY }}
-      MinCapacity: {{ MIN_DYNAMO_READ_CAPACITTY }}
+      MaxCapacity: !Ref MaxDynamoReadCapacitty
+      MinCapacity: !Ref MinDynamoReadCapacitty
       ResourceId: !Join
         - /
         - - table
@@ -736,8 +896,8 @@ Resources:
     Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
     DependsOn: ScalingRole
     Properties:
-      MaxCapacity: {{ MAX_DYNAMO_WRITE_CAPACITTY }}
-      MinCapacity: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
+      MaxCapacity: !Ref MaxDynamoWriteCapacitty
+      MinCapacity: !Ref MinDynamoWriteCapacitty
       ResourceId: !Join
         - /
         - - table
@@ -773,8 +933,8 @@ Resources:
     Type: AWS::ApplicationAutoScaling::ScalableTarget
     DependsOn: ScalingRole
     Properties:
-      MaxCapacity: {{ MAX_DYNAMO_READ_CAPACITTY }}
-      MinCapacity: {{ MIN_DYNAMO_READ_CAPACITTY }}
+      MaxCapacity: !Ref MaxDynamoReadCapacitty
+      MinCapacity: !Ref MinDynamoReadCapacitty
       ResourceId: !Join
         - /
         - - table
@@ -786,8 +946,8 @@ Resources:
     Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
     DependsOn: ScalingRole
     Properties:
-      MaxCapacity: {{ MAX_DYNAMO_WRITE_CAPACITTY }}
-      MinCapacity: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
+      MaxCapacity: !Ref MaxDynamoWriteCapacitty
+      MinCapacity: !Ref MinDynamoWriteCapacitty
       ResourceId: !Join
         - /
         - - table
@@ -823,8 +983,8 @@ Resources:
     Type: AWS::ApplicationAutoScaling::ScalableTarget
     DependsOn: ScalingRole
     Properties:
-      MaxCapacity: {{ MAX_DYNAMO_READ_CAPACITTY }}
-      MinCapacity: {{ MIN_DYNAMO_READ_CAPACITTY }}
+      MaxCapacity: !Ref MaxDynamoReadCapacitty
+      MinCapacity: !Ref MinDynamoReadCapacitty
       ResourceId: !Sub 'table/${ArticleLikedUser}/index/target_date-sort_key-index'
       RoleARN: !GetAtt ScalingRole.Arn
       ScalableDimension: dynamodb:index:ReadCapacityUnits
@@ -833,8 +993,8 @@ Resources:
     Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
     DependsOn: ScalingRole
     Properties:
-      MaxCapacity: {{ MAX_DYNAMO_WRITE_CAPACITTY }}
-      MinCapacity: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
+      MaxCapacity: !Ref MaxDynamoWriteCapacitty
+      MinCapacity: !Ref MinDynamoWriteCapacitty
       ResourceId: !Sub 'table/${ArticleLikedUser}/index/target_date-sort_key-index'
       RoleARN: !GetAtt ScalingRole.Arn
       ScalableDimension: dynamodb:index:WriteCapacityUnits
@@ -867,8 +1027,8 @@ Resources:
     Type: AWS::ApplicationAutoScaling::ScalableTarget
     DependsOn: ScalingRole
     Properties:
-      MaxCapacity: {{ MAX_DYNAMO_READ_CAPACITTY }}
-      MinCapacity: {{ MIN_DYNAMO_READ_CAPACITTY }}
+      MaxCapacity: !Ref MaxDynamoReadCapacitty
+      MinCapacity: !Ref MinDynamoReadCapacitty
       ResourceId: !Join
         - /
         - - table
@@ -880,8 +1040,8 @@ Resources:
     Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
     DependsOn: ScalingRole
     Properties:
-      MaxCapacity: {{ MAX_DYNAMO_WRITE_CAPACITTY }}
-      MinCapacity: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
+      MaxCapacity: !Ref MaxDynamoWriteCapacitty
+      MinCapacity: !Ref MinDynamoWriteCapacitty
       ResourceId: !Join
         - /
         - - table
@@ -917,8 +1077,8 @@ Resources:
     Type: AWS::ApplicationAutoScaling::ScalableTarget
     DependsOn: ScalingRole
     Properties:
-      MaxCapacity: {{ MAX_DYNAMO_READ_CAPACITTY }}
-      MinCapacity: {{ MIN_DYNAMO_READ_CAPACITTY }}
+      MaxCapacity: !Ref MaxDynamoReadCapacitty
+      MinCapacity: !Ref MinDynamoReadCapacitty
       ResourceId: !Sub 'table/${ArticlePvUser}/index/target_date-sort_key-index'
       RoleARN: !GetAtt ScalingRole.Arn
       ScalableDimension: dynamodb:index:ReadCapacityUnits
@@ -927,8 +1087,8 @@ Resources:
     Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
     DependsOn: ScalingRole
     Properties:
-      MaxCapacity: {{ MAX_DYNAMO_WRITE_CAPACITTY }}
-      MinCapacity: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
+      MaxCapacity: !Ref MaxDynamoWriteCapacitty
+      MinCapacity: !Ref MinDynamoWriteCapacitty
       ResourceId: !Sub 'table/${ArticlePvUser}/index/target_date-sort_key-index'
       RoleARN: !GetAtt ScalingRole.Arn
       ScalableDimension: dynamodb:index:WriteCapacityUnits
@@ -961,8 +1121,8 @@ Resources:
     Type: AWS::ApplicationAutoScaling::ScalableTarget
     DependsOn: ScalingRole
     Properties:
-      MaxCapacity: {{ MAX_DYNAMO_READ_CAPACITTY }}
-      MinCapacity: {{ MIN_DYNAMO_READ_CAPACITTY }}
+      MaxCapacity: !Ref MaxDynamoReadCapacitty
+      MinCapacity: !Ref MinDynamoReadCapacitty
       ResourceId: !Join
         - /
         - - table
@@ -974,8 +1134,8 @@ Resources:
     Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
     DependsOn: ScalingRole
     Properties:
-      MaxCapacity: {{ MAX_DYNAMO_WRITE_CAPACITTY }}
-      MinCapacity: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
+      MaxCapacity: !Ref MaxDynamoWriteCapacitty
+      MinCapacity: !Ref MinDynamoWriteCapacitty
       ResourceId: !Join
         - /
         - - table
@@ -1011,8 +1171,8 @@ Resources:
     Type: AWS::ApplicationAutoScaling::ScalableTarget
     DependsOn: ScalingRole
     Properties:
-      MaxCapacity: {{ MAX_DYNAMO_READ_CAPACITTY }}
-      MinCapacity: {{ MIN_DYNAMO_READ_CAPACITTY }}
+      MaxCapacity: !Ref MaxDynamoReadCapacitty
+      MinCapacity: !Ref MinDynamoReadCapacitty
       ResourceId: !Join
         - /
         - - table
@@ -1024,8 +1184,8 @@ Resources:
     Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
     DependsOn: ScalingRole
     Properties:
-      MaxCapacity: {{ MAX_DYNAMO_WRITE_CAPACITTY }}
-      MinCapacity: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
+      MaxCapacity: !Ref MaxDynamoWriteCapacitty
+      MinCapacity: !Ref MinDynamoWriteCapacitty
       ResourceId: !Join
         - /
         - - table
@@ -1061,8 +1221,8 @@ Resources:
     Type: AWS::ApplicationAutoScaling::ScalableTarget
     DependsOn: ScalingRole
     Properties:
-      MaxCapacity: {{ MAX_DYNAMO_READ_CAPACITTY }}
-      MinCapacity: {{ MIN_DYNAMO_READ_CAPACITTY }}
+      MaxCapacity: !Ref MaxDynamoReadCapacitty
+      MinCapacity: !Ref MinDynamoReadCapacitty
       ResourceId: !Join
         - /
         - - table
@@ -1074,8 +1234,8 @@ Resources:
     Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
     DependsOn: ScalingRole
     Properties:
-      MaxCapacity: {{ MAX_DYNAMO_WRITE_CAPACITTY }}
-      MinCapacity: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
+      MaxCapacity: !Ref MaxDynamoWriteCapacitty
+      MinCapacity: !Ref MinDynamoWriteCapacitty
       ResourceId: !Join
         - /
         - - table
@@ -1111,8 +1271,8 @@ Resources:
     Type: AWS::ApplicationAutoScaling::ScalableTarget
     DependsOn: ScalingRole
     Properties:
-      MaxCapacity: {{ MAX_DYNAMO_READ_CAPACITTY }}
-      MinCapacity: {{ MIN_DYNAMO_READ_CAPACITTY }}
+      MaxCapacity: !Ref MaxDynamoReadCapacitty
+      MinCapacity: !Ref MinDynamoReadCapacitty
       ResourceId: !Join
         - /
         - - table
@@ -1124,8 +1284,8 @@ Resources:
     Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
     DependsOn: ScalingRole
     Properties:
-      MaxCapacity: {{ MAX_DYNAMO_WRITE_CAPACITTY }}
-      MinCapacity: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
+      MaxCapacity: !Ref MaxDynamoWriteCapacitty
+      MinCapacity: !Ref MinDynamoWriteCapacitty
       ResourceId: !Join
         - /
         - - table
@@ -1161,8 +1321,8 @@ Resources:
     Type: AWS::ApplicationAutoScaling::ScalableTarget
     DependsOn: ScalingRole
     Properties:
-      MaxCapacity: {{ MAX_DYNAMO_READ_CAPACITTY }}
-      MinCapacity: {{ MIN_DYNAMO_READ_CAPACITTY }}
+      MaxCapacity: !Ref MaxDynamoReadCapacitty
+      MinCapacity: !Ref MinDynamoReadCapacitty
       ResourceId: !Join
         - /
         - - table
@@ -1174,8 +1334,8 @@ Resources:
     Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
     DependsOn: ScalingRole
     Properties:
-      MaxCapacity: {{ MAX_DYNAMO_WRITE_CAPACITTY }}
-      MinCapacity: {{ MIN_DYNAMO_WRITE_CAPACITTY }}
+      MaxCapacity: !Ref MaxDynamoWriteCapacitty
+      MinCapacity: !Ref MinDynamoWriteCapacitty
       ResourceId: !Join
         - /
         - - table
@@ -1201,6 +1361,344 @@ Resources:
       PolicyName: WriteAutoScalingPolicy
       PolicyType: TargetTrackingScaling
       ScalingTargetId: !Ref BetaUsersTableWriteCapacityScalableTarget
+      TargetTrackingScalingPolicyConfiguration:
+        TargetValue: 50.0
+        ScaleInCooldown: 60
+        ScaleOutCooldown: 60
+        PredefinedMetricSpecification:
+          PredefinedMetricType: DynamoDBWriteCapacityUtilization
+  NotificationTableReadCapacityScalableTarget:
+    Type: AWS::ApplicationAutoScaling::ScalableTarget
+    DependsOn: ScalingRole
+    Properties:
+      MaxCapacity: !Ref MaxDynamoWriteCapacitty
+      MinCapacity: !Ref MinDynamoWriteCapacitty
+      ResourceId: !Join
+        - /
+        - - table
+          - !Ref Notification
+      RoleARN: !GetAtt ScalingRole.Arn
+      ScalableDimension: dynamodb:table:ReadCapacityUnits
+      ServiceNamespace: dynamodb
+  NotificationTableWriteCapacityScalableTarget:
+    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
+    DependsOn: ScalingRole
+    Properties:
+      MaxCapacity: !Ref MaxDynamoWriteCapacitty
+      MinCapacity: !Ref MinDynamoWriteCapacitty
+      ResourceId: !Join
+        - /
+        - - table
+          - !Ref Notification
+      RoleARN: !GetAtt ScalingRole.Arn
+      ScalableDimension: dynamodb:table:WriteCapacityUnits
+      ServiceNamespace: dynamodb
+  NotificationTableReadScalingPolicy:
+    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
+    Properties:
+      PolicyName: ReadAutoScalingPolicy
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId: !Ref NotificationTableReadCapacityScalableTarget
+      TargetTrackingScalingPolicyConfiguration:
+        TargetValue: 50.0
+        ScaleInCooldown: 60
+        ScaleOutCooldown: 60
+        PredefinedMetricSpecification:
+          PredefinedMetricType: DynamoDBReadCapacityUtilization
+  NotificationTableWriteScalingPolicy:
+    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
+    Properties:
+      PolicyName: WriteAutoScalingPolicy
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId: !Ref NotificationTableWriteCapacityScalableTarget
+      TargetTrackingScalingPolicyConfiguration:
+        TargetValue: 50.0
+        ScaleInCooldown: 60
+        ScaleOutCooldown: 60
+        PredefinedMetricSpecification:
+          PredefinedMetricType: DynamoDBWriteCapacityUtilization
+  UnreadNotificationManagerTableReadCapacityScalableTarget:
+    Type: AWS::ApplicationAutoScaling::ScalableTarget
+    DependsOn: ScalingRole
+    Properties:
+      MaxCapacity: !Ref MaxDynamoWriteCapacitty
+      MinCapacity: !Ref MinDynamoWriteCapacitty
+      ResourceId: !Join
+        - /
+        - - table
+          - !Ref UnreadNotificationManager
+      RoleARN: !GetAtt ScalingRole.Arn
+      ScalableDimension: dynamodb:table:ReadCapacityUnits
+      ServiceNamespace: dynamodb
+  UnreadNotificationManagerTableWriteCapacityScalableTarget:
+    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
+    DependsOn: ScalingRole
+    Properties:
+      MaxCapacity: !Ref MaxDynamoWriteCapacitty
+      MinCapacity: !Ref MinDynamoWriteCapacitty
+      ResourceId: !Join
+        - /
+        - - table
+          - !Ref UnreadNotificationManager
+      RoleARN: !GetAtt ScalingRole.Arn
+      ScalableDimension: dynamodb:table:WriteCapacityUnits
+      ServiceNamespace: dynamodb
+  UnreadNotificationManagerTableReadScalingPolicy:
+    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
+    Properties:
+      PolicyName: ReadAutoScalingPolicy
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId: !Ref UnreadNotificationManagerTableReadCapacityScalableTarget
+      TargetTrackingScalingPolicyConfiguration:
+        TargetValue: 50.0
+        ScaleInCooldown: 60
+        ScaleOutCooldown: 60
+        PredefinedMetricSpecification:
+          PredefinedMetricType: DynamoDBReadCapacityUtilization
+  UnreadNotificationManagerTableWriteScalingPolicy:
+    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
+    Properties:
+      PolicyName: WriteAutoScalingPolicy
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId: !Ref UnreadNotificationManagerTableWriteCapacityScalableTarget
+      TargetTrackingScalingPolicyConfiguration:
+        TargetValue: 50.0
+        ScaleInCooldown: 60
+        ScaleOutCooldown: 60
+        PredefinedMetricSpecification:
+          PredefinedMetricType: DynamoDBWriteCapacityUtilization
+  CommentTableReadCapacityScalableTarget:
+    Type: AWS::ApplicationAutoScaling::ScalableTarget
+    DependsOn: ScalingRole
+    Properties:
+      MaxCapacity: !Ref MaxDynamoWriteCapacitty
+      MinCapacity: !Ref MinDynamoWriteCapacitty
+      ResourceId: !Join
+        - /
+        - - table
+          - !Ref Comment
+      RoleARN: !GetAtt ScalingRole.Arn
+      ScalableDimension: dynamodb:table:ReadCapacityUnits
+      ServiceNamespace: dynamodb
+  CommentTableWriteCapacityScalableTarget:
+    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
+    DependsOn: ScalingRole
+    Properties:
+      MaxCapacity: !Ref MaxDynamoWriteCapacitty
+      MinCapacity: !Ref MinDynamoWriteCapacitty
+      ResourceId: !Join
+        - /
+        - - table
+          - !Ref Comment
+      RoleARN: !GetAtt ScalingRole.Arn
+      ScalableDimension: dynamodb:table:WriteCapacityUnits
+      ServiceNamespace: dynamodb
+  CommentTableReadScalingPolicy:
+    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
+    Properties:
+      PolicyName: ReadAutoScalingPolicy
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId: !Ref CommentTableReadCapacityScalableTarget
+      TargetTrackingScalingPolicyConfiguration:
+        TargetValue: 50.0
+        ScaleInCooldown: 60
+        ScaleOutCooldown: 60
+        PredefinedMetricSpecification:
+          PredefinedMetricType: DynamoDBReadCapacityUtilization
+  CommentTableWriteScalingPolicy:
+    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
+    Properties:
+      PolicyName: WriteAutoScalingPolicy
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId: !Ref CommentTableWriteCapacityScalableTarget
+      TargetTrackingScalingPolicyConfiguration:
+        TargetValue: 50.0
+        ScaleInCooldown: 60
+        ScaleOutCooldown: 60
+        PredefinedMetricSpecification:
+          PredefinedMetricType: DynamoDBWriteCapacityUtilization
+  CommentArticleIdSortKeyIndexReadCapacityScalableTarget:
+    Type: AWS::ApplicationAutoScaling::ScalableTarget
+    DependsOn: ScalingRole
+    Properties:
+      MaxCapacity: !Ref MaxDynamoReadCapacitty
+      MinCapacity: !Ref MinDynamoReadCapacitty
+      ResourceId: !Sub 'table/${Comment}/index/article_id-sort_key-index'
+      RoleARN: !GetAtt ScalingRole.Arn
+      ScalableDimension: dynamodb:index:ReadCapacityUnits
+      ServiceNamespace: dynamodb
+  CommentArticleIdSortKeyIndexWriteCapacityScalableTarget:
+    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
+    DependsOn: ScalingRole
+    Properties:
+      MaxCapacity: !Ref MaxDynamoWriteCapacitty
+      MinCapacity: !Ref MinDynamoWriteCapacitty
+      ResourceId: !Sub 'table/${Comment}/index/article_id-sort_key-index'
+      RoleARN: !GetAtt ScalingRole.Arn
+      ScalableDimension: dynamodb:index:WriteCapacityUnits
+      ServiceNamespace: dynamodb
+  CommentArticleIdSortKeyIndexReadScalingPolicy:
+    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
+    Properties:
+      PolicyName: ReadAutoScalingPolicy
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId: !Ref CommentArticleIdSortKeyIndexReadCapacityScalableTarget
+      TargetTrackingScalingPolicyConfiguration:
+        TargetValue: 50.0
+        ScaleInCooldown: 60
+        ScaleOutCooldown: 60
+        PredefinedMetricSpecification:
+          PredefinedMetricType: DynamoDBReadCapacityUtilization
+  CommentArticleIdSortKeyIndexWriteScalingPolicy:
+    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
+    Properties:
+      PolicyName: WriteAutoScalingPolicy
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId: !Ref CommentArticleIdSortKeyIndexWriteCapacityScalableTarget
+      TargetTrackingScalingPolicyConfiguration:
+        TargetValue: 50.0
+        ScaleInCooldown: 60
+        ScaleOutCooldown: 60
+        PredefinedMetricSpecification:
+          PredefinedMetricType: DynamoDBWriteCapacityUtilization
+  CommentLikedUserTableReadCapacityScalableTarget:
+    Type: AWS::ApplicationAutoScaling::ScalableTarget
+    DependsOn: ScalingRole
+    Properties:
+      MaxCapacity: !Ref MaxDynamoWriteCapacitty
+      MinCapacity: !Ref MinDynamoWriteCapacitty
+      ResourceId: !Join
+        - /
+        - - table
+          - !Ref CommentLikedUser
+      RoleARN: !GetAtt ScalingRole.Arn
+      ScalableDimension: dynamodb:table:ReadCapacityUnits
+      ServiceNamespace: dynamodb
+  CommentLikedUserTableWriteCapacityScalableTarget:
+    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
+    DependsOn: ScalingRole
+    Properties:
+      MaxCapacity: !Ref MaxDynamoWriteCapacitty
+      MinCapacity: !Ref MinDynamoWriteCapacitty
+      ResourceId: !Join
+        - /
+        - - table
+          - !Ref CommentLikedUser
+      RoleARN: !GetAtt ScalingRole.Arn
+      ScalableDimension: dynamodb:table:WriteCapacityUnits
+      ServiceNamespace: dynamodb
+  CommentLikedUserTableReadScalingPolicy:
+    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
+    Properties:
+      PolicyName: ReadAutoScalingPolicy
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId: !Ref CommentLikedUserTableReadCapacityScalableTarget
+      TargetTrackingScalingPolicyConfiguration:
+        TargetValue: 50.0
+        ScaleInCooldown: 60
+        ScaleOutCooldown: 60
+        PredefinedMetricSpecification:
+          PredefinedMetricType: DynamoDBReadCapacityUtilization
+  CommentLikedUserTableWriteScalingPolicy:
+    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
+    Properties:
+      PolicyName: WriteAutoScalingPolicy
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId: !Ref CommentLikedUserTableWriteCapacityScalableTarget
+      TargetTrackingScalingPolicyConfiguration:
+        TargetValue: 50.0
+        ScaleInCooldown: 60
+        ScaleOutCooldown: 60
+        PredefinedMetricSpecification:
+          PredefinedMetricType: DynamoDBWriteCapacityUtilization
+  CommentLikedUserArticleIdIndexReadCapacityScalableTarget:
+    Type: AWS::ApplicationAutoScaling::ScalableTarget
+    DependsOn: ScalingRole
+    Properties:
+      MaxCapacity: !Ref MaxDynamoReadCapacitty
+      MinCapacity: !Ref MinDynamoReadCapacitty
+      ResourceId: !Sub 'table/${CommentLikedUser}/index/article_id-index'
+      RoleARN: !GetAtt ScalingRole.Arn
+      ScalableDimension: dynamodb:index:ReadCapacityUnits
+      ServiceNamespace: dynamodb
+  CommentLikedUserArticleIdIndexWriteCapacityScalableTarget:
+    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
+    DependsOn: ScalingRole
+    Properties:
+      MaxCapacity: !Ref MaxDynamoWriteCapacitty
+      MinCapacity: !Ref MinDynamoWriteCapacitty
+      ResourceId: !Sub 'table/${CommentLikedUser}/index/article_id-index'
+      RoleARN: !GetAtt ScalingRole.Arn
+      ScalableDimension: dynamodb:index:WriteCapacityUnits
+      ServiceNamespace: dynamodb
+  CommentLikedUserArticleIdIndexReadScalingPolicy:
+    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
+    Properties:
+      PolicyName: ReadAutoScalingPolicy
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId: !Ref CommentLikedUserArticleIdIndexReadCapacityScalableTarget
+      TargetTrackingScalingPolicyConfiguration:
+        TargetValue: 50.0
+        ScaleInCooldown: 60
+        ScaleOutCooldown: 60
+        PredefinedMetricSpecification:
+          PredefinedMetricType: DynamoDBReadCapacityUtilization
+  CommentLikedUserArticleIdIndexWriteScalingPolicy:
+    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
+    Properties:
+      PolicyName: WriteAutoScalingPolicy
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId: !Ref CommentLikedUserArticleIdIndexWriteCapacityScalableTarget
+      TargetTrackingScalingPolicyConfiguration:
+        TargetValue: 50.0
+        ScaleInCooldown: 60
+        ScaleOutCooldown: 60
+        PredefinedMetricSpecification:
+          PredefinedMetricType: DynamoDBWriteCapacityUtilization
+  DeletedCommentTableReadCapacityScalableTarget:
+    Type: AWS::ApplicationAutoScaling::ScalableTarget
+    DependsOn: ScalingRole
+    Properties:
+      MaxCapacity: !Ref MaxDynamoWriteCapacitty
+      MinCapacity: !Ref MinDynamoWriteCapacitty
+      ResourceId: !Join
+        - /
+        - - table
+          - !Ref DeletedComment
+      RoleARN: !GetAtt ScalingRole.Arn
+      ScalableDimension: dynamodb:table:ReadCapacityUnits
+      ServiceNamespace: dynamodb
+  DeletedCommentTableWriteCapacityScalableTarget:
+    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
+    DependsOn: ScalingRole
+    Properties:
+      MaxCapacity: !Ref MaxDynamoWriteCapacitty
+      MinCapacity: !Ref MinDynamoWriteCapacitty
+      ResourceId: !Join
+        - /
+        - - table
+          - !Ref DeletedComment
+      RoleARN: !GetAtt ScalingRole.Arn
+      ScalableDimension: dynamodb:table:WriteCapacityUnits
+      ServiceNamespace: dynamodb
+  DeletedCommentTableReadScalingPolicy:
+    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
+    Properties:
+      PolicyName: ReadAutoScalingPolicy
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId: !Ref DeletedCommentTableReadCapacityScalableTarget
+      TargetTrackingScalingPolicyConfiguration:
+        TargetValue: 50.0
+        ScaleInCooldown: 60
+        ScaleOutCooldown: 60
+        PredefinedMetricSpecification:
+          PredefinedMetricType: DynamoDBReadCapacityUtilization
+  DeletedCommentTableWriteScalingPolicy:
+    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
+    Properties:
+      PolicyName: WriteAutoScalingPolicy
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId: !Ref DeletedCommentTableWriteCapacityScalableTarget
       TargetTrackingScalingPolicyConfiguration:
         TargetValue: 50.0
         ScaleInCooldown: 60

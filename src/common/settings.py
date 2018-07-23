@@ -70,6 +70,22 @@ parameters = {
         'type': 'string',
         'maxLength': 100
     },
+    'notification_id': {
+        'type': 'string',
+        'maxLength': 80
+    },
+    'comment': {
+        'text': {
+            'type': 'string',
+            'minLength': 1,
+            'maxLength': 400
+        },
+        'comment_id': {
+            'type': 'string',
+            'minLength': 12,
+            'maxLength': 12
+        }
+    }
 }
 
 article_recent_default_limit = 20
@@ -77,7 +93,11 @@ users_articles_public_default_limit = 10
 articles_popular_default_limit = 20
 
 USERS_ARTICLE_INDEX_DEFAULT_LIMIT = 10
+NOTIFICATION_INDEX_DEFAULT_LIMIT = 10
+COMMENT_INDEX_DEFAULT_LIMIT = 10
+
 article_id_length = 12
+COMMENT_ID_LENGTH = 12
 
 html_allowed_tags = ['a', 'b', 'blockquote', 'br', 'h2', 'h3', 'i', 'p', 'u', 'img', 'hr',
                      'div', 'figure', 'figcaption']
@@ -127,3 +147,6 @@ USER_ICON_HEIGHT = 240
 
 S3_ARTICLES_IMAGES_PATH = 'd/api/articles_images/'
 S3_INFO_ICON_PATH = 'd/api/info_icon/'
+
+LIKE_NOTIFICATION_TYPE = 'like'
+COMMENT_NOTIFICATION_TYPE = 'comment'

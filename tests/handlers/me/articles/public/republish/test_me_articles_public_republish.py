@@ -132,6 +132,7 @@ class TestMeArticlesPublicRepublish(TestCase):
 
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(article_info['status'], 'public')
+        self.assertEqual(article_info['sync_elasticsearch'], 1)
         self.assertEqual(params['requestContext']['authorizer']['claims']['cognito:username'], article_info['user_id'])
         for key in article_info_param_names:
             self.assertEqual(expected_item[key], article_info[key])
@@ -191,7 +192,7 @@ class TestMeArticlesPublicRepublish(TestCase):
             }
         }
 
-        article_content_edit = self.article_content_edit_table.update_item(
+        self.article_content_edit_table.update_item(
             Key={'article_id': params['pathParameters']['article_id']},
             UpdateExpression="set title = :title",
             ExpressionAttributeValues={':title': None}
@@ -229,7 +230,7 @@ class TestMeArticlesPublicRepublish(TestCase):
             }
         }
 
-        article_content_edit = self.article_content_edit_table.update_item(
+        self.article_content_edit_table.update_item(
             Key={'article_id': params['pathParameters']['article_id']},
             UpdateExpression="set body = :body",
             ExpressionAttributeValues={':body': None}
@@ -267,7 +268,7 @@ class TestMeArticlesPublicRepublish(TestCase):
             }
         }
 
-        article_content_edit = self.article_content_edit_table.update_item(
+        self.article_content_edit_table.update_item(
             Key={'article_id': params['pathParameters']['article_id']},
             UpdateExpression="set overview = :overview",
             ExpressionAttributeValues={':overview': None}
