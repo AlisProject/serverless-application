@@ -60,8 +60,9 @@ class MeArticlesCommentsCreate(LambdaBase):
             article_info_table = self.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
             article_info = article_info_table.get_item(Key={'article_id': self.params['article_id']})['Item']
 
-            self.__create_comment_notification(article_info, comment_id, user_id)
-            self.__update_unread_notification_manager(article_info)
+            if self.__is_notifiable_comment(article_info, user_id):
+                self.__create_comment_notification(article_info, comment_id, user_id)
+                self.__update_unread_notification_manager(article_info)
 
         except Exception as err:
             logging.fatal(err)
@@ -71,6 +72,9 @@ class MeArticlesCommentsCreate(LambdaBase):
                 'statusCode': 200,
                 'body': json.dumps({'comment_id': comment_id})
             }
+
+    def __is_notifiable_comment(self, article_info, user_id):
+        return False if article_info['user_id'] == user_id else True
 
     def __create_comment_notification(self, article_info, comment_id, user_id):
         notification_table = self.dynamodb.Table(os.environ['NOTIFICATION_TABLE_NAME'])
