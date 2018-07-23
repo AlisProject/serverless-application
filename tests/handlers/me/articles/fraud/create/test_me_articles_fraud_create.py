@@ -1,4 +1,5 @@
 import os
+import json
 from tests_util import TestsUtil
 from unittest import TestCase
 from me_articles_fraud_create import MeArticlesFraudCreate
@@ -78,6 +79,12 @@ class TestMeArticlesFraudCreate(TestCase):
             'pathParameters': {
                 'article_id': self.article_fraud_user_table_items[0]['article_id']
             },
+            'body': json.dumps({
+                'reason': 'plagiarism',
+                'plagiarism_url': 'http://test.com',
+                'plagiarism_description': 'plagiarism description',
+                'illegal_content': 'illegal content'
+            }),
             'requestContext': {
                 'authorizer': {
                     'claims': {
@@ -97,18 +104,35 @@ class TestMeArticlesFraudCreate(TestCase):
 
         target_article_id = params['pathParameters']['article_id']
         target_user_id = params['requestContext']['authorizer']['claims']['cognito:username']
+        body = json.loads(params['body'])
+        target_reason = body['reason']
+        target_plagiarism_url = body['plagiarism_url']
+        target_plagiarism_description = body['plagiarism_description']
+        target_illegal_content = body['illegal_content']
 
         article_fraud_user = self.get_article_fraud_user(target_article_id, target_user_id)
 
         expected_items = {
             'article_id': target_article_id,
             'user_id': target_user_id,
+            'reason': target_reason,
+            'plagiarism_url': target_plagiarism_url,
+            'plagiarism_description': target_plagiarism_description,
+            'illegal_content': target_illegal_content,
             'created_at': 1520150272000003
         }
 
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(len(article_fraud_user_after), len(article_fraud_user_before) + 1)
-        article_fraud_user_param_names = ['article_id', 'user_id', 'created_at']
+        article_fraud_user_param_names = [
+            'article_id',
+            'user_id',
+            'reason',
+            'plagiarism_url',
+            'plagiarism_description',
+            'illegal_content',
+            'created_at'
+        ]
         for key in article_fraud_user_param_names:
             self.assertEqual(expected_items[key], article_fraud_user[key])
 
@@ -175,6 +199,68 @@ class TestMeArticlesFraudCreate(TestCase):
             }
         }
 
+        self.assert_bad_request(params)
+
+    def test_validation_invalid_reason(self):
+        params = {
+            'body': json.dumps({'reason': 'abcde'})
+        }
+        self.assert_bad_request(params)
+
+    def test_validation_required_plagiarism_url_when_reason_is_plagiarism(self):
+        params = {
+            'body': json.dumps(
+                {
+                    'reason': 'plagiarism',
+                    'plagiarism_url': '',
+                }
+            )
+        }
+        self.assert_bad_request(params)
+
+    def test_validation_required_plagiarism_description_when_reason_is_plagiarism(self):
+        params = {
+            'body': json.dumps(
+                {
+                    'reason': 'plagiarism',
+                    'plagiarism_url': 'http://test.com',
+                    'plagiarism_description': '',
+                }
+            )
+        }
+        self.assert_bad_request(params)
+
+    def test_validation_invalid_plagiarism_url_when_reason_is_plagiarism(self):
+        params = {
+            'body': json.dumps(
+                {
+                    'reason': 'plagiarism',
+                    'plagiarism_url': 'aaa'
+                }
+            )
+        }
+        self.assert_bad_request(params)
+
+    def test_validation_required_illegal_content_when_reason_is_illegal(self):
+        params = {
+            'body': json.dumps(
+                {
+                    'reason': 'illegal',
+                    'illegal_content': '',
+                }
+            )
+        }
+        self.assert_bad_request(params)
+
+    def test_validation_required_illegal_content_when_reason_is_other(self):
+        params = {
+            'body': json.dumps(
+                {
+                    'reason': 'other',
+                    'illegal_content': '',
+                }
+            )
+        }
         self.assert_bad_request(params)
 
     def get_article_fraud_user(self, article_id, user_id):
