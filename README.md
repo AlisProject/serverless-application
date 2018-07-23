@@ -78,7 +78,10 @@ aws s3api create-bucket --bucket $DEPLOY_BUCKET_NAME \
 ## Create template.yaml
 
 ```bash
-python make_template.py
+./deploy.sh database
+
+# Show all tables.
+aws dynamodb list-tables |grep ${ALIS_APP_ID}database |sort |tr -d ' '
 ```
 
 ## Packaging
