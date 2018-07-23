@@ -11,6 +11,7 @@ TEST_TMP_DIR = './tmp_tests'
 
 
 def exec_test(target_dir):
+    print(target_dir)
     exit_status = 0
     try:
         subprocess.check_call(['green', '-vv', '--processes', '1', target_dir])
@@ -22,7 +23,7 @@ def exec_test(target_dir):
 
 def copy_required_files(path):
     # テストの実行ディレクトリパスを取得
-    test_dir = './' + path[:path.rfind('/')]
+    test_dir = path[:path.rfind('/')]
 
     # テスト対象ソースを複製（対象ソースは tests 配下と同一構造の src ディレクトリ配下が対象）
     copy_tree(re.sub('^\./tmp_tests', './src', test_dir), test_dir)
@@ -40,13 +41,11 @@ def main():
         shutil.rmtree(TEST_TMP_DIR)
 
     # テスト実行のためのtmpディレクトリを作成し、testsをコピーする
-    os.mkdir('./tmp_tests')
-    copy_tree('./tests/', './tmp_tests')
+    os.mkdir(TEST_TMP_DIR)
+    copy_tree(TEST_DIR, TEST_TMP_DIR)
 
     # 引数でファイル名を受け取っている場合は変数にセットする
     target_file_path = sys.argv[1] if len(sys.argv) == 2 else None
-
-    exec_dir = ''
 
     if target_file_path:
         # tmpフォルダ上の指定されたファイルのパスを取得
@@ -56,7 +55,7 @@ def main():
     else:
         exec_dir = TEST_TMP_DIR
 
-        for name in glob.iglob('tmp_tests/**/test_*.py', recursive=True):
+        for name in glob.iglob(TEST_TMP_DIR + '/**/test_*.py', recursive=True):
             copy_required_files(name)
 
     result = exec_test(exec_dir)
