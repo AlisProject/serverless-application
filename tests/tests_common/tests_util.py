@@ -1,7 +1,6 @@
 import os
 import yaml
 import boto3
-from botocore.exceptions import ClientError
 
 
 class TestsUtil:
@@ -23,14 +22,15 @@ class TestsUtil:
         create_table.meta.client.get_waiter('table_exists').wait(TableName=table_name)
         # put item
         table = dynamodb.Table(table_name)
-        for item in table_items:
-            table.put_item(Item=item)
+        with table.batch_writer() as batch:
+            for item in table_items:
+                batch.put_item(Item=item)
 
     @staticmethod
     def get_dynamodb_client():
         if os.environ.get('IS_DYNAMODB_ENDPOINT_OF_AWS') is not None:
             return boto3.resource('dynamodb')
-        return boto3.resource('dynamodb', endpoint_url='http://localhost:4569/')
+        return boto3.resource('dynamodb', endpoint_url='http://localhost:8000/')
 
     @classmethod
     def create_all_s3_buckets(cls, s3):
@@ -56,14 +56,10 @@ class TestsUtil:
 
     @classmethod
     def delete_all_tables(cls, dynamodb):
-        for table in cls.get_all_tables():
-            try:
-                del_table = dynamodb.Table(table['table_name'])
-                del_table.delete()
-                del_table.meta.client.get_waiter('table_not_exists').wait(TableName=table['table_name'])
-            except ClientError as e:
-                if e.response['Error']['Code'] != 'ResourceNotFoundException':
-                    raise
+        for table in dynamodb.tables.all():
+            del_table = dynamodb.Table(table.table_name)
+            del_table.delete()
+            del_table.meta.client.get_waiter('table_not_exists').wait(TableName=table.table_name)
 
     @classmethod
     def get_all_tables(cls):
