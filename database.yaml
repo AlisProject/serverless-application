@@ -11,6 +11,8 @@ Resources:
           AttributeType: S
         - AttributeName: sort_key
           AttributeType: N
+        - AttributeName: sync_elasticsearch
+          AttributeType: N
       KeySchema:
         - AttributeName: article_id
           KeyType: HASH
@@ -45,6 +47,15 @@ Resources:
               KeyType: RANGE
           Projection:
             ProjectionType: KEYS_ONLY
+          ProvisionedThroughput:
+            ReadCapacityUnits: 2
+            WriteCapacityUnits: 2
+        - IndexName: sync_elasticsearch-index
+          KeySchema:
+            - AttributeName: sync_elasticsearch
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
           ProvisionedThroughput:
             ReadCapacityUnits: 2
             WriteCapacityUnits: 2
@@ -305,9 +316,21 @@ Resources:
       AttributeDefinitions:
         - AttributeName: user_id
           AttributeType: S
+        - AttributeName: sync_elasticsearch
+          AttributeType: N
       KeySchema:
         - AttributeName: user_id
           KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: sync_elasticsearch-index
+          KeySchema:
+            - AttributeName: sync_elasticsearch
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: 2
+            WriteCapacityUnits: 2
       ProvisionedThroughput:
         ReadCapacityUnits: 2
         WriteCapacityUnits: 2
