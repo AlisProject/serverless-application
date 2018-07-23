@@ -13,6 +13,8 @@ class TestMeArticlesCommentsCreate(TestCase):
         TestsUtil.set_all_tables_name_to_env()
         TestsUtil.delete_all_tables(self.dynamodb)
 
+        os.environ['SALT_FOR_ARTICLE_ID'] = 'test_salt'
+
         self.article_info_table = self.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
         self.article_info_table_items = [
             {
