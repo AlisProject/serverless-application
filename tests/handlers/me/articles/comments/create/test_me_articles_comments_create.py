@@ -168,6 +168,45 @@ class TestMeArticlesCommentsCreate(TestCase):
         self.assertEqual(len(comment_after) - len(comment_before), 1)
         self.assertIsNotNone(comment)
 
+    @patch('me_articles_comments_create.MeArticlesCommentsCreate._MeArticlesCommentsCreate__generate_comment_id',
+           MagicMock(return_value='PIYOPIYO'))
+    def test_main_ok_with_adding_comment_on_own_article(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'publicId0001'
+            },
+            'body': {
+                'text': 'A' * 400,
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'article_user01'
+                    }
+                }
+            }
+        }
+
+        params['body'] = json.dumps(params['body'])
+
+        comment_before = self.comment_table.scan()['Items']
+        notification_before = self.notification_table.scan()['Items']
+        unread_notification_manager_before = self.unread_notification_manager_table.scan()['Items']
+
+        response = MeArticlesCommentsCreate(params, {}, self.dynamodb).main()
+
+        comment_after = self.comment_table.scan()['Items']
+        notification_after = self.notification_table.scan()['Items']
+        unread_notification_manager_after = self.unread_notification_manager_table.scan()['Items']
+
+        comment = self.comment_table.get_item(Key={'comment_id': 'PIYOPIYO'}).get('Item')
+
+        self.assertEqual(response['statusCode'], 200)
+        self.assertIsNotNone(comment)
+        self.assertEqual(len(comment_after) - len(comment_before), 1)
+        self.assertEqual(len(notification_after) - len(notification_before), 0)
+        self.assertEqual(len(unread_notification_manager_after) - len(unread_notification_manager_before), 0)
+
     def test_call_validate_comment_existence(self):
         params = {
             'pathParameters': {
