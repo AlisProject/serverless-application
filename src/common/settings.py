@@ -13,13 +13,13 @@ parameters = {
         'type': 'string',
         'minLength': 3,
         'maxLength': 30,
-        'pattern': '^(?!.*--)[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]$'
+        'pattern': r'^(?!.*--)[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]$'
     },
     'phone_number': {
         'type': 'string',
         'minLength': 13,
         'maxLength': 13,
-        'pattern': '^\+81[6-9]0\d{8}$'
+        'pattern': r'^\+81[6-9]0\d{8}$'
     },
     'icon_image': {
         'type': 'string',
