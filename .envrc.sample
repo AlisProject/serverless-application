@@ -4,6 +4,13 @@
 ## すべてのサブシステムで同じ値を使う必要がある
 export ALIS_APP_ID=foobar
 
+# CloudFormationで生成されたAPI GatewayのAPI ID
+# スクリプトから各APIに事後処理を行うために使用する
+# 現状、SAMがIAM認証をサポートしていないため
+# TODO: SAMがIAM認証をサポートしたらteplate.yamlに集約してこの値とスクリプトを除却する
+#   - see: https://github.com/awslabs/serverless-application-model/issues/248
+export SERVERLESS_REST_API_ID=pe6odilrre
+
 # --- AWS ---
 
 ## aws-cli
