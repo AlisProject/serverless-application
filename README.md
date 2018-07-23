@@ -97,3 +97,12 @@ Specify generated Cognito User Pool ARN to SSM.
 ./deploy.sh api
 python elasticsearch-setup.py YourGlobalIP
 ```
+
+### Fix API settings via a script
+
+```bash
+# Set SERVERLESS_REST_API_ID to .envrc
+direnv edit
+
+./fix_api.sh
+```
