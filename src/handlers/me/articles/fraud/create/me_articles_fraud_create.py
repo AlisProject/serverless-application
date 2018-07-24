@@ -25,6 +25,21 @@ class MeArticlesFraudCreate(LambdaBase):
                     'properties': {
                         'reason': {'enum': settings.FRAUD_REASONS}
                     }
+                },
+                {
+                    'properties': {
+                        'reason': {'enum': settings.FRAUD_NEED_ORIGINAL_REASONS}
+                    },
+                    'anyOf': [
+                        {'required': ['plagiarism_url']},
+                        {'required': ['plagiarism_description']}
+                    ]
+                },
+                {
+                    'properties': {
+                        'reason': {'enum': settings.FRAUD_NEED_DETAIL_REASONS}
+                    },
+                    'required': ['illegal_content']
                 }
             ],
             'required': ['article_id']
@@ -35,7 +50,6 @@ class MeArticlesFraudCreate(LambdaBase):
         if self.event.get('pathParameters') is None:
             raise ValidationError('pathParameters is required')
         validate(self.params, self.get_schema())
-        self.__validate_reason_dependencies(self.params)
         # relation
         DBUtil.validate_article_existence(
             self.dynamodb,
@@ -74,16 +88,3 @@ class MeArticlesFraudCreate(LambdaBase):
             Item=article_fraud_user,
             ConditionExpression='attribute_not_exists(article_id)'
         )
-
-    def __validate_reason_dependencies(self, params):
-        reason = params.get('reason', '')
-        if reason in settings.FRAUD_NEED_ORIGINAL_REASONS:
-            self.__validate_dependencies(params, ['plagiarism_url', 'plagiarism_description'])
-
-        if reason in settings.FRAUD_NEED_DETAIL_REASONS:
-            self.__validate_dependencies(params, ['illegal_content'])
-
-    def __validate_dependencies(self, params, required_items):
-        for item in required_items:
-            if not params[item]:
-                raise ValidationError("%s is required" % item)
