@@ -30,7 +30,22 @@ class TestMeArticlesFraudCreate(TestCase):
             {
                 'article_id': 'testid000002',
                 'user_id': 'test02',
-                'created_at': 1520150273
+                'created_at': 1520150274
+            },
+            {
+                'article_id': 'testid000003',
+                'user_id': 'test02',
+                'created_at': 1520150275
+            },
+            {
+                'article_id': 'testid000004',
+                'user_id': 'test02',
+                'created_at': 1520150276
+            },
+            {
+                'article_id': 'testid000005',
+                'user_id': 'test02',
+                'created_at': 1520150277
             }
         ]
         TestsUtil.create_table(
@@ -55,7 +70,22 @@ class TestMeArticlesFraudCreate(TestCase):
                 'article_id': 'testid000002',
                 'status': 'draft',
                 'sort_key': 1520150272000002
-            }
+            },
+            {
+                'article_id': 'testid000003',
+                'status': 'public',
+                'sort_key': 1520150272000003
+            },
+            {
+                'article_id': 'testid000004',
+                'status': 'public',
+                'sort_key': 1520150272000004
+            },
+            {
+                'article_id': 'testid000005',
+                'status': 'public',
+                'sort_key': 1520150272000005
+            },
         ]
         TestsUtil.create_table(
             cls.dynamodb,
@@ -79,11 +109,109 @@ class TestMeArticlesFraudCreate(TestCase):
             'pathParameters': {
                 'article_id': self.article_fraud_user_table_items[0]['article_id']
             },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test03'
+                    }
+                }
+            }
+        }
+
+        article_fraud_user_table = self.dynamodb.Table(os.environ['ARTICLE_FRAUD_USER_TABLE_NAME'])
+        article_fraud_user_before = article_fraud_user_table.scan()['Items']
+
+        article_fraud_user = MeArticlesFraudCreate(event=params, context={}, dynamodb=self.dynamodb)
+        response = article_fraud_user.main()
+
+        article_fraud_user_after = article_fraud_user_table.scan()['Items']
+
+        target_article_id = params['pathParameters']['article_id']
+        target_user_id = params['requestContext']['authorizer']['claims']['cognito:username']
+
+        article_fraud_user = self.get_article_fraud_user(target_article_id, target_user_id)
+
+        expected_items = {
+            'article_id': target_article_id,
+            'user_id': target_user_id,
+            'reason': target_reason,
+            'plagiarism_url': target_plagiarism_url,
+            'plagiarism_description': target_plagiarism_description,
+            'illegal_content': target_illegal_content,
+            'created_at': 1520150272000003
+        }
+
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(len(article_fraud_user_after), len(article_fraud_user_before) + 1)
+        article_fraud_user_param_names = [
+            'article_id',
+            'user_id',
+            'created_at'
+        ]
+        for key in article_fraud_user_param_names:
+            self.assertEqual(expected_items[key], article_fraud_user[key])
+
+    @patch('time.time', MagicMock(return_value=1520150272000003))
+    def test_main_ok_added_reason(self):
+        params = {
+            'pathParameters': {
+                'article_id': self.article_fraud_user_table_items[1]['article_id']
+            },
+            'body': json.dumps({
+                'reason': 'violence'
+            }),
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test03'
+                    }
+                }
+            }
+        }
+
+        article_fraud_user_table = self.dynamodb.Table(os.environ['ARTICLE_FRAUD_USER_TABLE_NAME'])
+        article_fraud_user_before = article_fraud_user_table.scan()['Items']
+
+        article_fraud_user = MeArticlesFraudCreate(event=params, context={}, dynamodb=self.dynamodb)
+        response = article_fraud_user.main()
+
+        article_fraud_user_after = article_fraud_user_table.scan()['Items']
+
+        target_article_id = params['pathParameters']['article_id']
+        target_user_id = params['requestContext']['authorizer']['claims']['cognito:username']
+        body = json.loads(params['body'])
+        target_reason = body.get('reason')
+
+        article_fraud_user = self.get_article_fraud_user(target_article_id, target_user_id)
+
+        expected_items = {
+            'article_id': target_article_id,
+            'user_id': target_user_id,
+            'reason': target_reason,
+            'created_at': 1520150272000003
+        }
+
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(len(article_fraud_user_after), len(article_fraud_user_before) + 1)
+        article_fraud_user_param_names = [
+            'article_id',
+            'user_id',
+            'reason',
+            'created_at'
+        ]
+        for key in article_fraud_user_param_names:
+            self.assertEqual(expected_items[key], article_fraud_user[key])
+
+    @patch('time.time', MagicMock(return_value=1520150272000003))
+    def test_main_ok_reason_is_plagiarism(self):
+        params = {
+            'pathParameters': {
+                'article_id': self.article_fraud_user_table_items[3]['article_id']
+            },
             'body': json.dumps({
                 'reason': 'plagiarism',
                 'plagiarism_url': 'http://test.com',
                 'plagiarism_description': 'plagiarism description',
-                'illegal_content': 'illegal content'
             }),
             'requestContext': {
                 'authorizer': {
@@ -108,7 +236,6 @@ class TestMeArticlesFraudCreate(TestCase):
         target_reason = body.get('reason')
         target_plagiarism_url = body.get('plagiarism_url')
         target_plagiarism_description = body.get('plagiarism_description')
-        target_illegal_content = body.get('illegal_content')
 
         article_fraud_user = self.get_article_fraud_user(target_article_id, target_user_id)
 
@@ -118,7 +245,6 @@ class TestMeArticlesFraudCreate(TestCase):
             'reason': target_reason,
             'plagiarism_url': target_plagiarism_url,
             'plagiarism_description': target_plagiarism_description,
-            'illegal_content': target_illegal_content,
             'created_at': 1520150272000003
         }
 
@@ -130,6 +256,60 @@ class TestMeArticlesFraudCreate(TestCase):
             'reason',
             'plagiarism_url',
             'plagiarism_description',
+            'created_at'
+        ]
+        for key in article_fraud_user_param_names:
+            self.assertEqual(expected_items[key], article_fraud_user[key])
+
+    @patch('time.time', MagicMock(return_value=1520150272000003))
+    def test_main_ok_reason_is_other(self):
+        params = {
+            'pathParameters': {
+                'article_id': self.article_fraud_user_table_items[4]['article_id']
+            },
+            'body': json.dumps({
+                'reason': 'other',
+                'illegal_content': 'illegal content'
+            }),
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test03'
+                    }
+                }
+            }
+        }
+
+        article_fraud_user_table = self.dynamodb.Table(os.environ['ARTICLE_FRAUD_USER_TABLE_NAME'])
+        article_fraud_user_before = article_fraud_user_table.scan()['Items']
+
+        article_fraud_user = MeArticlesFraudCreate(event=params, context={}, dynamodb=self.dynamodb)
+        response = article_fraud_user.main()
+
+        article_fraud_user_after = article_fraud_user_table.scan()['Items']
+
+        target_article_id = params['pathParameters']['article_id']
+        target_user_id = params['requestContext']['authorizer']['claims']['cognito:username']
+        body = json.loads(params['body'])
+        target_reason = body.get('reason')
+        target_illegal_content = body.get('illegal_content')
+
+        article_fraud_user = self.get_article_fraud_user(target_article_id, target_user_id)
+
+        expected_items = {
+            'article_id': target_article_id,
+            'user_id': target_user_id,
+            'reason': target_reason,
+            'illegal_content': target_illegal_content,
+            'created_at': 1520150272000003
+        }
+
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(len(article_fraud_user_after), len(article_fraud_user_before) + 1)
+        article_fraud_user_param_names = [
+            'article_id',
+            'user_id',
+            'reason',
             'illegal_content',
             'created_at'
         ]
@@ -212,9 +392,7 @@ class TestMeArticlesFraudCreate(TestCase):
         body = {
             'body': json.dumps(
                 {
-                    'reason': 'plagiarism',
-                    'plagiarism_url': '',
-                    'plagiarism_description': ''
+                    'reason': 'plagiarism'
                 }
             )
         }
@@ -237,8 +415,7 @@ class TestMeArticlesFraudCreate(TestCase):
         body = {
             'body': json.dumps(
                 {
-                    'reason': 'illegal',
-                    'illegal_content': ''
+                    'reason': 'illegal'
                 }
             )
         }
@@ -249,8 +426,7 @@ class TestMeArticlesFraudCreate(TestCase):
         body = {
             'body': json.dumps(
                 {
-                    'reason': 'other',
-                    'illegal_content': ''
+                    'reason': 'other'
                 }
             )
         }
@@ -291,7 +467,7 @@ class TestMeArticlesFraudCreate(TestCase):
     def get_parameters_other_than_body(self):
         basic_params = {
             'pathParameters': {
-                'article_id': self.article_fraud_user_table_items[1]['article_id']
+                'article_id': self.article_fraud_user_table_items[5]['article_id']
             },
             'requestContext': {
                 'authorizer': {

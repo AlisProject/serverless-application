@@ -6,7 +6,7 @@ import json
 from db_util import DBUtil
 from botocore.exceptions import ClientError
 from lambda_base import LambdaBase
-from jsonschema import validate, ValidationError
+from jsonschema import validate, ValidationError, FormatChecker
 
 
 class MeArticlesFraudCreate(LambdaBase):
@@ -34,12 +34,12 @@ class MeArticlesFraudCreate(LambdaBase):
         # single
         if self.event.get('pathParameters') is None:
             raise ValidationError('pathParameters is required')
-        validate(self.params, self.get_schema())
+        validate(self.params, self.get_schema(), format_checker=FormatChecker())
         self.__validate_reason_dependencies(self.params)
         # relation
         DBUtil.validate_article_existence(
             self.dynamodb,
-            self.params['article_id'],
+            self.event['pathParameters']['article_id'],
             status='public'
         )
 
@@ -76,14 +76,17 @@ class MeArticlesFraudCreate(LambdaBase):
         )
 
     def __validate_reason_dependencies(self, params):
-        reason = params.get('reason', '')
+        reason = params.get('reason')
         if reason in settings.FRAUD_NEED_ORIGINAL_REASONS:
-            self.__validate_dependencies(params, ['plagiarism_url', 'plagiarism_description'])
+            self.__validate_plagiarism_dependencies(params)
 
         if reason in settings.FRAUD_NEED_DETAIL_REASONS:
-            self.__validate_dependencies(params, ['illegal_content'])
+            self.__validate_illegal_content_dependencies(params)
 
-    def __validate_dependencies(self, params, required_items):
-        for item in required_items:
-            if not params.get(item):
-                raise ValidationError("%s is required" % item)
+    def __validate_plagiarism_dependencies(self, params):
+        if not params.get('plagiarism_url') and not params.get('plagiarism_description'):
+            raise ValidationError('plagiarism_url or plagiarism_description is required')
+
+    def __validate_illegal_content_dependencies(self, params):
+        if not params.get('illegal_content'):
+            raise ValidationError('illegal_content is required')
