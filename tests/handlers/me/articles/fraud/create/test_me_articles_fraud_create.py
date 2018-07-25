@@ -134,10 +134,6 @@ class TestMeArticlesFraudCreate(TestCase):
         expected_items = {
             'article_id': target_article_id,
             'user_id': target_user_id,
-            'reason': target_reason,
-            'plagiarism_url': target_plagiarism_url,
-            'plagiarism_description': target_plagiarism_description,
-            'illegal_content': target_illegal_content,
             'created_at': 1520150272000003
         }
 
@@ -385,7 +381,7 @@ class TestMeArticlesFraudCreate(TestCase):
         body = {
             'body': json.dumps({'reason': 'abcde'})
         }
-        params = dict(self.get_parameters_other_than_body(), **body)
+        params = dict(self.get_parameters_other_than_body_for_validate(), **body)
         self.assert_bad_request(params)
 
     def test_validation_required_plagiarism_detail_when_reason_is_plagiarism(self):
@@ -396,7 +392,7 @@ class TestMeArticlesFraudCreate(TestCase):
                 }
             )
         }
-        params = dict(self.get_parameters_other_than_body(), **body)
+        params = dict(self.get_parameters_other_than_body_for_validate(), **body)
         self.assert_bad_request(params)
 
     def test_validation_invalid_plagiarism_url_when_reason_is_plagiarism(self):
@@ -408,7 +404,7 @@ class TestMeArticlesFraudCreate(TestCase):
                 }
             )
         }
-        params = dict(self.get_parameters_other_than_body(), **body)
+        params = dict(self.get_parameters_other_than_body_for_validate(), **body)
         self.assert_bad_request(params)
 
     def test_validation_required_illegal_content_when_reason_is_illegal(self):
@@ -419,7 +415,7 @@ class TestMeArticlesFraudCreate(TestCase):
                 }
             )
         }
-        params = dict(self.get_parameters_other_than_body(), **body)
+        params = dict(self.get_parameters_other_than_body_for_validate(), **body)
         self.assert_bad_request(params)
 
     def test_validation_required_illegal_content_when_reason_is_other(self):
@@ -430,7 +426,7 @@ class TestMeArticlesFraudCreate(TestCase):
                 }
             )
         }
-        params = dict(self.get_parameters_other_than_body(), **body)
+        params = dict(self.get_parameters_other_than_body_for_validate(), **body)
         self.assert_bad_request(params)
 
     def test_validation_plagiarism_description_max(self):
@@ -442,7 +438,7 @@ class TestMeArticlesFraudCreate(TestCase):
                 }
             )
         }
-        params = dict(self.get_parameters_other_than_body(), **body)
+        params = dict(self.get_parameters_other_than_body_for_validate(), **body)
         self.assert_bad_request(params)
 
     def test_validation_illegal_content_max(self):
@@ -454,7 +450,7 @@ class TestMeArticlesFraudCreate(TestCase):
                 }
             )
         }
-        params = dict(self.get_parameters_other_than_body(), **body)
+        params = dict(self.get_parameters_other_than_body_for_validate(), **body)
         self.assert_bad_request(params)
 
     def get_article_fraud_user(self, article_id, user_id):
@@ -464,7 +460,7 @@ class TestMeArticlesFraudCreate(TestCase):
         article_fraud_user_table = self.dynamodb.Table(os.environ['ARTICLE_FRAUD_USER_TABLE_NAME'])
         return article_fraud_user_table.query(**query_params)['Items'][0]
 
-    def get_parameters_other_than_body(self):
+    def get_parameters_other_than_body_for_validate(self):
         basic_params = {
             'pathParameters': {
                 'article_id': self.article_fraud_user_table_items[5]['article_id']
