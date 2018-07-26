@@ -52,19 +52,56 @@ class ESconfig:
                 AccessPolicies=self.original_access_policy
         )
 
+    def check_index_exists(self, index):
+        url = f"https://{self.endpoint}/{index}"
+        request = urllib.request.Request(
+                url,
+                method="HEAD",
+                headers={"Content-Type": "application/json"}
+            )
+        try:
+            urllib.request.urlopen(request)
+            return(True)
+        except urllib.error.HTTPError:
+            return(False)
+
+    def delete_index(self, index):
+        url = f"https://{self.endpoint}/{index}"
+        request = urllib.request.Request(
+                url,
+                method="DELETE",
+                headers={"Content-Type": "application/json"}
+            )
+        urllib.request.urlopen(request)
+
+    def create_index(self, index, setting):
+        url = f"https://{self.endpoint}/{index}"
+        request = urllib.request.Request(
+                url,
+                method="PUT",
+                data=json.dumps(setting).encode("utf-8"),
+                headers={"Content-Type": "application/json"}
+                )
+        urllib.request.urlopen(request)
+
 
 esconfig = ESconfig()
+
+# 自分のIPを許可
 myip = sys.argv[1]
+print(f"{myip}のIPを許可リストに追加します")
 esconfig.set_access_policy_allow_ip(myip)
-print(myip)
-print("アクセスポリシー反映中")
-time.sleep(60)
-print("インデックス作成")
-requst_json = {
+print("アクセスポリシー反映中 60秒待機")
+for i in range(6):
+    time.sleep(10)
+    print(f"{(i+1)*10}秒経過")
+
+# 日本語形態素解析設定
+kuromoji_setting = {
     "settings": {
         "analysis": {
             "analyzer": {
-                "my_ja_analyzer": {
+                "default": {
                     "type":      "custom",
                     "tokenizer": "kuromoji_tokenizer",
                     "char_filter": [
@@ -83,18 +120,47 @@ requst_json = {
         }
     }
 }
+# n-gram設定
+ngram_setting = {
+    "settings": {
+        "analysis": {
+            "analyzer": {
+                "default": {
+                    "tokenizer": "ngram_tokenizer"
+                }
+            },
+            "tokenizer": {
+                "ngram_tokenizer": {
+                    "type": "ngram",
+                    "min_gram": 1,
+                    "max_gram": 2,
+                    "token_chars": [
+                        "letter",
+                        "digit"
+                    ]
+                }
+            }
+        }
+    }
+}
+create_index_list = [
+    {"name": "articles", "setting": kuromoji_setting},
+    {"name": "users",    "setting": ngram_setting}
+]
+for index in create_index_list:
+    name = index["name"]
+    if esconfig.check_index_exists(name):
+        print(f"既に{name}が存在します削除して作り直しますか？ (y/n)")
+        choice = input("input> ")
+        if choice == "y":
+            esconfig.delete_index(name)
+            print(f"{name}を削除")
+        else:
+            print("キャンセル")
+            continue
+    print(f"{name}インデックス作成")
+    esconfig.create_index(name, index["setting"])
+    print(f"{name}インデックス作成完了")
 
-index_list = ["articles", "users"]
-for index in index_list:
-    url = f"https://{esconfig.endpoint}/{index}"
-    request = urllib.request.Request(
-            url,
-            method="PUT",
-            data=json.dumps(requst_json).encode("utf-8"),
-            headers={"Content-Type": "application/json"}
-            )
-    with urllib.request.urlopen(request) as response:
-        response_body = response.read().decode("utf-8")
-    print(f"{index}インデックス作成完了")
-
+print("アクセスポリシーを元の状態に戻します")
 esconfig.rollback_access_policy()

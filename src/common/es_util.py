@@ -69,11 +69,6 @@ class ESUtil:
                             "match": {
                                 "user_display_name": s
                             }
-                        },
-                        {
-                            "match": {
-                                "self_introduction": s
-                            }
                         }
                     ]
                 }
