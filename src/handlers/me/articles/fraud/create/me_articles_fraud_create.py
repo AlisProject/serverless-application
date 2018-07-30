@@ -20,13 +20,6 @@ class MeArticlesFraudCreate(LambdaBase):
                 'plagiarism_description': settings.parameters['fraud_user']['plagiarism_description'],
                 'illegal_content': settings.parameters['fraud_user']['illegal_content']
             },
-            'anyOf': [
-                {
-                    'properties': {
-                        'reason': {'enum': settings.FRAUD_REASONS}
-                    }
-                }
-            ],
             'required': ['article_id']
         }
 
