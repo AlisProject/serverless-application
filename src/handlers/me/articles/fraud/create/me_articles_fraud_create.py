@@ -63,6 +63,8 @@ class MeArticlesFraudCreate(LambdaBase):
             'illegal_content': self.params.get('illegal_content'),
             'created_at': int(time.time())
         }
+        DBUtil.items_values_empty_to_none(article_fraud_user)
+
         article_fraud_user_table.put_item(
             Item=article_fraud_user,
             ConditionExpression='attribute_not_exists(article_id)'
