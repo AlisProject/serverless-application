@@ -2,6 +2,7 @@
 import json
 import os
 
+import settings
 from boto3.dynamodb.conditions import Key
 from lambda_base import LambdaBase
 
@@ -18,7 +19,7 @@ class TopicsIndex(LambdaBase):
 
         query_params = {
             'IndexName': 'index_hash_key-order-index',
-            'KeyConditionExpression': Key('index_hash_key').eq('index_hash_key')
+            'KeyConditionExpression': Key('index_hash_key').eq(settings.TOPIC_INDEX_HASH_KEY)
         }
 
         topics = topic_table.query(**query_params)['Items']

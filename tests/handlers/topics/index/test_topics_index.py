@@ -1,6 +1,9 @@
 import json
 import os
 from unittest import TestCase
+
+import settings
+
 from topics_index import TopicsIndex
 from tests_util import TestsUtil
 
@@ -15,9 +18,9 @@ class TestTopicsIndex(TestCase):
 
         # create users_table
         cls.topic_items = [
-            {'name': 'crypto', 'order': 1, 'index_hash_key': 'index_hash_key'},
-            {'name': 'fashion', 'order': 2, 'index_hash_key': 'index_hash_key'},
-            {'name': 'food', 'order': 3, 'index_hash_key': 'index_hash_key'}
+            {'name': 'crypto', 'order': 1, 'index_hash_key': settings.TOPIC_INDEX_HASH_KEY},
+            {'name': 'fashion', 'order': 2, 'index_hash_key': settings.TOPIC_INDEX_HASH_KEY},
+            {'name': 'food', 'order': 3, 'index_hash_key': settings.TOPIC_INDEX_HASH_KEY}
         ]
         TestsUtil.create_table(cls.dynamodb, os.environ['TOPIC_TABLE_NAME'], cls.topic_items)
 
