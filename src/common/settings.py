@@ -85,6 +85,16 @@ parameters = {
             'minLength': 12,
             'maxLength': 12
         }
+    },
+    'page': {
+        'type': 'integer',
+        'minimum': 1,
+        'maximum': 100000
+    },
+    'query': {
+        'type': 'string',
+        'minLength': 1,
+        'maxLength': 150
     }
 }
 
