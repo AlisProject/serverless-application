@@ -391,6 +391,19 @@ class TestMeArticlesFraudCreate(TestCase):
         params = dict(self.get_parameters_other_than_body_for_validate(), **body)
         self.assert_bad_request(params)
 
+    def test_validation_empty_plagiarism_detail_when_reason_is_plagiarism(self):
+        body = {
+            'body': json.dumps(
+                {
+                    'reason': 'plagiarism',
+                    'plagiarism_url': '',
+                    'plagiarism_description': ''
+                }
+            )
+        }
+        params = dict(self.get_parameters_other_than_body_for_validate(), **body)
+        self.assert_bad_request(params)
+
     def test_validation_invalid_plagiarism_url_when_reason_is_plagiarism(self):
         body = {
             'body': json.dumps(
@@ -414,11 +427,35 @@ class TestMeArticlesFraudCreate(TestCase):
         params = dict(self.get_parameters_other_than_body_for_validate(), **body)
         self.assert_bad_request(params)
 
+    def test_validation_empty_illegal_content_when_reason_is_illegal(self):
+        body = {
+            'body': json.dumps(
+                {
+                    'reason': 'illegal',
+                    'illegal_content': ''
+                }
+            )
+        }
+        params = dict(self.get_parameters_other_than_body_for_validate(), **body)
+        self.assert_bad_request(params)
+
     def test_validation_required_illegal_content_when_reason_is_other(self):
         body = {
             'body': json.dumps(
                 {
                     'reason': 'other'
+                }
+            )
+        }
+        params = dict(self.get_parameters_other_than_body_for_validate(), **body)
+        self.assert_bad_request(params)
+
+    def test_validation_empty_illegal_content_when_reason_is_other(self):
+        body = {
+            'body': json.dumps(
+                {
+                    'reason': 'other',
+                    'illegal_content': ''
                 }
             )
         }
