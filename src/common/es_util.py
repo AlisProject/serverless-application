@@ -13,9 +13,8 @@ class ESUtil:
                 }
             },
             "sort": [
-                {
-                    "published_at": "desc"
-                }
+                "_score",
+                {"published_at": "desc"}
             ],
             "from": limit*(page-1),
             "size": limit
@@ -49,31 +48,15 @@ class ESUtil:
         body = {
             "query": {
                 "bool": {
-                    "must": [
+                    "should": [
+                        {"wildcard": {"user_id": f"*{word}*"}},
+                        {"wildcard": {"user_display_name": f"*{word}*"}}
                     ]
                 }
             },
             "from": limit*(page-1),
             "size": limit
         }
-        for s in word.split():
-            query = {
-                "bool": {
-                    "should": [
-                        {
-                            "match": {
-                                "user_id": s
-                            }
-                        },
-                        {
-                            "match": {
-                                "user_display_name": s
-                            }
-                        }
-                    ]
-                }
-            }
-            body["query"]["bool"]["must"].append(query)
         res = elasticsearch.search(
                 index="users",
                 body=body

@@ -89,7 +89,7 @@ class TestSearchArticles(TestCase):
         response = SearchArticles(params, {}, elasticsearch=self.elasticsearch).main()
         result = json.loads(response['body'])
         self.assertEqual(len(result), 10)
-        self.assertEqual(result[0]['article_id'], 'dummy29')
+        self.assertRegex(result[0]['article_id'], '^dummy')
         # page 指定
         params = {
                 'queryStringParameters': {
@@ -100,7 +100,7 @@ class TestSearchArticles(TestCase):
         }
         response = SearchArticles(params, {}, elasticsearch=self.elasticsearch).main()
         result = json.loads(response['body'])
-        self.assertEqual(result[0]['article_id'], 'dummy19')
+        self.assertRegex(result[0]['article_id'], '^dummy')
         self.assertEqual(len(result), 10)
         # page 範囲外
         params = {
