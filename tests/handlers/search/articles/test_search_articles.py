@@ -102,6 +102,16 @@ class TestSearchArticles(TestCase):
         result = json.loads(response['body'])
         self.assertEqual(result[0]['article_id'], 'dummy19')
         self.assertEqual(len(result), 10)
+        # page 範囲外
+        params = {
+                'queryStringParameters': {
+                    'page': '100001',
+                    'limit': '10',
+                    'query': 'dummy'
+                }
+        }
+        response = SearchArticles(params, {}, elasticsearch=self.elasticsearch).main()
+        self.assertEqual(response['statusCode'], 400)
 
     def test_search_match_zero(self):
         params = {
@@ -112,3 +122,14 @@ class TestSearchArticles(TestCase):
         response = SearchArticles(params, {}, elasticsearch=self.elasticsearch).main()
         result = json.loads(response['body'])
         self.assertEqual(len(result), 0)
+
+    def test_search_request_query_over150(self):
+        # query文字列150超
+        params = {
+                'queryStringParameters': {
+                    'limit': '1',
+                    'query': 'abcdefghij' * 16
+                }
+        }
+        response = SearchArticles(params, {}, elasticsearch=self.elasticsearch).main()
+        self.assertEqual(response['statusCode'], 400)

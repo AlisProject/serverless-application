@@ -14,9 +14,8 @@ class SearchUsers(LambdaBase):
             'type': 'object',
             'properties': {
                 'limit': settings.parameters['limit'],
-                'page': {
-                    'type': 'integer'
-                }
+                'page': settings.parameters['page'],
+                'query': settings.parameters['query']
             },
             'required': ['query']
         }
