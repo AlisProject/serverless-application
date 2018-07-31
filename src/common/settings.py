@@ -95,6 +95,32 @@ parameters = {
         'type': 'string',
         'minLength': 1,
         'maxLength': 150
+    },
+    'fraud_user': {
+        'reason': {
+            'type': 'string',
+            'enum': [
+                'violence',
+                'spam',
+                'plagiarism',
+                'slander',
+                'illegal',
+                'other'
+            ]
+        },
+        'plagiarism_url': {
+            'type': 'string',
+            'format': 'uri',
+            'maxLength': 2048
+        },
+        'plagiarism_description': {
+            'type': 'string',
+            'maxLength': 1000
+        },
+        'illegal_content': {
+            'type': 'string',
+            'maxLength': 1000
+        }
     }
 }
 
@@ -146,7 +172,6 @@ ng_user_name = [
     'xml', 'year'
 ]
 
-
 LIKED_RETRY_COUNT = 3
 
 ARTICLE_IMAGE_MAX_WIDTH = 3840
@@ -160,3 +185,7 @@ S3_INFO_ICON_PATH = 'd/api/info_icon/'
 
 LIKE_NOTIFICATION_TYPE = 'like'
 COMMENT_NOTIFICATION_TYPE = 'comment'
+
+FRAUD_NEED_ORIGINAL_REASONS = ['plagiarism']
+
+FRAUD_NEED_DETAIL_REASONS = ['illegal', 'other']

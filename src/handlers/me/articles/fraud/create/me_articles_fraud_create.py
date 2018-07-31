@@ -6,7 +6,7 @@ import json
 from db_util import DBUtil
 from botocore.exceptions import ClientError
 from lambda_base import LambdaBase
-from jsonschema import validate, ValidationError
+from jsonschema import validate, ValidationError, FormatChecker
 
 
 class MeArticlesFraudCreate(LambdaBase):
@@ -14,7 +14,11 @@ class MeArticlesFraudCreate(LambdaBase):
         return {
             'type': 'object',
             'properties': {
-                'article_id': settings.parameters['article_id']
+                'article_id': settings.parameters['article_id'],
+                'reason': settings.parameters['fraud_user']['reason'],
+                'plagiarism_url': settings.parameters['fraud_user']['plagiarism_url'],
+                'plagiarism_description': settings.parameters['fraud_user']['plagiarism_description'],
+                'illegal_content': settings.parameters['fraud_user']['illegal_content']
             },
             'required': ['article_id']
         }
@@ -23,7 +27,8 @@ class MeArticlesFraudCreate(LambdaBase):
         # single
         if self.event.get('pathParameters') is None:
             raise ValidationError('pathParameters is required')
-        validate(self.event.get('pathParameters'), self.get_schema())
+        validate(self.params, self.get_schema(), format_checker=FormatChecker())
+        self.__validate_reason_dependencies(self.params)
         # relation
         DBUtil.validate_article_existence(
             self.dynamodb,
@@ -52,9 +57,31 @@ class MeArticlesFraudCreate(LambdaBase):
         article_fraud_user = {
             'article_id': self.event['pathParameters']['article_id'],
             'user_id': self.event['requestContext']['authorizer']['claims']['cognito:username'],
+            'reason': self.params.get('reason'),
+            'plagiarism_url': self.params.get('plagiarism_url'),
+            'plagiarism_description': self.params.get('plagiarism_description'),
+            'illegal_content': self.params.get('illegal_content'),
             'created_at': int(time.time())
         }
+        DBUtil.items_values_empty_to_none(article_fraud_user)
+
         article_fraud_user_table.put_item(
             Item=article_fraud_user,
             ConditionExpression='attribute_not_exists(article_id)'
         )
+
+    def __validate_reason_dependencies(self, params):
+        reason = params.get('reason')
+        if reason in settings.FRAUD_NEED_ORIGINAL_REASONS:
+            self.__validate_plagiarism_dependencies(params)
+
+        if reason in settings.FRAUD_NEED_DETAIL_REASONS:
+            self.__validate_illegal_content_dependencies(params)
+
+    def __validate_plagiarism_dependencies(self, params):
+        if not params.get('plagiarism_url') and not params.get('plagiarism_description'):
+            raise ValidationError('plagiarism_url or plagiarism_description is required')
+
+    def __validate_illegal_content_dependencies(self, params):
+        if not params.get('illegal_content'):
+            raise ValidationError('illegal_content is required')
