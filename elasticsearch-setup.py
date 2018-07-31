@@ -96,9 +96,14 @@ for i in range(6):
     time.sleep(10)
     print(f"{(i+1)*10}秒経過")
 
-# 日本語形態素解析設定
-kuromoji_setting = {
+create_index_list = []
+
+# articles インデックス設定(日本語形態素解析)
+articles_setting = {
     "settings": {
+        "index": {
+            "number_of_replicas": "0"
+        },
         "analysis": {
             "analyzer": {
                 "default": {
@@ -120,33 +125,25 @@ kuromoji_setting = {
         }
     }
 }
-# n-gram設定
-ngram_setting = {
+create_index_list.append({"name": "articles", "setting": articles_setting})
+
+# users インデックス設定(逐次検索なのでトークナイズしない)
+users_setting = {
     "settings": {
+        "index": {
+            "number_of_replicas": "0"
+        },
         "analysis": {
             "analyzer": {
                 "default": {
-                    "tokenizer": "ngram_tokenizer"
-                }
-            },
-            "tokenizer": {
-                "ngram_tokenizer": {
-                    "type": "ngram",
-                    "min_gram": 1,
-                    "max_gram": 2,
-                    "token_chars": [
-                        "letter",
-                        "digit"
-                    ]
+                    "tokenizer": "keyword"
                 }
             }
         }
     }
 }
-create_index_list = [
-    {"name": "articles", "setting": kuromoji_setting},
-    {"name": "users",    "setting": ngram_setting}
-]
+create_index_list.append({"name": "users", "setting": users_setting})
+
 for index in create_index_list:
     name = index["name"]
     if esconfig.check_index_exists(name):
