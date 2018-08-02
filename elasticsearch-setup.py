@@ -102,7 +102,7 @@ create_index_list = []
 articles_setting = {
     "settings": {
         "index": {
-            "number_of_replicas": "0"
+            "number_of_replicas": "1"
         },
         "analysis": {
             "analyzer": {
@@ -131,7 +131,7 @@ create_index_list.append({"name": "articles", "setting": articles_setting})
 users_setting = {
     "settings": {
         "index": {
-            "number_of_replicas": "0"
+            "number_of_replicas": "1"
         },
         "analysis": {
             "analyzer": {

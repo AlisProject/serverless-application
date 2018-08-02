@@ -1767,13 +1767,13 @@ Resources:
       EBSOptions:
         EBSEnabled: true
         VolumeType: gp2
-        VolumeSize: 20
+        VolumeSize: 35
       ElasticsearchClusterConfig:
-        InstanceType: m4.large.elasticsearch
-        InstanceCount: 1
+        InstanceType: t2.medium.elasticsearch
+        InstanceCount: 2
         DedicatedMasterEnabled: true
         ZoneAwarenessEnabled: false
-        DedicatedMasterType: m4.large.elasticsearch
+        DedicatedMasterType: t2.medium.elasticsearch
         DedicatedMasterCount: 3
       ElasticsearchVersion: '6.2'
       SnapshotOptions:
