@@ -85,13 +85,13 @@ class TestArticlesRecent(TestCase):
         table = TestArticlesRecent.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
 
         for i in range(21):
-            item = {
+            table.put_item(Item={
                 'article_id': 'test_limit_number' + str(i),
                 'status': 'public',
                 'sort_key': 1520150273000000 + i,
                 'topic': 'crypt'
-            }
-            table.put_item(Item=item)
+                }
+            )
 
         TestsUtil.sync_articles_from_dynamo_to_es(TestArticlesRecent.dynamodb, TestArticlesRecent.elasticsearch)
 
