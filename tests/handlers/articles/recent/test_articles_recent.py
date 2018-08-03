@@ -5,10 +5,7 @@ import os
 import json
 from elasticsearch import Elasticsearch
 
-
 class TestArticlesRecent(TestCase):
-    ES_ARTICLES_INDEX_NAME = 'articles'
-
     dynamodb = TestsUtil.get_dynamodb_client()
     elasticsearch = Elasticsearch(
         hosts=[{'host': 'localhost'}]
@@ -47,23 +44,14 @@ class TestArticlesRecent(TestCase):
             }
         ]
         TestsUtil.create_table(cls.dynamodb, os.environ['ARTICLE_INFO_TABLE_NAME'], article_info_items)
-        cls.sync_to_elastic_search(article_info_items)
+
+        TestsUtil.create_es_articles_index(cls.elasticsearch)
+        TestsUtil.sync_articles_to_es_from_dynamo(cls.dynamodb, cls.elasticsearch)
 
     @classmethod
     def tearDownClass(cls):
         TestsUtil.delete_all_tables(cls.dynamodb)
-        cls.elasticsearch.indices.delete(index=cls.ES_ARTICLES_INDEX_NAME, ignore=[404])
-
-    @classmethod
-    def sync_to_elastic_search(cls, articles):
-        for article in articles:
-            cls.elasticsearch.index(
-                    index='articles',
-                    doc_type='article',
-                    id=article['article_id'],
-                    body=article
-            )
-        cls.elasticsearch.indices.refresh(index=cls.ES_ARTICLES_INDEX_NAME)
+        TestsUtil.remove_es_articles_index(cls.elasticsearch)
 
     def assert_bad_request(self, params):
         function = ArticlesRecent(params, {}, elasticsearch=self.elasticsearch)
@@ -95,7 +83,6 @@ class TestArticlesRecent(TestCase):
     def test_main_ok_with_no_limit(self):
         table = TestArticlesRecent.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
 
-        es_list = []
         for i in range(21):
             item = {
                 'article_id': 'test_limit_number' + str(i),
@@ -104,8 +91,8 @@ class TestArticlesRecent(TestCase):
                 'topic': 'crypt'
             }
             table.put_item(Item=item)
-            es_list.append(item)
-        TestArticlesRecent.sync_to_elastic_search(es_list)
+
+        TestsUtil.sync_articles_to_es_from_dynamo(TestArticlesRecent.dynamodb, TestArticlesRecent.elasticsearch)
 
         params = {
             'queryStringParameters': None
@@ -146,7 +133,8 @@ class TestArticlesRecent(TestCase):
                 'sort_key': 1520150273000000 + i,
                 'topic': 'crypt'
             })
-        TestArticlesRecent.sync_to_elastic_search(es_list)
+        # TestArticlesRecent.sync_to_elastic_search()
+        TestsUtil.sync_articles_to_es_from_dynamo(TestArticlesRecent.dynamodb, TestArticlesRecent.elasticsearch)
 
         params = {
             'queryStringParameters': {
