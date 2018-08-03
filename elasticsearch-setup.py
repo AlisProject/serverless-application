@@ -123,6 +123,21 @@ articles_setting = {
                 }
             }
         }
+    },
+    "mappings": {
+        "article": {
+            "properties": {
+                "sort_key": {
+                    "type": "long"
+                },
+                "created_at": {
+                    "type": "long"
+                },
+                "published_at": {
+                    "type": "long"
+                }
+            }
+        }
     }
 }
 create_index_list.append({"name": "articles", "setting": articles_setting})
