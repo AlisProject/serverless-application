@@ -48,7 +48,7 @@ class TestESUtil(TestCase):
                     id=item['article_id'],
                     body=item
             )
-            cls.elasticsearch.indices.refresh(index='articles')
+        cls.elasticsearch.indices.refresh(index='articles')
 
     @classmethod
     def tearDownClass(cls):

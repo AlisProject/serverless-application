@@ -45,12 +45,23 @@ class TestArticlesRecent(TestCase):
             }
         ]
         TestsUtil.create_table(cls.dynamodb, os.environ['ARTICLE_INFO_TABLE_NAME'], article_info_items)
-        cls.__add_to_elastic_search(cls, article_info_items)
+        cls.sync_to_elastic_search(article_info_items)
 
     @classmethod
     def tearDownClass(cls):
         TestsUtil.delete_all_tables(cls.dynamodb)
         cls.elasticsearch.indices.delete(index='articles', ignore=[404])
+
+    @classmethod
+    def sync_to_elastic_search(cls, articles):
+        for article in articles:
+            cls.elasticsearch.index(
+                    index='articles',
+                    doc_type='article',
+                    id=article['article_id'],
+                    body=article
+            )
+        cls.elasticsearch.indices.refresh(index='articles')
 
     def assert_bad_request(self, params):
         function = ArticlesRecent(params, {}, self.dynamodb)
@@ -92,7 +103,7 @@ class TestArticlesRecent(TestCase):
             }
             table.put_item(Item=item)
             es_list.append(item)
-        self.__add_to_elastic_search(es_list)
+        TestArticlesRecent.sync_to_elastic_search(es_list)
 
         params = {
             'queryStringParameters': None
@@ -133,7 +144,7 @@ class TestArticlesRecent(TestCase):
                 'sort_key': 1520150273000000 + i,
                 'topic': 'crypt'
             })
-        self.__add_to_elastic_search(es_list)
+        TestArticlesRecent.sync_to_elastic_search(es_list)
 
         params = {
             'queryStringParameters': {
@@ -245,13 +256,3 @@ class TestArticlesRecent(TestCase):
         }
 
         self.assert_bad_request(params)
-
-    def __add_to_elastic_search(self, articles):
-        for article in articles:
-            self.elasticsearch.index(
-                    index='articles',
-                    doc_type='article',
-                    id=article['article_id'],
-                    body=article
-            )
-            self.elasticsearch.indices.refresh(index='articles')
