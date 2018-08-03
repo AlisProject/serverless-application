@@ -46,7 +46,7 @@ class TestArticlesRecent(TestCase):
         TestsUtil.create_table(cls.dynamodb, os.environ['ARTICLE_INFO_TABLE_NAME'], article_info_items)
 
         TestsUtil.create_es_articles_index(cls.elasticsearch)
-        TestsUtil.sync_articles_to_es_from_dynamo(cls.dynamodb, cls.elasticsearch)
+        TestsUtil.sync_articles_from_dynamo_to_es(cls.dynamodb, cls.elasticsearch)
 
     @classmethod
     def tearDownClass(cls):
@@ -92,7 +92,7 @@ class TestArticlesRecent(TestCase):
             }
             table.put_item(Item=item)
 
-        TestsUtil.sync_articles_to_es_from_dynamo(TestArticlesRecent.dynamodb, TestArticlesRecent.elasticsearch)
+        TestsUtil.sync_articles_from_dynamo_to_es(TestArticlesRecent.dynamodb, TestArticlesRecent.elasticsearch)
 
         params = {
             'queryStringParameters': None
@@ -134,7 +134,7 @@ class TestArticlesRecent(TestCase):
                 'topic': 'crypt'
             })
         # TestArticlesRecent.sync_to_elastic_search()
-        TestsUtil.sync_articles_to_es_from_dynamo(TestArticlesRecent.dynamodb, TestArticlesRecent.elasticsearch)
+        TestsUtil.sync_articles_from_dynamo_to_es(TestArticlesRecent.dynamodb, TestArticlesRecent.elasticsearch)
 
         params = {
             'queryStringParameters': {
