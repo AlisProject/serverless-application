@@ -78,20 +78,19 @@ class ESUtil:
             'size': limit
         }
 
-        if params is not None and params:
-            for name, value in params.items():
-                query = {
-                    'bool': {
-                        'must': [
-                            {
-                                'match': {
-                                    name: value
-                                }
+        if params.get('topic'):
+            query = {
+                'bool': {
+                    'must': [
+                        {
+                            'match': {
+                                'topic': params.get('topic')
                             }
-                        ]
-                    }
+                        }
+                    ]
                 }
-                body['query']['bool']['must'].append(query)
+            }
+            body['query']['bool']['must'].append(query)
 
         res = elasticsearch.search(
             index='articles',
