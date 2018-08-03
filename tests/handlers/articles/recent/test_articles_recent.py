@@ -5,6 +5,7 @@ import os
 import json
 from elasticsearch import Elasticsearch
 
+
 class TestArticlesRecent(TestCase):
     dynamodb = TestsUtil.get_dynamodb_client()
     elasticsearch = Elasticsearch(
