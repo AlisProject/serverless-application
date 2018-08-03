@@ -44,6 +44,15 @@ class TestArticlesRecent(TestCase):
                 'topic': 'hoge'
             }
         ]
+
+        for i in range(30):
+            article_info_items.append({
+                'article_id': 'test_dummy_article-' + str(i),
+                'status': 'public',
+                'sort_key': 1520150271000000 + i,
+                'topic': 'dummy'
+            })
+
         TestsUtil.create_table(cls.dynamodb, os.environ['ARTICLE_INFO_TABLE_NAME'], article_info_items)
 
         TestsUtil.create_es_articles_index(cls.elasticsearch)
@@ -82,19 +91,6 @@ class TestArticlesRecent(TestCase):
         self.assertEqual(json.loads(response['body'])['Items'], expected_items)
 
     def test_main_ok_with_no_limit(self):
-        table = TestArticlesRecent.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
-
-        for i in range(21):
-            table.put_item(Item={
-                'article_id': 'test_limit_number' + str(i),
-                'status': 'public',
-                'sort_key': 1520150273000000 + i,
-                'topic': 'crypt'
-                }
-            )
-
-        TestsUtil.sync_public_articles_from_dynamo_to_es(TestArticlesRecent.dynamodb, TestArticlesRecent.elasticsearch)
-
         params = {
             'queryStringParameters': None
         }
@@ -126,17 +122,43 @@ class TestArticlesRecent(TestCase):
         self.assertEqual(json.loads(response['body'])['Items'], expected_items)
 
     def test_main_ok_with_page(self):
+        # 指定なし
         params = {
             'queryStringParameters': {
-                'limit': '10',
-                'topic': 'crypt',
-                'page': '2'
+                'limit': '20',
+                'topic': 'dummy'
+            }
+        }
+        response = ArticlesRecent(params, {}, elasticsearch=self.elasticsearch).main()
+
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(len(json.loads(response['body'])['Items']), 20)
+
+        # 指定あり
+        params = {
+            'queryStringParameters': {
+                'limit': '20',
+                'page': '2',
+                'topic': 'dummy'
             }
         }
         response = ArticlesRecent(params, {}, elasticsearch=self.elasticsearch).main()
 
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(len(json.loads(response['body'])['Items']), 10)
+
+        # ページ超えた場合
+        params = {
+            'queryStringParameters': {
+                'limit': '20',
+                'page': '100',
+                'topic': 'dummy'
+            }
+        }
+        response = ArticlesRecent(params, {}, elasticsearch=self.elasticsearch).main()
+
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(len(json.loads(response['body'])['Items']), 0)
 
     def test_validation_limit_type(self):
         params = {
