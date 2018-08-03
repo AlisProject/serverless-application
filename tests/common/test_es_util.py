@@ -5,8 +5,6 @@ from tests_util import TestsUtil
 
 
 class TestESUtil(TestCase):
-    ES_ARTICLES_INDEX_NAME = 'articles'
-
     elasticsearch = Elasticsearch(
         hosts=[{'host': 'localhost'}]
     )
@@ -53,7 +51,7 @@ class TestESUtil(TestCase):
                     id=item['article_id'],
                     body=item
             )
-        cls.elasticsearch.indices.refresh(index=cls.ES_ARTICLES_INDEX_NAME)
+        cls.elasticsearch.indices.refresh(index='articles')
 
     @classmethod
     def tearDownClass(cls):
