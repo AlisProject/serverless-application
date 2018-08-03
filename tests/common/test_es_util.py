@@ -1,6 +1,7 @@
 from es_util import ESUtil
 from unittest import TestCase
 from elasticsearch import Elasticsearch
+from tests_util import TestsUtil
 
 
 class TestESUtil(TestCase):
@@ -12,6 +13,8 @@ class TestESUtil(TestCase):
 
     @classmethod
     def setUpClass(cls):
+        TestsUtil.create_es_articles_index(cls.elasticsearch)
+
         items = [
             {
                 'article_id': 'test1',
@@ -54,7 +57,7 @@ class TestESUtil(TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        cls.elasticsearch.indices.delete(index=cls.ES_ARTICLES_INDEX_NAME, ignore=[404])
+        TestsUtil.remove_es_articles_index(cls.elasticsearch)
 
     def test_search_recent_articles_ok(self):
         params = {}
