@@ -47,7 +47,7 @@ class TestArticlesRecent(TestCase):
         TestsUtil.create_table(cls.dynamodb, os.environ['ARTICLE_INFO_TABLE_NAME'], article_info_items)
 
         TestsUtil.create_es_articles_index(cls.elasticsearch)
-        TestsUtil.sync_articles_from_dynamo_to_es(cls.dynamodb, cls.elasticsearch)
+        TestsUtil.sync_public_articles_from_dynamo_to_es(cls.dynamodb, cls.elasticsearch)
 
     @classmethod
     def tearDownClass(cls):
@@ -93,7 +93,7 @@ class TestArticlesRecent(TestCase):
                 }
             )
 
-        TestsUtil.sync_articles_from_dynamo_to_es(TestArticlesRecent.dynamodb, TestArticlesRecent.elasticsearch)
+        TestsUtil.sync_public_articles_from_dynamo_to_es(TestArticlesRecent.dynamodb, TestArticlesRecent.elasticsearch)
 
         params = {
             'queryStringParameters': None

@@ -128,7 +128,7 @@ class TestsUtil:
         elasticsearch.indices.delete(index='articles', ignore=[404])
 
     @staticmethod
-    def sync_articles_from_dynamo_to_es(dynamodb, elasticsearch):
+    def sync_public_articles_from_dynamo_to_es(dynamodb, elasticsearch):
         table = dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
         query_params = {
             'IndexName': 'status-sort_key-index',
