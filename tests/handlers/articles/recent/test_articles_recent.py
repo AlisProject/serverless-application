@@ -126,17 +126,6 @@ class TestArticlesRecent(TestCase):
         self.assertEqual(json.loads(response['body'])['Items'], expected_items)
 
     def test_main_ok_with_page(self):
-        es_list = []
-        for i in range(20):
-            es_list.append({
-                'article_id': 'test_limit_number' + str(i),
-                'status': 'public',
-                'sort_key': 1520150273000000 + i,
-                'topic': 'crypt'
-            })
-        # TestArticlesRecent.sync_to_elastic_search()
-        TestsUtil.sync_articles_from_dynamo_to_es(TestArticlesRecent.dynamodb, TestArticlesRecent.elasticsearch)
-
         params = {
             'queryStringParameters': {
                 'limit': '10',
