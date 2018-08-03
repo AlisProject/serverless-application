@@ -102,29 +102,6 @@ class TestArticlesRecent(TestCase):
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(len(json.loads(response['body'])['Items']), 20)
 
-    def test_main_ok_with_evaluated_key(self):
-        params = {
-            'queryStringParameters': {
-                'limit': '100',
-                'article_id': 'testid000001',
-                'sort_key': '1520150272000001'
-            }
-        }
-
-        response = ArticlesRecent(params, {}, elasticsearch=self.elasticsearch).main()
-
-        expected_items = [
-            {
-                'article_id': 'testid000001',
-                'status': 'public',
-                'sort_key': 1520150272000001,
-                'topic': 'crypt'
-            }
-        ]
-
-        self.assertEqual(response['statusCode'], 200)
-        self.assertEqual(json.loads(response['body'])['Items'], expected_items)
-
     def test_main_ok_search_by_topic(self):
         params = {
             'queryStringParameters': {
