@@ -7,6 +7,8 @@ from elasticsearch import Elasticsearch
 
 
 class TestArticlesRecent(TestCase):
+    ES_ARTICLES_INDEX_NAME = 'articles'
+
     dynamodb = TestsUtil.get_dynamodb_client()
     elasticsearch = Elasticsearch(
         hosts=[{'host': 'localhost'}]
@@ -50,7 +52,7 @@ class TestArticlesRecent(TestCase):
     @classmethod
     def tearDownClass(cls):
         TestsUtil.delete_all_tables(cls.dynamodb)
-        cls.elasticsearch.indices.delete(index='articles', ignore=[404])
+        cls.elasticsearch.indices.delete(index=cls.ES_ARTICLES_INDEX_NAME, ignore=[404])
 
     @classmethod
     def sync_to_elastic_search(cls, articles):
@@ -61,10 +63,10 @@ class TestArticlesRecent(TestCase):
                     id=article['article_id'],
                     body=article
             )
-        cls.elasticsearch.indices.refresh(index='articles')
+        cls.elasticsearch.indices.refresh(index=cls.ES_ARTICLES_INDEX_NAME)
 
     def assert_bad_request(self, params):
-        function = ArticlesRecent(params, {}, self.dynamodb)
+        function = ArticlesRecent(params, {}, elasticsearch=self.elasticsearch)
         response = function.main()
 
         self.assertEqual(response['statusCode'], 400)

@@ -4,6 +4,8 @@ from elasticsearch import Elasticsearch
 
 
 class TestESUtil(TestCase):
+    ES_ARTICLES_INDEX_NAME = 'articles'
+
     elasticsearch = Elasticsearch(
         hosts=[{'host': 'localhost'}]
     )
@@ -48,11 +50,11 @@ class TestESUtil(TestCase):
                     id=item['article_id'],
                     body=item
             )
-        cls.elasticsearch.indices.refresh(index='articles')
+        cls.elasticsearch.indices.refresh(index=cls.ES_ARTICLES_INDEX_NAME)
 
     @classmethod
     def tearDownClass(cls):
-        cls.elasticsearch.indices.delete(index='articles', ignore=[404])
+        cls.elasticsearch.indices.delete(index=cls.ES_ARTICLES_INDEX_NAME, ignore=[404])
 
     def test_search_recent_articles_ok(self):
         params = {}
