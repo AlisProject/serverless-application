@@ -35,7 +35,7 @@ class TestArticlesRecent(TestCase):
                 'article_id': 'testid000002',
                 'status': 'public',
                 'sort_key': 1520150272000002,
-                'topic': 'hoge'
+                'topic': 'crypt'
             },
             {
                 'article_id': 'testid000003',
@@ -102,7 +102,7 @@ class TestArticlesRecent(TestCase):
     def test_main_ok_search_by_topic(self):
         params = {
             'queryStringParameters': {
-                'limit': '1',
+                'limit': '10',
                 'topic': 'crypt'
             }
         }
@@ -110,6 +110,12 @@ class TestArticlesRecent(TestCase):
         response = ArticlesRecent(params, {}, elasticsearch=self.elasticsearch).main()
 
         expected_items = [
+            {
+                'article_id': 'testid000002',
+                'status': 'public',
+                'sort_key': 1520150272000002,
+                'topic': 'crypt'
+            },
             {
                 'article_id': 'testid000001',
                 'status': 'public',
@@ -121,8 +127,7 @@ class TestArticlesRecent(TestCase):
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(json.loads(response['body'])['Items'], expected_items)
 
-    def test_main_ok_with_page(self):
-        # 指定なし
+    def test_main_ok_no_page(self):
         params = {
             'queryStringParameters': {
                 'limit': '20',
@@ -134,7 +139,7 @@ class TestArticlesRecent(TestCase):
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(len(json.loads(response['body'])['Items']), 20)
 
-        # 指定あり
+    def test_main_ok_with_page(self):
         params = {
             'queryStringParameters': {
                 'limit': '20',
@@ -147,11 +152,11 @@ class TestArticlesRecent(TestCase):
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(len(json.loads(response['body'])['Items']), 10)
 
-        # ページ超えた場合
+    def test_main_ok_exceed_page(self):
         params = {
             'queryStringParameters': {
                 'limit': '20',
-                'page': '100',
+                'page': '3',
                 'topic': 'dummy'
             }
         }
