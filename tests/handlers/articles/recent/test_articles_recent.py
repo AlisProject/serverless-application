@@ -23,19 +23,19 @@ class TestArticlesRecent(TestCase):
                 'article_id': 'draftId00001',
                 'status': 'draft',
                 'sort_key': 1520150272000000,
-                'topic': 'crypt'
+                'topic': 'crypto'
             },
             {
                 'article_id': 'testid000001',
                 'status': 'public',
                 'sort_key': 1520150272000001,
-                'topic': 'crypt'
+                'topic': 'crypto'
             },
             {
                 'article_id': 'testid000002',
                 'status': 'public',
                 'sort_key': 1520150272000002,
-                'topic': 'crypt'
+                'topic': 'crypto'
             },
             {
                 'article_id': 'testid000003',
@@ -103,7 +103,7 @@ class TestArticlesRecent(TestCase):
         params = {
             'queryStringParameters': {
                 'limit': '10',
-                'topic': 'crypt'
+                'topic': 'crypto'
             }
         }
 
@@ -114,13 +114,13 @@ class TestArticlesRecent(TestCase):
                 'article_id': 'testid000002',
                 'status': 'public',
                 'sort_key': 1520150272000002,
-                'topic': 'crypt'
+                'topic': 'crypto'
             },
             {
                 'article_id': 'testid000001',
                 'status': 'public',
                 'sort_key': 1520150272000001,
-                'topic': 'crypt'
+                'topic': 'crypto'
             }
         ]
 
