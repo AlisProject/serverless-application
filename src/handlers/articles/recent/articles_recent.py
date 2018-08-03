@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
-import os
 import json
 import settings
 from lambda_base import LambdaBase
-from boto3.dynamodb.conditions import Key
 from jsonschema import validate
 from decimal_encoder import DecimalEncoder
 from parameter_util import ParameterUtil
+from es_util import ESUtil
 
 
 class ArticlesRecent(LambdaBase):
@@ -16,7 +15,9 @@ class ArticlesRecent(LambdaBase):
             'properties': {
                 'limit': settings.parameters['limit'],
                 'article_id': settings.parameters['article_id'],
-                'sort_key': settings.parameters['sort_key']
+                'sort_key': settings.parameters['sort_key'],
+                'page': settings.parameters['page'],
+                'topic': settings.parameters['topic']
             }
         }
 
@@ -26,29 +27,32 @@ class ArticlesRecent(LambdaBase):
         validate(self.params, self.get_schema())
 
     def exec_main_proc(self):
-        dynamo_tbl = self.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
+        limit = int(self.params.get('limit')) if self.params.get('limit') is not None \
+            else settings.article_recent_default_limit
+        page = int(self.params.get('page')) if self.params.get('page') is not None else 1
 
-        limit = int(self.params.get('limit')) if self.params.get('limit') is not None else settings.article_recent_default_limit
+        topic = self.params.get('topic')
 
-        query_params = {
-            'Limit': limit,
-            'IndexName': 'status-sort_key-index',
-            'KeyConditionExpression': Key('status').eq('public'),
-            'ScanIndexForward': False
-        }
-
+        params = {}
+        if topic:
+            params.update({'topic': topic})
         if self.params.get('article_id') is not None and self.params.get('sort_key') is not None:
-            LastEvaluatedKey = {
-                'status': 'public',
+            params.update({
                 'article_id': self.params.get('article_id'),
                 'sort_key': self.params.get('sort_key')
-            }
+            })
 
-            query_params.update({'ExclusiveStartKey': LastEvaluatedKey})
+        results = ESUtil.search_recent_articles(self.elasticsearch, params, limit, page)
 
-        responce = dynamo_tbl.query(**query_params)
+        articles = []
+        for item in results['hits']['hits']:
+            articles.append(item['_source'])
+
+        response = {
+            'Items': articles
+        }
 
         return {
             'statusCode': 200,
-            'body': json.dumps(responce, cls=DecimalEncoder)
+            'body': json.dumps(response, cls=DecimalEncoder)
         }

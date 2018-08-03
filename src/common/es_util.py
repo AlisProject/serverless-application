@@ -62,3 +62,41 @@ class ESUtil:
                 body=body
         )
         return res
+
+    @staticmethod
+    def search_recent_articles(elasticsearch, params, limit, page):
+        body = {
+            'query': {
+                'bool': {
+                    'must': []
+                }
+            },
+            'sort': [
+                {'sort_key': 'desc'}
+            ],
+            'from': limit * (page - 1),
+            'size': limit
+        }
+
+        if params is not None and params:
+            for name, value in params.items():
+                query = {
+                    'bool': {
+                        'must': [
+                            {
+                                'match': {
+                                    name: value
+                                }
+                            }
+                        ]
+                    }
+                }
+                body['query']['bool']['must'].append(query)
+
+        res = elasticsearch.search(
+            index='articles',
+            doc_type='article',
+            body=body
+        )
+
+        return res

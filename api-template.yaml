@@ -306,6 +306,16 @@ Resources:
                 required: false
                 type: "integer"
                 minimum: 1
+              - name: "topic"
+                in: "query"
+                description: "トピック"
+                required: false
+                type: "string"
+              - name: "page"
+                in: "query"
+                description: "ページ数"
+                required: false
+                type: "integer"
               responses:
                 "200":
                   description: "最新記事一覧"
@@ -1246,6 +1256,9 @@ Resources:
       Handler: handler.lambda_handler
       Role: !GetAtt LambdaRole.Arn
       CodeUri: ./deploy/articles_recent.zip
+      Environment:
+        Variables:
+          ELASTIC_SEARCH_ENDPOINT: !GetAtt ElasticSearchService.DomainEndpoint
       Events:
         Api:
           Type: Api

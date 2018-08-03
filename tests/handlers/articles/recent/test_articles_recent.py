@@ -3,10 +3,14 @@ from articles_recent import ArticlesRecent
 from tests_util import TestsUtil
 import os
 import json
+from elasticsearch import Elasticsearch
 
 
 class TestArticlesRecent(TestCase):
     dynamodb = TestsUtil.get_dynamodb_client()
+    elasticsearch = Elasticsearch(
+        hosts=[{'host': 'localhost'}]
+    )
 
     @classmethod
     def setUpClass(cls):
@@ -18,29 +22,35 @@ class TestArticlesRecent(TestCase):
             {
                 'article_id': 'draftId00001',
                 'status': 'draft',
-                'sort_key': 1520150272000000
+                'sort_key': 1520150272000000,
+                'topic': 'crypt'
             },
             {
                 'article_id': 'testid000001',
                 'status': 'public',
-                'sort_key': 1520150272000001
+                'sort_key': 1520150272000001,
+                'topic': 'crypt'
             },
             {
                 'article_id': 'testid000002',
                 'status': 'public',
-                'sort_key': 1520150272000002
+                'sort_key': 1520150272000002,
+                'topic': 'hoge'
             },
             {
                 'article_id': 'testid000003',
                 'status': 'public',
-                'sort_key': 1520150272000003
+                'sort_key': 1520150272000003,
+                'topic': 'hoge'
             }
         ]
         TestsUtil.create_table(cls.dynamodb, os.environ['ARTICLE_INFO_TABLE_NAME'], article_info_items)
+        cls.__add_to_elastic_search(cls, article_info_items)
 
     @classmethod
     def tearDownClass(cls):
         TestsUtil.delete_all_tables(cls.dynamodb)
+        cls.elasticsearch.indices.delete(index='articles', ignore=[404])
 
     def assert_bad_request(self, params):
         function = ArticlesRecent(params, {}, self.dynamodb)
@@ -55,13 +65,14 @@ class TestArticlesRecent(TestCase):
             }
         }
 
-        response = ArticlesRecent(params, {}, self.dynamodb).main()
+        response = ArticlesRecent(params, {}, elasticsearch=self.elasticsearch).main()
 
         expected_items = [
             {
                 'article_id': 'testid000003',
                 'status': 'public',
-                'sort_key': 1520150272000003
+                'sort_key': 1520150272000003,
+                'topic': 'hoge'
             }
         ]
 
@@ -71,18 +82,22 @@ class TestArticlesRecent(TestCase):
     def test_main_ok_with_no_limit(self):
         table = TestArticlesRecent.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
 
+        es_list = []
         for i in range(21):
-            table.put_item(Item={
+            item = {
                 'article_id': 'test_limit_number' + str(i),
                 'status': 'public',
-                'sort_key': 1520150273000000 + i
-                }
-            )
+                'sort_key': 1520150273000000 + i,
+                'topic': 'crypt'
+            }
+            table.put_item(Item=item)
+            es_list.append(item)
+        self.__add_to_elastic_search(es_list)
 
         params = {
             'queryStringParameters': None
         }
-        response = ArticlesRecent(params, {}, self.dynamodb).main()
+        response = ArticlesRecent(params, {}, elasticsearch=self.elasticsearch).main()
 
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(len(json.loads(response['body'])['Items']), 20)
@@ -92,22 +107,68 @@ class TestArticlesRecent(TestCase):
             'queryStringParameters': {
                 'limit': '100',
                 'article_id': 'testid000001',
-                'sort_key': '1520150272000002'
+                'sort_key': '1520150272000001'
             }
         }
 
-        response = ArticlesRecent(params, {}, self.dynamodb).main()
+        response = ArticlesRecent(params, {}, elasticsearch=self.elasticsearch).main()
 
         expected_items = [
             {
                 'article_id': 'testid000001',
                 'status': 'public',
-                'sort_key': 1520150272000001
+                'sort_key': 1520150272000001,
+                'topic': 'crypt'
             }
         ]
 
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(json.loads(response['body'])['Items'], expected_items)
+
+    def test_main_ok_search_by_topic(self):
+        params = {
+            'queryStringParameters': {
+                'limit': '1',
+                'topic': 'crypt'
+            }
+        }
+
+        response = ArticlesRecent(params, {}, elasticsearch=self.elasticsearch).main()
+
+        expected_items = [
+            {
+                'article_id': 'testid000001',
+                'status': 'public',
+                'sort_key': 1520150272000001,
+                'topic': 'crypt'
+            }
+        ]
+
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(json.loads(response['body'])['Items'], expected_items)
+
+    def test_main_ok_with_page(self):
+        es_list = []
+        for i in range(20):
+            es_list.append({
+                'article_id': 'test_limit_number' + str(i),
+                'status': 'public',
+                'sort_key': 1520150273000000 + i,
+                'topic': 'crypt'
+            })
+        self.__add_to_elastic_search(es_list)
+
+        params = {
+            'queryStringParameters': {
+                'limit': '10',
+                'topic': 'crypt',
+                'page': '2'
+            }
+        }
+        response = ArticlesRecent(params, {}, elasticsearch=self.elasticsearch).main()
+
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(len(json.loads(response['body'])['Items']), 10)
 
     def test_validation_limit_type(self):
         params = {
@@ -180,3 +241,40 @@ class TestArticlesRecent(TestCase):
         }
 
         self.assert_bad_request(params)
+
+    def test_validation_too_long_topic(self):
+        params = {
+            'queryStringParameters': {
+                'topic': 'A' * 21
+            }
+        }
+
+        self.assert_bad_request(params)
+
+    def test_validation_invalid_page(self):
+        params = {
+            'queryStringParameters': {
+                'page': 'ALIS'
+            }
+        }
+
+        self.assert_bad_request(params)
+
+    def test_validation_too_big_page(self):
+        params = {
+            'queryStringParameters': {
+                'page': '100001'
+            }
+        }
+
+        self.assert_bad_request(params)
+
+    def __add_to_elastic_search(self, articles):
+        for article in articles:
+            self.elasticsearch.index(
+                    index='articles',
+                    doc_type='article',
+                    id=article['article_id'],
+                    body=article
+            )
+            self.elasticsearch.indices.refresh(index='articles')
