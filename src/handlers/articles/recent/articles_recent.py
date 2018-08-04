@@ -14,8 +14,6 @@ class ArticlesRecent(LambdaBase):
             'type': 'object',
             'properties': {
                 'limit': settings.parameters['limit'],
-                'article_id': settings.parameters['article_id'],
-                'sort_key': settings.parameters['sort_key'],
                 'page': settings.parameters['page'],
                 'topic': settings.parameters['topic']
             }

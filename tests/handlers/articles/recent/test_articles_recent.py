@@ -192,51 +192,6 @@ class TestArticlesRecent(TestCase):
 
         self.assert_bad_request(params)
 
-    def test_validation_article_id_max(self):
-        params = {
-            'queryStringParameters': {
-                'article_id': 'A' * 13
-            }
-        }
-
-        self.assert_bad_request(params)
-
-    def test_validation_article_id_min(self):
-        params = {
-            'queryStringParameters': {
-                'article_id': 'A' * 11
-            }
-        }
-
-        self.assert_bad_request(params)
-
-    def test_validation_sort_key_type(self):
-        params = {
-            'queryStringParameters': {
-                'sort_key': 'ALIS'
-            }
-        }
-
-        self.assert_bad_request(params)
-
-    def test_validation_sort_key_max(self):
-        params = {
-            'queryStringParameters': {
-                'sort_key': '2147483647000001'
-            }
-        }
-
-        self.assert_bad_request(params)
-
-    def test_validation_sort_key_min(self):
-        params = {
-            'queryStringParameters': {
-                'article_id': '0'
-            }
-        }
-
-        self.assert_bad_request(params)
-
     def test_validation_too_long_topic(self):
         params = {
             'queryStringParameters': {
