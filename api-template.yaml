@@ -37,6 +37,8 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   DeletedCommentTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
+  TopicTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
   AlisAppDomain:
     Type: 'AWS::SSM::Parameter::Value<String>'
   PrivateChainAwsAccessKey:
@@ -78,6 +80,7 @@ Globals:
         COMMENT_TABLE_NAME: !Ref CommentTableName
         COMMENT_LIKED_USER_TABLE_NAME: !Ref CommentLikedUserTableName
         DELETED_COMMENT_TABLE_NAME: !Ref DeletedCommentTableName
+        TOPIC_TABLE_NAME: !Ref TopicTableName
         DOMAIN: !Ref AlisAppDomain
         PRIVATE_CHAIN_AWS_ACCESS_KEY: !Ref PrivateChainAwsAccessKey
         PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY: !Ref PrivateChainAwsSecretAccessKey
@@ -341,17 +344,17 @@ Resources:
                 required: false
                 type: 'integer'
                 minimum: 1
-              - name: 'article_id'
+              - name: 'page'
                 in: 'query'
-                description: 'ページング処理における、現在のページの最後の記事のID'
-                required: false
-                type: 'string'
-              - name: 'score'
-                in: 'query'
-                description: 'ページング処理における、現在のページの最後の記事のスコア数'
+                description: '取得対象ページのoffset'
                 required: false
                 type: 'integer'
                 minimum: 1
+              - name: 'topic'
+                in: 'query'
+                description: '検索対象のトピック名'
+                required: false
+                type: 'string'
               responses:
                 '200':
                   description: '人気記事一覧'
@@ -1222,6 +1225,26 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+          /topics:
+            get:
+              description: トピックの一覧を取得
+              responses:
+                '200':
+                  description: トピックの一覧
+                  schema:
+                    type: array
+                    items:
+                      type: string
+                      enum:
+                        - crypto
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${TopicsIndex.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
         securityDefinitions:
           cognitoUserPool:
             type: apiKey
@@ -1272,6 +1295,9 @@ Resources:
       Handler: handler.lambda_handler
       Role: !GetAtt LambdaRole.Arn
       CodeUri: ./deploy/articles_popular.zip
+      Environment:
+        Variables:
+          ELASTIC_SEARCH_ENDPOINT: !GetAtt ElasticSearchService.DomainEndpoint
       Events:
         Api:
           Type: Api
@@ -1726,6 +1752,19 @@ Resources:
           Properties:
             Path: /me/unread_notification_managers
             Method: put
+            RestApiId: !Ref RestApi
+  TopicsIndex:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/topics_index.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /topics
+            Method: get
             RestApiId: !Ref RestApi
   ElasticSearchSearchArticles:
     Type: AWS::Serverless::Function
