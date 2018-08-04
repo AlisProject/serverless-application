@@ -87,4 +87,6 @@ class ESUtil:
             body=body
         )
 
-        return res
+        articles = [item['_source'] for item in res['hits']['hits']]
+
+        return articles

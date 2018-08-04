@@ -31,11 +31,7 @@ class ArticlesRecent(LambdaBase):
             else settings.article_recent_default_limit
         page = int(self.params.get('page')) if self.params.get('page') is not None else 1
 
-        results = ESUtil.search_recent_articles(self.elasticsearch, self.params, limit, page)
-
-        articles = []
-        for item in results['hits']['hits']:
-            articles.append(item['_source'])
+        articles = ESUtil.search_recent_articles(self.elasticsearch, self.params, limit, page)
 
         response = {
             'Items': articles
