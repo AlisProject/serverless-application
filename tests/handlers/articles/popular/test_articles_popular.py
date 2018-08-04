@@ -1,83 +1,80 @@
+import uuid
 from unittest import TestCase
+
+import settings
+from elasticsearch import Elasticsearch
+from tests_es_util import TestsEsUtil
+
 from articles_popular import ArticlesPopular
 from tests_util import TestsUtil
-import os
 import json
 
 
 class TestArticlesPopular(TestCase):
     dynamodb = TestsUtil.get_dynamodb_client()
+    elasticsearch = Elasticsearch(
+        hosts=[{'host': 'localhost'}]
+    )
 
     def setUp(self):
-        TestsUtil.set_all_tables_name_to_env()
-        TestsUtil.delete_all_tables(self.dynamodb)
+        TestsEsUtil.delete_alias(self.elasticsearch, settings.ARTICLE_SCORE_INDEX_NAME)
 
-        # create article_info_table
+        # 実際のIndexと挙動をなるべく合わせるためエイリアスを利用している。
+        index_name = settings.ARTICLE_SCORE_INDEX_NAME + str(uuid.uuid4())
+        self.elasticsearch.indices.create(index=index_name)
+        self.elasticsearch.indices.put_alias(index_name, settings.ARTICLE_SCORE_INDEX_NAME)
+
         article_info_items = [
             {
-                'article_id': 'draftid00001',
-                'status': 'draft',
-                'sort_key': 1520150272000000
-            },
-            {
                 'article_id': 'testid000001',
+                'user_id': 'matsumatsu20',
+                'created_at': 1520150272,
+                'title': 'title02',
+                'overview': 'overview02',
                 'status': 'public',
+                'topic': 'crypto',
+                'article_score': 12,
                 'sort_key': 1520150272000001
             },
             {
                 'article_id': 'testid000002',
+                'user_id': 'matsumatsu20',
+                'created_at': 1520150272,
+                'title': 'title03',
+                'overview': 'overview03',
                 'status': 'public',
+                'topic': 'fashion',
+                'article_score': 18,
                 'sort_key': 1520150272000002
             },
             {
                 'article_id': 'testid000003',
+                'user_id': 'matsumatsu20',
+                'created_at': 1520150272,
+                'title': 'title04',
+                'overview': 'overview04',
                 'status': 'public',
+                'topic': 'crypto',
+                'article_score': 6,
                 'sort_key': 1520150272000003
             }
         ]
-        TestsUtil.create_table(self.dynamodb, os.environ['ARTICLE_INFO_TABLE_NAME'], article_info_items)
 
-        article_score_items = [
-            {
-                'article_id': 'draftid00001',
-                'score': 24,
-                'evaluated_at': 1520150272000000
-            },
-            {
-                'article_id': 'testid000001',
-                'score': 12,
-                'evaluated_at': 1520150272000000
-            },
-            {
-                'article_id': 'testid000002',
-                'score': 18,
-                'evaluated_at': 1520150272000000
-            },
-            {
-                'article_id': 'testid000003',
-                'score': 6,
-                'evaluated_at': 1520150272000000
-            }
-        ]
-        TestsUtil.create_table(self.dynamodb, os.environ['ARTICLE_SCORE_TABLE_NAME'], article_score_items)
+        for article_info in article_info_items:
+            self.elasticsearch.index(
+                index=settings.ARTICLE_SCORE_INDEX_NAME,
+                doc_type="article_score",
+                id=article_info['article_id'],
+                body=article_info
+            )
 
-        evaluated_manage_items = [
-            {
-                'type': 'article_score',
-                'active_evaluated_at': 1520150272000000
-            },
-            {
-                'type': 'alistoken',
-                'active_evaluated_at': 1520150273000000
-            }
-        ]
-        TestsUtil.create_table(self.dynamodb, os.environ['ARTICLE_EVALUATED_MANAGE_TABLE_NAME'], evaluated_manage_items)
+        self.elasticsearch.indices.refresh(settings.ARTICLE_SCORE_INDEX_NAME)
 
     def tearDown(self):
         TestsUtil.delete_all_tables(self.dynamodb)
 
     def assert_bad_request(self, params):
-        function = ArticlesPopular(params, {}, self.dynamodb)
+        function = ArticlesPopular(params, {}, dynamodb=self.dynamodb, elasticsearch=self.elasticsearch)
         response = function.main()
 
         self.assertEqual(response['statusCode'], 400)
@@ -85,78 +82,99 @@ class TestArticlesPopular(TestCase):
     def test_main_ok(self):
         params = {
             'queryStringParameters': {
-                'limit': '3'
+                'limit': '2'
             }
         }
 
-        response = ArticlesPopular(params, {}, self.dynamodb).main()
+        response = ArticlesPopular(params, {}, dynamodb=self.dynamodb, elasticsearch=self.elasticsearch).main()
 
         expected_items = [
             {
                 'article_id': 'testid000002',
+                'user_id': 'matsumatsu20',
+                'created_at': 1520150272,
+                'title': 'title03',
+                'overview': 'overview03',
                 'status': 'public',
+                'topic': 'fashion',
+                'article_score': 18,
                 'sort_key': 1520150272000002
             },
             {
                 'article_id': 'testid000001',
+                'user_id': 'matsumatsu20',
+                'created_at': 1520150272,
+                'title': 'title02',
+                'overview': 'overview02',
                 'status': 'public',
+                'topic': 'crypto',
+                'article_score': 12,
                 'sort_key': 1520150272000001
             }
         ]
 
-        expected_evaluated_key = {
-            'article_id': 'testid000001',
-            'score': 12,
-            'evaluated_at': 1520150272000000
-        }
-
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(json.loads(response['body'])['Items'], expected_items)
-        self.assertEqual(json.loads(response['body'])['LastEvaluatedKey'], expected_evaluated_key)
 
     def test_main_ok_with_no_limit(self):
-        article_info_table = self.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
-        article_score_table = self.dynamodb.Table(os.environ['ARTICLE_SCORE_TABLE_NAME'])
-
         for i in range(21):
-            article_info_table.put_item(Item={
-                'article_id': 'test_limit_number' + str(i),
-                'status': 'public',
-                'sort_key': 1520150273000000 + i
+            self.elasticsearch.index(
+                index=settings.ARTICLE_SCORE_INDEX_NAME,
+                doc_type="article_score",
+                id='test_limit_number' + str(i),
+                body={
+                    'article_id': 'test_limit_number' + str(i),
+                    'user_id': 'matsumatsu20',
+                    'created_at': 1520150272,
+                    'title': 'title03',
+                    'overview': 'overview03',
+                    'status': 'public',
+                    'topic': 'crypto',
+                    'article_score': 30,
+                    'sort_key': 1520150273000000 + i
                 }
             )
 
-            article_score_table.put_item(Item={
-                'article_id': 'test_limit_number' + str(i),
-                'score': 30,
-                'evaluated_at': 1520150272000000
-                }
-            )
+        self.elasticsearch.indices.refresh(settings.ARTICLE_SCORE_INDEX_NAME)
 
         params = {
             'queryStringParameters': None
         }
-        response = ArticlesPopular(params, {}, self.dynamodb).main()
+        response = ArticlesPopular(params, {}, dynamodb=self.dynamodb, elasticsearch=self.elasticsearch).main()
 
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(len(json.loads(response['body'])['Items']), 20)
 
-    def test_main_ok_with_evaluated_key(self):
+    def test_main_ok_with_topic(self):
         params = {
             'queryStringParameters': {
-                'limit': '100',
-                'article_id': 'testid000001',
-                'score': '12',
-                'evaluated_at': '1520150272000000'
+                'topic': 'crypto'
             }
         }
 
-        response = ArticlesPopular(params, {}, self.dynamodb).main()
+        response = ArticlesPopular(params, {}, dynamodb=self.dynamodb, elasticsearch=self.elasticsearch).main()
 
         expected_items = [
             {
-                'article_id': 'testid000003',
+                'article_id': 'testid000001',
+                'user_id': 'matsumatsu20',
+                'created_at': 1520150272,
+                'title': 'title02',
+                'overview': 'overview02',
                 'status': 'public',
+                'topic': 'crypto',
+                'article_score': 12,
+                'sort_key': 1520150272000001
+            },
+            {
+                'article_id': 'testid000003',
+                'user_id': 'matsumatsu20',
+                'created_at': 1520150272,
+                'title': 'title04',
+                'overview': 'overview04',
+                'status': 'public',
+                'topic': 'crypto',
+                'article_score': 6,
                 'sort_key': 1520150272000003
             }
         ]
@@ -164,61 +182,26 @@ class TestArticlesPopular(TestCase):
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(json.loads(response['body'])['Items'], expected_items)
 
-    def test_main_no_evaluated_manager(self):
-        article_evaluated_manage_table = self.dynamodb.Table(os.environ['ARTICLE_EVALUATED_MANAGE_TABLE_NAME'])
-        article_evaluated_manage_table.delete_item(Key={'type': 'article_score'})
-
-        params = {
-            'queryStringParameters': {
-                'limit': '3'
-            }
-        }
-
-        response = ArticlesPopular(params, {}, self.dynamodb).main()
-
-        self.assertEqual(response['statusCode'], 200)
-        self.assertEqual(json.loads(response['body']), [])
-
-    def test_scenario_evaluated_at_changed_within_pagination(self):
-        # 初回の記事一覧取得
-        params = {
-            'queryStringParameters': {
-                'limit': '2'
-            }
-        }
-
-        response = ArticlesPopular(params, {}, self.dynamodb).main()
-        evaluated_key = json.loads(response['body'])['LastEvaluatedKey']
-        self.assertEqual(response['statusCode'], 200)
-
-        # 2回目の記事一覧取得、初回で得られたevaluated_keyを利用
-        # かつ処理の途中でバッチが実行されたことを想定して、ArticleEvaluatedManageを更新する
-        article_evaluated_manage_table = self.dynamodb.Table(os.environ['ARTICLE_EVALUATED_MANAGE_TABLE_NAME'])
-        article_evaluated_manage_table.put_item(Item={
-            'type': 'article_score',
-            'active_evaluated_at': 1520150272000100
-        })
-
+    def test_main_ok_with_page(self):
         params = {
             'queryStringParameters': {
                 'limit': '2',
-                'article_id': evaluated_key['article_id'],
-                'score': str(evaluated_key['score']),
-                'evaluated_at': str(evaluated_key['evaluated_at'])
+                'page': '2'
             }
         }
 
-        response = ArticlesPopular(params, {}, self.dynamodb).main()
+        response = ArticlesPopular(params, {}, dynamodb=self.dynamodb, elasticsearch=self.elasticsearch).main()
 
         expected_items = [
             {
-                'article_id': 'testid000001',
-                'status': 'public',
-                'sort_key': 1520150272000001
-            },
-            {
                 'article_id': 'testid000003',
+                'user_id': 'matsumatsu20',
+                'created_at': 1520150272,
+                'title': 'title04',
+                'overview': 'overview04',
                 'status': 'public',
+                'topic': 'crypto',
+                'article_score': 6,
                 'sort_key': 1520150272000003
             }
         ]
@@ -253,64 +236,37 @@ class TestArticlesPopular(TestCase):
 
         self.assert_bad_request(params)
 
-    def test_validation_article_id_max(self):
+    def test_validation_topic_max(self):
         params = {
             'queryStringParameters': {
-                'article_id': 'A' * 13
+                'topic': 'A' * 21
             }
         }
 
         self.assert_bad_request(params)
 
-    def test_validation_article_id_min(self):
+    def test_validation_page_type(self):
         params = {
             'queryStringParameters': {
-                'article_id': 'A' * 11
+                'page': 'A' * 21
             }
         }
 
         self.assert_bad_request(params)
 
-    def test_validation_score_type(self):
+    def test_validation_page_max(self):
         params = {
             'queryStringParameters': {
-                'score': 'ALIS'
+                'page': '100001'
             }
         }
 
         self.assert_bad_request(params)
 
-    def test_validation_score_max(self):
+    def test_validation_page_min(self):
         params = {
             'queryStringParameters': {
-                'score': '2147483647000001'
-            }
-        }
-
-        self.assert_bad_request(params)
-
-    def test_validation_score_min(self):
-        params = {
-            'queryStringParameters': {
-                'score': '0'
-            }
-        }
-
-        self.assert_bad_request(params)
-
-    def test_validation_evaluated_at_max(self):
-        params = {
-            'queryStringParameters': {
-                'evaluated_at': '2147483647000001'
-            }
-        }
-
-        self.assert_bad_request(params)
-
-    def test_validation_evaluated_at_min(self):
-        params = {
-            'queryStringParameters': {
-                'evaluated_at': '0'
+                'page': '0'
             }
         }
 
