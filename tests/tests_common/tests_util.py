@@ -83,7 +83,8 @@ class TestsUtil:
             {'env_name': 'UNREAD_NOTIFICATION_MANAGER_TABLE_NAME', 'table_name': 'UnreadNotificationManager'},
             {'env_name': 'COMMENT_TABLE_NAME', 'table_name': 'Comment'},
             {'env_name': 'COMMENT_LIKED_USER_TABLE_NAME',  'table_name': 'CommentLikedUser'},
-            {'env_name': 'DELETED_COMMENT_TABLE_NAME',  'table_name': 'DeletedComment'}
+            {'env_name': 'DELETED_COMMENT_TABLE_NAME',  'table_name': 'DeletedComment'},
+            {'env_name': 'TOPIC_TABLE_NAME', 'table_name': 'Topic'}
         ]
         if os.environ.get('IS_DYNAMODB_ENDPOINT_OF_AWS') is not None:
             for table in cls.all_tables:

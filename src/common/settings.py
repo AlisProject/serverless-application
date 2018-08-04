@@ -160,3 +160,5 @@ S3_INFO_ICON_PATH = 'd/api/info_icon/'
 
 LIKE_NOTIFICATION_TYPE = 'like'
 COMMENT_NOTIFICATION_TYPE = 'comment'
+
+TOPIC_INDEX_HASH_KEY = 'topic'
