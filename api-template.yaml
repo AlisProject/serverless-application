@@ -217,6 +217,17 @@ Resources:
                 type: string
               created_at:
                 type: integer
+          Topic:
+            type: object
+            properties:
+              name:
+                type: string
+              display_name:
+                type: string
+              order:
+                type: integer
+              index_hash_key:
+                type: string
         paths:
           /search/articles:
             get:
@@ -1224,9 +1235,7 @@ Resources:
                   schema:
                     type: array
                     items:
-                      type: string
-                      enum:
-                        - crypto
+                      $ref: '#/definitions/Topic'
               x-amazon-apigateway-integration:
                 responses:
                   default:
