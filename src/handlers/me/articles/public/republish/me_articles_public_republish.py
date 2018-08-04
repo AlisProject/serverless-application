@@ -13,9 +13,10 @@ class MeArticlesPublicRepublish(LambdaBase):
         return {
             'type': 'object',
             'properties': {
-                'article_id': settings.parameters['article_id']
+                'article_id': settings.parameters['article_id'],
+                'topic': settings.parameters['topic']
             },
-            'required': ['article_id']
+            'required': ['article_id', 'topic']
         }
 
     def validate_params(self):
@@ -30,6 +31,8 @@ class MeArticlesPublicRepublish(LambdaBase):
             user_id=self.event['requestContext']['authorizer']['claims']['cognito:username'],
             status='public'
         )
+
+        DBUtil.validate_topic(self.dynamodb, self.params['topic'])
 
     def exec_main_proc(self):
         article_content_edit_table = self.dynamodb.Table(os.environ['ARTICLE_CONTENT_EDIT_TABLE_NAME'])
@@ -55,12 +58,13 @@ class MeArticlesPublicRepublish(LambdaBase):
                 'article_id': self.params['article_id'],
             },
             UpdateExpression=("set title = :title, overview=:overview, eye_catch_url=:eye_catch_url, "
-                              "sync_elasticsearch=:sync_elasticsearch"),
+                              "sync_elasticsearch=:sync_elasticsearch, topic=:topic"),
             ExpressionAttributeValues={
                 ':title': article_content_edit['title'],
                 ':overview': article_content_edit['overview'],
                 ':eye_catch_url': article_content_edit['eye_catch_url'],
                 ':sync_elasticsearch': 1,
+                ':topic': self.params['topic']
             }
         )
 
