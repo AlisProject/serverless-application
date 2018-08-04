@@ -334,17 +334,17 @@ Resources:
                 required: false
                 type: 'integer'
                 minimum: 1
-              - name: 'article_id'
+              - name: 'page'
                 in: 'query'
-                description: 'ページング処理における、現在のページの最後の記事のID'
-                required: false
-                type: 'string'
-              - name: 'score'
-                in: 'query'
-                description: 'ページング処理における、現在のページの最後の記事のスコア数'
+                description: '取得対象ページのoffset'
                 required: false
                 type: 'integer'
                 minimum: 1
+              - name: 'topic'
+                in: 'query'
+                description: '検索対象のトピック名'
+                required: false
+                type: 'string'
               responses:
                 '200':
                   description: '人気記事一覧'
@@ -1282,6 +1282,9 @@ Resources:
       Handler: handler.lambda_handler
       Role: !GetAtt LambdaRole.Arn
       CodeUri: ./deploy/articles_popular.zip
+      Environment:
+        Variables:
+          ELASTIC_SEARCH_ENDPOINT: !GetAtt ElasticSearchService.DomainEndpoint
       Events:
         Api:
           Type: Api

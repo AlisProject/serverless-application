@@ -95,6 +95,11 @@ parameters = {
         'type': 'string',
         'minLength': 1,
         'maxLength': 150
+    },
+    'topic': {
+        'type': 'string',
+        'minLength': 1,
+        'maxLength': 20
     }
 }
 
@@ -161,4 +166,5 @@ S3_INFO_ICON_PATH = 'd/api/info_icon/'
 LIKE_NOTIFICATION_TYPE = 'like'
 COMMENT_NOTIFICATION_TYPE = 'comment'
 
+ARTICLE_SCORE_INDEX_NAME = 'article_scores'
 TOPIC_INDEX_HASH_KEY = 'topic'
