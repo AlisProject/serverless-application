@@ -79,18 +79,7 @@ class ESUtil:
         }
 
         if params.get('topic'):
-            query = {
-                'bool': {
-                    'must': [
-                        {
-                            'match': {
-                                'topic': params.get('topic')
-                            }
-                        }
-                    ]
-                }
-            }
-            body['query']['bool']['must'].append(query)
+            body['query']['bool']['must'].append({'match': {'topic': params.get('topic')}})
 
         res = elasticsearch.search(
             index='articles',
