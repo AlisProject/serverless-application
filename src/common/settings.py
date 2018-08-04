@@ -95,6 +95,11 @@ parameters = {
         'type': 'string',
         'minLength': 1,
         'maxLength': 150
+    },
+    'topic': {
+        'type': 'string',
+        'minLength': 1,
+        'maxLength': 20
     }
 }
 

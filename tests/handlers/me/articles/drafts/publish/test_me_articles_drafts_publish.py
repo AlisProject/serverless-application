@@ -1,6 +1,8 @@
 import os
 import boto3
 import time
+
+import settings
 from boto3.dynamodb.conditions import Key
 from unittest import TestCase
 from me_articles_drafts_publish import MeArticlesDraftsPublish
@@ -87,6 +89,13 @@ class TestMeArticlesDraftsPublish(TestCase):
         ]
         TestsUtil.create_table(self.dynamodb, os.environ['ARTICLE_HISTORY_TABLE_NAME'], article_history_items)
 
+        topic_items = [
+            {'name': 'crypto', 'order': 1, 'index_hash_key': settings.TOPIC_INDEX_HASH_KEY},
+            {'name': 'fashion', 'order': 2, 'index_hash_key': settings.TOPIC_INDEX_HASH_KEY},
+            {'name': 'food', 'order': 3, 'index_hash_key': settings.TOPIC_INDEX_HASH_KEY}
+        ]
+        TestsUtil.create_table(self.dynamodb, os.environ['TOPIC_TABLE_NAME'], topic_items)
+
     def tearDown(cls):
         TestsUtil.delete_all_tables(cls.dynamodb)
 
@@ -101,7 +110,8 @@ class TestMeArticlesDraftsPublish(TestCase):
     def test_main_ok(self):
         params = {
             'pathParameters': {
-                'article_id': 'draftId00001'
+                'article_id': 'draftId00001',
+                'topic': 'crypto'
             },
             'requestContext': {
                 'authorizer': {
@@ -122,6 +132,8 @@ class TestMeArticlesDraftsPublish(TestCase):
         article_history_after = self.article_history_table.scan()['Items']
         article_content_edit_after = self.article_content_edit_table.scan()['Items']
 
+        self.assertEqual(response['statusCode'], 200)
+
         article_info = self.article_info_table.get_item(Key={'article_id': params['pathParameters']['article_id']})['Item']
         article_content = self.article_content_table.get_item(
             Key={'article_id': params['pathParameters']['article_id']}
@@ -130,11 +142,11 @@ class TestMeArticlesDraftsPublish(TestCase):
             KeyConditionExpression=Key('article_id').eq(params['pathParameters']['article_id'])
         )['Items'][-1]
 
-        self.assertEqual(response['statusCode'], 200)
         self.assertEqual(article_info['status'], 'public')
         self.assertEqual(article_info['sort_key'], 1520150552000000)
         self.assertEqual(article_info['published_at'], 1525000000)
         self.assertEqual(article_info['sync_elasticsearch'], 1)
+        self.assertEqual(article_info['topic'], 'crypto')
         self.assertEqual(article_content['title'], article_history['title'])
         self.assertEqual(article_content['body'], article_history['body'])
         self.assertEqual(len(article_info_after) - len(article_info_before), 0)
@@ -144,7 +156,8 @@ class TestMeArticlesDraftsPublish(TestCase):
     def test_main_ok_with_article_content_edit(self):
         params = {
             'pathParameters': {
-                'article_id': 'draftId00002'
+                'article_id': 'draftId00002',
+                'topic': 'crypto'
             },
             'requestContext': {
                 'authorizer': {
@@ -186,7 +199,8 @@ class TestMeArticlesDraftsPublish(TestCase):
     def test_main_ok_article_history_arleady_exists(self):
         params = {
             'pathParameters': {
-                'article_id': 'draftId00003'
+                'article_id': 'draftId00003',
+                'topic': 'crypto'
             },
             'requestContext': {
                 'authorizer': {
@@ -225,10 +239,11 @@ class TestMeArticlesDraftsPublish(TestCase):
         self.assertEqual(len(article_history_after) - len(article_history_before), 1)
         self.assertEqual(len(article_content_edit_after) - len(article_content_edit_before), 0)
 
-    def test_call_validate_article_existence(self):
+    def test_call_validate_methods(self):
         params = {
             'pathParameters': {
-                'article_id': 'draftId00001'
+                'article_id': 'draftId00001',
+                'topic': 'crypto'
             },
             'requestContext': {
                 'authorizer': {
@@ -242,17 +257,24 @@ class TestMeArticlesDraftsPublish(TestCase):
         mock_lib = MagicMock()
         with patch('me_articles_drafts_publish.DBUtil', mock_lib):
             MeArticlesDraftsPublish(params, {}, self.dynamodb).main()
-            args, kwargs = mock_lib.validate_article_existence.call_args
 
             self.assertTrue(mock_lib.validate_article_existence.called)
+            args, kwargs = mock_lib.validate_article_existence.call_args
             self.assertTrue(args[0])
             self.assertTrue(args[1])
             self.assertTrue(kwargs['user_id'])
             self.assertEqual(kwargs['status'], 'draft')
 
-    def test_validation_with_no_params(self):
+            self.assertTrue(mock_lib.validate_topic.called)
+            args, kwargs = mock_lib.validate_topic.call_args
+            self.assertTrue(args[0])
+            self.assertEqual(args[1], 'crypto')
+
+    def test_validation_with_no_article_id(self):
         params = {
-            'pathParameters': {}
+            'pathParameters': {
+                'topic': 'crypto'
+            }
         }
 
         self.assert_bad_request(params)
@@ -260,7 +282,8 @@ class TestMeArticlesDraftsPublish(TestCase):
     def test_validation_article_id_max(self):
         params = {
             'queryStringParameters': {
-                'article_id': 'A' * 13
+                'article_id': 'A' * 13,
+                'topic': 'crypto'
             }
         }
 
@@ -269,7 +292,27 @@ class TestMeArticlesDraftsPublish(TestCase):
     def test_validation_article_id_min(self):
         params = {
             'queryStringParameters': {
-                'article_id': 'A' * 11
+                'article_id': 'A' * 11,
+                'topic': 'crypto'
+            }
+        }
+
+        self.assert_bad_request(params)
+
+    def test_validation_with_no_topic(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'draftId00001'
+            }
+        }
+
+        self.assert_bad_request(params)
+
+    def test_validation_topic_max(self):
+        params = {
+            'queryStringParameters': {
+                'article_id': 'draftId00001',
+                'topic': 'A' * 21
             }
         }
 
