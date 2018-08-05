@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
 import settings
+from db_util import DBUtil
 from es_util import ESUtil
 from lambda_base import LambdaBase
 from jsonschema import validate
@@ -23,6 +24,9 @@ class ArticlesPopular(LambdaBase):
         ParameterUtil.cast_parameter_to_int(self.params, self.get_schema())
 
         validate(self.params, self.get_schema())
+
+        if self.params.get('topic'):
+            DBUtil.validate_topic(self.dynamodb, self.params['topic'])
 
     def exec_main_proc(self):
         limit = int(self.params['limit']) if self.params.get('limit') else settings.articles_popular_default_limit

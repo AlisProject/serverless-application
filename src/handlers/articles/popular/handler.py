@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 import os
 
+import boto3
 from elasticsearch import Elasticsearch, RequestsHttpConnection
 from requests_aws4auth import AWS4Auth
 
 from articles_popular import ArticlesPopular
 
+dynamodb = boto3.resource('dynamodb')
 awsauth = AWS4Auth(
     os.environ['AWS_ACCESS_KEY_ID'],
     os.environ['AWS_SECRET_ACCESS_KEY'],
@@ -23,5 +25,5 @@ elasticsearch = Elasticsearch(
 
 
 def lambda_handler(event, context):
-    articles_popular = ArticlesPopular(event, context, elasticsearch=elasticsearch)
+    articles_popular = ArticlesPopular(event, context, dynamodb=dynamodb, elasticsearch=elasticsearch)
     return articles_popular.main()

@@ -1,4 +1,7 @@
 from unittest import TestCase
+from unittest.mock import MagicMock, patch
+
+import settings
 from articles_recent import ArticlesRecent
 from tests_util import TestsUtil
 import os
@@ -42,7 +45,7 @@ class TestArticlesRecent(TestCase):
                 'article_id': 'testid000003',
                 'status': 'public',
                 'sort_key': 1520150272000003,
-                'topic': 'hoge'
+                'topic': 'fashion'
             }
         ]
 
@@ -51,7 +54,7 @@ class TestArticlesRecent(TestCase):
                 'article_id': 'test_dummy_article-' + str(i),
                 'status': 'public',
                 'sort_key': 1520150271000000 + i,
-                'topic': 'dummy'
+                'topic': 'food'
             })
 
         TestsUtil.create_table(cls.dynamodb, os.environ['ARTICLE_INFO_TABLE_NAME'], article_info_items)
@@ -59,13 +62,20 @@ class TestArticlesRecent(TestCase):
         TestsEsUtil.create_articles_index(cls.elasticsearch)
         TestsEsUtil.sync_public_articles_from_dynamodb(cls.dynamodb, cls.elasticsearch)
 
+        topic_items = [
+            {'name': 'crypto', 'order': 1, 'index_hash_key': settings.TOPIC_INDEX_HASH_KEY},
+            {'name': 'fashion', 'order': 2, 'index_hash_key': settings.TOPIC_INDEX_HASH_KEY},
+            {'name': 'food', 'order': 3, 'index_hash_key': settings.TOPIC_INDEX_HASH_KEY}
+        ]
+        TestsUtil.create_table(cls.dynamodb, os.environ['TOPIC_TABLE_NAME'], topic_items)
+
     @classmethod
     def tearDownClass(cls):
         TestsUtil.delete_all_tables(cls.dynamodb)
         TestsEsUtil.remove_articles_index(cls.elasticsearch)
 
     def assert_bad_request(self, params):
-        function = ArticlesRecent(params, {}, elasticsearch=self.elasticsearch)
+        function = ArticlesRecent(params, {}, dynamodb=self.dynamodb, elasticsearch=self.elasticsearch)
         response = function.main()
 
         self.assertEqual(response['statusCode'], 400)
@@ -77,14 +87,14 @@ class TestArticlesRecent(TestCase):
             }
         }
 
-        response = ArticlesRecent(params, {}, elasticsearch=self.elasticsearch).main()
+        response = ArticlesRecent(params, {}, dynamodb=self.dynamodb, elasticsearch=self.elasticsearch).main()
 
         expected_items = [
             {
                 'article_id': 'testid000003',
                 'status': 'public',
                 'sort_key': 1520150272000003,
-                'topic': 'hoge'
+                'topic': 'fashion'
             }
         ]
 
@@ -95,7 +105,7 @@ class TestArticlesRecent(TestCase):
         params = {
             'queryStringParameters': None
         }
-        response = ArticlesRecent(params, {}, elasticsearch=self.elasticsearch).main()
+        response = ArticlesRecent(params, {}, dynamodb=self.dynamodb, elasticsearch=self.elasticsearch).main()
 
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(len(json.loads(response['body'])['Items']), 20)
@@ -108,7 +118,7 @@ class TestArticlesRecent(TestCase):
             }
         }
 
-        response = ArticlesRecent(params, {}, elasticsearch=self.elasticsearch).main()
+        response = ArticlesRecent(params, {}, dynamodb=self.dynamodb, elasticsearch=self.elasticsearch).main()
 
         expected_items = [
             {
@@ -132,10 +142,10 @@ class TestArticlesRecent(TestCase):
         params = {
             'queryStringParameters': {
                 'limit': '20',
-                'topic': 'dummy'
+                'topic': 'food'
             }
         }
-        response = ArticlesRecent(params, {}, elasticsearch=self.elasticsearch).main()
+        response = ArticlesRecent(params, {}, dynamodb=self.dynamodb, elasticsearch=self.elasticsearch).main()
 
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(len(json.loads(response['body'])['Items']), 20)
@@ -145,10 +155,10 @@ class TestArticlesRecent(TestCase):
             'queryStringParameters': {
                 'limit': '20',
                 'page': '2',
-                'topic': 'dummy'
+                'topic': 'food'
             }
         }
-        response = ArticlesRecent(params, {}, elasticsearch=self.elasticsearch).main()
+        response = ArticlesRecent(params, {}, dynamodb=self.dynamodb, elasticsearch=self.elasticsearch).main()
 
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(len(json.loads(response['body'])['Items']), 10)
@@ -158,13 +168,29 @@ class TestArticlesRecent(TestCase):
             'queryStringParameters': {
                 'limit': '20',
                 'page': '3',
-                'topic': 'dummy'
+                'topic': 'food'
             }
         }
-        response = ArticlesRecent(params, {}, elasticsearch=self.elasticsearch).main()
+        response = ArticlesRecent(params, {}, dynamodb=self.dynamodb, elasticsearch=self.elasticsearch).main()
 
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(len(json.loads(response['body'])['Items']), 0)
+
+    def test_call_validate_topic(self):
+        params = {
+            'queryStringParameters': {
+                'topic': 'crypto'
+            }
+        }
+
+        mock_lib = MagicMock()
+        with patch('articles_recent.DBUtil', mock_lib):
+            ArticlesRecent(params, {}, dynamodb=self.dynamodb, elasticsearch=self.elasticsearch).main()
+
+            self.assertTrue(mock_lib.validate_topic.called)
+            args, kwargs = mock_lib.validate_topic.call_args
+            self.assertTrue(args[0])
+            self.assertEqual(args[1], 'crypto')
 
     def test_validation_limit_type(self):
         params = {
