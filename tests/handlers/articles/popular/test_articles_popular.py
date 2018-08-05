@@ -1,5 +1,7 @@
+import os
 import uuid
 from unittest import TestCase
+from unittest.mock import MagicMock, patch
 
 import settings
 from elasticsearch import Elasticsearch
@@ -17,6 +19,7 @@ class TestArticlesPopular(TestCase):
     )
 
     def setUp(self):
+        TestsUtil.set_all_tables_name_to_env()
         TestsEsUtil.delete_alias(self.elasticsearch, settings.ARTICLE_SCORE_INDEX_NAME)
 
         # 実際のIndexと挙動をなるべく合わせるためエイリアスを利用している。
@@ -69,6 +72,13 @@ class TestArticlesPopular(TestCase):
             )
 
         self.elasticsearch.indices.refresh(settings.ARTICLE_SCORE_INDEX_NAME)
+
+        topic_items = [
+            {'name': 'crypto', 'order': 1, 'index_hash_key': settings.TOPIC_INDEX_HASH_KEY},
+            {'name': 'fashion', 'order': 2, 'index_hash_key': settings.TOPIC_INDEX_HASH_KEY},
+            {'name': 'food', 'order': 3, 'index_hash_key': settings.TOPIC_INDEX_HASH_KEY}
+        ]
+        TestsUtil.create_table(self.dynamodb, os.environ['TOPIC_TABLE_NAME'], topic_items)
 
     def tearDown(self):
         TestsUtil.delete_all_tables(self.dynamodb)
@@ -208,6 +218,22 @@ class TestArticlesPopular(TestCase):
 
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(json.loads(response['body'])['Items'], expected_items)
+
+    def test_call_validate_topic(self):
+        params = {
+            'queryStringParameters': {
+                'topic': 'crypto'
+            }
+        }
+
+        mock_lib = MagicMock()
+        with patch('articles_popular.DBUtil', mock_lib):
+            ArticlesPopular(params, {}, dynamodb=self.dynamodb, elasticsearch=self.elasticsearch).main()
+
+            self.assertTrue(mock_lib.validate_topic.called)
+            args, kwargs = mock_lib.validate_topic.call_args
+            self.assertTrue(args[0])
+            self.assertEqual(args[1], 'crypto')
 
     def test_validation_limit_type(self):
         params = {

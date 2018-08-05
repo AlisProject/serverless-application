@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
 import settings
+from db_util import DBUtil
 from lambda_base import LambdaBase
 from jsonschema import validate
 from decimal_encoder import DecimalEncoder
@@ -23,6 +24,9 @@ class ArticlesRecent(LambdaBase):
         ParameterUtil.cast_parameter_to_int(self.params, self.get_schema())
 
         validate(self.params, self.get_schema())
+
+        if self.params.get('topic'):
+            DBUtil.validate_topic(self.dynamodb, self.params['topic'])
 
     def exec_main_proc(self):
         limit = int(self.params.get('limit')) if self.params.get('limit') is not None \
