@@ -90,3 +90,31 @@ class ESUtil:
         articles = [item['_source'] for item in response['hits']['hits']]
 
         return articles
+
+    @staticmethod
+    def search_recent_articles(elasticsearch, params, limit, page):
+        body = {
+            'query': {
+                'bool': {
+                    'must': []
+                }
+            },
+            'sort': [
+                {'sort_key': 'desc'}
+            ],
+            'from': limit * (page - 1),
+            'size': limit
+        }
+
+        if params.get('topic'):
+            body['query']['bool']['must'].append({'match': {'topic': params.get('topic')}})
+
+        res = elasticsearch.search(
+            index='articles',
+            doc_type='article',
+            body=body
+        )
+
+        articles = [item['_source'] for item in res['hits']['hits']]
+
+        return articles
