@@ -4,6 +4,7 @@ from tests_util import TestsUtil
 import os
 import json
 from elasticsearch import Elasticsearch
+from tests_es_util import TestsEsUtil
 
 
 class TestArticlesRecent(TestCase):
@@ -55,13 +56,13 @@ class TestArticlesRecent(TestCase):
 
         TestsUtil.create_table(cls.dynamodb, os.environ['ARTICLE_INFO_TABLE_NAME'], article_info_items)
 
-        TestsUtil.create_es_articles_index(cls.elasticsearch)
-        TestsUtil.sync_public_articles_from_dynamo_to_es(cls.dynamodb, cls.elasticsearch)
+        TestsEsUtil.create_articles_index(cls.elasticsearch)
+        TestsEsUtil.sync_public_articles_from_dynamodb(cls.dynamodb, cls.elasticsearch)
 
     @classmethod
     def tearDownClass(cls):
         TestsUtil.delete_all_tables(cls.dynamodb)
-        TestsUtil.remove_es_articles_index(cls.elasticsearch)
+        TestsEsUtil.remove_articles_index(cls.elasticsearch)
 
     def assert_bad_request(self, params):
         function = ArticlesRecent(params, {}, elasticsearch=self.elasticsearch)

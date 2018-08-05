@@ -1,7 +1,6 @@
 import os
 import yaml
 import boto3
-from boto3.dynamodb.conditions import Key
 
 
 class TestsUtil:
@@ -100,41 +99,3 @@ class TestsUtil:
             if r['ResourceType'] == 'AWS::DynamoDB::Table' and r['LogicalResourceId'] == table_name:
                 return(r['PhysicalResourceId'])
         return
-
-    @staticmethod
-    def create_es_articles_index(elasticsearch):
-        TestsUtil.remove_es_articles_index(elasticsearch)
-
-        article_settings = {
-            'mappings': {
-                'article': {
-                    'properties': {
-                        'sort_key': {
-                            'type': 'long'
-                        }
-                    }
-                }
-            }
-        }
-        elasticsearch.indices.create(index='articles', body=article_settings)
-
-    @staticmethod
-    def remove_es_articles_index(elasticsearch):
-        elasticsearch.indices.delete(index='articles', ignore=[404])
-
-    @staticmethod
-    def sync_public_articles_from_dynamo_to_es(dynamodb, elasticsearch):
-        table = dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
-        query_params = {
-            'IndexName': 'status-sort_key-index',
-            'KeyConditionExpression': Key('status').eq('public')
-        }
-        articles = table.query(**query_params)
-        for article in articles['Items']:
-            elasticsearch.index(
-                index='articles',
-                doc_type='article',
-                id=article['article_id'],
-                body=article
-            )
-        elasticsearch.indices.refresh(index='articles')
