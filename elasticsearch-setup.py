@@ -129,12 +129,6 @@ articles_setting = {
             "properties": {
                 "sort_key": {
                     "type": "long"
-                },
-                "created_at": {
-                    "type": "long"
-                },
-                "published_at": {
-                    "type": "long"
                 }
             }
         }
