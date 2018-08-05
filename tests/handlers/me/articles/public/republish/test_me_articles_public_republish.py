@@ -1,6 +1,8 @@
 import os
 import boto3
 import time
+
+import settings
 from boto3.dynamodb.conditions import Key
 from unittest import TestCase
 from me_articles_public_republish import MeArticlesPublicRepublish
@@ -28,12 +30,14 @@ class TestMeArticlesPublicRepublish(TestCase):
                 'article_id': 'publicId0001',
                 'user_id': 'test01',
                 'status': 'public',
+                'topic': 'fashion',
                 'sort_key': 1520150272000000
             },
             {
                 'article_id': 'publicId0002',
                 'user_id': 'test01',
                 'status': 'public',
+                'topic': 'fashion',
                 'sort_key': 1520150272000000
             }
         ]
@@ -75,6 +79,13 @@ class TestMeArticlesPublicRepublish(TestCase):
         ]
         TestsUtil.create_table(self.dynamodb, os.environ['ARTICLE_HISTORY_TABLE_NAME'], article_history_items)
 
+        topic_items = [
+            {'name': 'crypto', 'order': 1, 'index_hash_key': settings.TOPIC_INDEX_HASH_KEY},
+            {'name': 'fashion', 'order': 2, 'index_hash_key': settings.TOPIC_INDEX_HASH_KEY},
+            {'name': 'food', 'order': 3, 'index_hash_key': settings.TOPIC_INDEX_HASH_KEY}
+        ]
+        TestsUtil.create_table(self.dynamodb, os.environ['TOPIC_TABLE_NAME'], topic_items)
+
     def tearDown(cls):
         TestsUtil.delete_all_tables(cls.dynamodb)
 
@@ -87,7 +98,8 @@ class TestMeArticlesPublicRepublish(TestCase):
     def test_main_ok(self):
         params = {
             'pathParameters': {
-                'article_id': 'publicId0001'
+                'article_id': 'publicId0001',
+                'topic': 'crypto'
             },
             'requestContext': {
                 'authorizer': {
@@ -124,7 +136,8 @@ class TestMeArticlesPublicRepublish(TestCase):
             'title': 'edit_title1_edit',
             'body': 'edit_body1_edit',
             'overview': 'edit_overview1_edit',
-            'eye_catch_url': 'http://example.com/eye_catch_url_edit'
+            'eye_catch_url': 'http://example.com/eye_catch_url_edit',
+            'topic': 'crypto'
         }
 
         article_info_param_names = ['eye_catch_url', 'title', 'overview']
@@ -149,7 +162,8 @@ class TestMeArticlesPublicRepublish(TestCase):
     def test_main_ok_with_no_article_content_edit(self):
         params = {
             'pathParameters': {
-                'article_id': 'publicId0002'
+                'article_id': 'publicId0002',
+                'topic': 'crypto'
             },
             'requestContext': {
                 'authorizer': {
@@ -181,7 +195,8 @@ class TestMeArticlesPublicRepublish(TestCase):
     def test_main_ng_with_none_title(self):
         params = {
             'pathParameters': {
-                'article_id': 'publicId0001'
+                'article_id': 'publicId0001',
+                'topic': 'crypto'
             },
             'requestContext': {
                 'authorizer': {
@@ -219,7 +234,8 @@ class TestMeArticlesPublicRepublish(TestCase):
     def test_main_ng_with_none_body(self):
         params = {
             'pathParameters': {
-                'article_id': 'publicId0001'
+                'article_id': 'publicId0001',
+                'topic': 'crypto'
             },
             'requestContext': {
                 'authorizer': {
@@ -257,7 +273,8 @@ class TestMeArticlesPublicRepublish(TestCase):
     def test_main_ng_with_none_overview(self):
         params = {
             'pathParameters': {
-                'article_id': 'publicId0001'
+                'article_id': 'publicId0001',
+                'topic': 'crypto'
             },
             'requestContext': {
                 'authorizer': {
@@ -292,10 +309,11 @@ class TestMeArticlesPublicRepublish(TestCase):
         self.assertEqual(len(article_content_edit_after) - len(article_content_edit_before), 0)
         self.assertEqual(len(article_history_after) - len(article_history_before), 0)
 
-    def test_call_validate_article_existence(self):
+    def test_call_validate_methods(self):
         params = {
             'pathParameters': {
-                'article_id': 'publicId0001'
+                'article_id': 'publicId0001',
+                'topic': 'crypto'
             },
             'requestContext': {
                 'authorizer': {
@@ -309,17 +327,24 @@ class TestMeArticlesPublicRepublish(TestCase):
         mock_lib = MagicMock()
         with patch('me_articles_public_republish.DBUtil', mock_lib):
             MeArticlesPublicRepublish(params, {}, self.dynamodb).main()
-            args, kwargs = mock_lib.validate_article_existence.call_args
 
             self.assertTrue(mock_lib.validate_article_existence.called)
+            args, kwargs = mock_lib.validate_article_existence.call_args
             self.assertTrue(args[0])
             self.assertTrue(args[1])
             self.assertTrue(kwargs['user_id'])
             self.assertEqual(kwargs['status'], 'public')
 
-    def test_validation_with_no_params(self):
+            self.assertTrue(mock_lib.validate_topic.called)
+            args, kwargs = mock_lib.validate_topic.call_args
+            self.assertTrue(args[0])
+            self.assertEqual(args[1], 'crypto')
+
+    def test_validation_with_no_article_id(self):
         params = {
-            'pathParameters': {}
+            'pathParameters': {
+                'topic': 'crypto'
+            }
         }
 
         self.assert_bad_request(params)
@@ -327,7 +352,8 @@ class TestMeArticlesPublicRepublish(TestCase):
     def test_validation_article_id_max(self):
         params = {
             'queryStringParameters': {
-                'article_id': 'A' * 13
+                'article_id': 'A' * 13,
+                'topic': 'crypto'
             }
         }
 
@@ -336,7 +362,27 @@ class TestMeArticlesPublicRepublish(TestCase):
     def test_validation_article_id_min(self):
         params = {
             'queryStringParameters': {
-                'article_id': 'A' * 11
+                'article_id': 'A' * 11,
+                'topic': 'crypto'
+            }
+        }
+
+        self.assert_bad_request(params)
+
+    def test_validation_with_no_topic(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'publicId0001'
+            }
+        }
+
+        self.assert_bad_request(params)
+
+    def test_validation_topic_max(self):
+        params = {
+            'queryStringParameters': {
+                'article_id': 'publicId0001',
+                'topic': 'A' * 21
             }
         }
 

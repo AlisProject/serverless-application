@@ -15,8 +15,9 @@ class MeArticlesDraftsPublish(LambdaBase):
             'type': 'object',
             'properties': {
                 'article_id': settings.parameters['article_id'],
+                'topic': settings.parameters['topic']
             },
-            'required': ['article_id']
+            'required': ['article_id', 'topic']
         }
 
     def validate_params(self):
@@ -29,6 +30,8 @@ class MeArticlesDraftsPublish(LambdaBase):
             status='draft'
         )
 
+        DBUtil.validate_topic(self.dynamodb, self.params['topic'])
+
     def exec_main_proc(self):
         self.__delete_article_content_edit()
         self.__create_article_history_and_update_sort_key()
@@ -39,12 +42,9 @@ class MeArticlesDraftsPublish(LambdaBase):
             Key={
                 'article_id': self.params['article_id'],
             },
-            UpdateExpression='set #attr = :article_status, #sync_elasticsearch = :one',
-            ExpressionAttributeNames={
-                '#attr': 'status',
-                '#sync_elasticsearch': 'sync_elasticsearch'
-            },
-            ExpressionAttributeValues={':article_status': 'public', ':one': 1}
+            UpdateExpression='set #attr = :article_status, sync_elasticsearch = :one, topic = :topic',
+            ExpressionAttributeNames={'#attr': 'status'},
+            ExpressionAttributeValues={':article_status': 'public', ':one': 1, ':topic': self.params['topic']}
         )
 
         return {

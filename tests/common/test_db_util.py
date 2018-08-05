@@ -1,7 +1,9 @@
 import os
 
+import settings
 from boto3.dynamodb.conditions import Key
 from db_util import DBUtil
+from jsonschema import ValidationError
 from tests_util import TestsUtil
 from unittest import TestCase
 from record_not_found_error import RecordNotFoundError
@@ -98,6 +100,13 @@ class TestDBUtil(TestCase):
             }
         ]
         TestsUtil.create_table(cls.dynamodb, os.environ['ARTICLE_PV_USER_TABLE_NAME'], article_pv_user_items)
+
+        topic_items = [
+            {'name': 'crypto', 'order': 1, 'index_hash_key': settings.TOPIC_INDEX_HASH_KEY},
+            {'name': 'fashion', 'order': 2, 'index_hash_key': settings.TOPIC_INDEX_HASH_KEY},
+            {'name': 'food', 'order': 3, 'index_hash_key': settings.TOPIC_INDEX_HASH_KEY}
+        ]
+        TestsUtil.create_table(cls.dynamodb, os.environ['TOPIC_TABLE_NAME'], topic_items)
 
     @classmethod
     def tearDownClass(cls):
@@ -307,3 +316,10 @@ class TestDBUtil(TestCase):
         response = DBUtil.query_all_items(article_pv_user_table, query_params)
 
         self.assertEqual(len(response), 4)
+
+    def test_validate_topic_ok(self):
+        self.assertTrue(DBUtil.validate_topic(self.dynamodb, 'crypto'))
+
+    def test_validate_topic_ng(self):
+        with self.assertRaises(ValidationError):
+            DBUtil.validate_topic(self.dynamodb, 'BTC')

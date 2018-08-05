@@ -1,4 +1,8 @@
 import os
+
+import settings
+from boto3.dynamodb.conditions import Key
+from jsonschema import ValidationError
 from record_not_found_error import RecordNotFoundError
 from not_authorized_error import NotAuthorizedError
 
@@ -85,3 +89,18 @@ class DBUtil:
             items.extend(response['Items'])
 
         return items
+
+    @staticmethod
+    def validate_topic(dynamodb, topic_name):
+        topic_table = dynamodb.Table(os.environ['TOPIC_TABLE_NAME'])
+
+        query_params = {
+            'IndexName': 'index_hash_key-order-index',
+            'KeyConditionExpression': Key('index_hash_key').eq(settings.TOPIC_INDEX_HASH_KEY)
+        }
+
+        topics = topic_table.query(**query_params)['Items']
+
+        if topic_name not in [topic['name'] for topic in topics]:
+            raise ValidationError('Bad Request: Invalid topic')
+        return True

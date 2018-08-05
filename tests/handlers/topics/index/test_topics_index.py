@@ -18,9 +18,9 @@ class TestTopicsIndex(TestCase):
 
         # create users_table
         cls.topic_items = [
-            {'name': 'crypto', 'order': 1, 'index_hash_key': settings.TOPIC_INDEX_HASH_KEY},
-            {'name': 'fashion', 'order': 2, 'index_hash_key': settings.TOPIC_INDEX_HASH_KEY},
-            {'name': 'food', 'order': 3, 'index_hash_key': settings.TOPIC_INDEX_HASH_KEY}
+            {'name': 'crypto', 'display_name': '暗号通貨', 'order': 1, 'index_hash_key': settings.TOPIC_INDEX_HASH_KEY},
+            {'name': 'fashion', 'fashion': 'ファッション', 'order': 2, 'index_hash_key': settings.TOPIC_INDEX_HASH_KEY},
+            {'name': 'food', 'fashion': '食', 'order': 3, 'index_hash_key': settings.TOPIC_INDEX_HASH_KEY}
         ]
         TestsUtil.create_table(cls.dynamodb, os.environ['TOPIC_TABLE_NAME'], cls.topic_items)
 
@@ -31,7 +31,5 @@ class TestTopicsIndex(TestCase):
     def test_main(self):
         response = TopicsIndex({}, {}, dynamodb=self.dynamodb).main()
 
-        expected = [topic['name'] for topic in self.topic_items]
-
         self.assertEqual(response['statusCode'], 200)
-        self.assertEqual(json.loads(response['body']), expected)
+        self.assertEqual(json.loads(response['body']), self.topic_items)

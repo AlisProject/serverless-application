@@ -4,6 +4,7 @@ import os
 
 import settings
 from boto3.dynamodb.conditions import Key
+from decimal_encoder import DecimalEncoder
 from lambda_base import LambdaBase
 
 
@@ -24,9 +25,7 @@ class TopicsIndex(LambdaBase):
 
         topics = topic_table.query(**query_params)['Items']
 
-        topic_names = [topic['name'] for topic in topics]
-
         return {
             'statusCode': 200,
-            'body': json.dumps(topic_names)
+            'body': json.dumps(topics, cls=DecimalEncoder)
         }
