@@ -1,3 +1,4 @@
+import json
 import os
 import boto3
 import time
@@ -98,7 +99,9 @@ class TestMeArticlesPublicRepublish(TestCase):
     def test_main_ok(self):
         params = {
             'pathParameters': {
-                'article_id': 'publicId0001',
+                'article_id': 'publicId0001'
+            },
+            'body': {
                 'topic': 'crypto'
             },
             'requestContext': {
@@ -109,6 +112,7 @@ class TestMeArticlesPublicRepublish(TestCase):
                 }
             }
         }
+        params['body'] = json.dumps(params['body'])
 
         article_info_before = self.article_info_table.scan()['Items']
         article_content_before = self.article_content_table.scan()['Items']
@@ -162,7 +166,9 @@ class TestMeArticlesPublicRepublish(TestCase):
     def test_main_ok_with_no_article_content_edit(self):
         params = {
             'pathParameters': {
-                'article_id': 'publicId0002',
+                'article_id': 'publicId0002'
+            },
+            'body': {
                 'topic': 'crypto'
             },
             'requestContext': {
@@ -173,6 +179,7 @@ class TestMeArticlesPublicRepublish(TestCase):
                 }
             }
         }
+        params['body'] = json.dumps(params['body'])
 
         article_info_before = self.article_info_table.scan()['Items']
         article_content_before = self.article_content_table.scan()['Items']
@@ -195,7 +202,9 @@ class TestMeArticlesPublicRepublish(TestCase):
     def test_main_ng_with_none_title(self):
         params = {
             'pathParameters': {
-                'article_id': 'publicId0001',
+                'article_id': 'publicId0001'
+            },
+            'body': {
                 'topic': 'crypto'
             },
             'requestContext': {
@@ -206,6 +215,7 @@ class TestMeArticlesPublicRepublish(TestCase):
                 }
             }
         }
+        params['body'] = json.dumps(params['body'])
 
         self.article_content_edit_table.update_item(
             Key={'article_id': params['pathParameters']['article_id']},
@@ -234,7 +244,9 @@ class TestMeArticlesPublicRepublish(TestCase):
     def test_main_ng_with_none_body(self):
         params = {
             'pathParameters': {
-                'article_id': 'publicId0001',
+                'article_id': 'publicId0001'
+            },
+            'body': {
                 'topic': 'crypto'
             },
             'requestContext': {
@@ -245,6 +257,7 @@ class TestMeArticlesPublicRepublish(TestCase):
                 }
             }
         }
+        params['body'] = json.dumps(params['body'])
 
         self.article_content_edit_table.update_item(
             Key={'article_id': params['pathParameters']['article_id']},
@@ -273,7 +286,9 @@ class TestMeArticlesPublicRepublish(TestCase):
     def test_main_ng_with_none_overview(self):
         params = {
             'pathParameters': {
-                'article_id': 'publicId0001',
+                'article_id': 'publicId0001'
+            },
+            'body': {
                 'topic': 'crypto'
             },
             'requestContext': {
@@ -284,6 +299,7 @@ class TestMeArticlesPublicRepublish(TestCase):
                 }
             }
         }
+        params['body'] = json.dumps(params['body'])
 
         self.article_content_edit_table.update_item(
             Key={'article_id': params['pathParameters']['article_id']},
@@ -312,7 +328,9 @@ class TestMeArticlesPublicRepublish(TestCase):
     def test_call_validate_methods(self):
         params = {
             'pathParameters': {
-                'article_id': 'publicId0001',
+                'article_id': 'publicId0001'
+            },
+            'body': {
                 'topic': 'crypto'
             },
             'requestContext': {
@@ -323,6 +341,7 @@ class TestMeArticlesPublicRepublish(TestCase):
                 }
             }
         }
+        params['body'] = json.dumps(params['body'])
 
         mock_lib = MagicMock()
         with patch('me_articles_public_republish.DBUtil', mock_lib):
@@ -342,30 +361,59 @@ class TestMeArticlesPublicRepublish(TestCase):
 
     def test_validation_with_no_article_id(self):
         params = {
-            'pathParameters': {
+            'queryStringParameters': {},
+            'body': {
                 'topic': 'crypto'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01'
+                    }
+                }
             }
         }
+        params['body'] = json.dumps(params['body'])
 
         self.assert_bad_request(params)
 
     def test_validation_article_id_max(self):
         params = {
             'queryStringParameters': {
-                'article_id': 'A' * 13,
+                'article_id': 'A' * 13
+            },
+            'body': {
                 'topic': 'crypto'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01'
+                    }
+                }
             }
         }
+        params['body'] = json.dumps(params['body'])
 
         self.assert_bad_request(params)
 
     def test_validation_article_id_min(self):
         params = {
             'queryStringParameters': {
-                'article_id': 'A' * 11,
+                'article_id': 'A' * 11
+            },
+            'body': {
                 'topic': 'crypto'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01'
+                    }
+                }
             }
         }
+        params['body'] = json.dumps(params['body'])
 
         self.assert_bad_request(params)
 
@@ -373,17 +421,36 @@ class TestMeArticlesPublicRepublish(TestCase):
         params = {
             'pathParameters': {
                 'article_id': 'publicId0001'
+            },
+            'body': {},
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01'
+                    }
+                }
             }
         }
+        params['body'] = json.dumps(params['body'])
 
         self.assert_bad_request(params)
 
     def test_validation_topic_max(self):
         params = {
             'queryStringParameters': {
-                'article_id': 'publicId0001',
+                'article_id': 'publicId0001'
+            },
+            'body': {
                 'topic': 'A' * 21
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01'
+                    }
+                }
             }
         }
+        params['body'] = json.dumps(params['body'])
 
         self.assert_bad_request(params)
