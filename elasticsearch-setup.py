@@ -5,11 +5,19 @@ import os
 import urllib
 import time
 import sys
+import re
 
 
 class ESconfig:
+    def __getdomain(self):
+        ssm = boto3.client('ssm')
+        response = ssm.get_parameter(Name=f'{os.environ["ALIS_APP_ID"]}ssmElasticSearchEndpoint')
+        endpoint = response["Parameter"]["Value"]
+        m = re.match(r'search\-([\w\-]+)\-', endpoint)
+        return(m.group(1))
+
     def __init__(self):
-        self.domain = os.environ["ALIS_APP_ID"] + 'api'
+        self.domain = self.__getdomain()
         self.client = boto3.client('es')
         response = self.client.describe_elasticsearch_domain(
             DomainName=self.domain
