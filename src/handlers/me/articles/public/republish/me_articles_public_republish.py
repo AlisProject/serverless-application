@@ -23,7 +23,7 @@ class MeArticlesPublicRepublish(LambdaBase):
         if self.event.get('pathParameters') is None:
             raise ValidationError('pathParameters is required')
 
-        validate(self.event.get('pathParameters'), self.get_schema())
+        validate(self.params, self.get_schema())
 
         DBUtil.validate_article_existence(
             self.dynamodb,

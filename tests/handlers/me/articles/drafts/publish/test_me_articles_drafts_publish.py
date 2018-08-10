@@ -1,3 +1,4 @@
+import json
 import os
 import boto3
 import time
@@ -110,7 +111,9 @@ class TestMeArticlesDraftsPublish(TestCase):
     def test_main_ok(self):
         params = {
             'pathParameters': {
-                'article_id': 'draftId00001',
+                'article_id': 'draftId00001'
+            },
+            'body': {
                 'topic': 'crypto'
             },
             'requestContext': {
@@ -121,6 +124,7 @@ class TestMeArticlesDraftsPublish(TestCase):
                 }
             }
         }
+        params['body'] = json.dumps(params['body'])
 
         article_info_before = self.article_info_table.scan()['Items']
         article_history_before = self.article_history_table.scan()['Items']
@@ -156,7 +160,9 @@ class TestMeArticlesDraftsPublish(TestCase):
     def test_main_ok_with_article_content_edit(self):
         params = {
             'pathParameters': {
-                'article_id': 'draftId00002',
+                'article_id': 'draftId00002'
+            },
+            'body': {
                 'topic': 'crypto'
             },
             'requestContext': {
@@ -167,6 +173,7 @@ class TestMeArticlesDraftsPublish(TestCase):
                 }
             }
         }
+        params['body'] = json.dumps(params['body'])
 
         article_info_before = self.article_info_table.scan()['Items']
         article_history_before = self.article_history_table.scan()['Items']
@@ -199,7 +206,9 @@ class TestMeArticlesDraftsPublish(TestCase):
     def test_main_ok_article_history_arleady_exists(self):
         params = {
             'pathParameters': {
-                'article_id': 'draftId00003',
+                'article_id': 'draftId00003'
+            },
+            'body': {
                 'topic': 'crypto'
             },
             'requestContext': {
@@ -210,6 +219,7 @@ class TestMeArticlesDraftsPublish(TestCase):
                 }
             }
         }
+        params['body'] = json.dumps(params['body'])
 
         article_info_before = self.article_info_table.scan()['Items']
         article_history_before = self.article_history_table.scan()['Items']
@@ -242,7 +252,9 @@ class TestMeArticlesDraftsPublish(TestCase):
     def test_call_validate_methods(self):
         params = {
             'pathParameters': {
-                'article_id': 'draftId00001',
+                'article_id': 'draftId00001'
+            },
+            'body': {
                 'topic': 'crypto'
             },
             'requestContext': {
@@ -253,6 +265,7 @@ class TestMeArticlesDraftsPublish(TestCase):
                 }
             }
         }
+        params['body'] = json.dumps(params['body'])
 
         mock_lib = MagicMock()
         with patch('me_articles_drafts_publish.DBUtil', mock_lib):
@@ -272,10 +285,19 @@ class TestMeArticlesDraftsPublish(TestCase):
 
     def test_validation_with_no_article_id(self):
         params = {
-            'pathParameters': {
+            'queryStringParameters': {},
+            'body': {
                 'topic': 'crypto'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01'
+                    }
+                }
             }
         }
+        params['body'] = json.dumps(params['body'])
 
         self.assert_bad_request(params)
 
@@ -283,9 +305,19 @@ class TestMeArticlesDraftsPublish(TestCase):
         params = {
             'queryStringParameters': {
                 'article_id': 'A' * 13,
+            },
+            'body': {
                 'topic': 'crypto'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01'
+                    }
+                }
             }
         }
+        params['body'] = json.dumps(params['body'])
 
         self.assert_bad_request(params)
 
@@ -293,9 +325,19 @@ class TestMeArticlesDraftsPublish(TestCase):
         params = {
             'queryStringParameters': {
                 'article_id': 'A' * 11,
+            },
+            'body': {
                 'topic': 'crypto'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01'
+                    }
+                }
             }
         }
+        params['body'] = json.dumps(params['body'])
 
         self.assert_bad_request(params)
 
@@ -303,8 +345,18 @@ class TestMeArticlesDraftsPublish(TestCase):
         params = {
             'pathParameters': {
                 'article_id': 'draftId00001'
+            },
+            'body': {},
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01'
+                    }
+                }
             }
+
         }
+        params['body'] = json.dumps(params['body'])
 
         self.assert_bad_request(params)
 
@@ -312,8 +364,18 @@ class TestMeArticlesDraftsPublish(TestCase):
         params = {
             'queryStringParameters': {
                 'article_id': 'draftId00001',
+            },
+            'body': {
                 'topic': 'A' * 21
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01'
+                    }
+                }
             }
         }
+        params['body'] = json.dumps(params['body'])
 
         self.assert_bad_request(params)

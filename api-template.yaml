@@ -577,6 +577,11 @@ Resources:
                 description: '対象記事の指定するために使用'
                 required: true
                 type: 'string'
+              - name: 'topic'
+                in: 'body'
+                description: 'トピック名'
+                required: true
+                type: 'string'
               responses:
                 '200':
                   description: 'successful operation'
@@ -732,6 +737,11 @@ Resources:
               - name: 'article_id'
                 in: 'path'
                 description: '対象記事を指定するために使用'
+                required: true
+                type: 'string'
+              - name: 'topic'
+                in: 'body'
+                description: 'トピック名'
                 required: true
                 type: 'string'
               responses:
