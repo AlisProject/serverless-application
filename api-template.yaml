@@ -1809,3 +1809,35 @@ Resources:
             Path: /search/users
             Method: get
             RestApiId: !Ref RestApi
+  ElasticSearchService:
+    Type: "AWS::Elasticsearch::Domain"
+    Properties: 
+      AccessPolicies: !Join
+        - ''
+        - - '{ "Version": "2012-10-17", "Statement": [ { "Effect": "Allow", "Principal": { "AWS": "'
+          - !GetAtt LambdaRole.Arn
+          - '" }, "Action": "es:*", "Resource": "'
+          - 'arn:aws:es:'
+          - !Ref 'AWS::Region'
+          - ':'
+          - !Ref 'AWS::AccountId'
+          - ':domain/'
+          - !Ref "AWS::StackName"
+          - '/*" } ] }'
+      AdvancedOptions:
+        rest.action.multi.allow_explicit_index: 'true'
+      DomainName: !Ref "AWS::StackName"
+      EBSOptions:
+        EBSEnabled: true
+        VolumeType: gp2
+        VolumeSize: 35
+      ElasticsearchClusterConfig:
+        InstanceType: t2.medium.elasticsearch
+        InstanceCount: 2
+        DedicatedMasterEnabled: true
+        ZoneAwarenessEnabled: false
+        DedicatedMasterType: t2.medium.elasticsearch
+        DedicatedMasterCount: 3
+      ElasticsearchVersion: '6.2'
+      SnapshotOptions:
+        AutomatedSnapshotStartHour: 0
