@@ -37,6 +37,8 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   DeletedCommentTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
+  ElasticSearchEndpoint:
+    Type: 'AWS::SSM::Parameter::Value<String>'
   TopicTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
   AlisAppDomain:
@@ -1300,7 +1302,7 @@ Resources:
       CodeUri: ./deploy/articles_recent.zip
       Environment:
         Variables:
-          ELASTIC_SEARCH_ENDPOINT: !GetAtt ElasticSearchService.DomainEndpoint
+          ELASTIC_SEARCH_ENDPOINT: !Ref ElasticSearchEndpoint
       Events:
         Api:
           Type: Api
@@ -1316,7 +1318,7 @@ Resources:
       CodeUri: ./deploy/articles_popular.zip
       Environment:
         Variables:
-          ELASTIC_SEARCH_ENDPOINT: !GetAtt ElasticSearchService.DomainEndpoint
+          ELASTIC_SEARCH_ENDPOINT: !Ref ElasticSearchEndpoint
       Events:
         Api:
           Type: Api
@@ -1793,7 +1795,7 @@ Resources:
       CodeUri: ./deploy/search_articles.zip
       Environment:
         Variables:
-          ELASTIC_SEARCH_ENDPOINT: !GetAtt ElasticSearchService.DomainEndpoint
+          ELASTIC_SEARCH_ENDPOINT: !Ref ElasticSearchEndpoint
       Events:
         Api:
           Type: Api
@@ -1809,7 +1811,7 @@ Resources:
       CodeUri: ./deploy/search_users.zip
       Environment:
         Variables:
-          ELASTIC_SEARCH_ENDPOINT: !GetAtt ElasticSearchService.DomainEndpoint
+          ELASTIC_SEARCH_ENDPOINT: !Ref ElasticSearchEndpoint
       Events:
         Api:
           Type: Api

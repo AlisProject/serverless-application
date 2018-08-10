@@ -91,6 +91,24 @@ aws dynamodb list-tables |grep ${ALIS_APP_ID}database |sort |tr -d ' '
 And add all of generated table names to SSM.
 - See: https://github.com/AlisProject/environment
 
+### ElasticSearch
+
+```bash
+./deploy.sh elasticsearch
+
+# show elasticsearch instance config
+aws es list-domain-names
+aws es describe-elasticsearch-domain --domain-name YourElasticSearchDomain
+```
+
+And add ElasticSearch Endpoint to SSM.
+- See: https://github.com/AlisProject/environment
+
+[check your global ip](https://checkip.amazonaws.com/)
+
+```bash
+python elasticsearch-setup.py YourGlobalIP
+```
 
 ### Cognito
 
@@ -103,13 +121,11 @@ Specify generated Cognito User Pool ARN to SSM.
 - See: https://github.com/AlisProject/environment
 
 
-### Lambda & API Gateway & ElasticSearch
+### Lambda & API Gateway
 
-[check your global ip](https://checkip.amazonaws.com/)
 
 ```bash
 ./deploy.sh api
-python elasticsearch-setup.py YourGlobalIP
 ```
 
 ### Fix API settings via a script
