@@ -589,8 +589,8 @@ Resources:
                 description: 'タグの一覧'
                 required: false
                 type: 'array'
-                  items:
-                    type: 'string'
+                items:
+                  type: 'string'
               responses:
                 '200':
                   description: 'successful operation'
@@ -758,8 +758,8 @@ Resources:
                 description: 'タグの一覧'
                 required: false
                 type: 'array'
-                  items:
-                    type: 'string'
+                items:
+                  type: 'string'
               responses:
                 '200':
                   description: 'successful operation'
