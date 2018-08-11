@@ -118,7 +118,7 @@ class TestMeArticlesDraftsPublish(TestCase):
             },
             'body': {
                 'topic': 'crypto',
-                'tags': ['A', 'B', 'C']
+                'tags': ['A', 'B', 'C', 'D', 'E']
             },
             'requestContext': {
                 'authorizer': {
@@ -155,7 +155,7 @@ class TestMeArticlesDraftsPublish(TestCase):
         self.assertEqual(article_info['published_at'], 1525000000)
         self.assertEqual(article_info['sync_elasticsearch'], 1)
         self.assertEqual(article_info['topic'], 'crypto')
-        self.assertEqual(article_info['tags'], ['A', 'B', 'C'])
+        self.assertEqual(article_info['tags'], ['A', 'B', 'C', 'D', 'E'])
         self.assertEqual(article_content['title'], article_history['title'])
         self.assertEqual(article_content['body'], article_history['body'])
         self.assertEqual(len(article_info_after) - len(article_info_before), 0)
@@ -261,7 +261,7 @@ class TestMeArticlesDraftsPublish(TestCase):
             },
             'body': {
                 'topic': 'crypto',
-                'tags': ['A', 'B', 'C']
+                'tags': ['A']
             },
             'requestContext': {
                 'authorizer': {
@@ -281,7 +281,7 @@ class TestMeArticlesDraftsPublish(TestCase):
             args, _ = mock_lib.create_and_count.call_args
             self.assertTrue(args[0])
             self.assertEqual(args[1], ['a', 'b', 'c'])
-            self.assertEqual(args[2], ['A', 'B', 'C'])
+            self.assertEqual(args[2], ['A'])
 
     def test_call_validate_methods(self):
         params = {
@@ -401,6 +401,69 @@ class TestMeArticlesDraftsPublish(TestCase):
             },
             'body': {
                 'topic': 'A' * 21
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01'
+                    }
+                }
+            }
+        }
+        params['body'] = json.dumps(params['body'])
+
+        self.assert_bad_request(params)
+
+    def test_validation_many_tags(self):
+        params = {
+            'queryStringParameters': {
+                'article_id': 'draftId00001',
+            },
+            'body': {
+                'topic': 'crypto',
+                'tags': ['A', 'B', 'C', 'D', 'E', 'F']
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01'
+                    }
+                }
+            }
+        }
+        params['body'] = json.dumps(params['body'])
+
+        self.assert_bad_request(params)
+
+    def test_validation_tag_name_max(self):
+        params = {
+            'queryStringParameters': {
+                'article_id': 'draftId00001',
+            },
+            'body': {
+                'topic': 'crypto',
+                'tags': ['A', 'B', 'C', 'D', 'E' * 21]
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01'
+                    }
+                }
+            }
+        }
+        params['body'] = json.dumps(params['body'])
+
+        self.assert_bad_request(params)
+
+    def test_validation_tag_name_min(self):
+        params = {
+            'queryStringParameters': {
+                'article_id': 'draftId00001',
+            },
+            'body': {
+                'topic': 'crypto',
+                'tags': ['A', 'B', 'C', 'D', '']
             },
             'requestContext': {
                 'authorizer': {

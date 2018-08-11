@@ -106,7 +106,7 @@ class TestMeArticlesPublicRepublish(TestCase):
             },
             'body': {
                 'topic': 'crypto',
-                'tags': ['A', 'B', 'C']
+                'tags': ['A', 'B', 'C', 'D', 'E']
             },
             'requestContext': {
                 'authorizer': {
@@ -146,7 +146,7 @@ class TestMeArticlesPublicRepublish(TestCase):
             'overview': 'edit_overview1_edit',
             'eye_catch_url': 'http://example.com/eye_catch_url_edit',
             'topic': 'crypto',
-            'tags': ['A', 'B', 'C']
+            'tags': ['A', 'B', 'C', 'D', 'E']
         }
 
         article_info_param_names = ['eye_catch_url', 'title', 'overview']
@@ -337,7 +337,7 @@ class TestMeArticlesPublicRepublish(TestCase):
             },
             'body': {
                 'topic': 'crypto',
-                'tags': ['A', 'B', 'C']
+                'tags': ['A']
             },
             'requestContext': {
                 'authorizer': {
@@ -357,7 +357,7 @@ class TestMeArticlesPublicRepublish(TestCase):
             args, _ = mock_lib.create_and_count.call_args
             self.assertTrue(args[0])
             self.assertEqual(args[1], ['a', 'b', 'c'])
-            self.assertEqual(args[2], ['A', 'B', 'C'])
+            self.assertEqual(args[2], ['A'])
 
     def test_call_validate_methods(self):
         params = {
@@ -476,6 +476,69 @@ class TestMeArticlesPublicRepublish(TestCase):
             },
             'body': {
                 'topic': 'A' * 21
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01'
+                    }
+                }
+            }
+        }
+        params['body'] = json.dumps(params['body'])
+
+        self.assert_bad_request(params)
+
+    def test_validation_many_tags(self):
+        params = {
+            'queryStringParameters': {
+                'article_id': 'publicId0001',
+            },
+            'body': {
+                'topic': 'crypto',
+                'tags': ['A', 'B', 'C', 'D', 'E', 'F']
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01'
+                    }
+                }
+            }
+        }
+        params['body'] = json.dumps(params['body'])
+
+        self.assert_bad_request(params)
+
+    def test_validation_tag_name_max(self):
+        params = {
+            'queryStringParameters': {
+                'article_id': 'publicId0001',
+            },
+            'body': {
+                'topic': 'crypto',
+                'tags': ['A', 'B', 'C', 'D', 'E' * 21]
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01'
+                    }
+                }
+            }
+        }
+        params['body'] = json.dumps(params['body'])
+
+        self.assert_bad_request(params)
+
+    def test_validation_tag_name_min(self):
+        params = {
+            'queryStringParameters': {
+                'article_id': 'publicId0001',
+            },
+            'body': {
+                'topic': 'crypto',
+                'tags': ['A', 'B', 'C', 'D', '']
             },
             'requestContext': {
                 'authorizer': {

@@ -104,9 +104,10 @@ parameters = {
     'tags': {
         'type': 'array',
         'items': {
-            'type': 'string'
+            'type': 'string',
+            'minLength': 1,
+            'maxLength': 20
         },
-        'minItems': 1,
         'maxItems': 5
     }
 }
