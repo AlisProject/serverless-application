@@ -584,6 +584,13 @@ Resources:
                 description: 'トピック名'
                 required: true
                 type: 'string'
+              - name: 'tags'
+                in: 'body'
+                description: 'タグの一覧'
+                required: false
+                type: 'array'
+                  items:
+                    type: 'string'
               responses:
                 '200':
                   description: 'successful operation'
@@ -746,6 +753,13 @@ Resources:
                 description: 'トピック名'
                 required: true
                 type: 'string'
+              - name: 'tags'
+                in: 'body'
+                description: 'タグの一覧'
+                required: false
+                type: 'array'
+                  items:
+                    type: 'string'
               responses:
                 '200':
                   description: 'successful operation'

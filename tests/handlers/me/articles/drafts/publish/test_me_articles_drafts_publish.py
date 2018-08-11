@@ -31,6 +31,7 @@ class TestMeArticlesDraftsPublish(TestCase):
                 'article_id': 'draftId00001',
                 'user_id': 'test01',
                 'status': 'draft',
+                'tags': ['a', 'b', 'c'],
                 'sort_key': 1520150272000000
             },
             {
@@ -97,6 +98,8 @@ class TestMeArticlesDraftsPublish(TestCase):
         ]
         TestsUtil.create_table(self.dynamodb, os.environ['TOPIC_TABLE_NAME'], topic_items)
 
+        TestsUtil.create_table(self.dynamodb, os.environ['TAG_TABLE_NAME'], [])
+
     def tearDown(cls):
         TestsUtil.delete_all_tables(cls.dynamodb)
 
@@ -114,7 +117,8 @@ class TestMeArticlesDraftsPublish(TestCase):
                 'article_id': 'draftId00001'
             },
             'body': {
-                'topic': 'crypto'
+                'topic': 'crypto',
+                'tags': ['A', 'B', 'C']
             },
             'requestContext': {
                 'authorizer': {
@@ -151,6 +155,7 @@ class TestMeArticlesDraftsPublish(TestCase):
         self.assertEqual(article_info['published_at'], 1525000000)
         self.assertEqual(article_info['sync_elasticsearch'], 1)
         self.assertEqual(article_info['topic'], 'crypto')
+        self.assertEqual(article_info['tags'], ['A', 'B', 'C'])
         self.assertEqual(article_content['title'], article_history['title'])
         self.assertEqual(article_content['body'], article_history['body'])
         self.assertEqual(len(article_info_after) - len(article_info_before), 0)
@@ -248,6 +253,35 @@ class TestMeArticlesDraftsPublish(TestCase):
         self.assertEqual(len(article_info_after) - len(article_info_before), 0)
         self.assertEqual(len(article_history_after) - len(article_history_before), 1)
         self.assertEqual(len(article_content_edit_after) - len(article_content_edit_before), 0)
+
+    def test_call_create_and_count(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'draftId00001'
+            },
+            'body': {
+                'topic': 'crypto',
+                'tags': ['A', 'B', 'C']
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01'
+                    }
+                }
+            }
+        }
+        params['body'] = json.dumps(params['body'])
+
+        mock_lib = MagicMock()
+        with patch('me_articles_drafts_publish.TagUtil', mock_lib):
+            MeArticlesDraftsPublish(params, {}, self.dynamodb).main()
+
+            self.assertTrue(mock_lib.create_and_count.called)
+            args, _ = mock_lib.create_and_count.call_args
+            self.assertTrue(args[0])
+            self.assertEqual(args[1], ['a', 'b', 'c'])
+            self.assertEqual(args[2], ['A', 'B', 'C'])
 
     def test_call_validate_methods(self):
         params = {

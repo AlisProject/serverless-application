@@ -6,6 +6,7 @@ from boto3.dynamodb.conditions import Key
 from lambda_base import LambdaBase
 from jsonschema import validate
 from db_util import DBUtil
+from tag_util import TagUtil
 from time_util import TimeUtil
 
 
@@ -15,7 +16,8 @@ class MeArticlesDraftsPublish(LambdaBase):
             'type': 'object',
             'properties': {
                 'article_id': settings.parameters['article_id'],
-                'topic': settings.parameters['topic']
+                'topic': settings.parameters['topic'],
+                'tags': settings.parameters['tags']
             },
             'required': ['article_id', 'topic']
         }
@@ -37,15 +39,18 @@ class MeArticlesDraftsPublish(LambdaBase):
         self.__create_article_history_and_update_sort_key()
 
         article_info_table = self.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
+        article_info_before = article_info_table.get_item(Key={'article_id': self.params['article_id']}).get('Item')
 
         article_info_table.update_item(
             Key={
                 'article_id': self.params['article_id'],
             },
-            UpdateExpression='set #attr = :article_status, sync_elasticsearch = :one, topic = :topic',
+            UpdateExpression='set #attr = :article_status, sync_elasticsearch = :one, topic = :topic, tags = :tags',
             ExpressionAttributeNames={'#attr': 'status'},
-            ExpressionAttributeValues={':article_status': 'public', ':one': 1, ':topic': self.params['topic']}
+            ExpressionAttributeValues={':article_status': 'public', ':one': 1, ':topic': self.params['topic'], ':tags': self.params.get('tags')}
         )
+
+        TagUtil.create_and_count(self.dynamodb, article_info_before.get('tags'), self.params.get('tags'))
 
         return {
             'statusCode': 200
