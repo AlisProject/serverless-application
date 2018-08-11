@@ -136,6 +136,3 @@ class TestDBUtil(TestCase):
         tags = sorted(tags, key=lambda t: t['name'])
 
         self.assertEqual(tags, expected)
-
-
-

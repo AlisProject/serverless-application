@@ -47,7 +47,12 @@ class MeArticlesDraftsPublish(LambdaBase):
             },
             UpdateExpression='set #attr = :article_status, sync_elasticsearch = :one, topic = :topic, tags = :tags',
             ExpressionAttributeNames={'#attr': 'status'},
-            ExpressionAttributeValues={':article_status': 'public', ':one': 1, ':topic': self.params['topic'], ':tags': self.params.get('tags')}
+            ExpressionAttributeValues={
+                ':article_status': 'public',
+                ':one': 1,
+                ':topic': self.params['topic'],
+                ':tags': self.params.get('tags')
+            }
         )
 
         TagUtil.create_and_count(self.dynamodb, article_info_before.get('tags'), self.params.get('tags'))
