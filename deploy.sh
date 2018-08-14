@@ -46,6 +46,7 @@ aws cloudformation deploy \
     NotificationTableName=${SSM_PARAMS_PREFIX}NotificationTableName \
     UnreadNotificationManagerTableName=${SSM_PARAMS_PREFIX}UnreadNotificationManagerTableName \
     TopicTableName=${SSM_PARAMS_PREFIX}TopicTableName \
+    TagTableName=${SSM_PARAMS_PREFIX}TagTableName \
     CommentTableName=${SSM_PARAMS_PREFIX}CommentTableName \
     CommentLikedUserTableName=${SSM_PARAMS_PREFIX}CommentLikedUserTableName \
     DeletedCommentTableName=${SSM_PARAMS_PREFIX}DeletedCommentTableName \
