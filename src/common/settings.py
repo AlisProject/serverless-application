@@ -106,7 +106,7 @@ parameters = {
         'items': {
             'type': 'string',
             'minLength': 1,
-            'maxLength': 20
+            'maxLength': 25
         },
         'maxItems': 5
     }

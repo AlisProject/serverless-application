@@ -118,7 +118,7 @@ class TestMeArticlesDraftsPublish(TestCase):
             },
             'body': {
                 'topic': 'crypto',
-                'tags': ['A', 'B', 'C', 'D', 'E']
+                'tags': ['A', 'B', 'C', 'D', 'E' * 25]
             },
             'requestContext': {
                 'authorizer': {
@@ -155,7 +155,7 @@ class TestMeArticlesDraftsPublish(TestCase):
         self.assertEqual(article_info['published_at'], 1525000000)
         self.assertEqual(article_info['sync_elasticsearch'], 1)
         self.assertEqual(article_info['topic'], 'crypto')
-        self.assertEqual(article_info['tags'], ['A', 'B', 'C', 'D', 'E'])
+        self.assertEqual(article_info['tags'], ['A', 'B', 'C', 'D', 'E' * 25])
         self.assertEqual(article_content['title'], article_history['title'])
         self.assertEqual(article_content['body'], article_history['body'])
         self.assertEqual(len(article_info_after) - len(article_info_before), 0)
@@ -466,7 +466,7 @@ class TestMeArticlesDraftsPublish(TestCase):
             },
             'body': {
                 'topic': 'crypto',
-                'tags': ['A', 'B', 'C', 'D', 'E' * 21]
+                'tags': ['A', 'B', 'C', 'D', 'E' * 26]
             },
             'requestContext': {
                 'authorizer': {

@@ -106,7 +106,7 @@ class TestMeArticlesPublicRepublish(TestCase):
             },
             'body': {
                 'topic': 'crypto',
-                'tags': ['A', 'B', 'C', 'D', 'E']
+                'tags': ['A', 'B', 'C', 'D', 'E' * 25]
             },
             'requestContext': {
                 'authorizer': {
@@ -146,7 +146,7 @@ class TestMeArticlesPublicRepublish(TestCase):
             'overview': 'edit_overview1_edit',
             'eye_catch_url': 'http://example.com/eye_catch_url_edit',
             'topic': 'crypto',
-            'tags': ['A', 'B', 'C', 'D', 'E']
+            'tags': ['A', 'B', 'C', 'D', 'E' * 25]
         }
 
         article_info_param_names = ['eye_catch_url', 'title', 'overview']
@@ -541,7 +541,7 @@ class TestMeArticlesPublicRepublish(TestCase):
             },
             'body': {
                 'topic': 'crypto',
-                'tags': ['A', 'B', 'C', 'D', 'E' * 21]
+                'tags': ['A', 'B', 'C', 'D', 'E' * 26]
             },
             'requestContext': {
                 'authorizer': {
