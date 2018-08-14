@@ -330,6 +330,30 @@ class TestMeArticlesPublicRepublish(TestCase):
         self.assertEqual(len(article_content_edit_after) - len(article_content_edit_before), 0)
         self.assertEqual(len(article_history_after) - len(article_history_before), 0)
 
+    @patch("me_articles_public_republish.TagUtil.create_and_count", MagicMock(side_effect=Exception()))
+    def test_create_and_count_raise_exception(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'publicId0001'
+            },
+            'body': {
+                'topic': 'crypto',
+                'tags': ['A']
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01'
+                    }
+                }
+            }
+        }
+        params['body'] = json.dumps(params['body'])
+
+        response = MeArticlesPublicRepublish(params, {}, self.dynamodb).main()
+
+        self.assertEqual(response['statusCode'], 200)
+
     def test_call_create_and_count(self):
         params = {
             'pathParameters': {

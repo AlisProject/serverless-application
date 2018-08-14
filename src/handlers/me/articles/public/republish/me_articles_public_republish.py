@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
+import logging
 import os
 import time
+import traceback
+
 import settings
 from lambda_base import LambdaBase
 from jsonschema import validate, ValidationError
@@ -49,9 +52,13 @@ class MeArticlesPublicRepublish(LambdaBase):
         self.__update_article_info(article_content_edit)
         self.__update_article_content(article_content_edit)
 
-        TagUtil.create_and_count(self.dynamodb, article_info_before.get('tags'), self.params.get('tags'))
-
         article_content_edit_table.delete_item(Key={'article_id': self.params['article_id']})
+
+        try:
+            TagUtil.create_and_count(self.dynamodb, article_info_before.get('tags'), self.params.get('tags'))
+        except Exception as e:
+            logging.fatal(e)
+            traceback.print_exc()
 
         return {
             'statusCode': 200

@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
+import logging
 import os
+import traceback
+
 import settings
 import time
 from boto3.dynamodb.conditions import Key
@@ -55,7 +58,11 @@ class MeArticlesDraftsPublish(LambdaBase):
             }
         )
 
-        TagUtil.create_and_count(self.dynamodb, article_info_before.get('tags'), self.params.get('tags'))
+        try:
+            TagUtil.create_and_count(self.dynamodb, article_info_before.get('tags'), self.params.get('tags'))
+        except Exception as e:
+            logging.fatal(e)
+            traceback.print_exc()
 
         return {
             'statusCode': 200
