@@ -311,17 +311,6 @@ Resources:
                 required: false
                 type: "integer"
                 minimum: 1
-              - name: "article_id"
-                in: "query"
-                description: "ページング処理における、現在のページの最後の記事のID"
-                required: false
-                type: "string"
-              - name: "sort_key"
-                in: "query"
-                description: "ページング処理における、現在のページの最後の記事のソートキー"
-                required: false
-                type: "integer"
-                minimum: 1
               - name: "topic"
                 in: "query"
                 description: "トピック"
