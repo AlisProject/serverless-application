@@ -230,6 +230,11 @@ Resources:
                 type: integer
               index_hash_key:
                 type: string
+          Publish:
+            type: object
+            properties:
+              topic:
+                type: string
         paths:
           /search/articles:
             get:
@@ -570,9 +575,10 @@ Resources:
                 type: 'string'
               - name: 'topic'
                 in: 'body'
-                description: 'トピック名'
+                description: 'publish object'
                 required: true
-                type: 'string'
+                schema:
+                  $ref: '#/definitions/Publish'
               responses:
                 '200':
                   description: 'successful operation'
@@ -732,9 +738,10 @@ Resources:
                 type: 'string'
               - name: 'topic'
                 in: 'body'
-                description: 'トピック名'
+                description: 'publish object'
                 required: true
-                type: 'string'
+                schema:
+                  $ref: '#/definitions/Publish'
               responses:
                 '200':
                   description: 'successful operation'
