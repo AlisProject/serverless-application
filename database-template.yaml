@@ -363,6 +363,8 @@ Resources:
         WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
   BetaUsers:
     Type: AWS::DynamoDB::Table
+    DependsOn:
+    - Users
     Properties:
       AttributeDefinitions:
         - AttributeName: email
@@ -403,6 +405,8 @@ Resources:
         WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
   UnreadNotificationManager:
     Type: AWS::DynamoDB::Table
+    DependsOn:
+    - Notification
     Properties:
       AttributeDefinitions:
         - AttributeName: user_id
@@ -443,6 +447,8 @@ Resources:
         WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
   CommentLikedUser:
     Type: AWS::DynamoDB::Table
+    DependsOn:
+    - Comment
     Properties:
       AttributeDefinitions:
         - AttributeName: comment_id
@@ -471,6 +477,8 @@ Resources:
         WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
   DeletedComment:
     Type: AWS::DynamoDB::Table
+    DependsOn:
+    - Comment
     Properties:
       AttributeDefinitions:
         - AttributeName: comment_id
