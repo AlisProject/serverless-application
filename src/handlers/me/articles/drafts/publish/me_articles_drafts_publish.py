@@ -5,6 +5,8 @@ import traceback
 
 import settings
 import time
+
+from array_unique_validator import ArrayUniqueValidator
 from boto3.dynamodb.conditions import Key
 from lambda_base import LambdaBase
 from jsonschema import validate
@@ -27,6 +29,9 @@ class MeArticlesDraftsPublish(LambdaBase):
 
     def validate_params(self):
         validate(self.params, self.get_schema())
+
+        if self.params.get('tags'):
+            ArrayUniqueValidator.validate(self.params['tags'], 'tags', case_insensitive=True)
 
         DBUtil.validate_article_existence(
             self.dynamodb,

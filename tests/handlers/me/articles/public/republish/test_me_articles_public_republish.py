@@ -383,6 +383,36 @@ class TestMeArticlesPublicRepublish(TestCase):
             self.assertEqual(args[1], ['a', 'b', 'c'])
             self.assertEqual(args[2], ['A'])
 
+    def test_call_array_unique_validate(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'publicId0001'
+            },
+            'body': {
+                'topic': 'crypto',
+                'tags': ['A', 'B', 'C', 'D', 'E' * 25]
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01'
+                    }
+                }
+            }
+        }
+        params['body'] = json.dumps(params['body'])
+
+        mock_lib = MagicMock()
+
+        with patch('me_articles_public_republish.ArrayUniqueValidator', mock_lib):
+            MeArticlesPublicRepublish(params, {}, self.dynamodb).main()
+
+            self.assertTrue(mock_lib.validate.called)
+            args, kwargs = mock_lib.validate.call_args
+            self.assertEqual(args[0], ['A', 'B', 'C', 'D', 'E' * 25])
+            self.assertEqual(args[1], 'tags')
+            self.assertEqual(kwargs['case_insensitive'], True)
+
     def test_call_validate_methods(self):
         params = {
             'pathParameters': {

@@ -5,6 +5,7 @@ import time
 import traceback
 
 import settings
+from array_unique_validator import ArrayUniqueValidator
 from lambda_base import LambdaBase
 from jsonschema import validate, ValidationError
 from db_util import DBUtil
@@ -29,6 +30,9 @@ class MeArticlesPublicRepublish(LambdaBase):
             raise ValidationError('pathParameters is required')
 
         validate(self.params, self.get_schema())
+
+        if self.params.get('tags'):
+            ArrayUniqueValidator.validate(self.params['tags'], 'tags', case_insensitive=True)
 
         DBUtil.validate_article_existence(
             self.dynamodb,
