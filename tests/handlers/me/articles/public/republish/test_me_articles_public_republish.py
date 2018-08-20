@@ -32,6 +32,7 @@ class TestMeArticlesPublicRepublish(TestCase):
                 'user_id': 'test01',
                 'status': 'public',
                 'topic': 'fashion',
+                'tags': ['a', 'b', 'c'],
                 'sort_key': 1520150272000000
             },
             {
@@ -87,6 +88,8 @@ class TestMeArticlesPublicRepublish(TestCase):
         ]
         TestsUtil.create_table(self.dynamodb, os.environ['TOPIC_TABLE_NAME'], topic_items)
 
+        TestsUtil.create_table(self.dynamodb, os.environ['TAG_TABLE_NAME'], [])
+
     def tearDown(cls):
         TestsUtil.delete_all_tables(cls.dynamodb)
 
@@ -102,7 +105,8 @@ class TestMeArticlesPublicRepublish(TestCase):
                 'article_id': 'publicId0001'
             },
             'body': {
-                'topic': 'crypto'
+                'topic': 'crypto',
+                'tags': ['A', 'B', 'C', 'D', 'E' * 25]
             },
             'requestContext': {
                 'authorizer': {
@@ -141,7 +145,8 @@ class TestMeArticlesPublicRepublish(TestCase):
             'body': 'edit_body1_edit',
             'overview': 'edit_overview1_edit',
             'eye_catch_url': 'http://example.com/eye_catch_url_edit',
-            'topic': 'crypto'
+            'topic': 'crypto',
+            'tags': ['A', 'B', 'C', 'D', 'E' * 25]
         }
 
         article_info_param_names = ['eye_catch_url', 'title', 'overview']
@@ -325,6 +330,59 @@ class TestMeArticlesPublicRepublish(TestCase):
         self.assertEqual(len(article_content_edit_after) - len(article_content_edit_before), 0)
         self.assertEqual(len(article_history_after) - len(article_history_before), 0)
 
+    @patch("me_articles_public_republish.TagUtil.create_and_count", MagicMock(side_effect=Exception()))
+    def test_create_and_count_raise_exception(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'publicId0001'
+            },
+            'body': {
+                'topic': 'crypto',
+                'tags': ['A']
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01'
+                    }
+                }
+            }
+        }
+        params['body'] = json.dumps(params['body'])
+
+        response = MeArticlesPublicRepublish(params, {}, self.dynamodb).main()
+
+        self.assertEqual(response['statusCode'], 200)
+
+    def test_call_create_and_count(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'publicId0001'
+            },
+            'body': {
+                'topic': 'crypto',
+                'tags': ['A']
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01'
+                    }
+                }
+            }
+        }
+        params['body'] = json.dumps(params['body'])
+
+        mock_lib = MagicMock()
+        with patch('me_articles_public_republish.TagUtil', mock_lib):
+            MeArticlesPublicRepublish(params, {}, self.dynamodb).main()
+
+            self.assertTrue(mock_lib.create_and_count.called)
+            args, _ = mock_lib.create_and_count.call_args
+            self.assertTrue(args[0])
+            self.assertEqual(args[1], ['a', 'b', 'c'])
+            self.assertEqual(args[2], ['A'])
+
     def test_call_validate_methods(self):
         params = {
             'pathParameters': {
@@ -442,6 +500,69 @@ class TestMeArticlesPublicRepublish(TestCase):
             },
             'body': {
                 'topic': 'A' * 21
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01'
+                    }
+                }
+            }
+        }
+        params['body'] = json.dumps(params['body'])
+
+        self.assert_bad_request(params)
+
+    def test_validation_many_tags(self):
+        params = {
+            'queryStringParameters': {
+                'article_id': 'publicId0001',
+            },
+            'body': {
+                'topic': 'crypto',
+                'tags': ['A', 'B', 'C', 'D', 'E', 'F']
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01'
+                    }
+                }
+            }
+        }
+        params['body'] = json.dumps(params['body'])
+
+        self.assert_bad_request(params)
+
+    def test_validation_tag_name_max(self):
+        params = {
+            'queryStringParameters': {
+                'article_id': 'publicId0001',
+            },
+            'body': {
+                'topic': 'crypto',
+                'tags': ['A', 'B', 'C', 'D', 'E' * 26]
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01'
+                    }
+                }
+            }
+        }
+        params['body'] = json.dumps(params['body'])
+
+        self.assert_bad_request(params)
+
+    def test_validation_tag_name_min(self):
+        params = {
+            'queryStringParameters': {
+                'article_id': 'publicId0001',
+            },
+            'body': {
+                'topic': 'crypto',
+                'tags': ['A', 'B', 'C', 'D', '']
             },
             'requestContext': {
                 'authorizer': {

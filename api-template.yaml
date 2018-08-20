@@ -41,6 +41,8 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   TopicTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
+  TagTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
   AlisAppDomain:
     Type: 'AWS::SSM::Parameter::Value<String>'
   PrivateChainAwsAccessKey:
@@ -83,6 +85,7 @@ Globals:
         COMMENT_LIKED_USER_TABLE_NAME: !Ref CommentLikedUserTableName
         DELETED_COMMENT_TABLE_NAME: !Ref DeletedCommentTableName
         TOPIC_TABLE_NAME: !Ref TopicTableName
+        TAG_TABLE_NAME: !Ref TagTableName
         DOMAIN: !Ref AlisAppDomain
         PRIVATE_CHAIN_AWS_ACCESS_KEY: !Ref PrivateChainAwsAccessKey
         PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY: !Ref PrivateChainAwsSecretAccessKey
@@ -584,6 +587,13 @@ Resources:
                 description: 'トピック名'
                 required: true
                 type: 'string'
+              - name: 'tags'
+                in: 'body'
+                description: 'タグの一覧'
+                required: false
+                type: 'array'
+                items:
+                  type: 'string'
               responses:
                 '200':
                   description: 'successful operation'
@@ -746,6 +756,13 @@ Resources:
                 description: 'トピック名'
                 required: true
                 type: 'string'
+              - name: 'tags'
+                in: 'body'
+                description: 'タグの一覧'
+                required: false
+                type: 'array'
+                items:
+                  type: 'string'
               responses:
                 '200':
                   description: 'successful operation'
