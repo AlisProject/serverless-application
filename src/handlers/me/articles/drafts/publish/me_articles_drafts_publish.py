@@ -32,6 +32,7 @@ class MeArticlesDraftsPublish(LambdaBase):
 
         if self.params.get('tags'):
             ArrayUniqueValidator.validate(self.params['tags'], 'tags', case_insensitive=True)
+            TagUtil.validate_format(self.params['tags'])
 
         DBUtil.validate_article_existence(
             self.dynamodb,

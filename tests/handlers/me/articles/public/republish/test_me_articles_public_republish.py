@@ -354,7 +354,7 @@ class TestMeArticlesPublicRepublish(TestCase):
 
         self.assertEqual(response['statusCode'], 200)
 
-    def test_call_create_and_count(self):
+    def test_call_tag_util_methods(self):
         params = {
             'pathParameters': {
                 'article_id': 'publicId0001'
@@ -376,6 +376,10 @@ class TestMeArticlesPublicRepublish(TestCase):
         mock_lib = MagicMock()
         with patch('me_articles_public_republish.TagUtil', mock_lib):
             MeArticlesPublicRepublish(params, {}, self.dynamodb).main()
+
+            self.assertTrue(mock_lib.validate_format.called)
+            args, _ = mock_lib.validate_format.call_args
+            self.assertEqual(args[0], ['A'])
 
             self.assertTrue(mock_lib.create_and_count.called)
             args, _ = mock_lib.create_and_count.call_args
