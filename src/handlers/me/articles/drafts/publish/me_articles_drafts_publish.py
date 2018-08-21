@@ -6,11 +6,11 @@ import traceback
 import settings
 import time
 
-from array_unique_validator import ArrayUniqueValidator
 from boto3.dynamodb.conditions import Key
 from lambda_base import LambdaBase
 from jsonschema import validate
 from db_util import DBUtil
+from parameter_util import ParameterUtil
 from tag_util import TagUtil
 from time_util import TimeUtil
 
@@ -31,7 +31,7 @@ class MeArticlesDraftsPublish(LambdaBase):
         validate(self.params, self.get_schema())
 
         if self.params.get('tags'):
-            ArrayUniqueValidator.validate(self.params['tags'], 'tags', case_insensitive=True)
+            ParameterUtil.validate_array_unique(self.params['tags'], 'tags', case_insensitive=True)
             TagUtil.validate_format(self.params['tags'])
 
         DBUtil.validate_article_existence(

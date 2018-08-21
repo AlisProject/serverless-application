@@ -311,7 +311,7 @@ class TestMeArticlesDraftsPublish(TestCase):
             self.assertEqual(args[1], ['a', 'b', 'c'])
             self.assertEqual(args[2], ['A'])
 
-    def test_call_array_unique_validate(self):
+    def test_call_validate_array_unique(self):
         params = {
             'pathParameters': {
                 'article_id': 'draftId00001'
@@ -332,11 +332,11 @@ class TestMeArticlesDraftsPublish(TestCase):
 
         mock_lib = MagicMock()
 
-        with patch('me_articles_drafts_publish.ArrayUniqueValidator', mock_lib):
+        with patch('me_articles_drafts_publish.ParameterUtil', mock_lib):
             MeArticlesDraftsPublish(params, {}, self.dynamodb).main()
 
-            self.assertTrue(mock_lib.validate.called)
-            args, kwargs = mock_lib.validate.call_args
+            self.assertTrue(mock_lib.validate_array_unique.called)
+            args, kwargs = mock_lib.validate_array_unique.call_args
             self.assertEqual(args[0], ['A', 'B', 'C', 'D', 'E' * 25])
             self.assertEqual(args[1], 'tags')
             self.assertEqual(kwargs['case_insensitive'], True)
