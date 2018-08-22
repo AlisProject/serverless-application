@@ -1,5 +1,9 @@
 import os
+import re
 import time
+
+import settings
+from jsonschema import ValidationError
 
 
 class TagUtil:
@@ -42,3 +46,17 @@ class TagUtil:
             ExpressionAttributeNames={'#attr': 'count'},
             ExpressionAttributeValues={':increment': num}
         )
+
+    @staticmethod
+    def validate_format(tags):
+        pattern = re.compile(settings.TAG_DENIED_SYMBOL_PATTERN)
+
+        for tag in tags:
+            result = pattern.search(tag)
+
+            if result:
+                raise ValidationError("tags don't support {str}".format(str=result.group()))
+
+            for symbol in settings.TAG_ALLOWED_SYMBOLS:
+                if tag[0] == symbol or tag[-1] == symbol:
+                    raise ValidationError("tags don't support {str} with start and end of character".format(str=symbol))

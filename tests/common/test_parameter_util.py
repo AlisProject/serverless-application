@@ -1,4 +1,6 @@
 from unittest import TestCase
+
+from jsonschema import ValidationError
 from parameter_util import ParameterUtil
 
 
@@ -29,3 +31,31 @@ class TestParameterToInt(TestCase):
         }
 
         self.assertEqual(params, expected_params)
+
+    def test_validate_array_unique_ok(self):
+        target_items = ["FOO", "BAR", "foo"]
+
+        try:
+            ParameterUtil.validate_array_unique(target_items, 'tags')
+        except ValidationError:
+            self.fail('expected no error is raised')
+
+    def test_validate_array_unique_ok_with_case_insensitive(self):
+        target_items = ["FOO", "BAR", "BAZ"]
+
+        try:
+            ParameterUtil.validate_array_unique(target_items, 'tags', case_insensitive=True)
+        except ValidationError:
+            self.fail('expected no error is raised')
+
+    def test_validate_array_unique_with_not_unique(self):
+        target_items = ["FOO", "BAR", "FOO"]
+
+        with self.assertRaises(ValidationError):
+            ParameterUtil.validate_array_unique(target_items, 'tags')
+
+    def test_validate_array_unique_with_not_unique_case_insensitive(self):
+        target_items = ["FOO", "BAR", "foo"]
+
+        with self.assertRaises(ValidationError):
+            ParameterUtil.validate_array_unique(target_items, 'tags', case_insensitive=True)

@@ -354,7 +354,7 @@ class TestMeArticlesPublicRepublish(TestCase):
 
         self.assertEqual(response['statusCode'], 200)
 
-    def test_call_create_and_count(self):
+    def test_call_tag_util_methods(self):
         params = {
             'pathParameters': {
                 'article_id': 'publicId0001'
@@ -377,11 +377,45 @@ class TestMeArticlesPublicRepublish(TestCase):
         with patch('me_articles_public_republish.TagUtil', mock_lib):
             MeArticlesPublicRepublish(params, {}, self.dynamodb).main()
 
+            self.assertTrue(mock_lib.validate_format.called)
+            args, _ = mock_lib.validate_format.call_args
+            self.assertEqual(args[0], ['A'])
+
             self.assertTrue(mock_lib.create_and_count.called)
             args, _ = mock_lib.create_and_count.call_args
             self.assertTrue(args[0])
             self.assertEqual(args[1], ['a', 'b', 'c'])
             self.assertEqual(args[2], ['A'])
+
+    def test_call_validate_array_unique(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'publicId0001'
+            },
+            'body': {
+                'topic': 'crypto',
+                'tags': ['A', 'B', 'C', 'D', 'E' * 25]
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01'
+                    }
+                }
+            }
+        }
+        params['body'] = json.dumps(params['body'])
+
+        mock_lib = MagicMock()
+
+        with patch('me_articles_public_republish.ParameterUtil', mock_lib):
+            MeArticlesPublicRepublish(params, {}, self.dynamodb).main()
+
+            self.assertTrue(mock_lib.validate_array_unique.called)
+            args, kwargs = mock_lib.validate_array_unique.call_args
+            self.assertEqual(args[0], ['A', 'B', 'C', 'D', 'E' * 25])
+            self.assertEqual(args[1], 'tags')
+            self.assertEqual(kwargs['case_insensitive'], True)
 
     def test_call_validate_methods(self):
         params = {

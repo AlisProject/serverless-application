@@ -2,6 +2,7 @@ import os
 from decimal import Decimal
 from unittest import TestCase
 
+from jsonschema import ValidationError
 from tag_util import TagUtil
 from tests_util import TestsUtil
 
@@ -136,3 +137,31 @@ class TestDBUtil(TestCase):
         tags = sorted(tags, key=lambda t: t['name'])
 
         self.assertEqual(tags, expected)
+
+    def test_validate_format(self):
+        def expected_raise_error(args):
+            with self.assertRaises(ValidationError):
+                TagUtil.validate_format(args)
+
+        def expected_raise_no_error(args):
+            try:
+                TagUtil.validate_format(args)
+            except ValidationError:
+                self.fail('expected no error is raised')
+
+        expected_raise_no_error(['ABCDE', 'b', 'あいうえおぁぃぅぇぉﾊﾝｶｸ'])
+        expected_raise_no_error(['チャーハン', '＆＄％！”＃', '𪚲🍣𪚲'])
+        expected_raise_no_error(['aa-aa', 'Ruby on Rails', 'C C C C C'])
+        expected_raise_error(['XSS', 'CSRF', '<script>'])
+        expected_raise_error(['ALIS', 'INVALID '])
+        expected_raise_error(['ALIS', ' INVALID'])
+        expected_raise_error(['ALIS', '-INVALID'])
+        expected_raise_error(['ALIS', 'INVALID-'])
+        expected_raise_error(['ALIS', 'INVA--LID'])
+        expected_raise_error(['ALIS', 'INVA  LID'])
+
+        # ハイフン以外の半角記号
+        targets = '!"#$%&\'()*+,./:;<=>?@[\\]^_`{|}~'
+
+        for target in targets:
+            expected_raise_error(['ALIS', 'INV{target}ALID'.format(target=target)])
