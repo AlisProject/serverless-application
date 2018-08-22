@@ -1,11 +1,16 @@
 # -*- coding: utf-8 -*-
+import logging
 import os
 import time
+import traceback
+
 import settings
 from lambda_base import LambdaBase
 from jsonschema import validate, ValidationError
 from db_util import DBUtil
+from parameter_util import ParameterUtil
 from record_not_found_error import RecordNotFoundError
+from tag_util import TagUtil
 
 
 class MeArticlesPublicRepublish(LambdaBase):
@@ -14,7 +19,8 @@ class MeArticlesPublicRepublish(LambdaBase):
             'type': 'object',
             'properties': {
                 'article_id': settings.parameters['article_id'],
-                'topic': settings.parameters['topic']
+                'topic': settings.parameters['topic'],
+                'tags': settings.parameters['tags']
             },
             'required': ['article_id', 'topic']
         }
@@ -24,6 +30,10 @@ class MeArticlesPublicRepublish(LambdaBase):
             raise ValidationError('pathParameters is required')
 
         validate(self.params, self.get_schema())
+
+        if self.params.get('tags'):
+            ParameterUtil.validate_array_unique(self.params['tags'], 'tags', case_insensitive=True)
+            TagUtil.validate_format(self.params['tags'])
 
         DBUtil.validate_article_existence(
             self.dynamodb,
@@ -38,6 +48,9 @@ class MeArticlesPublicRepublish(LambdaBase):
         article_content_edit_table = self.dynamodb.Table(os.environ['ARTICLE_CONTENT_EDIT_TABLE_NAME'])
         article_content_edit = article_content_edit_table.get_item(Key={'article_id': self.params['article_id']}).get('Item')
 
+        article_info_table = self.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
+        article_info_before = article_info_table.get_item(Key={'article_id': self.params['article_id']}).get('Item')
+
         self.__validate_article_content_edit(article_content_edit)
 
         self.__create_article_history(article_content_edit)
@@ -45,6 +58,12 @@ class MeArticlesPublicRepublish(LambdaBase):
         self.__update_article_content(article_content_edit)
 
         article_content_edit_table.delete_item(Key={'article_id': self.params['article_id']})
+
+        try:
+            TagUtil.create_and_count(self.dynamodb, article_info_before.get('tags'), self.params.get('tags'))
+        except Exception as e:
+            logging.fatal(e)
+            traceback.print_exc()
 
         return {
             'statusCode': 200
@@ -58,13 +77,14 @@ class MeArticlesPublicRepublish(LambdaBase):
                 'article_id': self.params['article_id'],
             },
             UpdateExpression=("set title = :title, overview=:overview, eye_catch_url=:eye_catch_url, "
-                              "sync_elasticsearch=:sync_elasticsearch, topic=:topic"),
+                              "sync_elasticsearch=:sync_elasticsearch, topic=:topic, tags=:tags"),
             ExpressionAttributeValues={
                 ':title': article_content_edit['title'],
                 ':overview': article_content_edit['overview'],
                 ':eye_catch_url': article_content_edit['eye_catch_url'],
                 ':sync_elasticsearch': 1,
-                ':topic': self.params['topic']
+                ':topic': self.params['topic'],
+                ':tags': self.params.get('tags')
             }
         )
 

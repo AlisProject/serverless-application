@@ -100,6 +100,15 @@ parameters = {
         'type': 'string',
         'minLength': 1,
         'maxLength': 20
+    },
+    'tags': {
+        'type': 'array',
+        'items': {
+            'type': 'string',
+            'minLength': 1,
+            'maxLength': 25
+        },
+        'maxItems': 5
     }
 }
 
@@ -168,3 +177,6 @@ COMMENT_NOTIFICATION_TYPE = 'comment'
 
 ARTICLE_SCORE_INDEX_NAME = 'article_scores'
 TOPIC_INDEX_HASH_KEY = 'topic'
+
+TAG_DENIED_SYMBOL_PATTERN = '([!-,./:-@[-`{-~]|--| {2})'
+TAG_ALLOWED_SYMBOLS = ['-', ' ']

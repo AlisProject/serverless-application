@@ -41,6 +41,8 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   TopicTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
+  TagTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
   AlisAppDomain:
     Type: 'AWS::SSM::Parameter::Value<String>'
   PrivateChainAwsAccessKey:
@@ -83,6 +85,7 @@ Globals:
         COMMENT_LIKED_USER_TABLE_NAME: !Ref CommentLikedUserTableName
         DELETED_COMMENT_TABLE_NAME: !Ref DeletedCommentTableName
         TOPIC_TABLE_NAME: !Ref TopicTableName
+        TAG_TABLE_NAME: !Ref TagTableName
         DOMAIN: !Ref AlisAppDomain
         PRIVATE_CHAIN_AWS_ACCESS_KEY: !Ref PrivateChainAwsAccessKey
         PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY: !Ref PrivateChainAwsSecretAccessKey
@@ -235,6 +238,10 @@ Resources:
             properties:
               topic:
                 type: string
+              tgas:
+                type: array
+                items:
+                  type: string
         paths:
           /search/articles:
             get:
@@ -573,7 +580,7 @@ Resources:
                 description: '対象記事の指定するために使用'
                 required: true
                 type: 'string'
-              - name: 'topic'
+              - name: 'publish'
                 in: 'body'
                 description: 'publish object'
                 required: true
@@ -736,7 +743,7 @@ Resources:
                 description: '対象記事を指定するために使用'
                 required: true
                 type: 'string'
-              - name: 'topic'
+              - name: 'publish'
                 in: 'body'
                 description: 'publish object'
                 required: true
@@ -1107,11 +1114,6 @@ Resources:
             put:
               description: '下書き記事を更新'
               parameters:
-              - name: 'article_id'
-                in: 'path'
-                description: '対象記事の指定するために使用'
-                required: true
-                type: 'string'
               - name: 'article'
                 in: 'body'
                 description: 'article object'
