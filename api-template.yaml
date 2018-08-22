@@ -233,6 +233,15 @@ Resources:
                 type: integer
               index_hash_key:
                 type: string
+          Publish:
+            type: object
+            properties:
+              topic:
+                type: string
+              tgas:
+                type: array
+                items:
+                  type: string
         paths:
           /search/articles:
             get:
@@ -311,17 +320,6 @@ Resources:
               - name: "limit"
                 in: "query"
                 description: "取得件数"
-                required: false
-                type: "integer"
-                minimum: 1
-              - name: "article_id"
-                in: "query"
-                description: "ページング処理における、現在のページの最後の記事のID"
-                required: false
-                type: "string"
-              - name: "sort_key"
-                in: "query"
-                description: "ページング処理における、現在のページの最後の記事のソートキー"
                 required: false
                 type: "integer"
                 minimum: 1
@@ -582,18 +580,12 @@ Resources:
                 description: '対象記事の指定するために使用'
                 required: true
                 type: 'string'
-              - name: 'topic'
+              - name: 'publish'
                 in: 'body'
-                description: 'トピック名'
+                description: 'publish object'
                 required: true
-                type: 'string'
-              - name: 'tags'
-                in: 'body'
-                description: 'タグの一覧'
-                required: false
-                type: 'array'
-                items:
-                  type: 'string'
+                schema:
+                  $ref: '#/definitions/Publish'
               responses:
                 '200':
                   description: 'successful operation'
@@ -751,18 +743,12 @@ Resources:
                 description: '対象記事を指定するために使用'
                 required: true
                 type: 'string'
-              - name: 'topic'
+              - name: 'publish'
                 in: 'body'
-                description: 'トピック名'
+                description: 'publish object'
                 required: true
-                type: 'string'
-              - name: 'tags'
-                in: 'body'
-                description: 'タグの一覧'
-                required: false
-                type: 'array'
-                items:
-                  type: 'string'
+                schema:
+                  $ref: '#/definitions/Publish'
               responses:
                 '200':
                   description: 'successful operation'
@@ -1128,6 +1114,11 @@ Resources:
             put:
               description: '下書き記事を更新'
               parameters:
+              - name: 'article_id'
+                in: 'path'
+                description: '対象記事の指定するために使用'
+                required: true
+                type: 'string'
               - name: 'article'
                 in: 'body'
                 description: 'article object'
