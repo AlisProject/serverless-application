@@ -1114,6 +1114,11 @@ Resources:
             put:
               description: '下書き記事を更新'
               parameters:
+              - name: 'article_id'
+                in: 'path'
+                description: '対象記事の指定するために使用'
+                required: true
+                type: 'string'
               - name: 'article'
                 in: 'body'
                 description: 'article object'
