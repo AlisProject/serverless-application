@@ -3,6 +3,7 @@ venv
 deploy
 vendor-package
 .envrc
+_tmp_*
 
 # for tests
 tmp_tests
