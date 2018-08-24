@@ -85,7 +85,7 @@ aws s3api create-bucket --bucket ${ALIS_APP_ID}-serverless-deploy-bucket \
 ./deploy.sh database
 
 # Show all tables.
-aws dynamodb list-tables |grep ${ALIS_APP_ID}database |sort |tr -d ' '
+aws dynamodb list-tables |grep ${ALIS_APP_ID}database |sort |tr -d ' ",'
 ```
 
 And add all of generated table names to SSM.
@@ -118,6 +118,9 @@ Specify generated ApiLambdaRole to SSM.
 #### Fix API settings via a script
 
 ```bash
+# Show generated Rest API ID
+aws apigateway  get-rest-apis | jq '.items[] | if .name == "'${ALIS_APP_ID}'api" then .id else empty end' 
+
 # Set SERVERLESS_REST_API_ID to .envrc
 direnv edit
 
