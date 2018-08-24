@@ -263,6 +263,11 @@ Resources:
                 description: "ページ"
                 required: false
                 type: "integer"
+              - name: "offset"
+                in: "query"
+                description: "取得開始位置"
+                required: false
+                type: "integer"
               responses:
                 "200":
                   description: "検索記事一覧"
@@ -296,6 +301,11 @@ Resources:
               - name: "page"
                 in: "query"
                 description: "ページ"
+                required: false
+                type: "integer"
+              - name: "offset"
+                in: "query"
+                description: "取得開始位置"
                 required: false
                 type: "integer"
               responses:
@@ -333,6 +343,11 @@ Resources:
                 description: "ページ数"
                 required: false
                 type: "integer"
+              - name: "offset"
+                in: "query"
+                description: "取得開始位置"
+                required: false
+                type: "integer"
               responses:
                 "200":
                   description: "最新記事一覧"
@@ -360,7 +375,7 @@ Resources:
                 minimum: 1
               - name: 'page'
                 in: 'query'
-                description: '取得対象ページのoffset'
+                description: 'ページ数'
                 required: false
                 type: 'integer'
                 minimum: 1
@@ -369,6 +384,11 @@ Resources:
                 description: '検索対象のトピック名'
                 required: false
                 type: 'string'
+              - name: "offset"
+                in: "query"
+                description: "取得開始位置"
+                required: false
+                type: "integer"
               responses:
                 '200':
                   description: '人気記事一覧'

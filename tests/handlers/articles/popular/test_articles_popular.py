@@ -219,6 +219,60 @@ class TestArticlesPopular(TestCase):
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(json.loads(response['body'])['Items'], expected_items)
 
+    def test_main_ok_with_offset(self):
+        params = {
+            'queryStringParameters': {
+                'limit': '1',
+                'page': '1',
+                'offset': '2'
+            }
+        }
+
+        response = ArticlesPopular(params, {}, dynamodb=self.dynamodb, elasticsearch=self.elasticsearch).main()
+
+        expected_items = [
+            {
+                'article_id': 'testid000003',
+                'user_id': 'matsumatsu20',
+                'created_at': 1520150272,
+                'title': 'title04',
+                'overview': 'overview04',
+                'status': 'public',
+                'topic': 'crypto',
+                'article_score': 6,
+                'sort_key': 1520150272000003
+            }
+        ]
+
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(json.loads(response['body'])['Items'], expected_items)
+
+    def test_main_ok_with_only_offset(self):
+        params = {
+            'queryStringParameters': {
+                'offset': '2'
+            }
+        }
+
+        response = ArticlesPopular(params, {}, dynamodb=self.dynamodb, elasticsearch=self.elasticsearch).main()
+
+        expected_items = [
+            {
+                'article_id': 'testid000003',
+                'user_id': 'matsumatsu20',
+                'created_at': 1520150272,
+                'title': 'title04',
+                'overview': 'overview04',
+                'status': 'public',
+                'topic': 'crypto',
+                'article_score': 6,
+                'sort_key': 1520150272000003
+            }
+        ]
+
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(json.loads(response['body'])['Items'], expected_items)
+
     def test_call_validate_topic(self):
         params = {
             'queryStringParameters': {
@@ -293,6 +347,33 @@ class TestArticlesPopular(TestCase):
         params = {
             'queryStringParameters': {
                 'page': '0'
+            }
+        }
+
+        self.assert_bad_request(params)
+
+    def test_validation_offset_type(self):
+        params = {
+            'queryStringParameters': {
+                'offset': 'A'
+            }
+        }
+
+        self.assert_bad_request(params)
+
+    def test_validation_offset_max(self):
+        params = {
+            'queryStringParameters': {
+                'offset': '101'
+            }
+        }
+
+        self.assert_bad_request(params)
+
+    def test_validation_offset_min(self):
+        params = {
+            'queryStringParameters': {
+                'offset': '-1'
             }
         }
 

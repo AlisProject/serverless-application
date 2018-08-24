@@ -16,7 +16,8 @@ class ArticlesPopular(LambdaBase):
             'properties': {
                 'limit': settings.parameters['limit'],
                 'page': settings.parameters['page'],
-                'topic': settings.parameters['topic']
+                'topic': settings.parameters['topic'],
+                'offset': settings.parameters['offset']
             }
         }
 
@@ -31,8 +32,8 @@ class ArticlesPopular(LambdaBase):
     def exec_main_proc(self):
         limit = int(self.params['limit']) if self.params.get('limit') else settings.articles_popular_default_limit
         page = int(self.params['page']) if self.params.get('page') else 1
-
-        articles = ESUtil.search_popular_articles(self.elasticsearch, self.params, limit, page)
+        offset = int(self.params['offset']) if self.params.get('offset') is not None else 0
+        articles = ESUtil.search_popular_articles(self.elasticsearch, self.params, limit, page, offset)
 
         response = {
             'Items': articles

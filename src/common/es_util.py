@@ -4,7 +4,7 @@
 class ESUtil:
 
     @staticmethod
-    def search_article(elasticsearch, word, limit, page):
+    def search_article(elasticsearch, word, limit, page, offset):
         body = {
             "query": {
                 "bool": {
@@ -16,7 +16,7 @@ class ESUtil:
                 "_score",
                 {"published_at": "desc"}
             ],
-            "from": limit*(page-1),
+            "from": limit*(page-1) + offset,
             "size": limit
         }
         for s in word.split():
@@ -44,7 +44,7 @@ class ESUtil:
         return res
 
     @staticmethod
-    def search_user(elasticsearch, word, limit, page):
+    def search_user(elasticsearch, word, limit, page, offset):
         body = {
             "query": {
                 "bool": {
@@ -54,7 +54,7 @@ class ESUtil:
                     ]
                 }
             },
-            "from": limit*(page-1),
+            "from": limit*(page-1) + offset,
             "size": limit
         }
         res = elasticsearch.search(
@@ -64,7 +64,7 @@ class ESUtil:
         return res
 
     @staticmethod
-    def search_popular_articles(elasticsearch, params, limit, page):
+    def search_popular_articles(elasticsearch, params, limit, page, offset):
         body = {
             'query': {
                 'bool': {
@@ -75,7 +75,7 @@ class ESUtil:
             'sort': [
                 {'article_score': 'desc'}
             ],
-            'from': limit * (page - 1),
+            'from': limit * (page - 1) + offset,
             'size': limit
         }
 
@@ -92,7 +92,7 @@ class ESUtil:
         return articles
 
     @staticmethod
-    def search_recent_articles(elasticsearch, params, limit, page):
+    def search_recent_articles(elasticsearch, params, limit, page, offset):
         body = {
             'query': {
                 'bool': {
@@ -102,7 +102,7 @@ class ESUtil:
             'sort': [
                 {'sort_key': 'desc'}
             ],
-            'from': limit * (page - 1),
+            'from': limit * (page - 1) + offset,
             'size': limit
         }
 

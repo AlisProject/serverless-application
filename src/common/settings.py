@@ -91,6 +91,11 @@ parameters = {
         'minimum': 1,
         'maximum': 100000
     },
+    'offset': {
+        'type': 'integer',
+        'minimum': 0,
+        'maximum': 100
+    },
     'query': {
         'type': 'string',
         'minLength': 1,
