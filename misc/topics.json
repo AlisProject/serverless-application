@@ -1,0 +1,58 @@
+{
+  "Topic": [
+    {
+      "PutRequest": {
+        "Item": {
+          "name": {
+            "S": "crypto"
+          },
+          "display_name": {
+            "S": "クリプト"
+          },
+          "index_hash_key": {
+            "S": "topic"
+          },
+          "order": {
+            "N": "1"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "name": {
+            "S": "gourmet"
+          },
+          "display_name": {
+            "S": "グルメ"
+          },
+          "index_hash_key": {
+            "S": "topic"
+          },
+          "order": {
+            "N": "2"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "name": {
+            "S": "gosyuin"
+          },
+          "display_name": {
+            "S": "御朱印"
+          },
+          "index_hash_key": {
+            "S": "topic"
+          },
+          "order": {
+            "N": "3"
+          }
+        }
+      }
+    }
+  ]
+}
