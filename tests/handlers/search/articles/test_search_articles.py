@@ -113,6 +113,32 @@ class TestSearchArticles(TestCase):
         response = SearchArticles(params, {}, elasticsearch=self.elasticsearch).main()
         self.assertEqual(response['statusCode'], 400)
 
+    def test_search_request_offset(self):
+        # offset 指定
+        params = {
+                'queryStringParameters': {
+                    'page': '3',
+                    'limit': '10',
+                    'offset': '5',
+                    'query': 'dummy'
+                }
+        }
+        response = SearchArticles(params, {}, elasticsearch=self.elasticsearch).main()
+        result = json.loads(response['body'])
+        self.assertRegex(result[0]['article_id'], '^dummy')
+        self.assertEqual(len(result), 5)
+        # offset 指定のみ
+        params = {
+                'queryStringParameters': {
+                    'offset': '28',
+                    'query': 'dummy'
+                }
+        }
+        response = SearchArticles(params, {}, elasticsearch=self.elasticsearch).main()
+        result = json.loads(response['body'])
+        self.assertRegex(result[0]['article_id'], '^dummy')
+        self.assertEqual(len(result), 2)
+
     def test_search_match_zero(self):
         params = {
                 'queryStringParameters': {
@@ -131,5 +157,38 @@ class TestSearchArticles(TestCase):
                     'query': 'abcdefghij' * 16
                 }
         }
+        response = SearchArticles(params, {}, elasticsearch=self.elasticsearch).main()
+        self.assertEqual(response['statusCode'], 400)
+
+    def test_validation_offset_type(self):
+        params = {
+            'queryStringParameters': {
+                'query': 'dummy',
+                'offset': 'A'
+            }
+        }
+
+        response = SearchArticles(params, {}, elasticsearch=self.elasticsearch).main()
+        self.assertEqual(response['statusCode'], 400)
+
+    def test_validation_offset_max(self):
+        params = {
+            'queryStringParameters': {
+                'query': 'dummy',
+                'offset': '101'
+            }
+        }
+
+        response = SearchArticles(params, {}, elasticsearch=self.elasticsearch).main()
+        self.assertEqual(response['statusCode'], 400)
+
+    def test_validation_offset_min(self):
+        params = {
+            'queryStringParameters': {
+                'query': 'dummy',
+                'offset': '-1'
+            }
+        }
+
         response = SearchArticles(params, {}, elasticsearch=self.elasticsearch).main()
         self.assertEqual(response['statusCode'], 400)

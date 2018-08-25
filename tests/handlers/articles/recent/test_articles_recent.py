@@ -163,6 +163,32 @@ class TestArticlesRecent(TestCase):
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(len(json.loads(response['body'])['Items']), 10)
 
+    def test_main_ok_with_offset(self):
+        params = {
+            'queryStringParameters': {
+                'limit': '20',
+                'page': '2',
+                'offset': '5',
+                'topic': 'food'
+            }
+        }
+        response = ArticlesRecent(params, {}, dynamodb=self.dynamodb, elasticsearch=self.elasticsearch).main()
+
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(len(json.loads(response['body'])['Items']), 5)
+
+    def test_main_ok_with_only_offset(self):
+        params = {
+            'queryStringParameters': {
+                'offset': '28',
+                'topic': 'food'
+            }
+        }
+        response = ArticlesRecent(params, {}, dynamodb=self.dynamodb, elasticsearch=self.elasticsearch).main()
+
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(len(json.loads(response['body'])['Items']), 2)
+
     def test_main_ok_exceed_page(self):
         params = {
             'queryStringParameters': {
@@ -241,6 +267,33 @@ class TestArticlesRecent(TestCase):
         params = {
             'queryStringParameters': {
                 'page': '100001'
+            }
+        }
+
+        self.assert_bad_request(params)
+
+    def test_validation_offset_type(self):
+        params = {
+            'queryStringParameters': {
+                'offset': 'A'
+            }
+        }
+
+        self.assert_bad_request(params)
+
+    def test_validation_offset_max(self):
+        params = {
+            'queryStringParameters': {
+                'offset': '101'
+            }
+        }
+
+        self.assert_bad_request(params)
+
+    def test_validation_offset_min(self):
+        params = {
+            'queryStringParameters': {
+                'offset': '-1'
             }
         }
 

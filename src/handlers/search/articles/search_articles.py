@@ -15,7 +15,8 @@ class SearchArticles(LambdaBase):
             'properties': {
                 'limit': settings.parameters['limit'],
                 'page': settings.parameters['page'],
-                'query': settings.parameters['query']
+                'query': settings.parameters['query'],
+                'offset': settings.parameters['offset']
             },
             'required': ['query']
         }
@@ -28,7 +29,8 @@ class SearchArticles(LambdaBase):
         query = self.params['query']
         limit = int(self.params.get('limit')) if self.params.get('limit') is not None else settings.article_recent_default_limit
         page = int(self.params.get('page')) if self.params.get('page') is not None else 1
-        response = ESUtil.search_article(self.elasticsearch, query, limit, page)
+        offset = int(self.params['offset']) if self.params.get('offset') is not None else 0
+        response = ESUtil.search_article(self.elasticsearch, query, limit, page, offset)
         result = []
         for a in response["hits"]["hits"]:
             del(a["_source"]["body"])

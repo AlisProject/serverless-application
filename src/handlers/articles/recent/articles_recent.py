@@ -16,7 +16,8 @@ class ArticlesRecent(LambdaBase):
             'properties': {
                 'limit': settings.parameters['limit'],
                 'page': settings.parameters['page'],
-                'topic': settings.parameters['topic']
+                'topic': settings.parameters['topic'],
+                'offset': settings.parameters['offset']
             }
         }
 
@@ -32,8 +33,9 @@ class ArticlesRecent(LambdaBase):
         limit = int(self.params.get('limit')) if self.params.get('limit') is not None \
             else settings.article_recent_default_limit
         page = int(self.params.get('page')) if self.params.get('page') is not None else 1
+        offset = int(self.params['offset']) if self.params.get('offset') is not None else 0
 
-        articles = ESUtil.search_recent_articles(self.elasticsearch, self.params, limit, page)
+        articles = ESUtil.search_recent_articles(self.elasticsearch, self.params, limit, page, offset)
 
         response = {
             'Items': articles

@@ -94,6 +94,30 @@ class TestSearchUsers(TestCase):
         response = SearchUsers(params, {}, elasticsearch=self.elasticsearch).main()
         self.assertEqual(response['statusCode'], 400)
 
+    def test_search_request_offset(self):
+        # offset 指定
+        params = {
+                'queryStringParameters': {
+                    'limit': '10',
+                    'page': '3',
+                    'offset': '5',
+                    'query': 'testuser'
+                }
+        }
+        response = SearchUsers(params, {}, elasticsearch=self.elasticsearch).main()
+        result = json.loads(response['body'])
+        self.assertEqual(len(result), 5)
+        # offset 指定のみ
+        params = {
+                'queryStringParameters': {
+                    'offset': '28',
+                    'query': 'testuser'
+                }
+        }
+        response = SearchUsers(params, {}, elasticsearch=self.elasticsearch).main()
+        result = json.loads(response['body'])
+        self.assertEqual(len(result), 2)
+
     def test_search_match_zero(self):
         params = {
                 'queryStringParameters': {
@@ -111,5 +135,38 @@ class TestSearchUsers(TestCase):
                     'query': 'abcdefghij' * 16
                 }
         }
+        response = SearchUsers(params, {}, elasticsearch=self.elasticsearch).main()
+        self.assertEqual(response['statusCode'], 400)
+
+    def test_validation_offset_type(self):
+        params = {
+            'queryStringParameters': {
+                'query': 'hogehoge',
+                'offset': 'A'
+            }
+        }
+
+        response = SearchUsers(params, {}, elasticsearch=self.elasticsearch).main()
+        self.assertEqual(response['statusCode'], 400)
+
+    def test_validation_offset_max(self):
+        params = {
+            'queryStringParameters': {
+                'query': 'hogehoge',
+                'offset': '101'
+            }
+        }
+
+        response = SearchUsers(params, {}, elasticsearch=self.elasticsearch).main()
+        self.assertEqual(response['statusCode'], 400)
+
+    def test_validation_offset_min(self):
+        params = {
+            'queryStringParameters': {
+                'query': 'hogehoge',
+                'offset': '-1'
+            }
+        }
+
         response = SearchUsers(params, {}, elasticsearch=self.elasticsearch).main()
         self.assertEqual(response['statusCode'], 400)
