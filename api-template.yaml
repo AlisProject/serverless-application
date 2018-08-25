@@ -249,8 +249,8 @@ Resources:
               parameters:
               - name: "query"
                 in: "query"
-                description: "検索ワード"
-                required: true
+                description: "検索ワード(tag, queryいずれかは必須)"
+                required: false
                 type: "string"
               - name: "limit"
                 in: "query"
@@ -261,6 +261,11 @@ Resources:
               - name: "page"
                 in: "query"
                 description: "ページ"
+                required: false
+                type: "integer"
+              - name: "tag"
+                in: "query"
+                description: "検索タグ(tag, queryいずれかは必須)"
                 required: false
                 type: "integer"
               responses:

@@ -15,9 +15,13 @@ class SearchArticles(LambdaBase):
             'properties': {
                 'limit': settings.parameters['limit'],
                 'page': settings.parameters['page'],
-                'query': settings.parameters['query']
+                'query': settings.parameters['query'],
+                'tag': settings.parameters['tag']
             },
-            'required': ['query']
+            'anyOf': [
+                {'required': ['query']},
+                {'required': ['tag']},
+            ]
         }
 
     def validate_params(self):
@@ -25,10 +29,11 @@ class SearchArticles(LambdaBase):
         validate(self.params, self.get_schema())
 
     def exec_main_proc(self):
-        query = self.params['query']
+        query = self.params.get('query')
+        tag = self.params.get('tag')
         limit = int(self.params.get('limit')) if self.params.get('limit') is not None else settings.article_recent_default_limit
         page = int(self.params.get('page')) if self.params.get('page') is not None else 1
-        response = ESUtil.search_article(self.elasticsearch, query, limit, page)
+        response = ESUtil.search_article(self.elasticsearch, query, tag, limit, page)
         result = []
         for a in response["hits"]["hits"]:
             del(a["_source"]["body"])

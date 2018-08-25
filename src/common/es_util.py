@@ -4,7 +4,7 @@
 class ESUtil:
 
     @staticmethod
-    def search_article(elasticsearch, word, limit, page):
+    def search_article(elasticsearch, word, tag, limit, page):
         body = {
             "query": {
                 "bool": {
@@ -19,24 +19,32 @@ class ESUtil:
             "from": limit*(page-1),
             "size": limit
         }
-        for s in word.split():
-            query = {
-                "bool": {
-                    "should": [
-                        {
-                            "match": {
-                                "title": s
+
+        # wordが渡ってきた場合は文字列検索をする
+        if word:
+            for s in word.split():
+                query = {
+                    "bool": {
+                        "should": [
+                            {
+                                "match": {
+                                    "title": s
+                                }
+                            },
+                            {
+                                "match": {
+                                    "body": s
+                                }
                             }
-                        },
-                        {
-                            "match": {
-                                "body": s
-                            }
-                        }
-                    ]
+                        ]
+                    }
                 }
-            }
-            body["query"]["bool"]["must"].append(query)
+                body["query"]["bool"]["must"].append(query)
+
+        # tagが渡ってきたときはそのタグで一致検索(大文字小文字区別なし)を行う
+        if tag:
+            body['query']['bool']['must'].append({'match': {'tags': tag}})
+
         res = elasticsearch.search(
                 index="articles",
                 body=body
