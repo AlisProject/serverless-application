@@ -72,7 +72,6 @@ class TestsUtil:
             {'env_name': 'ARTICLE_EVALUATED_MANAGE_TABLE_NAME', 'table_name': 'ArticleEvaluatedManage'},
             {'env_name': 'ARTICLE_INFO_TABLE_NAME', 'table_name': 'ArticleInfo'},
             {'env_name': 'ARTICLE_LIKED_USER_TABLE_NAME', 'table_name': 'ArticleLikedUser'},
-            {'env_name': 'ARTICLE_SCORE_TABLE_NAME', 'table_name': 'ArticleScore'},
             {'env_name': 'ARTICLE_HISTORY_TABLE_NAME', 'table_name': 'ArticleHistory'},
             {'env_name': 'ARTICLE_CONTENT_EDIT_TABLE_NAME', 'table_name': 'ArticleContentEdit'},
             {'env_name': 'ARTICLE_FRAUD_USER_TABLE_NAME', 'table_name': 'ArticleFraudUser'},
