@@ -4,7 +4,7 @@
 class ESUtil:
 
     @staticmethod
-    def search_article(elasticsearch, word, tag, limit, page):
+    def search_article(elasticsearch, limit, page, word=None, tag=None):
         body = {
             "query": {
                 "bool": {

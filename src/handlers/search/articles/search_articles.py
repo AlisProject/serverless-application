@@ -33,7 +33,7 @@ class SearchArticles(LambdaBase):
         tag = self.params.get('tag')
         limit = int(self.params.get('limit')) if self.params.get('limit') is not None else settings.article_recent_default_limit
         page = int(self.params.get('page')) if self.params.get('page') is not None else 1
-        response = ESUtil.search_article(self.elasticsearch, query, tag, limit, page)
+        response = ESUtil.search_article(self.elasticsearch, limit, page, word=query, tag=tag)
         result = []
         for a in response["hits"]["hits"]:
             del(a["_source"]["body"])
