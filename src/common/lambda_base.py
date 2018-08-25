@@ -17,8 +17,8 @@ class LambdaBase(metaclass=ABCMeta):
         self.s3 = s3
         self.cognito = cognito
         self.elasticsearch = elasticsearch
-        self.params = self.__get_params()
-        self.headers = self.__get_headers()
+        self.params = None
+        self.headers = None
 
     @abstractmethod
     def get_schema(self):
@@ -39,6 +39,10 @@ class LambdaBase(metaclass=ABCMeta):
         try:
             # user validation
             UserUtil.verified_phone_and_email(self.event)
+
+            # init params
+            self.params = self.__get_params()
+            self.headers = self.__get_headers()
 
             # params validation
             self.validate_params()
@@ -108,7 +112,10 @@ class LambdaBase(metaclass=ABCMeta):
             if self.event.get(param['param_name']) is not None:
                 update_param = self.event.get(param['param_name'])
                 if param['is_json_str']:
-                    update_param = json.loads(update_param)
+                    try:
+                        update_param = json.loads(update_param)
+                    except json.decoder.JSONDecodeError:
+                        raise ValidationError('body needs to be json string')
                 result.update(update_param)
         return result
 
