@@ -101,6 +101,11 @@ parameters = {
         'minLength': 1,
         'maxLength': 20
     },
+    'tag': {
+        'type': 'string',
+        'minLength': 1,
+        'maxLength': 25
+    },
     'tags': {
         'type': 'array',
         'items': {
