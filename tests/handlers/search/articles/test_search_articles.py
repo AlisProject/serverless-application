@@ -25,7 +25,7 @@ class TestSearchArticles(TestCase):
                 'title': "abc2",
                 "published_at": 1530112753,
                 'body': "foo bar",
-                'tags': ['c', 'd', 'e']
+                'tags': ['c', 'd', 'e', 'abcde']
             },
             {
                 'article_id': "test3",
@@ -205,7 +205,7 @@ class TestSearchArticles(TestCase):
     def test_search_match_zero(self):
         params = {
                 'queryStringParameters': {
-                    'query': 'abcde'
+                    'tag': 'vwxyz'
                 }
         }
         response = SearchArticles(params, {}, elasticsearch=self.elasticsearch).main()
