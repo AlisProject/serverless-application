@@ -26,6 +26,14 @@ class TestSearchArticles(TestCase):
                 "published_at": 1530112753,
                 'body': "foo bar",
                 'tags': ['c', 'd', 'e']
+            },
+            {
+                'article_id': "test3",
+                'created_at': 1530112753,
+                'title': "abc2",
+                "published_at": 1530112753,
+                'body': "foo bar",
+                'tags': ['ﾊﾝｶｸ', '＆＄％！”＃', '𪚲🍣𪚲', 'aaa-aaa', 'abcde vwxyz']
             }
         ]
         for dummy in range(30):
@@ -127,21 +135,77 @@ class TestSearchArticles(TestCase):
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(len(result), 1)
 
-    def test_search_with_tag_case_insensitive(self):
+    def test_search_with_tag_half_kana(self):
         params = {
                 'queryStringParameters': {
-                    'tag': 'c'
+                    'tag': 'ﾊﾝｶｸ'
                 }
         }
         response = SearchArticles(params, {}, elasticsearch=self.elasticsearch).main()
         result = json.loads(response['body'])
         self.assertEqual(response['statusCode'], 200)
-        self.assertEqual(len(result), 2)
+        self.assertEqual(len(result), 1)
+
+    def test_search_with_tag_full_symbol(self):
+        params = {
+                'queryStringParameters': {
+                    'tag': '＆＄％！”＃'
+                }
+        }
+        response = SearchArticles(params, {}, elasticsearch=self.elasticsearch).main()
+        result = json.loads(response['body'])
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(len(result), 1)
+
+    def test_search_with_tag_emoji(self):
+        params = {
+                'queryStringParameters': {
+                    'tag': '𪚲🍣𪚲'
+                }
+        }
+        response = SearchArticles(params, {}, elasticsearch=self.elasticsearch).main()
+        result = json.loads(response['body'])
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(len(result), 1)
+
+    def test_search_with_tag_hyphen(self):
+        params = {
+                'queryStringParameters': {
+                    'tag': 'aaa-aaa'
+                }
+        }
+        response = SearchArticles(params, {}, elasticsearch=self.elasticsearch).main()
+        result = json.loads(response['body'])
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(len(result), 1)
+
+    def test_search_with_tag_space(self):
+        params = {
+                'queryStringParameters': {
+                    'tag': 'abcde vwxyz'
+                }
+        }
+        response = SearchArticles(params, {}, elasticsearch=self.elasticsearch).main()
+        result = json.loads(response['body'])
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(len(result), 1)
+
+    # Todo: 大文字小文字を区別しない対応
+    # def test_search_with_tag_case_insensitive(self):
+    #     params = {
+    #             'queryStringParameters': {
+    #                 'tag': 'c'
+    #             }
+    #     }
+    #     response = SearchArticles(params, {}, elasticsearch=self.elasticsearch).main()
+    #     result = json.loads(response['body'])
+    #     self.assertEqual(response['statusCode'], 200)
+    #     self.assertEqual(len(result), 2)
 
     def test_search_match_zero(self):
         params = {
                 'queryStringParameters': {
-                    'query': 'def'
+                    'query': 'abcde'
                 }
         }
         response = SearchArticles(params, {}, elasticsearch=self.elasticsearch).main()

@@ -43,7 +43,7 @@ class ESUtil:
 
         # tagが渡ってきたときはそのタグで一致検索(大文字小文字区別なし)を行う
         if tag:
-            body['query']['bool']['must'].append({'match': {'tags': tag}})
+            body['query']['bool']['must'].append({'term': {'tags.keyword': tag}})
 
         res = elasticsearch.search(
                 index="articles",
