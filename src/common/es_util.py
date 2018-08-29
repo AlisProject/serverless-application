@@ -41,7 +41,8 @@ class ESUtil:
                 }
                 body["query"]["bool"]["must"].append(query)
 
-        # tagが渡ってきたときはそのタグで一致検索(大文字小文字区別なし)を行う
+        # tagが渡ってきたときはそのタグで一致検索を行う
+        # TODO: 大文字小文字区別なしで検索を行えること
         if tag:
             body['query']['bool']['must'].append({'term': {'tags.keyword': tag}})
 
