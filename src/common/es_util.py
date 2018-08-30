@@ -45,6 +45,7 @@ class ESUtil:
         # TODO: 大文字小文字区別なしで検索を行えること
         if tag:
             body['query']['bool']['must'].append({'term': {'tags.keyword': tag}})
+            body['sort'] = [{"published_at": "desc"}]
 
         res = elasticsearch.search(
                 index="articles",

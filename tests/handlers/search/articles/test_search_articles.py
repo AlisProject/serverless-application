@@ -13,17 +13,17 @@ class TestSearchArticles(TestCase):
         items = [
             {
                 'article_id': "test1",
-                'created_at': 1530112753,
+                'created_at': 1530112710,
                 'title': "abc1",
-                "published_at": 1530112753,
+                "published_at": 1530112710,
                 'body': "huga test",
-                'tags': ['A', 'B', 'C']
+                'tags': ['A', 'B', 'C', 'd']
             },
             {
                 'article_id': "test2",
-                'created_at': 1530112753,
+                'created_at': 1530112720,
                 'title': "abc2",
-                "published_at": 1530112753,
+                "published_at": 1530112720,
                 'body': "foo bar",
                 'tags': ['c', 'd', 'e', 'abcde']
             },
@@ -34,6 +34,14 @@ class TestSearchArticles(TestCase):
                 "published_at": 1530112753,
                 'body': "foo bar",
                 'tags': ['ﾊﾝｶｸ', '＆＄％！”＃', '𪚲🍣𪚲', 'aaa-aaa', 'abcde vwxyz']
+            },
+            {
+                'article_id': "test4",
+                'created_at': 1530112700,
+                'title': "abc2",
+                "published_at": 1530112700,
+                'body': "foo bar",
+                'tags': ['d']
             }
         ]
         for dummy in range(30):
@@ -189,6 +197,20 @@ class TestSearchArticles(TestCase):
         result = json.loads(response['body'])
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(len(result), 1)
+
+    def test_search_with_tag_sort(self):
+        params = {
+                'queryStringParameters': {
+                    'tag': 'd'
+                }
+        }
+        response = SearchArticles(params, {}, elasticsearch=self.elasticsearch).main()
+        result = json.loads(response['body'])
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(len(result), 3)
+        self.assertEqual(result[0]['published_at'], 1530112720)
+        self.assertEqual(result[1]['published_at'], 1530112710)
+        self.assertEqual(result[2]['published_at'], 1530112700)
 
     # Todo: 大文字小文字を区別しない対応
     # def test_search_with_tag_case_insensitive(self):
