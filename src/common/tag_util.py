@@ -107,7 +107,7 @@ class TagUtil:
             'query': {
                 'bool': {
                     'must': [
-                        {'match': {'name': tag_name}}
+                        {'term': {'name': tag_name}}
                     ]
                 }
             }

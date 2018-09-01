@@ -169,7 +169,9 @@ class TestTagUtil(TestCase):
             expected_raise_error(['ALIS', 'INV{target}ALID'.format(target=target)])
 
     def test_get_tags_with_name_collation(self):
+        TagUtil.create_tag(self.elasticsearch, "aaa aaa")
         TagUtil.create_tag(self.elasticsearch, "aaa")
+        TagUtil.create_tag(self.elasticsearch, "aaa ccc")
         TagUtil.create_tag(self.elasticsearch, "BbB")
         TagUtil.create_tag(self.elasticsearch, "CCC")
 
