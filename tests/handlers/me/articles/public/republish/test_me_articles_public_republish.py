@@ -3,6 +3,9 @@ import os
 import boto3
 import time
 
+from elasticsearch import Elasticsearch
+from tests_es_util import TestsEsUtil
+
 import settings
 from boto3.dynamodb.conditions import Key
 from unittest import TestCase
@@ -10,9 +13,14 @@ from me_articles_public_republish import MeArticlesPublicRepublish
 from unittest.mock import patch, MagicMock
 from tests_util import TestsUtil
 
+from tag_util import TagUtil
+
 
 class TestMeArticlesPublicRepublish(TestCase):
     dynamodb = boto3.resource('dynamodb', endpoint_url='http://localhost:4569/')
+    elasticsearch = Elasticsearch(
+        hosts=[{'host': 'localhost'}]
+    )
 
     @classmethod
     def setUpClass(cls):
@@ -88,18 +96,23 @@ class TestMeArticlesPublicRepublish(TestCase):
         ]
         TestsUtil.create_table(self.dynamodb, os.environ['TOPIC_TABLE_NAME'], topic_items)
 
-        TestsUtil.create_table(self.dynamodb, os.environ['TAG_TABLE_NAME'], [])
+        TestsEsUtil.create_tag_index(self.elasticsearch)
+        self.elasticsearch.indices.refresh(index="tags")
 
-    def tearDown(cls):
-        TestsUtil.delete_all_tables(cls.dynamodb)
+    def tearDown(self):
+        TestsUtil.delete_all_tables(self.dynamodb)
+        self.elasticsearch.indices.delete(index="tags", ignore=[404])
 
     def assert_bad_request(self, params):
-        function = MeArticlesPublicRepublish(params, {}, self.dynamodb)
+        function = MeArticlesPublicRepublish(params, {}, dynamodb=self.dynamodb, elasticsearch=self.elasticsearch)
         response = function.main()
 
         self.assertEqual(response['statusCode'], 400)
 
     def test_main_ok(self):
+        TagUtil.create_tag(self.elasticsearch, 'a')
+        TagUtil.create_tag(self.elasticsearch, 'B')
+
         params = {
             'pathParameters': {
                 'article_id': 'publicId0001'
@@ -123,7 +136,7 @@ class TestMeArticlesPublicRepublish(TestCase):
         article_content_edit_before = self.article_content_edit_table.scan()['Items']
         article_history_before = self.article_history_table.scan()['Items']
 
-        response = MeArticlesPublicRepublish(params, {}, self.dynamodb).main()
+        response = MeArticlesPublicRepublish(params, {}, dynamodb=self.dynamodb, elasticsearch=self.elasticsearch).main()
 
         article_info_after = self.article_info_table.scan()['Items']
         article_content_after = self.article_content_table.scan()['Items']
@@ -146,7 +159,7 @@ class TestMeArticlesPublicRepublish(TestCase):
             'overview': 'edit_overview1_edit',
             'eye_catch_url': 'http://example.com/eye_catch_url_edit',
             'topic': 'crypto',
-            'tags': ['A', 'B', 'C', 'D', 'E' * 25]
+            'tags': ['a', 'B', 'C', 'D', 'E' * 25]
         }
 
         article_info_param_names = ['eye_catch_url', 'title', 'overview']
@@ -191,7 +204,7 @@ class TestMeArticlesPublicRepublish(TestCase):
         article_content_edit_before = self.article_content_edit_table.scan()['Items']
         article_history_before = self.article_history_table.scan()['Items']
 
-        response = MeArticlesPublicRepublish(params, {}, self.dynamodb).main()
+        response = MeArticlesPublicRepublish(params, {}, dynamodb=self.dynamodb, elasticsearch=self.elasticsearch).main()
 
         article_info_after = self.article_info_table.scan()['Items']
         article_content_after = self.article_content_table.scan()['Items']
@@ -233,7 +246,7 @@ class TestMeArticlesPublicRepublish(TestCase):
         article_content_edit_before = self.article_content_edit_table.scan()['Items']
         article_history_before = self.article_history_table.scan()['Items']
 
-        response = MeArticlesPublicRepublish(params, {}, self.dynamodb).main()
+        response = MeArticlesPublicRepublish(params, {}, dynamodb=self.dynamodb, elasticsearch=self.elasticsearch).main()
 
         article_info_after = self.article_info_table.scan()['Items']
         article_content_after = self.article_content_table.scan()['Items']
@@ -275,7 +288,7 @@ class TestMeArticlesPublicRepublish(TestCase):
         article_content_edit_before = self.article_content_edit_table.scan()['Items']
         article_history_before = self.article_history_table.scan()['Items']
 
-        response = MeArticlesPublicRepublish(params, {}, self.dynamodb).main()
+        response = MeArticlesPublicRepublish(params, {}, dynamodb=self.dynamodb, elasticsearch=self.elasticsearch).main()
 
         article_info_after = self.article_info_table.scan()['Items']
         article_content_after = self.article_content_table.scan()['Items']
@@ -317,7 +330,7 @@ class TestMeArticlesPublicRepublish(TestCase):
         article_content_edit_before = self.article_content_edit_table.scan()['Items']
         article_history_before = self.article_history_table.scan()['Items']
 
-        response = MeArticlesPublicRepublish(params, {}, self.dynamodb).main()
+        response = MeArticlesPublicRepublish(params, {}, dynamodb=self.dynamodb, elasticsearch=self.elasticsearch).main()
 
         article_info_after = self.article_info_table.scan()['Items']
         article_content_after = self.article_content_table.scan()['Items']
@@ -350,7 +363,7 @@ class TestMeArticlesPublicRepublish(TestCase):
         }
         params['body'] = json.dumps(params['body'])
 
-        response = MeArticlesPublicRepublish(params, {}, self.dynamodb).main()
+        response = MeArticlesPublicRepublish(params, {}, dynamodb=self.dynamodb, elasticsearch=self.elasticsearch).main()
 
         self.assertEqual(response['statusCode'], 200)
 
@@ -374,15 +387,21 @@ class TestMeArticlesPublicRepublish(TestCase):
         params['body'] = json.dumps(params['body'])
 
         mock_lib = MagicMock()
+        mock_lib.get_tags_with_name_collation.return_value = ['A']
         with patch('me_articles_public_republish.TagUtil', mock_lib):
-            MeArticlesPublicRepublish(params, {}, self.dynamodb).main()
+            MeArticlesPublicRepublish(params, {}, dynamodb=self.dynamodb, elasticsearch=self.elasticsearch).main()
 
             self.assertTrue(mock_lib.validate_format.called)
             args, _ = mock_lib.validate_format.call_args
             self.assertEqual(args[0], ['A'])
 
+            self.assertTrue(mock_lib.get_tags_with_name_collation.called)
+            args, _ = mock_lib.get_tags_with_name_collation.call_args
+            self.assertEqual(args[1], ['A'])
+
             self.assertTrue(mock_lib.create_and_count.called)
             args, _ = mock_lib.create_and_count.call_args
+
             self.assertTrue(args[0])
             self.assertEqual(args[1], ['a', 'b', 'c'])
             self.assertEqual(args[2], ['A'])
@@ -409,7 +428,7 @@ class TestMeArticlesPublicRepublish(TestCase):
         mock_lib = MagicMock()
 
         with patch('me_articles_public_republish.ParameterUtil', mock_lib):
-            MeArticlesPublicRepublish(params, {}, self.dynamodb).main()
+            MeArticlesPublicRepublish(params, {}, dynamodb=self.dynamodb, elasticsearch=self.elasticsearch).main()
 
             self.assertTrue(mock_lib.validate_array_unique.called)
             args, kwargs = mock_lib.validate_array_unique.call_args
@@ -437,7 +456,7 @@ class TestMeArticlesPublicRepublish(TestCase):
 
         mock_lib = MagicMock()
         with patch('me_articles_public_republish.DBUtil', mock_lib):
-            MeArticlesPublicRepublish(params, {}, self.dynamodb).main()
+            MeArticlesPublicRepublish(params, {}, dynamodb=self.dynamodb, elasticsearch=self.elasticsearch).main()
 
             self.assertTrue(mock_lib.validate_article_existence.called)
             args, kwargs = mock_lib.validate_article_existence.call_args

@@ -2,49 +2,43 @@ import os
 from decimal import Decimal
 from unittest import TestCase
 
+from elasticsearch import Elasticsearch
 from jsonschema import ValidationError
+from tests_es_util import TestsEsUtil
+
 from tag_util import TagUtil
 from tests_util import TestsUtil
 
 
-class TestDBUtil(TestCase):
+class TestTagUtil(TestCase):
     dynamodb = TestsUtil.get_dynamodb_client()
+    elasticsearch = Elasticsearch(
+        hosts=[{'host': 'localhost'}]
+    )
 
     def setUp(self):
         TestsUtil.set_all_tables_name_to_env()
         TestsUtil.delete_all_tables(self.dynamodb)
-
-        # create article_info_table
-        self.tag_table_items = [
-            {
-                'name': 'A',
-                'count': 2,
-                'created_at': 1520150272
-            },
-            {
-                'name': 'B',
-                'count': 3,
-                'created_at': 1520150272
-            },
-            {
-                'name': 'E',
-                'count': 4,
-                'created_at': 1520150272
-            }
-        ]
-        TestsUtil.create_table(self.dynamodb, os.environ['TAG_TABLE_NAME'], self.tag_table_items)
+        TestsEsUtil.create_tag_index(self.elasticsearch)
 
     def tearDown(self):
         TestsUtil.delete_all_tables(self.dynamodb)
+        self.elasticsearch.indices.delete(index="tags", ignore=[404])
 
-    def test_main_ok(self):
+    def test_create_and_count_ok(self):
+        TagUtil.create_tag(self.elasticsearch, 'A')
+        TagUtil.update_count(self.elasticsearch, 'A', 1)
+        TagUtil.create_tag(self.elasticsearch, 'B')
+        self.elasticsearch.indices.refresh(index="tags")
+
         before_tag_names = ['A', 'B', 'C']
         after_tag_names = ['A', 'D', 'E']
 
-        TagUtil.create_and_count(self.dynamodb, before_tag_names, after_tag_names)
+        TagUtil.create_and_count(self.elasticsearch, before_tag_names, after_tag_names)
 
-        tag_table = self.dynamodb.Table(os.environ['TAG_TABLE_NAME'])
-        tags = tag_table.scan()['Items']
+        self.elasticsearch.indices.refresh(index="tags")
+
+        tags = TestsEsUtil.get_all_tags(self.elasticsearch)
 
         expected = [
             {
@@ -53,7 +47,7 @@ class TestDBUtil(TestCase):
             },
             {
                 'name': 'B',
-                'count': Decimal('2'),
+                'count': Decimal('0'),
             },
             {
                 'name': 'D',
@@ -61,7 +55,7 @@ class TestDBUtil(TestCase):
             },
             {
                 'name': 'E',
-                'count': Decimal('5'),
+                'count': Decimal('1'),
             },
         ]
 
@@ -72,23 +66,27 @@ class TestDBUtil(TestCase):
 
         self.assertEqual(tags, expected)
 
-    def test_main_with_null_before_tag_names(self):
+    def test_create_and_count_with_null_before_tag_names(self):
+        TagUtil.create_tag(self.elasticsearch, 'A')
+        TagUtil.create_tag(self.elasticsearch, 'B')
+        self.elasticsearch.indices.refresh(index="tags")
+
         before_tag_names = None
-        after_tag_names = ['A', 'D', 'E']
+        after_tag_names = ['a', 'D', 'E']
 
-        TagUtil.create_and_count(self.dynamodb, before_tag_names, after_tag_names)
+        TagUtil.create_and_count(self.elasticsearch, before_tag_names, after_tag_names)
+        self.elasticsearch.indices.refresh(index="tags")
 
-        tag_table = self.dynamodb.Table(os.environ['TAG_TABLE_NAME'])
-        tags = tag_table.scan()['Items']
+        tags = TestsEsUtil.get_all_tags(self.elasticsearch)
 
         expected = [
             {
                 'name': 'A',
-                'count': Decimal('3'),
+                'count': Decimal('2'),
             },
             {
                 'name': 'B',
-                'count': Decimal('3'),
+                'count': Decimal('1'),
             },
             {
                 'name': 'D',
@@ -96,7 +94,7 @@ class TestDBUtil(TestCase):
             },
             {
                 'name': 'E',
-                'count': Decimal('5'),
+                'count': Decimal('1'),
             },
         ]
 
@@ -107,27 +105,32 @@ class TestDBUtil(TestCase):
 
         self.assertEqual(tags, expected)
 
-    def test_main_with_null_after_tag_names(self):
-        before_tag_names = ['A', 'B', 'C']
+    def test_create_and_count_with_null_after_tag_names(self):
+        TagUtil.create_tag(self.elasticsearch, 'A')
+        TagUtil.create_tag(self.elasticsearch, 'B')
+        TagUtil.create_tag(self.elasticsearch, 'E')
+        self.elasticsearch.indices.refresh(index="tags")
+
+        before_tag_names = ['A', 'b', 'C']
         after_tag_names = None
 
-        TagUtil.create_and_count(self.dynamodb, before_tag_names, after_tag_names)
+        TagUtil.create_and_count(self.elasticsearch, before_tag_names, after_tag_names)
+        self.elasticsearch.indices.refresh(index="tags")
 
-        tag_table = self.dynamodb.Table(os.environ['TAG_TABLE_NAME'])
-        tags = tag_table.scan()['Items']
+        tags = TestsEsUtil.get_all_tags(self.elasticsearch)
 
         expected = [
             {
                 'name': 'A',
-                'count': Decimal('1'),
+                'count': Decimal('0'),
             },
             {
                 'name': 'B',
-                'count': Decimal('2'),
+                'count': Decimal('0'),
             },
             {
                 'name': 'E',
-                'count': Decimal('4'),
+                'count': Decimal('1'),
             },
         ]
 
@@ -165,3 +168,27 @@ class TestDBUtil(TestCase):
 
         for target in targets:
             expected_raise_error(['ALIS', 'INV{target}ALID'.format(target=target)])
+
+    def test_get_tags_with_name_collation(self):
+        TagUtil.create_tag(self.elasticsearch, "aaa")
+        TagUtil.create_tag(self.elasticsearch, "BbB")
+        TagUtil.create_tag(self.elasticsearch, "CCC")
+
+        self.elasticsearch.indices.refresh(index="tags")
+
+        tag_names = ['AAA', 'BBB', 'CCC', 'DDD']
+        result = TagUtil.get_tags_with_name_collation(self.elasticsearch, tag_names)
+
+        self.assertEquals(result, ['aaa', 'BbB', 'CCC', 'DDD'])
+
+    def test_get_tags_with_name_collation_with_none(self):
+        TagUtil.create_tag(self.elasticsearch, "aaa")
+        TagUtil.create_tag(self.elasticsearch, "BbB")
+        TagUtil.create_tag(self.elasticsearch, "CCC")
+
+        self.elasticsearch.indices.refresh(index="tags")
+
+        tag_names = None
+        result = TagUtil.get_tags_with_name_collation(self.elasticsearch, tag_names)
+
+        self.assertIsNone(result)

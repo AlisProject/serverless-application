@@ -60,12 +60,12 @@ class MeArticlesDraftsPublish(LambdaBase):
                 ':article_status': 'public',
                 ':one': 1,
                 ':topic': self.params['topic'],
-                ':tags': self.params.get('tags')
+                ':tags': TagUtil.get_tags_with_name_collation(self.elasticsearch, self.params.get('tags'))
             }
         )
 
         try:
-            TagUtil.create_and_count(self.dynamodb, article_info_before.get('tags'), self.params.get('tags'))
+            TagUtil.create_and_count(self.elasticsearch, article_info_before.get('tags'), self.params.get('tags'))
         except Exception as e:
             logging.fatal(e)
             traceback.print_exc()

@@ -49,3 +49,46 @@ class TestsEsUtil:
                 body=article
             )
         elasticsearch.indices.refresh(index='articles')
+
+    @staticmethod
+    def create_tag_index(elasticsearch):
+        tag_settings = {
+            'settings': {
+                'analysis': {
+                    'normalizer': {
+                        'lowercase_normalizer': {
+                            'type': 'custom',
+                            'char_filter': [],
+                            'filter': ['lowercase']
+                        }
+                    }
+                }
+            },
+            'mappings': {
+                'tag': {
+                    'properties': {
+                        'name': {
+                            'type': 'keyword',
+                            'normalizer': 'lowercase_normalizer'
+                        },
+                        'created_at': {
+                            'type': 'integer'
+                        }
+                    }
+                }
+            }
+        }
+        elasticsearch.indices.create(index='tags', body=tag_settings)
+        elasticsearch.indices.refresh(index='tags')
+
+    @staticmethod
+    def get_all_tags(elasticsearch):
+        res = elasticsearch.search(
+            index='tags',
+            doc_type='tag',
+            body={}
+        )
+
+        tags = [item['_source'] for item in res['hits']['hits']]
+
+        return tags
