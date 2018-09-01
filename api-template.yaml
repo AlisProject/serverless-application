@@ -43,6 +43,8 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   TagTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
+  TipTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
   AlisAppDomain:
     Type: 'AWS::SSM::Parameter::Value<String>'
   PrivateChainAwsAccessKey:
@@ -54,6 +56,8 @@ Parameters:
   BetaModeFlag:
     Type: 'AWS::SSM::Parameter::Value<String>'
   DistS3BucketName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  CognitoUserPoolId:
     Type: 'AWS::SSM::Parameter::Value<String>'
   CognitoUserPoolArn:
     Type: 'AWS::SSM::Parameter::Value<String>'
@@ -86,6 +90,7 @@ Globals:
         DELETED_COMMENT_TABLE_NAME: !Ref DeletedCommentTableName
         TOPIC_TABLE_NAME: !Ref TopicTableName
         TAG_TABLE_NAME: !Ref TagTableName
+        TIP_TABLE_NAME: !Ref TipTableName
         DOMAIN: !Ref AlisAppDomain
         PRIVATE_CHAIN_AWS_ACCESS_KEY: !Ref PrivateChainAwsAccessKey
         PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY: !Ref PrivateChainAwsSecretAccessKey
@@ -194,6 +199,13 @@ Resources:
             properties:
               private_eth_address:
                 type: string
+          MeWalletTip:
+            type: object
+            properties:
+              to_user_id:
+                type: string
+              tip_value:
+                type: integer
           Notification:
             type: object
             properties:
@@ -1205,6 +1217,31 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+          /me/wallet/tip:
+            post:
+              description: '投げ銭を行う'
+              parameters:
+                - name: 'tip'
+                  in: 'body'
+                  description: 'tip object'
+                  required: true
+                  schema:
+                    $ref: '#/definitions/MeWalletTip'
+              responses:
+                '200':
+                  description: '投げ銭受付結果'
+                  schema:
+                   $ref: '#/definitions/MeWalletTip'
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeWalletTip.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
           /me/notifications:
             get:
               description: ログインユーザーの通知の一覧を取得
@@ -1747,6 +1784,22 @@ Resources:
           Properties:
             Path: /me/wallet/balance
             Method: get
+            RestApiId: !Ref RestApi
+  MeWalletTip:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_wallet_tip.zip
+      Environment:
+        Variables:
+          COGNITO_USER_POOL_ID: !Ref CognitoUserPoolId
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/wallet/tip
+            Method: post
             RestApiId: !Ref RestApi
   MeNotificationsIndex:
     Type: AWS::Serverless::Function

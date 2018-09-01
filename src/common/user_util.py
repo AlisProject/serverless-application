@@ -1,3 +1,6 @@
+import os
+from botocore.exceptions import ClientError
+from record_not_found_error import RecordNotFoundError
 from not_verified_user_error import NotVerifiedUserError
 
 
@@ -32,3 +35,16 @@ class UserUtil:
             return True
 
         raise NotVerifiedUserError('Not Verified')
+
+    @staticmethod
+    def get_cognito_user_info(cognito, user_id):
+        try:
+            return cognito.admin_get_user(
+                UserPoolId=os.environ['COGNITO_USER_POOL_ID'],
+                Username=user_id
+            )
+        except ClientError as e:
+            if e.response['Error']['Code'] == 'UserNotFoundException':
+                raise RecordNotFoundError('Record Not Found')
+            else:
+                raise e

@@ -47,10 +47,12 @@ aws cloudformation deploy \
     UnreadNotificationManagerTableName=${SSM_PARAMS_PREFIX}UnreadNotificationManagerTableName \
     TopicTableName=${SSM_PARAMS_PREFIX}TopicTableName \
     TagTableName=${SSM_PARAMS_PREFIX}TagTableName \
+    TipTableName=${SSM_PARAMS_PREFIX}TipTableName \
     CommentTableName=${SSM_PARAMS_PREFIX}CommentTableName \
     CommentLikedUserTableName=${SSM_PARAMS_PREFIX}CommentLikedUserTableName \
     DeletedCommentTableName=${SSM_PARAMS_PREFIX}DeletedCommentTableName \
     DistS3BucketName=${SSM_PARAMS_PREFIX}DistS3BucketName \
     ApiLambdaRole=${SSM_PARAMS_PREFIX}ApiLambdaRole \
     ElasticSearchEndpoint=${SSM_PARAMS_PREFIX}ElasticSearchEndpoint \
+    CognitoUserPoolId=${SSM_PARAMS_PREFIX}CognitoUserPoolId \
   --capabilities CAPABILITY_IAM
