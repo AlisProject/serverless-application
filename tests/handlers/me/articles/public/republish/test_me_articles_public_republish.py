@@ -112,6 +112,7 @@ class TestMeArticlesPublicRepublish(TestCase):
     def test_main_ok(self):
         TagUtil.create_tag(self.elasticsearch, 'a')
         TagUtil.create_tag(self.elasticsearch, 'B')
+        self.elasticsearch.indices.refresh(index='tags')
 
         params = {
             'pathParameters': {

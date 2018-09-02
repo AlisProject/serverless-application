@@ -126,6 +126,8 @@ class TestMeArticlesDraftsPublish(TestCase):
         TagUtil.create_tag(self.elasticsearch, 'a')
         TagUtil.create_tag(self.elasticsearch, 'B')
 
+        self.elasticsearch.indices.refresh(index='tags')
+
         params = {
             'pathParameters': {
                 'article_id': 'draftId00001'

@@ -48,6 +48,11 @@ class TagUtil:
 
         elasticsearch.update(index='tags', doc_type='tag', id=tag_name, body=update_script)
 
+    """
+    ここで作成されたtagが検索対象になるまで(__get_item_case_insensitiveの条件として引っかかってくるまで)1sほどかかる
+    これはESのセグメントマージという仕様によるものでどうしても回避したい場合は `elasticsearch.indices.refresh(index='tags')` をcreate後に行う必要がある
+    しかし、ESのデフォルト挙動を無理やり変えることになり、返ってパフォーマンス低下が起きる可能性もあるので特に何もしていない
+    """
     @classmethod
     def create_tag(cls, elasticsearch, tag_name):
         tag = {
@@ -62,9 +67,6 @@ class TagUtil:
             id=tag['name'],
             body=tag
         )
-
-        # デフォルトのrefresh_intervalだと、1sほど作成されたタグが検索対象にならないのでセグメントマージを強制的に行う
-        elasticsearch.indices.refresh(index='tags')
 
     """
     与えられたタグ名をElasticSearchに問い合わせ(大文字小文字区別せず)
