@@ -1,0 +1,2 @@
+class SendTransactionError(Exception):
+    pass
