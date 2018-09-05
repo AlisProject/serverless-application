@@ -97,6 +97,7 @@ class MeWalletTip(LambdaBase):
             'article_id': self.params['article_id'],
             'article_title': article_info['title'],
             'transaction': transaction_hash,
+            'uncompleted': 1,
             'sort_key': sort_key,
             'created_at': int(time.time())
         }

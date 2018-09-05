@@ -502,11 +502,23 @@ Resources:
           AttributeType: S
         - AttributeName: sort_key
           AttributeType: N
+        - AttributeName: uncompleted
+          AttributeType: N
       KeySchema:
         - AttributeName: user_id
           KeyType: HASH
         - AttributeName: sort_key
           KeyType: RANGE
+      GlobalSecondaryIndexes:
+        - IndexName: uncompleted-index
+          KeySchema:
+            - AttributeName: uncompleted
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: 1
+            WriteCapacityUnits: 1
       ProvisionedThroughput:
         ReadCapacityUnits: 1
         WriteCapacityUnits: 1

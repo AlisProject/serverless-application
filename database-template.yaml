@@ -537,11 +537,23 @@ Resources:
           AttributeType: S
         - AttributeName: sort_key
           AttributeType: N
+        - AttributeName: uncompleted
+          AttributeType: N
       KeySchema:
         - AttributeName: user_id
           KeyType: HASH
         - AttributeName: sort_key
           KeyType: RANGE
+      GlobalSecondaryIndexes:
+        - IndexName: uncompleted-index
+          KeySchema:
+            - AttributeName: uncompleted
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: !Ref MinDynamoReadCapacitty
+            WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
       ProvisionedThroughput:
         ReadCapacityUnits: !Ref MinDynamoReadCapacitty
         WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
