@@ -202,7 +202,7 @@ Resources:
           MeWalletTip:
             type: object
             properties:
-              to_user_id:
+              article_id:
                 type: string
               tip_value:
                 type: integer
