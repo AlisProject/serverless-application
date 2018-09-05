@@ -114,6 +114,11 @@ parameters = {
             'maxLength': 25
         },
         'maxItems': 5
+    },
+    'tip_value': {
+        'type': 'integer',
+        'minimum': 1,
+        'maximum': 10 ** 24
     }
 }
 
