@@ -29,6 +29,8 @@ class MeWalletTip(LambdaBase):
 
     def validate_params(self):
         # single
+        # フロント（js）の都合上桁数が多い場合は指数表記で値が渡る事があるため、int 型に整形
+        self.params['tip_value'] = int(self.params['tip_value'])
         validate(self.params, self.get_schema())
         # relation
         DBUtil.validate_article_existence(

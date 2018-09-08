@@ -116,7 +116,7 @@ parameters = {
         'maxItems': 5
     },
     'tip_value': {
-        'type': 'integer',
+        'type': 'number',
         'minimum': 1,
         'maximum': 10 ** 24
     }
