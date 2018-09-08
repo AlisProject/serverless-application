@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
+import settings
 
 
 class ESUtil:
 
     @staticmethod
-    def search_tag(elasticsearch, word):
+    def search_tag(elasticsearch, word, limit=settings.TAG_SEARCH_DEFAULT_LIMIT, page=1):
         body = {
             'query': {
-                "bool": {
-                    "must": [
+                'bool': {
+                    'must': [
                         {
                             'match': {
                                 'name_with_analyzer': {
@@ -22,7 +23,9 @@ class ESUtil:
             },
             'sort': [
                 {'count': 'desc'}
-            ]
+            ],
+            'from': limit * (page - 1),
+            'size': limit
         }
 
         response = elasticsearch.search(
