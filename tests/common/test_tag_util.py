@@ -42,18 +42,22 @@ class TestTagUtil(TestCase):
         expected = [
             {
                 'name': 'A',
+                'name_with_analyzer': 'A',
                 'count': Decimal('2'),
             },
             {
                 'name': 'B',
+                'name_with_analyzer': 'B',
                 'count': Decimal('0'),
             },
             {
                 'name': 'D',
+                'name_with_analyzer': 'D',
                 'count': Decimal('1'),
             },
             {
                 'name': 'E',
+                'name_with_analyzer': 'E',
                 'count': Decimal('1'),
             },
         ]
@@ -81,18 +85,22 @@ class TestTagUtil(TestCase):
         expected = [
             {
                 'name': 'A',
+                'name_with_analyzer': 'A',
                 'count': Decimal('2'),
             },
             {
                 'name': 'B',
+                'name_with_analyzer': 'B',
                 'count': Decimal('1'),
             },
             {
                 'name': 'D',
+                'name_with_analyzer': 'D',
                 'count': Decimal('1'),
             },
             {
                 'name': 'E',
+                'name_with_analyzer': 'E',
                 'count': Decimal('1'),
             },
         ]
@@ -121,14 +129,17 @@ class TestTagUtil(TestCase):
         expected = [
             {
                 'name': 'A',
+                'name_with_analyzer': 'A',
                 'count': Decimal('0'),
             },
             {
                 'name': 'B',
+                'name_with_analyzer': 'B',
                 'count': Decimal('0'),
             },
             {
                 'name': 'E',
+                'name_with_analyzer': 'E',
                 'count': Decimal('1'),
             },
         ]

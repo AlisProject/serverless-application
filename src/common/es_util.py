@@ -4,6 +4,37 @@
 class ESUtil:
 
     @staticmethod
+    def search_tag(elasticsearch, word):
+        body = {
+            'query': {
+                "bool": {
+                    "must": [
+                        {
+                            'match': {
+                                'name_with_analyzer': {
+                                    'query': word.lower(),
+                                    'analyzer': 'keyword'
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            'sort': [
+                {'count': 'desc'}
+            ]
+        }
+
+        response = elasticsearch.search(
+            index='tags',
+            body=body
+        )
+
+        tags = [item['_source'] for item in response['hits']['hits']]
+
+        return tags
+
+    @staticmethod
     def search_article(elasticsearch, word, limit, page):
         body = {
             "query": {

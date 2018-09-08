@@ -57,6 +57,7 @@ class TagUtil:
     def create_tag(cls, elasticsearch, tag_name):
         tag = {
             'name': tag_name,
+            'name_with_analyzer': tag_name,
             'count': 1,
             'created_at': int(time.time())
         }
