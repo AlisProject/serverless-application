@@ -34,21 +34,18 @@ class TestDBUtil(TestCase):
         self.__assert_search_tags('ALIS on', [])
 
     def test_search_tag_with_limit(self):
-        # 0~110のループを回す
-        for x in range(0, 111):
+        # 0~10のループを回す
+        for x in range(0, 11):
             TestsEsUtil.create_tag_with_count(self.elasticsearch, 'A' + str(x), x)
 
-        result = ESUtil.search_tag(self.elasticsearch, 'A')
-        self.assertEquals(len(result), 100)
+        result = ESUtil.search_tag(self.elasticsearch, 'A', 5, 1)
+        self.assertEquals(len(result), 5)
 
-        result = ESUtil.search_tag(self.elasticsearch, 'A', limit=10)
-        self.assertEquals(len(result), 10)
-
-        result = ESUtil.search_tag(self.elasticsearch, 'A', limit=2, page=2)
+        result = ESUtil.search_tag(self.elasticsearch, 'A', 2, 2)
         self.assertEquals(len(result), 2)
-        self.assertEquals([tag['name'] for tag in result], ['A108', 'A107'])
+        self.assertEquals([tag['name'] for tag in result], ['A8', 'A7'])
 
     def __assert_search_tags(self, word, expected):
-        result = ESUtil.search_tag(self.elasticsearch, word)
+        result = ESUtil.search_tag(self.elasticsearch, word, 10, 1)
         tags = [tag['name'] for tag in result]
         self.assertEquals(tags, expected)

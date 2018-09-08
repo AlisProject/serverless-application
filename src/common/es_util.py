@@ -5,7 +5,7 @@ import settings
 class ESUtil:
 
     @staticmethod
-    def search_tag(elasticsearch, word, limit=settings.TAG_SEARCH_DEFAULT_LIMIT, page=1):
+    def search_tag(elasticsearch, word, limit, page):
         body = {
             'query': {
                 'bool': {
