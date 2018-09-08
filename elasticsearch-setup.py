@@ -110,6 +110,7 @@ create_index_list = []
 articles_setting = {
     "settings": {
         "index": {
+            "max_result_window": "1000000",
             "number_of_replicas": "1"
         },
         "analysis": {
