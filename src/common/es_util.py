@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-import settings
-
-
 class ESUtil:
 
     @staticmethod
