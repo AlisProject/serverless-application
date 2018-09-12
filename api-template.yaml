@@ -254,6 +254,17 @@ Resources:
                 type: array
                 items:
                   type: string
+          Tag:
+            type: object
+            properties:
+              name:
+                type: string
+              name_with_analyzer:
+                type: string
+              count:
+                type: integer
+              created_at:
+                type: integer
         paths:
           /search/articles:
             get:
@@ -322,6 +333,41 @@ Resources:
                     type: array
                     items:
                       $ref: '#/definitions/UserInfo'
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ElasticSearchSearchUsers.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /search/tags:
+            get:
+              description: "タグ検索"
+              parameters:
+              - name: "query"
+                in: "query"
+                description: "検索ワード"
+                required: true
+                type: "string"
+              - name: "limit"
+                in: "query"
+                description: "取得件数"
+                required: false
+                type: "integer"
+                minimum: 1
+              - name: "page"
+                in: "query"
+                description: "ページ"
+                required: false
+                type: "integer"
+              responses:
+                "200":
+                  description: "タグ一覧"
+                  schema:
+                    type: array
+                    items:
+                      $ref: '#/definitions/Tag'
               x-amazon-apigateway-integration:
                 responses:
                   default:
@@ -1883,6 +1929,22 @@ Resources:
           Type: Api
           Properties:
             Path: /search/users
+            Method: get
+            RestApiId: !Ref RestApi
+  ElasticSearchSearchTag:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/search_tags.zip
+      Environment:
+        Variables:
+          ELASTIC_SEARCH_ENDPOINT: !Ref ElasticSearchEndpoint
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /search/tags
             Method: get
             RestApiId: !Ref RestApi
   ElasticSearchService:

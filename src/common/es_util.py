@@ -1,7 +1,38 @@
 # -*- coding: utf-8 -*-
-
-
 class ESUtil:
+
+    @staticmethod
+    def search_tag(elasticsearch, word, limit, page):
+        body = {
+            'query': {
+                'bool': {
+                    'must': [
+                        {
+                            'match': {
+                                'name_with_analyzer': {
+                                    'query': word.lower(),
+                                    'analyzer': 'keyword'
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            'sort': [
+                {'count': 'desc'}
+            ],
+            'from': limit * (page - 1),
+            'size': limit
+        }
+
+        response = elasticsearch.search(
+            index='tags',
+            body=body
+        )
+
+        tags = [item['_source'] for item in response['hits']['hits']]
+
+        return tags
 
     @staticmethod
     def search_article(elasticsearch, limit, page, word=None, tag=None):

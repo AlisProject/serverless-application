@@ -84,7 +84,7 @@ class MeArticlesPublicRepublish(LambdaBase):
                 ':eye_catch_url': article_content_edit['eye_catch_url'],
                 ':sync_elasticsearch': 1,
                 ':topic': self.params['topic'],
-                ':tags': self.params.get('tags')
+                ':tags': TagUtil.get_tags_with_name_collation(self.elasticsearch, self.params.get('tags'))
             }
         )
 
