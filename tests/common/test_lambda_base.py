@@ -51,6 +51,7 @@ class TestLambdaBase(TestCase):
     def test_get_params_ok_not_exists_any_params(self):
         event = {}
         lambda_impl = self.TestLambdaImpl(event, {})
+        lambda_impl.main()
         expected_params = {}
         self.assertEqual(expected_params, lambda_impl.params)
 
@@ -67,6 +68,7 @@ class TestLambdaBase(TestCase):
             'body': json.dumps({'test_key4': 'test4'})
         }
         lambda_impl = self.TestLambdaImpl(event, {})
+        lambda_impl.main()
         expected_params = {
             'test_key1': 'test1',
             'test_key2': 'test2',
@@ -75,9 +77,28 @@ class TestLambdaBase(TestCase):
         }
         self.assertEqual(expected_params, lambda_impl.params)
 
+    def test_get_params_validation_json_error(self):
+        event = {
+            'queryStringParameters': {
+                'test_key1': 'test1'
+            },
+            'pathParameters': {
+                'test_key2': 'test2',
+                'test_key3': 'test3'
+
+            },
+            'body': 'not json string'
+        }
+        lambda_impl = self.TestLambdaImpl(event, {})
+        lambda_impl.main()
+        response = lambda_impl.main()
+        self.assertEqual(response['statusCode'], 400)
+        self.assertEqual(json.loads(response['body'])['message'], 'Invalid parameter: body needs to be json string')
+
     def test_get_headers_ok_not_exists_any_params(self):
         event = {}
         lambda_impl = self.TestLambdaImpl(event, {})
+        lambda_impl.main()
         expected_headers = {}
         self.assertEqual(expected_headers, lambda_impl.headers)
 
@@ -89,6 +110,7 @@ class TestLambdaBase(TestCase):
             }
         }
         lambda_impl = self.TestLambdaImpl(event, {})
+        lambda_impl.main()
         expected_headers = {
             'test_key1': 'test1',
             'test_key2': 'test2'

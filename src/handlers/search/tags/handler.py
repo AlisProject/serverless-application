@@ -1,13 +1,9 @@
 # -*- coding: utf-8 -*-
 import os
-
-import boto3
+from search_tags import SearchTags
 from elasticsearch import Elasticsearch, RequestsHttpConnection
 from requests_aws4auth import AWS4Auth
 
-from me_articles_drafts_publish import MeArticlesDraftsPublish
-
-dynamodb = boto3.resource('dynamodb')
 awsauth = AWS4Auth(
     os.environ['AWS_ACCESS_KEY_ID'],
     os.environ['AWS_SECRET_ACCESS_KEY'],
@@ -25,5 +21,5 @@ elasticsearch = Elasticsearch(
 
 
 def lambda_handler(event, context):
-    me_articles_drafts_publish = MeArticlesDraftsPublish(event, context, dynamodb=dynamodb, elasticsearch=elasticsearch)
-    return me_articles_drafts_publish.main()
+    search_tags = SearchTags(event, context, elasticsearch=elasticsearch)
+    return search_tags.main()

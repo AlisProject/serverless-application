@@ -85,29 +85,17 @@ aws s3api create-bucket --bucket ${ALIS_APP_ID}-serverless-deploy-bucket \
 ./deploy.sh database
 
 # Show all tables.
-aws dynamodb list-tables |grep ${ALIS_APP_ID}database |sort |tr -d ' '
+aws dynamodb list-tables |grep ${ALIS_APP_ID}database |sort |tr -d ' ",'
 ```
 
 And add all of generated table names to SSM.
 - See: https://github.com/AlisProject/environment
 
-### ElasticSearch
+#### Master Data
+Add master data to DynamoDB.
 
 ```bash
-./deploy.sh elasticsearch
-
-# show elasticsearch instance config
-aws es list-domain-names
-aws es describe-elasticsearch-domain --domain-name YourElasticSearchDomain
-```
-
-And add ElasticSearch Endpoint to SSM.
-- See: https://github.com/AlisProject/environment
-
-[check your global ip](https://checkip.amazonaws.com/)
-
-```bash
-python elasticsearch-setup.py YourGlobalIP
+./add_master_data.sh
 ```
 
 ### Cognito
@@ -126,13 +114,39 @@ Specify generated Cognito User Pool ARN to SSM.
 
 ```bash
 ./deploy.sh api
+
+# Show generated IAM LambdaRole.
+aws iam list-roles | grep ${ALIS_APP_ID}api-LambdaRole | grep Arn
 ```
 
-### Fix API settings via a script
+Specify generated ApiLambdaRole to SSM.
+- See: https://github.com/AlisProject/environment
+
+#### Fix API settings via a script
 
 ```bash
+# Show generated Rest API ID
+aws apigateway  get-rest-apis | jq '.items[] | if .name == "'${ALIS_APP_ID}'api" then .id else empty end' 
+
 # Set SERVERLESS_REST_API_ID to .envrc
 direnv edit
 
 ./fix_api.sh
+```
+
+### ElasticSearch
+
+```bash
+./deploy.sh elasticsearch
+
+# show ElasticSearch Endpoint
+aws es describe-elasticsearch-domain --domain-name ${ALIS_APP_ID}api | jq '.DomainStatus.Endpoint'
+```
+
+And add ElasticSearch Endpoint to SSM.
+- See: https://github.com/AlisProject/environment
+
+Add Your local IP to ES access policy. 
+```bash
+python elasticsearch-setup.py $(curl https://checkip.amazonaws.com/)
 ```

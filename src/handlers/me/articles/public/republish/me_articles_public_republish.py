@@ -8,6 +8,7 @@ import settings
 from lambda_base import LambdaBase
 from jsonschema import validate, ValidationError
 from db_util import DBUtil
+from parameter_util import ParameterUtil
 from record_not_found_error import RecordNotFoundError
 from tag_util import TagUtil
 
@@ -29,6 +30,10 @@ class MeArticlesPublicRepublish(LambdaBase):
             raise ValidationError('pathParameters is required')
 
         validate(self.params, self.get_schema())
+
+        if self.params.get('tags'):
+            ParameterUtil.validate_array_unique(self.params['tags'], 'tags', case_insensitive=True)
+            TagUtil.validate_format(self.params['tags'])
 
         DBUtil.validate_article_existence(
             self.dynamodb,
@@ -79,7 +84,7 @@ class MeArticlesPublicRepublish(LambdaBase):
                 ':eye_catch_url': article_content_edit['eye_catch_url'],
                 ':sync_elasticsearch': 1,
                 ':topic': self.params['topic'],
-                ':tags': self.params.get('tags')
+                ':tags': TagUtil.get_tags_with_name_collation(self.elasticsearch, self.params.get('tags'))
             }
         )
 

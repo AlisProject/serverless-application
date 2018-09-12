@@ -43,6 +43,8 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   TagTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
+  TipTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
   AlisAppDomain:
     Type: 'AWS::SSM::Parameter::Value<String>'
   PrivateChainAwsAccessKey:
@@ -54,6 +56,8 @@ Parameters:
   BetaModeFlag:
     Type: 'AWS::SSM::Parameter::Value<String>'
   DistS3BucketName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  CognitoUserPoolId:
     Type: 'AWS::SSM::Parameter::Value<String>'
   CognitoUserPoolArn:
     Type: 'AWS::SSM::Parameter::Value<String>'
@@ -86,6 +90,7 @@ Globals:
         DELETED_COMMENT_TABLE_NAME: !Ref DeletedCommentTableName
         TOPIC_TABLE_NAME: !Ref TopicTableName
         TAG_TABLE_NAME: !Ref TagTableName
+        TIP_TABLE_NAME: !Ref TipTableName
         DOMAIN: !Ref AlisAppDomain
         PRIVATE_CHAIN_AWS_ACCESS_KEY: !Ref PrivateChainAwsAccessKey
         PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY: !Ref PrivateChainAwsSecretAccessKey
@@ -194,6 +199,13 @@ Resources:
             properties:
               private_eth_address:
                 type: string
+          MeWalletTip:
+            type: object
+            properties:
+              article_id:
+                type: string
+              tip_value:
+                type: integer
           Notification:
             type: object
             properties:
@@ -233,6 +245,26 @@ Resources:
                 type: integer
               index_hash_key:
                 type: string
+          Publish:
+            type: object
+            properties:
+              topic:
+                type: string
+              tgas:
+                type: array
+                items:
+                  type: string
+          Tag:
+            type: object
+            properties:
+              name:
+                type: string
+              name_with_analyzer:
+                type: string
+              count:
+                type: integer
+              created_at:
+                type: integer
         paths:
           /search/articles:
             get:
@@ -240,8 +272,8 @@ Resources:
               parameters:
               - name: "query"
                 in: "query"
-                description: "検索ワード"
-                required: true
+                description: "検索ワード(tag, queryいずれかは必須)"
+                required: false
                 type: "string"
               - name: "limit"
                 in: "query"
@@ -252,6 +284,11 @@ Resources:
               - name: "page"
                 in: "query"
                 description: "ページ"
+                required: false
+                type: "integer"
+              - name: "tag"
+                in: "query"
+                description: "検索タグ(tag, queryいずれかは必須)"
                 required: false
                 type: "integer"
               responses:
@@ -304,6 +341,41 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+          /search/tags:
+            get:
+              description: "タグ検索"
+              parameters:
+              - name: "query"
+                in: "query"
+                description: "検索ワード"
+                required: true
+                type: "string"
+              - name: "limit"
+                in: "query"
+                description: "取得件数"
+                required: false
+                type: "integer"
+                minimum: 1
+              - name: "page"
+                in: "query"
+                description: "ページ"
+                required: false
+                type: "integer"
+              responses:
+                "200":
+                  description: "タグ一覧"
+                  schema:
+                    type: array
+                    items:
+                      $ref: '#/definitions/Tag'
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ElasticSearchSearchUsers.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
           /articles/recent:
             get:
               description: "最新記事一覧情報を取得"
@@ -311,17 +383,6 @@ Resources:
               - name: "limit"
                 in: "query"
                 description: "取得件数"
-                required: false
-                type: "integer"
-                minimum: 1
-              - name: "article_id"
-                in: "query"
-                description: "ページング処理における、現在のページの最後の記事のID"
-                required: false
-                type: "string"
-              - name: "sort_key"
-                in: "query"
-                description: "ページング処理における、現在のページの最後の記事のソートキー"
                 required: false
                 type: "integer"
                 minimum: 1
@@ -582,18 +643,12 @@ Resources:
                 description: '対象記事の指定するために使用'
                 required: true
                 type: 'string'
-              - name: 'topic'
+              - name: 'publish'
                 in: 'body'
-                description: 'トピック名'
+                description: 'publish object'
                 required: true
-                type: 'string'
-              - name: 'tags'
-                in: 'body'
-                description: 'タグの一覧'
-                required: false
-                type: 'array'
-                items:
-                  type: 'string'
+                schema:
+                  $ref: '#/definitions/Publish'
               responses:
                 '200':
                   description: 'successful operation'
@@ -751,18 +806,12 @@ Resources:
                 description: '対象記事を指定するために使用'
                 required: true
                 type: 'string'
-              - name: 'topic'
+              - name: 'publish'
                 in: 'body'
-                description: 'トピック名'
+                description: 'publish object'
                 required: true
-                type: 'string'
-              - name: 'tags'
-                in: 'body'
-                description: 'タグの一覧'
-                required: false
-                type: 'array'
-                items:
-                  type: 'string'
+                schema:
+                  $ref: '#/definitions/Publish'
               responses:
                 '200':
                   description: 'successful operation'
@@ -1128,6 +1177,11 @@ Resources:
             put:
               description: '下書き記事を更新'
               parameters:
+              - name: 'article_id'
+                in: 'path'
+                description: '対象記事の指定するために使用'
+                required: true
+                type: 'string'
               - name: 'article'
                 in: 'body'
                 description: 'article object'
@@ -1206,6 +1260,31 @@ Resources:
                   default:
                     statusCode: "200"
                 uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeWalletBalance.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /me/wallet/tip:
+            post:
+              description: '投げ銭を行う'
+              parameters:
+                - name: 'tip'
+                  in: 'body'
+                  description: 'tip object'
+                  required: true
+                  schema:
+                    $ref: '#/definitions/MeWalletTip'
+              responses:
+                '200':
+                  description: '投げ銭受付結果'
+                  schema:
+                   $ref: '#/definitions/MeWalletTip'
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeWalletTip.Arn}/invocations
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
@@ -1752,6 +1831,22 @@ Resources:
             Path: /me/wallet/balance
             Method: get
             RestApiId: !Ref RestApi
+  MeWalletTip:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_wallet_tip.zip
+      Environment:
+        Variables:
+          COGNITO_USER_POOL_ID: !Ref CognitoUserPoolId
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/wallet/tip
+            Method: post
+            RestApiId: !Ref RestApi
   MeNotificationsIndex:
     Type: AWS::Serverless::Function
     Properties:
@@ -1834,5 +1929,21 @@ Resources:
           Type: Api
           Properties:
             Path: /search/users
+            Method: get
+            RestApiId: !Ref RestApi
+  ElasticSearchSearchTag:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/search_tags.zip
+      Environment:
+        Variables:
+          ELASTIC_SEARCH_ENDPOINT: !Ref ElasticSearchEndpoint
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /search/tags
             Method: get
             RestApiId: !Ref RestApi

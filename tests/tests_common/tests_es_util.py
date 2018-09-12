@@ -1,4 +1,6 @@
 import os
+import time
+
 from boto3.dynamodb.conditions import Key
 
 
@@ -49,3 +51,85 @@ class TestsEsUtil:
                 body=article
             )
         elasticsearch.indices.refresh(index='articles')
+
+    @staticmethod
+    def create_tag_index(elasticsearch):
+        tag_settings = {
+            'settings': {
+                'analysis': {
+                    'normalizer': {
+                        'lowercase_normalizer': {
+                            'type': 'custom',
+                            'char_filter': [],
+                            'filter': ['lowercase']
+                        }
+                    },
+                    'filter': {
+                        'autocomplete_filter': {
+                            'type': 'edge_ngram',
+                            'min_gram': 1,
+                            'max_gram': 20
+                        }
+                    },
+                    'analyzer': {
+                        'autocomplete': {
+                            'type': 'custom',
+                            'tokenizer': 'keyword',
+                            'filter': [
+                                'lowercase',
+                                'autocomplete_filter'
+                            ]
+                        }
+                    }
+                }
+            },
+            'mappings': {
+                'tag': {
+                    'properties': {
+                        'name': {
+                            'type': 'keyword',
+                            'normalizer': 'lowercase_normalizer'
+                        },
+                        'name_with_analyzer': {
+                            'type': 'text',
+                            'analyzer': 'autocomplete'
+                        },
+                        'created_at': {
+                            'type': 'integer'
+                        }
+                    }
+                }
+            }
+        }
+        elasticsearch.indices.create(index='tags', body=tag_settings)
+        elasticsearch.indices.refresh(index='tags')
+
+    @staticmethod
+    def create_tag_with_count(elasticsearch, tag_name, count):
+        tag = {
+            'name': tag_name,
+            'name_with_analyzer': tag_name,
+            'count': count,
+            'created_at': int(time.time())
+        }
+
+        elasticsearch.index(
+            index='tags',
+            doc_type='tag',
+            id=tag['name'],
+            body=tag
+        )
+
+        elasticsearch.indices.refresh(index='tags')
+
+    @staticmethod
+    def get_all_tags(elasticsearch):
+        res = elasticsearch.search(
+            index='tags',
+            doc_type='tag',
+            body={}
+        )
+
+        tags = [item['_source'] for item in res['hits']['hits']]
+
+        return tags

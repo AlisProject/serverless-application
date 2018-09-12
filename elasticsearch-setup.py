@@ -161,6 +161,34 @@ users_setting = {
 }
 create_index_list.append({"name": "users", "setting": users_setting})
 
+tag_settings = {
+    'settings': {
+        'analysis': {
+            'normalizer': {
+                'lowercase_normalizer': {
+                    'type': 'custom',
+                    'char_filter': [],
+                    'filter': ['lowercase']
+                }
+            }
+        }
+    },
+    'mappings': {
+        'tag': {
+            'properties': {
+                'name': {
+                    'type': 'keyword',
+                    'normalizer': 'lowercase_normalizer'
+                },
+                'created_at': {
+                    'type': 'integer'
+                }
+            }
+        }
+    }
+}
+create_index_list.append({"name": "tags", "setting": tag_settings})
+
 for index in create_index_list:
     name = index["name"]
     if esconfig.check_index_exists(name):

@@ -101,6 +101,11 @@ parameters = {
         'minLength': 1,
         'maxLength': 20
     },
+    'tag': {
+        'type': 'string',
+        'minLength': 1,
+        'maxLength': 25
+    },
     'tags': {
         'type': 'array',
         'items': {
@@ -109,6 +114,11 @@ parameters = {
             'maxLength': 25
         },
         'maxItems': 5
+    },
+    'tip_value': {
+        'type': 'number',
+        'minimum': 1,
+        'maximum': 10 ** 24
     }
 }
 
@@ -119,6 +129,7 @@ articles_popular_default_limit = 20
 USERS_ARTICLE_INDEX_DEFAULT_LIMIT = 10
 NOTIFICATION_INDEX_DEFAULT_LIMIT = 10
 COMMENT_INDEX_DEFAULT_LIMIT = 10
+TAG_SEARCH_DEFAULT_LIMIT = 100
 
 article_id_length = 12
 COMMENT_ID_LENGTH = 12
@@ -177,3 +188,6 @@ COMMENT_NOTIFICATION_TYPE = 'comment'
 
 ARTICLE_SCORE_INDEX_NAME = 'article_scores'
 TOPIC_INDEX_HASH_KEY = 'topic'
+
+TAG_DENIED_SYMBOL_PATTERN = '([!-,./:-@[-`{-~]|--| {2})'
+TAG_ALLOWED_SYMBOLS = ['-', ' ']

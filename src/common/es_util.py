@@ -1,10 +1,41 @@
 # -*- coding: utf-8 -*-
-
-
 class ESUtil:
 
     @staticmethod
-    def search_article(elasticsearch, word, limit, page):
+    def search_tag(elasticsearch, word, limit, page):
+        body = {
+            'query': {
+                'bool': {
+                    'must': [
+                        {
+                            'match': {
+                                'name_with_analyzer': {
+                                    'query': word.lower(),
+                                    'analyzer': 'keyword'
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            'sort': [
+                {'count': 'desc'}
+            ],
+            'from': limit * (page - 1),
+            'size': limit
+        }
+
+        response = elasticsearch.search(
+            index='tags',
+            body=body
+        )
+
+        tags = [item['_source'] for item in response['hits']['hits']]
+
+        return tags
+
+    @staticmethod
+    def search_article(elasticsearch, limit, page, word=None, tag=None):
         body = {
             "query": {
                 "bool": {
@@ -19,24 +50,34 @@ class ESUtil:
             "from": limit*(page-1),
             "size": limit
         }
-        for s in word.split():
-            query = {
-                "bool": {
-                    "should": [
-                        {
-                            "match": {
-                                "title": s
+
+        # wordが渡ってきた場合は文字列検索をする
+        if word:
+            for s in word.split():
+                query = {
+                    "bool": {
+                        "should": [
+                            {
+                                "match": {
+                                    "title": s
+                                }
+                            },
+                            {
+                                "match": {
+                                    "body": s
+                                }
                             }
-                        },
-                        {
-                            "match": {
-                                "body": s
-                            }
-                        }
-                    ]
+                        ]
+                    }
                 }
-            }
-            body["query"]["bool"]["must"].append(query)
+                body["query"]["bool"]["must"].append(query)
+
+        # tagが渡ってきたときはそのタグで一致検索を行う
+        # TODO: 大文字小文字区別なしで検索を行えること
+        if tag:
+            body['query']['bool']['must'].append({'term': {'tags.keyword': tag}})
+            body['sort'] = [{"published_at": "desc"}]
+
         res = elasticsearch.search(
                 index="articles",
                 body=body
