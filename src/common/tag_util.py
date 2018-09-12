@@ -31,7 +31,7 @@ class TagUtil:
         for tag_name in before_tag_names:
             if tag_name not in after_tag_names:
                 tag = cls.__get_item_case_insensitive(elasticsearch, tag_name)
-                if tag:
+                if tag and tag['count'] > 0:
                     cls.update_count(elasticsearch, tag['name'], -1)
 
     @classmethod

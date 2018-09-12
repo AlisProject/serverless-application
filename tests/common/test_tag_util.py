@@ -28,9 +28,13 @@ class TestTagUtil(TestCase):
         TagUtil.create_tag(self.elasticsearch, 'A')
         TagUtil.update_count(self.elasticsearch, 'A', 1)
         TagUtil.create_tag(self.elasticsearch, 'B')
+
+        # count: 0 のTagを作成する
+        TagUtil.create_tag(self.elasticsearch, 'F')
+        TagUtil.update_count(self.elasticsearch, 'F', -1)
         self.elasticsearch.indices.refresh(index="tags")
 
-        before_tag_names = ['A', 'B', 'C']
+        before_tag_names = ['A', 'B', 'C', 'F']
         after_tag_names = ['A', 'D', 'E']
 
         TagUtil.create_and_count(self.elasticsearch, before_tag_names, after_tag_names)
@@ -59,6 +63,11 @@ class TestTagUtil(TestCase):
                 'name': 'E',
                 'name_with_analyzer': 'E',
                 'count': Decimal('1'),
+            },
+            {
+                'name': 'F',
+                'name_with_analyzer': 'F',
+                'count': Decimal('0'),
             },
         ]
 
