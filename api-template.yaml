@@ -372,7 +372,7 @@ Resources:
                 responses:
                   default:
                     statusCode: "200"
-                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ElasticSearchSearchUsers.Arn}/invocations
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ElasticSearchSearchTags.Arn}/invocations
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
@@ -1931,7 +1931,7 @@ Resources:
             Path: /search/users
             Method: get
             RestApiId: !Ref RestApi
-  ElasticSearchSearchTag:
+  ElasticSearchSearchTags:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
