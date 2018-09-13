@@ -6,6 +6,7 @@ import settings
 from decimal_encoder import DecimalEncoder
 from es_util import ESUtil
 from lambda_base import LambdaBase
+from parameter_util import ParameterUtil
 
 
 class SearchTags(LambdaBase):
@@ -21,6 +22,7 @@ class SearchTags(LambdaBase):
         }
 
     def validate_params(self):
+        ParameterUtil.cast_parameter_to_int(self.params, self.get_schema())
         validate(self.params, self.get_schema())
 
     def exec_main_proc(self):
