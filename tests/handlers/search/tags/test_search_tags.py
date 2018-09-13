@@ -39,8 +39,8 @@ class TestSearchTags(TestCase):
         params = {
                 'queryStringParameters': {
                     'query': 'ali',
-                    'limit': 1,
-                    'page': 2
+                    'limit': '1',
+                    'page': '2'
                 }
         }
         response = SearchTags(params, {}, elasticsearch=self.elasticsearch).main()
