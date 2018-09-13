@@ -155,6 +155,31 @@ users_setting = {
                 "default": {
                     "tokenizer": "keyword"
                 }
+            },
+            "normalizer": {
+                "lowcase": {
+                    "type": "custom",
+                    "char_filter": [],
+                    "filter": ["lowercase"]
+                }
+            }
+        }
+    },
+    "mappings": {
+        "user": {
+            "properties": {
+                "user_id": {
+                    "type": "keyword",
+                    "copy_to": "search_name"
+                },
+                "user_display_name": {
+                    "type": "keyword",
+                    "copy_to": "search_name"
+                },
+                "search_name": {
+                    "type": "keyword",
+                    "normalizer": "lowcase"
+                }
             }
         }
     }
