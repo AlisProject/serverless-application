@@ -97,6 +97,7 @@ Globals:
         PRIVATE_CHAIN_EXECUTE_API_HOST: !Ref PrivateChainExecuteApiHost
         BETA_MODE_FLAG: !Ref BetaModeFlag
         DIST_S3_BUCKET_NAME: !Ref DistS3BucketName
+        ELASTIC_SEARCH_ENDPOINT: !Ref ElasticSearchEndpoint
 
 Resources:
   RestApi:
@@ -1396,9 +1397,6 @@ Resources:
       Handler: handler.lambda_handler
       Role: !GetAtt LambdaRole.Arn
       CodeUri: ./deploy/articles_recent.zip
-      Environment:
-        Variables:
-          ELASTIC_SEARCH_ENDPOINT: !Ref ElasticSearchEndpoint
       Events:
         Api:
           Type: Api
@@ -1412,9 +1410,6 @@ Resources:
       Handler: handler.lambda_handler
       Role: !GetAtt LambdaRole.Arn
       CodeUri: ./deploy/articles_popular.zip
-      Environment:
-        Variables:
-          ELASTIC_SEARCH_ENDPOINT: !Ref ElasticSearchEndpoint
       Events:
         Api:
           Type: Api
@@ -1905,9 +1900,6 @@ Resources:
       Handler: handler.lambda_handler
       Role: !GetAtt LambdaRole.Arn
       CodeUri: ./deploy/search_articles.zip
-      Environment:
-        Variables:
-          ELASTIC_SEARCH_ENDPOINT: !Ref ElasticSearchEndpoint
       Events:
         Api:
           Type: Api
@@ -1921,9 +1913,6 @@ Resources:
       Handler: handler.lambda_handler
       Role: !GetAtt LambdaRole.Arn
       CodeUri: ./deploy/search_users.zip
-      Environment:
-        Variables:
-          ELASTIC_SEARCH_ENDPOINT: !Ref ElasticSearchEndpoint
       Events:
         Api:
           Type: Api
@@ -1937,9 +1926,6 @@ Resources:
       Handler: handler.lambda_handler
       Role: !GetAtt LambdaRole.Arn
       CodeUri: ./deploy/search_tags.zip
-      Environment:
-        Variables:
-          ELASTIC_SEARCH_ENDPOINT: !Ref ElasticSearchEndpoint
       Events:
         Api:
           Type: Api
