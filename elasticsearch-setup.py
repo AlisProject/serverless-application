@@ -170,6 +170,23 @@ tag_settings = {
                     'char_filter': [],
                     'filter': ['lowercase']
                 }
+            },
+            'filter': {
+                'autocomplete_filter': {
+                    'type': 'edge_ngram',
+                    'min_gram': 1,
+                    'max_gram': 20
+                }
+            },
+            'analyzer': {
+                'autocomplete': {
+                    'type': 'custom',
+                    'tokenizer': 'keyword',
+                    'filter': [
+                        'lowercase',
+                        'autocomplete_filter'
+                    ]
+                }
             }
         }
     },
@@ -179,6 +196,10 @@ tag_settings = {
                 'name': {
                     'type': 'keyword',
                     'normalizer': 'lowercase_normalizer'
+                },
+                'name_with_analyzer': {
+                    'type': 'text',
+                    'analyzer': 'autocomplete'
                 },
                 'created_at': {
                     'type': 'integer'
