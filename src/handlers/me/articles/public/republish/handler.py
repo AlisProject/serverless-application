@@ -25,5 +25,5 @@ elasticsearch = Elasticsearch(
 
 
 def lambda_handler(event, context):
-    me_articles_public_republish = MeArticlesPublicRepublish(event, context, dynamodb)
+    me_articles_public_republish = MeArticlesPublicRepublish(event, context, dynamodb=dynamodb, elasticsearch=elasticsearch)
     return me_articles_public_republish.main()
