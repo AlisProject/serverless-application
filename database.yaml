@@ -124,8 +124,18 @@ Resources:
         - AttributeName: evaluated_at
           KeyType: RANGE
       ProvisionedThroughput:
-          ReadCapacityUnits: 2
-          WriteCapacityUnits: 2
+        ReadCapacityUnits: 2
+        WriteCapacityUnits: 2
+      GlobalSecondaryIndexes:
+        - IndexName: evaluated_at-index
+          KeySchema:
+          - AttributeName: evaluated_at
+            KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: 2
+            WriteCapacityUnits: 2
   ArticleEvaluatedManage:
     Type: AWS::DynamoDB::Table
     DependsOn:
