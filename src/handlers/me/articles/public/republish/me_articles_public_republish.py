@@ -60,7 +60,7 @@ class MeArticlesPublicRepublish(LambdaBase):
         article_content_edit_table.delete_item(Key={'article_id': self.params['article_id']})
 
         try:
-            TagUtil.create_and_count(self.dynamodb, article_info_before.get('tags'), self.params.get('tags'))
+            TagUtil.create_and_count(self.elasticsearch, article_info_before.get('tags'), self.params.get('tags'))
         except Exception as e:
             logging.fatal(e)
             traceback.print_exc()
