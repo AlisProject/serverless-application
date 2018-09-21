@@ -491,6 +491,8 @@ Resources:
         WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
   Topic:
     Type: AWS::DynamoDB::Table
+    DependsOn:
+    - ArticleContent
     Properties:
       AttributeDefinitions:
         - AttributeName: name
@@ -519,6 +521,8 @@ Resources:
         WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
   Tag:
     Type: AWS::DynamoDB::Table
+    DependsOn:
+    - ArticleContent
     Properties:
       AttributeDefinitions:
         - AttributeName: name
@@ -531,6 +535,8 @@ Resources:
         WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
   Tip:
     Type: AWS::DynamoDB::Table
+    DependsOn:
+    - ArticleContent
     Properties:
       AttributeDefinitions:
         - AttributeName: user_id
