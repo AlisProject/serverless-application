@@ -267,6 +267,25 @@ Resources:
               created_at:
                 type: integer
         paths:
+          /login/twitter/authorization_url:
+            get:
+              description: "Twitter認証画面のURLを取得する"
+              responses:
+                "200":
+                  description: "Twitter認証画面のURL"
+                  schema:
+                    type: object
+                    properties:
+                      url:
+                        type: string
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LoginTwitterAuthorizationUrl.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
           /search/articles:
             get:
               description: "記事検索"
@@ -1391,6 +1410,19 @@ Resources:
         - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
         - arn:aws:iam::aws:policy/AmazonS3FullAccess
         - arn:aws:iam::aws:policy/AmazonCognitoPowerUser
+  LoginTwitterAuthorizationUrl:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/login_twitter_authorization_url.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /login/twitter/authorization_url
+            Method: get
+            RestApiId: !Ref RestApi
   ArticlesRecent:
     Type: AWS::Serverless::Function
     Properties:
@@ -1935,7 +1967,7 @@ Resources:
             RestApiId: !Ref RestApi
   ElasticSearchService:
     Type: "AWS::Elasticsearch::Domain"
-    Properties: 
+    Properties:
       AccessPolicies: !Join
         - ''
         - - '{ "Version": "2012-10-17", "Statement": [ { "Effect": "Allow", "Principal": { "AWS": "'
