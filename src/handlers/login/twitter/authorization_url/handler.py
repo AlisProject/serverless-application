@@ -1,12 +1,7 @@
 # -*- coding: utf-8 -*-
-import boto3
-import os
-import json
-from decimal_encoder import DecimalEncoder
+from login_twitter_authorization_url import LoginTwitterAuthorizationUrl
 
 
 def lambda_handler(event, context):
-    return {
-        'statusCode': 200,
-        'body': json.dumps({'hello': 'world'}, cls=DecimalEncoder)
-    }
+    login_twitter_authorization_url = LoginTwitterAuthorizationUrl(event=event, context=context)
+    return login_twitter_authorization_url.main()

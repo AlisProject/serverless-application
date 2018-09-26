@@ -191,3 +191,7 @@ TOPIC_INDEX_HASH_KEY = 'topic'
 
 TAG_DENIED_SYMBOL_PATTERN = '([!-,./:-@[-`{-~]|--| {2})'
 TAG_ALLOWED_SYMBOLS = ['-', ' ']
+
+TWITTER_API_REQUEST_TOKEN_URL = 'https://api.twitter.com/oauth/request_token'
+TWITTER_API_AUTHENTICATE_URL = 'https://api.twitter.com/oauth/authenticate'
+TWITTER_API_ACCESS_TOKEN_URL = 'https://api.twitter.com/oauth/access_token'

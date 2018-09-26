@@ -137,6 +137,8 @@ Resources:
     Properties:
         ClientName: JavaScriptClient
         GenerateSecret: false
+        ExplicitAuthFlows:
+          - ADMIN_NO_SRP_AUTH
         UserPoolId: !Ref UserPool
         ReadAttributes:
           - email

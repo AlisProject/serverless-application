@@ -63,6 +63,12 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   SaltForArticleId:
     Type: 'AWS::SSM::Parameter::Value<String>'
+  TwitterConsumerKey:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  TwitterConsumerSecret:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  TwitterOauthCallbackUrl:
+    Type: 'AWS::SSM::Parameter::Value<String>'
 
 Globals:
   Function:
@@ -267,6 +273,43 @@ Resources:
               created_at:
                 type: integer
         paths:
+          /login/twitter:
+            post:
+              description: "Twitterログインの実施"
+              parameters:
+                - name: request
+                  in: body
+                  required: true
+                  schema:
+                    type: object
+                    required:
+                      - oauth_token
+                      - oauth_verifier
+                    properties:
+                      oauth_token:
+                        type: string
+                      oauth_verifier:
+                        type: string
+              responses:
+                "200":
+                  description: "アクセストークンを取得"
+                  schema:
+                    type: object
+                    properties:
+                      access_token:
+                        type: string
+                      refresh_token:
+                        type: string
+                      id_token:
+                        type: string
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LoginTwitter.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
           /login/twitter/authorization_url:
             get:
               description: "Twitter認証画面のURLを取得する"
@@ -1410,12 +1453,30 @@ Resources:
         - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
         - arn:aws:iam::aws:policy/AmazonS3FullAccess
         - arn:aws:iam::aws:policy/AmazonCognitoPowerUser
+  LoginTwitter:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/login_twitter_index.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /login/twitter
+            Method: post
+            RestApiId: !Ref RestApi
   LoginTwitterAuthorizationUrl:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
       Role: !GetAtt LambdaRole.Arn
       CodeUri: ./deploy/login_twitter_authorization_url.zip
+      Environment:
+        Variables:
+          TWITTER_CONSUMER_KEY: !Ref TwitterConsumerKey
+          TWITTER_CONSUMER_SECRET: !Ref TwitterConsumerSecret
+          TWITTER_OAUTH_CALLBACK_URL: !Ref TwitterOauthCallbackUrl
       Events:
         Api:
           Type: Api
