@@ -7,6 +7,7 @@ from decimal_encoder import DecimalEncoder
 from lambda_base import LambdaBase
 from requests_oauthlib import OAuth1Session
 from twitter_util import TwitterUtil
+from exceptions import TwitterOauthError
 
 
 class LoginTwitterAuthorizationUrl(LambdaBase):
@@ -17,18 +18,17 @@ class LoginTwitterAuthorizationUrl(LambdaBase):
         pass
 
     def exec_main_proc(self):
-        twitter = OAuth1Session(
-            os.environ['TWITTER_CONSUMER_KEY'],
-            os.environ['TWITTER_CONSUMER_SECRET']
-        )
-        response = twitter.post(
-            settings.TWITTER_API_REQUEST_TOKEN_URL,
-            params={'oauth_callback': os.environ['TWITTER_OAUTH_CALLBACK_URL']}
+        twitter = TwitterUtil(
+            consumer_key=os.environ['TWITTER_CONSUMER_KEY'],
+            consumer_secret=os.environ['TWITTER_CONSUMER_SECRET']
         )
 
-        response_body = TwitterUtil.parse_api_response(response)
-        if response.status_code is not 200:
-            logging.fatal(response_body)
+        try:
+            authentication_url = twitter.generate_auth_url(
+                callback_url=os.environ['TWITTER_OAUTH_CALLBACK_URL']
+            )
+        except TwitterOauthError as e:
+            logging.fatal(e)
             return {
                 'statusCode': 500,
                 'body': json.dumps({'message': 'Internal server error'})
@@ -37,6 +37,6 @@ class LoginTwitterAuthorizationUrl(LambdaBase):
         return {
             'statusCode': 200,
             'body': json.dumps({
-                'url': TwitterUtil.get_authentication_url(response_body['oauth_token'])
+                'url': authentication_url
             }, cls=DecimalEncoder)
         }
