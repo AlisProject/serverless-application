@@ -1,9 +1,7 @@
-import json
 import os
 import settings
 import logging
 
-from decimal_encoder import DecimalEncoder
 from lambda_base import LambdaBase
 from twitter_util import TwitterUtil
 from user_util import UserUtil
@@ -50,10 +48,11 @@ class LoginTwitterIndex(LambdaBase):
 
         if UserUtil.exists_user(self.cognito, user_info['user_id']):
             try:
-                response = UserUtil.login(
-                    self.cognito,
-                    user_info['user_id'],
-                    settings.TEXT_PASSWORD
+                response = UserUtil.sns_login(
+                    cognito=self.cognito,
+                    user_id=user_info['user_id'],
+                    password=settings.TEXT_PASSWORD,
+                    provider=os.environ['THIRD_PARTY_LOGIN']
                 )
 
                 return ResponseBuilder.response(
@@ -77,7 +76,8 @@ class LoginTwitterIndex(LambdaBase):
                 user_id=user_info['user_id'],
                 email=user_info['email'],
                 backed_temp_password=os.environ['TWITTER_LOGIN_COMMON_TEMP_PASSWORD'],
-                backed_password=settings.TEXT_PASSWORD
+                backed_password=settings.TEXT_PASSWORD,
+                provider=os.environ['THIRD_PARTY_LOGIN']
             )
 
             UserUtil.force_non_verified_phone(
@@ -89,6 +89,12 @@ class LoginTwitterIndex(LambdaBase):
                 dynamodb=self.dynamodb,
                 user_id=user_info['user_id'],
                 user_display_name=user_info['display_name']
+            )
+
+            UserUtil.add_sns_user_info(
+                dynamodb=self.dynamodb,
+                user_id=user_info['user_id'],
+                password=settings.TEXT_PASSWORD
             )
 
             return ResponseBuilder.response(

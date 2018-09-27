@@ -65,7 +65,7 @@ class UserUtil:
         return True
 
     @staticmethod
-    def login(cognito, user_id, password):
+    def sns_login(cognito, user_id, password, provider):
         try:
             return cognito.admin_initiate_auth(
                 UserPoolId=os.environ['COGNITO_USER_POOL_ID'],
@@ -75,12 +75,15 @@ class UserUtil:
                     'USERNAME': user_id,
                     'PASSWORD': password
                 },
+                ClientMetadata={
+                    'THIRD_PARTY_LOGIN': provider
+                }
             )
         except ClientError as e:
             raise e
 
     @staticmethod
-    def create_sns_user(cognito, user_id, email, backed_temp_password, backed_password):
+    def create_sns_user(cognito, user_id, email, backed_temp_password, backed_password, provider):
         try:
             cognito.admin_create_user(
                 UserPoolId=os.environ['COGNITO_USER_POOL_ID'],
@@ -103,6 +106,9 @@ class UserUtil:
                     'USERNAME': user_id,
                     'PASSWORD': backed_temp_password
                 },
+                ClientMetadata={
+                    'THIRD_PARTY_LOGIN': provider
+                }
             )
 
             return cognito.admin_respond_to_auth_challenge(
@@ -143,6 +149,18 @@ class UserUtil:
                 'user_id': user_id,
                 'user_display_name': user_display_name,
                 'sync_elasticsearch': 1
+            }
+            users.put_item(Item=user, ConditionExpression='attribute_not_exists(user_id)')
+        except ClientError as e:
+            raise e
+
+    @staticmethod
+    def add_sns_user_info(dynamodb, user_id, password):
+        try:
+            users = dynamodb.Table(os.environ['SNS_USERS_TABLE_NAME'])
+            user = {
+                'user_id': user_id,
+                'password': password,
             }
             users.put_item(Item=user, ConditionExpression='attribute_not_exists(user_id)')
         except ClientError as e:
