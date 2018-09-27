@@ -1,13 +1,15 @@
 import json
 import os
 import settings
+import logging
 
 from decimal_encoder import DecimalEncoder
 from lambda_base import LambdaBase
-from requests_oauthlib import OAuth1Session
 from twitter_util import TwitterUtil
+from user_util import UserUtil
 from jsonschema import validate, ValidationError
 from botocore.exceptions import ClientError
+from exceptions import TwitterOauthError
 
 
 class LoginTwitterIndex(LambdaBase):
@@ -28,83 +30,65 @@ class LoginTwitterIndex(LambdaBase):
         validate(self.params, self.get_schema())
 
     def exec_main_proc(self):
-        twitter = OAuth1Session(
-            os.environ['TWITTER_CONSUMER_KEY'],
-            os.environ['TWITTER_CONSUMER_SECRET'],
-            self.params['oauth_token'],
-            self.params['oauth_verifier'],
+        twitter = TwitterUtil(
+            consumer_key=os.environ['TWITTER_CONSUMER_KEY'],
+            consumer_secret=os.environ['TWITTER_CONSUMER_SECRET']
         )
-
-        response = twitter.post(
-            settings.TWITTER_API_ACCESS_TOKEN_URL,
-            params={'oauth_verifier': self.params['oauth_verifier']}
-        )
-
-        access_token = TwitterUtil.parse_api_response(response)
-
-        twitter = OAuth1Session(
-            os.environ['TWITTER_CONSUMER_KEY'],
-            os.environ['TWITTER_CONSUMER_SECRET'],
-            access_token['oauth_token'],
-            access_token['oauth_token_secret'],
-        )
-
-        user_id = TwitterUtil.generate_user_id(access_token['user_id'])
-        response = twitter.get(
-            settings.TWITTER_API_VERIFY_CREDENTIALS_URL + '?include_email=true'
-        )
-        user_info = json.loads(response.text)
-        print(user_info)
-        print(user_info.get('email', user_id + '@example.com'))
-        email = user_info.get('email', user_id + '@example.com')
 
         try:
-            self.cognito.admin_get_user(
-                UserPoolId=os.environ['COGNITO_USER_POOL_ID'],
-                Username=user_id
+            user_info = twitter.get_user_info(
+                oauth_token=self.params['oauth_token'],
+                oauth_verifier=self.params['oauth_verifier']
             )
-            response = self.cognito.admin_initiate_auth(
-                UserPoolId=os.environ['COGNITO_USER_POOL_ID'],
-                ClientId=os.environ['COGNITO_USER_POOL_APP_ID'],
-                AuthFlow='ADMIN_NO_SRP_AUTH',
-                AuthParameters={
-                    'USERNAME': user_id,
-                    'PASSWORD': os.environ['TWITTER_LOGIN_COMMON_PASSWORD']
-                },
-            )
-
+        except TwitterOauthError as e:
+            logging.fatal(e)
             return {
-                'statusCode': 200,
-                'body': json.dumps({
-                    'accessToken': response['AuthenticationResult']['AccessToken'],
-                    'idToken': response['AuthenticationResult']['IdToken'],
-                    'refreshToken': response['AuthenticationResult']['RefreshToken'],
-                }, cls=DecimalEncoder)
+                'statusCode': 500,
+                'body': json.dumps({'message': 'Internal server error'})
             }
 
-        except ClientError:
-            pass
+        if UserUtil.exists_user(self.cognito, user_info['user_id']):
+            try:
+                response = UserUtil.login(
+                    self.cognito,
+                    user_info['user_id'],
+                    os.environ['TWITTER_LOGIN_COMMON_PASSWORD']
+                )
+
+                return {
+                    'statusCode': 200,
+                    'body': json.dumps({
+                        'accessToken': response['AuthenticationResult']['AccessToken'],
+                        'idToken': response['AuthenticationResult']['IdToken'],
+                        'refreshToken': response['AuthenticationResult']['RefreshToken'],
+                    }, cls=DecimalEncoder)
+                }
+            except ClientError as e:
+                logging.fatal(e)
+                return {
+                    'statusCode': 500,
+                    'body': json.dumps({'message': 'Internal server error'})
+                }
 
         user = self.cognito.admin_create_user(
             UserPoolId=os.environ['COGNITO_USER_POOL_ID'],
-            Username=user_id,
+            Username=user_info['user_id'],
             UserAttributes=[
                 {
                     'Name': 'email',
-                    'Value': email
+                    'Value': user_info['email']
                 },
             ],
             TemporaryPassword=os.environ['TWITTER_LOGIN_COMMON_TEMP_PASSWORD'],
             MessageAction='SUPPRESS'
         )
-        print(user)
 
         response = self.cognito.admin_initiate_auth(
             UserPoolId=os.environ['COGNITO_USER_POOL_ID'],
             ClientId=os.environ['COGNITO_USER_POOL_APP_ID'],
             AuthFlow='ADMIN_NO_SRP_AUTH',
             AuthParameters={
-                'USERNAME': user_id,
+                'USERNAME': user_info['user_id'],
                 'PASSWORD': os.environ['TWITTER_LOGIN_COMMON_TEMP_PASSWORD']
             },
         )
@@ -114,7 +98,7 @@ class LoginTwitterIndex(LambdaBase):
             ClientId=os.environ['COGNITO_USER_POOL_APP_ID'],
             ChallengeName='NEW_PASSWORD_REQUIRED',
             ChallengeResponses={
-                'USERNAME': user_id,
+                'USERNAME': user_info['user_id'],
                 'NEW_PASSWORD': os.environ['TWITTER_LOGIN_COMMON_PASSWORD']
             },
             Session=response['Session']
@@ -122,7 +106,7 @@ class LoginTwitterIndex(LambdaBase):
 
         self.cognito.admin_update_user_attributes(
             UserPoolId=os.environ['COGNITO_USER_POOL_ID'],
-            Username=user_id,
+            Username=user_info['user_id'],
             UserAttributes=[
                 {
                     'Name': 'phone_number',

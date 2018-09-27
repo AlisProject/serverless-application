@@ -48,3 +48,31 @@ class UserUtil:
                 raise RecordNotFoundError('Record Not Found')
             else:
                 raise e
+
+    @staticmethod
+    def exists_user(cognito, user_id):
+        try:
+            return cognito.admin_get_user(
+                UserPoolId=os.environ['COGNITO_USER_POOL_ID'],
+                Username=user_id
+            )
+        except ClientError as e:
+            if e.response['Error']['Code'] == 'UserNotFoundException':
+                return False
+            else:
+                return True
+
+    @staticmethod
+    def login(cognito, user_id, password):
+        try:
+            return cognito.admin_initiate_auth(
+                UserPoolId=os.environ['COGNITO_USER_POOL_ID'],
+                ClientId=os.environ['COGNITO_USER_POOL_APP_ID'],
+                AuthFlow='ADMIN_NO_SRP_AUTH',
+                AuthParameters={
+                    'USERNAME': user_id,
+                    'PASSWORD': password
+                },
+            )
+        except ClientError as e:
+            raise e
