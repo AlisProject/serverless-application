@@ -52,7 +52,7 @@ class UserUtil:
     @staticmethod
     def exists_user(cognito, user_id):
         try:
-            return cognito.admin_get_user(
+            cognito.admin_get_user(
                 UserPoolId=os.environ['COGNITO_USER_POOL_ID'],
                 Username=user_id
             )
@@ -60,7 +60,9 @@ class UserUtil:
             if e.response['Error']['Code'] == 'UserNotFoundException':
                 return False
             else:
-                return True
+                raise e
+
+        return True
 
     @staticmethod
     def login(cognito, user_id, password):
@@ -130,5 +132,18 @@ class UserUtil:
                 ]
             )
 
+        except ClientError as e:
+            raise e
+
+    @staticmethod
+    def update_user_profile(dynamodb, user_id, user_display_name):
+        try:
+            users = dynamodb.Table(os.environ['USERS_TABLE_NAME'])
+            user = {
+                'user_id': user_id,
+                'user_display_name': user_display_name,
+                'sync_elasticsearch': 1
+            }
+            users.put_item(Item=user, ConditionExpression='attribute_not_exists(user_id)')
         except ClientError as e:
             raise e

@@ -48,6 +48,7 @@ aws cloudformation deploy \
     TopicTableName=${SSM_PARAMS_PREFIX}TopicTableName \
     TagTableName=${SSM_PARAMS_PREFIX}TagTableName \
     TipTableName=${SSM_PARAMS_PREFIX}TipTableName \
+    SnsUsersTableName=${SSM_PARAMS_PREFIX}SnsUsersTableName \
     CommentTableName=${SSM_PARAMS_PREFIX}CommentTableName \
     CommentLikedUserTableName=${SSM_PARAMS_PREFIX}CommentLikedUserTableName \
     DeletedCommentTableName=${SSM_PARAMS_PREFIX}DeletedCommentTableName \

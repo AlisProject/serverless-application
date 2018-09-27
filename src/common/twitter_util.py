@@ -42,10 +42,12 @@ class TwitterUtil:
         user_info = json.loads(response.text)
         email = user_info.get(
             'email', cognito_user_id + '@' + settings.FAKE_USER_EMAIL_DOMAIN)
+        display_name = user_info.get('screen_name')
 
         return {
             'user_id': cognito_user_id,
-            'email': email
+            'email': email,
+            'display_name': display_name
         }
 
     def generate_auth_url(self, callback_url):

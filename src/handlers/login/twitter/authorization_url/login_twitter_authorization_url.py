@@ -2,10 +2,10 @@ import json
 import os
 import logging
 
-from decimal_encoder import DecimalEncoder
 from lambda_base import LambdaBase
 from twitter_util import TwitterUtil
 from exceptions import TwitterOauthError
+from response_builder import ResponseBuilder
 
 
 class LoginTwitterAuthorizationUrl(LambdaBase):
@@ -27,14 +27,12 @@ class LoginTwitterAuthorizationUrl(LambdaBase):
             )
         except TwitterOauthError as e:
             logging.fatal(e)
-            return {
-                'statusCode': 500,
-                'body': json.dumps({'message': 'Internal server error'})
-            }
+            return ResponseBuilder.response(
+                status_code=500,
+                body={'message': 'Internal server error'}
+            )
 
-        return {
-            'statusCode': 200,
-            'body': json.dumps({
-                'url': authentication_url
-            }, cls=DecimalEncoder)
-        }
+        return ResponseBuilder.response(
+            status_code=200,
+            body={'url': authentication_url}
+        )
