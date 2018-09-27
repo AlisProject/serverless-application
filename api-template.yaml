@@ -61,6 +61,8 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   CognitoUserPoolArn:
     Type: 'AWS::SSM::Parameter::Value<String>'
+  CognitoUserPoolAppId:
+    Type: 'AWS::SSM::Parameter::Value<String>'
   SaltForArticleId:
     Type: 'AWS::SSM::Parameter::Value<String>'
   TwitterConsumerKey:
@@ -68,6 +70,10 @@ Parameters:
   TwitterConsumerSecret:
     Type: 'AWS::SSM::Parameter::Value<String>'
   TwitterOauthCallbackUrl:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  TwitterLoginCommonTempPassword:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  TwitterLoginCommonPassword:
     Type: 'AWS::SSM::Parameter::Value<String>'
 
 Globals:
@@ -1459,6 +1465,14 @@ Resources:
       Handler: handler.lambda_handler
       Role: !GetAtt LambdaRole.Arn
       CodeUri: ./deploy/login_twitter_index.zip
+      Environment:
+        Variables:
+          TWITTER_CONSUMER_KEY: !Ref TwitterConsumerKey
+          TWITTER_CONSUMER_SECRET: !Ref TwitterConsumerSecret
+          TWITTER_LOGIN_COMMON_TEMP_PASSWORD: !Ref TwitterLoginCommonTempPassword
+          TWITTER_LOGIN_COMMON_PASSWORD: !Ref TwitterLoginCommonPassword
+          COGNITO_USER_POOL_ID: !Ref CognitoUserPoolId
+          COGNITO_USER_POOL_APP_ID: !Ref CognitoUserPoolAppId
       Events:
         Api:
           Type: Api

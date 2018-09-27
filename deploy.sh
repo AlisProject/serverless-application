@@ -55,7 +55,10 @@ aws cloudformation deploy \
     ApiLambdaRole=${SSM_PARAMS_PREFIX}ApiLambdaRole \
     ElasticSearchEndpoint=${SSM_PARAMS_PREFIX}ElasticSearchEndpoint \
     CognitoUserPoolId=${SSM_PARAMS_PREFIX}CognitoUserPoolId \
+    CognitoUserPoolAppId=${SSM_PARAMS_PREFIX}CognitoUserPoolAppId \
     TwitterConsumerKey=${SSM_PARAMS_PREFIX}TwitterConsumerKey \
     TwitterConsumerSecret=${SSM_PARAMS_PREFIX}TwitterConsumerSecret \
     TwitterOauthCallbackUrl=${SSM_PARAMS_PREFIX}TwitterOauthCallbackUrl \
+    TwitterLoginCommonTempPassword=${SSM_PARAMS_PREFIX}TwitterLoginCommonTempPassword \
+    TwitterLoginCommonPassword=${SSM_PARAMS_PREFIX}TwitterLoginCommonPassword \
   --capabilities CAPABILITY_IAM
