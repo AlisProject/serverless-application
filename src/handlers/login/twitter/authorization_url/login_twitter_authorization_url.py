@@ -1,11 +1,9 @@
 import json
 import os
-import settings
 import logging
 
 from decimal_encoder import DecimalEncoder
 from lambda_base import LambdaBase
-from requests_oauthlib import OAuth1Session
 from twitter_util import TwitterUtil
 from exceptions import TwitterOauthError
 

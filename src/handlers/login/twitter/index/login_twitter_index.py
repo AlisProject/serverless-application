@@ -70,56 +70,31 @@ class LoginTwitterIndex(LambdaBase):
                     'body': json.dumps({'message': 'Internal server error'})
                 }
 
-        user = self.cognito.admin_create_user(
-            UserPoolId=os.environ['COGNITO_USER_POOL_ID'],
-            Username=user_info['user_id'],
-            UserAttributes=[
-                {
-                    'Name': 'email',
-                    'Value': user_info['email']
-                },
-            ],
-            TemporaryPassword=os.environ['TWITTER_LOGIN_COMMON_TEMP_PASSWORD'],
-            MessageAction='SUPPRESS'
-        )
+        try:
+            response = UserUtil.create_sns_user(
+                cognito=self.cognito,
+                user_id=user_info['user_id'],
+                email=user_info['email'],
+                backed_temp_password=os.environ['TWITTER_LOGIN_COMMON_TEMP_PASSWORD'],
+                backed_password=os.environ['TWITTER_LOGIN_COMMON_PASSWORD']
+            )
 
-        response = self.cognito.admin_initiate_auth(
-            UserPoolId=os.environ['COGNITO_USER_POOL_ID'],
-            ClientId=os.environ['COGNITO_USER_POOL_APP_ID'],
-            AuthFlow='ADMIN_NO_SRP_AUTH',
-            AuthParameters={
-                'USERNAME': user_info['user_id'],
-                'PASSWORD': os.environ['TWITTER_LOGIN_COMMON_TEMP_PASSWORD']
-            },
-        )
+            UserUtil.force_non_verified_phone(
+                cognito=self.cognito,
+                user_id=user_info['user_id']
+            )
 
-        response = self.cognito.admin_respond_to_auth_challenge(
-            UserPoolId=os.environ['COGNITO_USER_POOL_ID'],
-            ClientId=os.environ['COGNITO_USER_POOL_APP_ID'],
-            ChallengeName='NEW_PASSWORD_REQUIRED',
-            ChallengeResponses={
-                'USERNAME': user_info['user_id'],
-                'NEW_PASSWORD': os.environ['TWITTER_LOGIN_COMMON_PASSWORD']
-            },
-            Session=response['Session']
-        )
-
-        self.cognito.admin_update_user_attributes(
-            UserPoolId=os.environ['COGNITO_USER_POOL_ID'],
-            Username=user_info['user_id'],
-            UserAttributes=[
-                {
-                    'Name': 'phone_number',
-                    'Value': ''
-                },
-            ]
-        )
-
-        return {
-            'statusCode': 200,
-            'body': json.dumps({
-                'accessToken': response['AuthenticationResult']['AccessToken'],
-                'idToken': response['AuthenticationResult']['IdToken'],
-                'refreshToken': response['AuthenticationResult']['RefreshToken'],
-            }, cls=DecimalEncoder)
-        }
+            return {
+                'statusCode': 200,
+                'body': json.dumps({
+                    'accessToken': response['AuthenticationResult']['AccessToken'],
+                    'idToken': response['AuthenticationResult']['IdToken'],
+                    'refreshToken': response['AuthenticationResult']['RefreshToken'],
+                }, cls=DecimalEncoder)
+            }
+        except ClientError as e:
+            logging.fatal(e)
+            return {
+                'statusCode': 500,
+                'body': json.dumps({'message': 'Internal server error'})
+            }

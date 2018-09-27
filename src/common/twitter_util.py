@@ -1,5 +1,4 @@
 import json
-import os
 import settings
 
 from urllib.parse import parse_qsl
