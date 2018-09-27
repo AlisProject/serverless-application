@@ -51,10 +51,12 @@ class LoginTwitterIndex(LambdaBase):
 
         user_id = TwitterUtil.generate_user_id(access_token['user_id'])
         response = twitter.get(
-            settings.TWITTER_API_VERIFY_CREDENTIALS_URL,
-            include_email=True
+            settings.TWITTER_API_VERIFY_CREDENTIALS_URL + '?include_email=true'
         )
-        user_info = TwitterUtil.parse_api_response(response)
+        user_info = json.loads(response.text)
+        print(user_info)
+        print(user_info.get('email', user_id + '@example.com'))
+        email = user_info.get('email', user_id + '@example.com')
 
         try:
             self.cognito.admin_get_user(
@@ -89,7 +91,7 @@ class LoginTwitterIndex(LambdaBase):
             UserAttributes=[
                 {
                     'Name': 'email',
-                    'Value': 'info+twitter@serverless-operations.com'
+                    'Value': email
                 },
             ],
             TemporaryPassword=os.environ['TWITTER_LOGIN_COMMON_TEMP_PASSWORD'],
