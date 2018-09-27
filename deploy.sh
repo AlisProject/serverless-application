@@ -55,4 +55,7 @@ aws cloudformation deploy \
     ApiLambdaRole=${SSM_PARAMS_PREFIX}ApiLambdaRole \
     ElasticSearchEndpoint=${SSM_PARAMS_PREFIX}ElasticSearchEndpoint \
     CognitoUserPoolId=${SSM_PARAMS_PREFIX}CognitoUserPoolId \
+    TwitterConsumerKey=${SSM_PARAMS_PREFIX}TwitterConsumerKey \
+    TwitterConsumerSecret=${SSM_PARAMS_PREFIX}TwitterConsumerSecret \
+    TwitterOauthCallbackUrl=${SSM_PARAMS_PREFIX}TwitterOauthCallbackUrl \
   --capabilities CAPABILITY_IAM

@@ -1,11 +1,12 @@
 import json
 import os
 import settings
+import logging
 
 from decimal_encoder import DecimalEncoder
 from lambda_base import LambdaBase
-from urllib.parse import parse_qsl
 from requests_oauthlib import OAuth1Session
+from twitter_util import TwitterUtil
 
 
 class LoginTwitterAuthorizationUrl(LambdaBase):
@@ -25,11 +26,17 @@ class LoginTwitterAuthorizationUrl(LambdaBase):
             params={'oauth_callback': os.environ['TWITTER_OAUTH_CALLBACK_URL']}
         )
 
-        request_token = dict(parse_qsl(response.content.decode('utf-8')))
-        authenticate_endpoint = '%s?oauth_token=%s' \
-            % (settings.TWITTER_API_AUTHENTICATE_URL, request_token['oauth_token'])
+        response_body = TwitterUtil.parse_api_response(response)
+        if response.status_code is not 200:
+            logging.fatal(response_body)
+            return {
+                'statusCode': 500,
+                'body': json.dumps({'message': 'Internal server error'})
+            }
 
         return {
             'statusCode': 200,
-            'body': json.dumps({'url': authenticate_endpoint}, cls=DecimalEncoder)
+            'body': json.dumps({
+                'url': TwitterUtil.get_authentication_url(response_body['oauth_token'])
+            }, cls=DecimalEncoder)
         }

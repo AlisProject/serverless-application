@@ -119,6 +119,12 @@ parameters = {
         'type': 'number',
         'minimum': 1,
         'maximum': 10 ** 24
+    },
+    'oauth_token': {
+        'type': 'string'
+    },
+    'oauth_verifier': {
+        'type': 'string'
     }
 }
 
