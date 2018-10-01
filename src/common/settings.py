@@ -15,6 +15,10 @@ parameters = {
         'maxLength': 30,
         'pattern': r'^(?!.*--)[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]$'
     },
+    'line_id': {
+        'type': 'string',
+        'pattern': r'^LINE_U[0-9a-f]{32}$'
+    },
     'phone_number': {
         'type': 'string',
         'minLength': 13,
@@ -191,3 +195,9 @@ TOPIC_INDEX_HASH_KEY = 'topic'
 
 TAG_DENIED_SYMBOL_PATTERN = '([!-,./:-@[-`{-~]|--| {2})'
 TAG_ALLOWED_SYMBOLS = ['-', ' ']
+
+LINE_TOKEN_END_POINT = 'https://api.line.me/oauth2/v2.1/token'
+LINE_ISSUER = 'https://access.line.me'
+LINE_USERNAME_PREFIX = 'LINE_'
+EMAIL_SUFFIX = '@example.com'
+
