@@ -6,6 +6,7 @@ from lambda_base import LambdaBase
 from jsonschema import validate
 from decimal_encoder import DecimalEncoder
 from record_not_found_error import RecordNotFoundError
+from boto3.dynamodb.conditions import Key
 
 
 class UsersInfoShow(LambdaBase):
@@ -27,9 +28,20 @@ class UsersInfoShow(LambdaBase):
         response = users_table.get_item(Key={'user_id': self.params['user_id']})
 
         if response.get('Item') is None:
-            raise RecordNotFoundError('Record Not Found')
+            alias_user_response = users_table.query(
+                IndexName="alias_user_id-index",
+                KeyConditionExpression=Key('alias_user_id').eq(self.params['user_id'])
+            )
 
-        return {
-            'statusCode': 200,
-            'body': json.dumps(response['Item'], cls=DecimalEncoder)
-        }
+            if len(alias_user_response.get('Items')) == 0:
+                raise RecordNotFoundError('Record Not Found')
+            else:
+                return {
+                    'statusCode': 200,
+                    'body': json.dumps(alias_user_response['Items'][0], cls=DecimalEncoder)
+                }
+        else:
+            return {
+                'statusCode': 200,
+                'body': json.dumps(response['Item'], cls=DecimalEncoder)
+            }

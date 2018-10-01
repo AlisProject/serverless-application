@@ -30,30 +30,50 @@ class UsersArticlesPublic(LambdaBase):
 
         if self.event.get('queryStringParameters') is not None:
             params.update(self.event.get('queryStringParameters'))
-
         ParameterUtil.cast_parameter_to_int(params, self.get_schema())
 
         validate(params, self.get_schema())
 
     def exec_main_proc(self):
+        users_table = self.dynamodb.Table(os.environ['USERS_TABLE_NAME'])
+        alias_user = users_table.query(
+            IndexName="alias_user_id-index",
+            KeyConditionExpression=Key('alias_user_id').eq(self.event['pathParameters']['user_id'])
+        )
         article_info_table = self.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
 
         limit = self.__get_index_limit(self.event.get('queryStringParameters'))
 
-        query_params = {
-            'Limit': limit,
-            'IndexName': 'user_id-sort_key-index',
-            'KeyConditionExpression': Key('user_id').eq(self.event['pathParameters']['user_id']),
-            'FilterExpression': Attr('status').eq('public'),
-            'ScanIndexForward': False
-        }
+        if len(alias_user['Items']) == 0:
+            query_params = {
+                'Limit': limit,
+                'IndexName': 'user_id-sort_key-index',
+                'KeyConditionExpression': Key('user_id').eq(self.event['pathParameters']['user_id']),
+                'FilterExpression': Attr('status').eq('public'),
+                'ScanIndexForward': False
+            }
+        else:
+            query_params = {
+                'Limit': limit,
+                'IndexName': 'alias_user_id-sort_key-index',
+                'KeyConditionExpression': Key('alias_user_id').eq(self.event['pathParameters']['user_id']),
+                'FilterExpression': Attr('status').eq('public'),
+                'ScanIndexForward': False
+            }
 
         if self.__require_last_evaluatd_key(self.event.get('queryStringParameters')):
-            LastEvaluatedKey = {
-                'user_id': self.event['pathParameters']['user_id'],
-                'article_id': self.event['queryStringParameters']['article_id'],
-                'sort_key': int(self.event['queryStringParameters']['sort_key'])
-            }
+            if len(alias_user['Items']) == 0:
+                LastEvaluatedKey = {
+                    'user_id': self.event['pathParameters']['user_id'],
+                    'article_id': self.event['queryStringParameters']['article_id'],
+                    'sort_key': int(self.event['queryStringParameters']['sort_key'])
+                }
+            else:
+                LastEvaluatedKey = {
+                    'user_id': alias_user.get('Items')[0]['user_id'],
+                    'article_id': self.event['queryStringParameters']['article_id'],
+                    'sort_key': int(self.event['queryStringParameters']['sort_key'])
+                }
 
             query_params.update({'ExclusiveStartKey': LastEvaluatedKey})
 
@@ -67,11 +87,18 @@ class UsersArticlesPublic(LambdaBase):
             items.extend(response['Items'])
 
             if len(items) >= limit:
-                LastEvaluatedKey = {
-                    'user_id': self.params['user_id'],
-                    'article_id': items[limit - 1]['article_id'],
-                    'sort_key': int(items[limit - 1]['sort_key'])
-                }
+                if len(alias_user['Items']) == 0:
+                    LastEvaluatedKey = {
+                        'user_id': self.params['user_id'],
+                        'article_id': items[limit - 1]['article_id'],
+                        'sort_key': int(items[limit - 1]['sort_key'])
+                    }
+                else:
+                    LastEvaluatedKey = {
+                        'user_id': alias_user.get('Items')[0]['user_id'],
+                        'article_id': items[limit - 1]['article_id'],
+                        'sort_key': int(items[limit - 1]['sort_key'])
+                    }
                 response.update({'LastEvaluatedKey': LastEvaluatedKey})
                 break
 

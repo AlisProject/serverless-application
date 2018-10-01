@@ -39,6 +39,11 @@ class MeCommentsLikesCreate(LambdaBase):
             'created_at': int(time.time())
         }
 
+        users_table = self.dynamodb.Table(os.environ['USERS_TABLE_NAME'])
+        user = users_table.get_item(Key={'user_id': user_id}).get('Item')
+        if 'alias_user_id' in user:
+            comment_liked_user.update({'alias_user_id': user['alias_user_id']})
+
         try:
             comment_liked_user_table.put_item(
                 Item=comment_liked_user,

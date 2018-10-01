@@ -8,7 +8,6 @@ from jsonschema import validate
 from decimal_encoder import DecimalEncoder
 from parameter_util import ParameterUtil
 
-
 class MeArticlesDraftsIndex(LambdaBase):
     def get_schema(self):
         return {
