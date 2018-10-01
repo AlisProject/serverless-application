@@ -22,7 +22,16 @@ class TestMeArticlesCommentsCreate(TestCase):
             }
         ]
         TestsUtil.create_table(self.dynamodb, os.environ['ARTICLE_INFO_TABLE_NAME'], self.article_info_items)
-
+        self.users_table = self.dynamodb.Table(os.environ['USERS_TABLE_NAME'])
+        self.users_items = [
+            {
+                'user_id': 'like_user_01'
+            },
+            {
+                'user_id': 'like_user_02'
+            }
+        ]
+        TestsUtil.create_table(self.dynamodb, os.environ['USERS_TABLE_NAME'], self.users_items)
         self.comment_liked_user_table = self.dynamodb.Table(os.environ['COMMENT_LIKED_USER_TABLE_NAME'])
         self.comment_items = [
             {
