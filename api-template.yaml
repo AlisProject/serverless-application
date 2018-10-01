@@ -27,6 +27,8 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   BetaUsersTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
+  SnsUsersTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
   NotificationTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
   UnreadNotificationManagerTableName:
@@ -61,7 +63,23 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   CognitoUserPoolArn:
     Type: 'AWS::SSM::Parameter::Value<String>'
+  CognitoUserPoolAppId:
+    Type: 'AWS::SSM::Parameter::Value<String>'
   SaltForArticleId:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  LineChannelId:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  LineChannelSecret:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  LineLoginCommonTempPassword:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  LineLoginCommonPhoneNumber:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  LineRedirectUri:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  LineLoginMark:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  LoginSalt:
     Type: 'AWS::SSM::Parameter::Value<String>'
 
 Globals:
@@ -91,6 +109,7 @@ Globals:
         TOPIC_TABLE_NAME: !Ref TopicTableName
         TAG_TABLE_NAME: !Ref TagTableName
         TIP_TABLE_NAME: !Ref TipTableName
+        SNS_USERS_TABLE_NAME: !Ref SnsUsersTableName
         DOMAIN: !Ref AlisAppDomain
         PRIVATE_CHAIN_AWS_ACCESS_KEY: !Ref PrivateChainAwsAccessKey
         PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY: !Ref PrivateChainAwsSecretAccessKey
@@ -145,6 +164,11 @@ Resources:
                 type: string
               created_at:
                 type: integer
+          AliasUserCreate:
+            type: object
+            properties:
+              alias_user_id:
+                type: string
           MeArticlesDraftsCreate:
             type: object
             properties:
@@ -207,6 +231,16 @@ Resources:
                 type: string
               tip_value:
                 type: integer
+          MeAliasCreate:
+            type: object
+            properties:
+              alias_user_id:
+                type: string
+          LoginLine:
+            type: object
+            properties:
+              user_id:
+                type: string
           Notification:
             type: object
             properties:
@@ -570,6 +604,71 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+          # for dev endpoint
+          /alias_user:
+            post:
+              description: 'alias_user_idを作成'
+              parametaers:
+              - name: 'alias_user_id'
+                in: 'body'
+                description: 'SNSログインで作成されたユーザーのID'
+                required: true
+                type: 'string'
+              responses:
+                '200':
+                  description: '作成されたAliasUserID'
+                  schema:
+                    type: object
+                    properties:
+                      alias_user_id:
+                        type: 'string'
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AliasUserCreate.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          # for dev endpoint
+          /sns_login_initiate:
+            post:
+              description: 'SNSログインユーザーを作成'
+              responses:
+                '200':
+                  description: 'test'
+                  schema:
+                    type: object
+                    properties:
+                      id_token:
+                        type: 'string'
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SnsLoginInitiate.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /login/line:
+            post:
+              description: 'LINEログインユーザーを作成'
+              responses:
+                '200':
+                  description: '認証用codeの受け渡し'
+                  schema:
+                    type: object
+                    properties:
+                      code:
+                        type: 'string'
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LoginLine.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
           /me/articles/drafts:
             get:
               description: '下書き記事一覧情報を取得'
@@ -901,7 +1000,6 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
-
           /me/articles/{article_id}/comments/likes:
             get:
               description: '指定された記事のコメントの中で、自分がいいねを実行したコメントのIDの一覧を取得する'
@@ -1345,6 +1443,34 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+          /me/alias:
+            post:
+              description: 'alias_user_idを作成'
+              parameters:
+              - name: 'alias_user_id'
+                in: 'body'
+                description: 'alias_user_id'
+                required: true
+                schema:
+                  $ref: '#/definitions/MeAliasCreate'
+              responses:
+                '200':
+                  description: '作成されたalias_user_id'
+                  schema:
+                    type: object
+                    properties:
+                      alias_user_id:
+                        type: 'string'
+              security:
+              - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '201'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeAliasCreate.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
           /topics:
             get:
               description: トピックの一覧を取得
@@ -1494,6 +1620,66 @@ Resources:
           Properties:
             Path: /me/articles/drafts
             Method: get
+            RestApiId: !Ref RestApi
+  AliasUserCreate:
+      Type: AWS::Serverless::Function
+      Properties:
+        Handler: handler.lambda_handler
+        Role: !GetAtt LambdaRole.Arn
+        CodeUri: ./deploy/alias_user_create.zip
+        Events:
+          Api:
+            Type: Api
+            Properties:
+              Path: /alias_user
+              Method: post
+              RestApiId: !Ref RestApi
+  # for dev coding
+  SnsLoginInitiate:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/sns_login_initiate.zip
+      Environment:
+        Variables:
+          LINE_CHANNEL_ID: !Ref LineChannelId
+          LINE_CHANNEL_SECRET: !Ref LineChannelSecret
+          LINE_LOGIN_COMMON_TEMP_PASSWORD: !Ref LineLoginCommonTempPassword
+          LINE_LOGIN_COMMON_PHONE_NUMBER: !Ref LineLoginCommonPhoneNumber
+          LOGIN_SALT: !Ref LoginSalt
+          COGNITO_USER_POOL_ID: !Ref CognitoUserPoolId
+          COGNITO_USER_POOL_APP_ID: !Ref CognitoUserPoolAppId
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /sns_login_initiate
+            Method: post
+            RestApiId: !Ref RestApi
+  LoginLine:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/login_line.zip
+      Environment:
+        Variables:
+          LINE_CHANNEL_ID: !Ref LineChannelId
+          LINE_CHANNEL_SECRET: !Ref LineChannelSecret
+          LINE_LOGIN_COMMON_TEMP_PASSWORD: !Ref LineLoginCommonTempPassword
+          LINE_LOGIN_COMMON_PHONE_NUMBER: !Ref LineLoginCommonPhoneNumber
+          LINE_REDIRECT_URI: !Ref LineRedirectUri
+          LINE_LOGIN_MARK: !Ref LineLoginMark
+          LOGIN_SALT: !Ref LoginSalt
+          COGNITO_USER_POOL_ID: !Ref CognitoUserPoolId
+          COGNITO_USER_POOL_APP_ID: !Ref CognitoUserPoolAppId
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /login/line
+            Method: post
             RestApiId: !Ref RestApi
   MeArticlesDraftsCreate:
       Type: AWS::Serverless::Function
@@ -1881,6 +2067,19 @@ Resources:
             Path: /me/unread_notification_managers
             Method: put
             RestApiId: !Ref RestApi
+  MeAliasCreate:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_alias_create.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/alias
+            Method: post
+            RestApiId: !Ref RestApi
   TopicsIndex:
     Type: AWS::Serverless::Function
     Properties:
@@ -1894,6 +2093,16 @@ Resources:
             Path: /topics
             Method: get
             RestApiId: !Ref RestApi
+  #  for dev coding
+  CognitoTriggerPreAuthentication:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/cognito_trigger_preauthentication.zip
+      Environment:
+        Variables:
+          LINE_LOGIN_MARK: !Ref LineLoginMark
   ElasticSearchSearchArticles:
     Type: AWS::Serverless::Function
     Properties:
@@ -1935,7 +2144,7 @@ Resources:
             RestApiId: !Ref RestApi
   ElasticSearchService:
     Type: "AWS::Elasticsearch::Domain"
-    Properties: 
+    Properties:
       AccessPolicies: !Join
         - ''
         - - '{ "Version": "2012-10-17", "Statement": [ { "Effect": "Allow", "Principal": { "AWS": "'

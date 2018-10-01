@@ -25,6 +25,8 @@ Resources:
           AttributeType: S
         - AttributeName: user_id
           AttributeType: S
+        - AttributeName: alias_user_id
+          AttributeType: S
         - AttributeName: status
           AttributeType: S
         - AttributeName: sort_key
@@ -52,6 +54,17 @@ Resources:
               KeyType: HASH
             - AttributeName: sort_key
               KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: !Ref MinDynamoReadCapacitty
+            WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
+        - IndexName: alias_user_id-sort_key-index
+          KeySchema:
+          - AttributeName: alias_user_id
+            KeyType: HASH
+          - AttributeName: sort_key
+            KeyType: RANGE
           Projection:
             ProjectionType: ALL
           ProvisionedThroughput:
@@ -345,6 +358,8 @@ Resources:
           AttributeType: S
         - AttributeName: sync_elasticsearch
           AttributeType: N
+        - AttributeName: alias_user_id
+          AttributeType: S
       KeySchema:
         - AttributeName: user_id
           KeyType: HASH
@@ -352,6 +367,15 @@ Resources:
         - IndexName: sync_elasticsearch-index
           KeySchema:
             - AttributeName: sync_elasticsearch
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: !Ref MinDynamoReadCapacitty
+            WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
+        - IndexName: alias_user_id-index
+          KeySchema:
+            - AttributeName: alias_user_id
               KeyType: HASH
           Projection:
             ProjectionType: ALL
@@ -372,6 +396,18 @@ Resources:
       KeySchema:
         - AttributeName: email
           KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: !Ref MinDynamoReadCapacitty
+        WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
+  SnsUsers:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+      - AttributeName: user_id
+        AttributeType: S
+      KeySchema:
+      - AttributeName: user_id
+        KeyType: HASH
       ProvisionedThroughput:
         ReadCapacityUnits: !Ref MinDynamoReadCapacitty
         WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
@@ -491,8 +527,6 @@ Resources:
         WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
   Topic:
     Type: AWS::DynamoDB::Table
-    DependsOn:
-    - ArticleContent
     Properties:
       AttributeDefinitions:
         - AttributeName: name
@@ -521,8 +555,6 @@ Resources:
         WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
   Tag:
     Type: AWS::DynamoDB::Table
-    DependsOn:
-    - ArticleContent
     Properties:
       AttributeDefinitions:
         - AttributeName: name
@@ -535,8 +567,6 @@ Resources:
         WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
   Tip:
     Type: AWS::DynamoDB::Table
-    DependsOn:
-    - ArticleContent
     Properties:
       AttributeDefinitions:
         - AttributeName: user_id

@@ -43,6 +43,7 @@ aws cloudformation deploy \
     ArticleScoreTableName=${SSM_PARAMS_PREFIX}ArticleScoreTableName \
     UsersTableName=${SSM_PARAMS_PREFIX}UsersTableName \
     BetaUsersTableName=${SSM_PARAMS_PREFIX}BetaUsersTableName \
+    SnsUsersTableName=${SSM_PARAMS_PREFIX}SnsUsersTableName \
     NotificationTableName=${SSM_PARAMS_PREFIX}NotificationTableName \
     UnreadNotificationManagerTableName=${SSM_PARAMS_PREFIX}UnreadNotificationManagerTableName \
     TopicTableName=${SSM_PARAMS_PREFIX}TopicTableName \
@@ -55,4 +56,12 @@ aws cloudformation deploy \
     ApiLambdaRole=${SSM_PARAMS_PREFIX}ApiLambdaRole \
     ElasticSearchEndpoint=${SSM_PARAMS_PREFIX}ElasticSearchEndpoint \
     CognitoUserPoolId=${SSM_PARAMS_PREFIX}CognitoUserPoolId \
+    CognitoUserPoolAppId=${SSM_PARAMS_PREFIX}CognitoUserPoolAppId \
+    LineChannelId=${SSM_PARAMS_PREFIX}LineChannelId \
+    LineChannelSecret=${SSM_PARAMS_PREFIX}LineChannelSecret \
+    LineLoginCommonTempPassword=${SSM_PARAMS_PREFIX}LineLoginCommonTempPassword \
+    LineLoginCommonPhoneNumber=${SSM_PARAMS_PREFIX}LineLoginCommonPhoneNumber \
+    LineRedirectUri=${SSM_PARAMS_PREFIX}LineRedirectUri \
+    LineLoginMark=${SSM_PARAMS_PREFIX}LineLoginMark \
+    LoginSalt=${SSM_PARAMS_PREFIX}LoginSalt \
   --capabilities CAPABILITY_IAM
