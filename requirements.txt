@@ -8,3 +8,5 @@ pillow
 aws-requests-auth
 requests_aws4auth
 elasticsearch
+pyjwt
+pycrypto
