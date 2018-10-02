@@ -55,12 +55,18 @@ class LoginTwitterIndex(LambdaBase):
                     provider=os.environ['THIRD_PARTY_LOGIN']
                 )
 
+                has_alias_user_id = UserUtil.has_alias_user_id(
+                    dynamodb=self.dynamodb,
+                    user_id=user_info['user_id'],
+                )
+
                 return ResponseBuilder.response(
                     status_code=200,
                     body={
-                        'accessToken': response['AuthenticationResult']['AccessToken'],
-                        'idToken': response['AuthenticationResult']['IdToken'],
-                        'refreshToken': response['AuthenticationResult']['RefreshToken'],
+                        'access_token': response['AuthenticationResult']['AccessToken'],
+                        'id_token': response['AuthenticationResult']['IdToken'],
+                        'refresh_token': response['AuthenticationResult']['RefreshToken'],
+                        'has_alias_user_id': has_alias_user_id
                     }
                 )
             except ClientError as e:

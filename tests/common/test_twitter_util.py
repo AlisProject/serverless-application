@@ -1,7 +1,7 @@
 import json
 from unittest import TestCase
 from twitter_util import TwitterUtil
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from exceptions import TwitterOauthError
 
 
@@ -11,7 +11,6 @@ class TestUserUtil(TestCase):
             consumer_key='fake_custom_twitter_key',
             consumer_secret='fake_custom_twitter_key'
         )
-        self.mock_lib = MagicMock()
 
     def test_get_user_info_ok(self):
         with patch('twitter_util.OAuth1Session') as oauth_mock:
@@ -38,12 +37,11 @@ class TestUserUtil(TestCase):
 
     def test_get_user_info_ok_return_fake_email(self):
         with patch('twitter_util.OAuth1Session') as oauth_mock:
-            instance = oauth_mock.return_value
-            instance.post.return_value = TwitterFakeResponse(
+            oauth_mock.return_value.post.return_value = TwitterFakeResponse(
                 status_code=200,
                 content='user_id=1234&oauth_token=fake_oauth_token&oauth_token_secret=fake_oauth_token_secret'.encode('utf-8')
             )
-            instance.get.return_value = TwitterFakeResponse(
+            oauth_mock.return_value.get.return_value = TwitterFakeResponse(
                 status_code=200,
                 text=json.dumps({
                     'user_id': '1234',
