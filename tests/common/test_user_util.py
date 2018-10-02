@@ -268,7 +268,7 @@ class TestUserUtil(TestCase):
 
         self.assertFalse(response)
 
-    def test_update_user_profile_ng(self):
+    def test_has_alias_user_id_ng(self):
         with self.assertRaises(ClientError):
             self.dynamodb.Table = MagicMock()
             self.dynamodb.Table.return_value.get_item.side_effect = ClientError(
