@@ -73,8 +73,6 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   LineLoginCommonTempPassword:
     Type: 'AWS::SSM::Parameter::Value<String>'
-  LineLoginCommonPhoneNumber:
-    Type: 'AWS::SSM::Parameter::Value<String>'
   LineRedirectUri:
     Type: 'AWS::SSM::Parameter::Value<String>'
   LineLoginMark:
@@ -236,11 +234,24 @@ Resources:
             properties:
               alias_user_id:
                 type: string
-          LoginLine:
+          LoginLineAuthorizeUrl:
             type: object
             properties:
-              user_id:
+              callback_url:
                 type: string
+          LoginLineAuthorizeRequest:
+            type: object
+            properties:
+              accessToken:
+                type: string
+              lastAuthUser:
+                type: string
+              idToken:
+                type: string
+              refreshToken:
+                type: string
+              hasAliasUserId:
+                type: boolean
           Notification:
             type: object
             properties:
@@ -650,7 +661,26 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
-          /login/line:
+          /login/line/authorize_url:
+            get:
+              description: 'LINEログイン用URL返却のAPI'
+              responses:
+                '200':
+                  description: 'LINEログイン用URL'
+                  schema:
+                    type: object
+                    properties:
+                      callback_url:
+                        type: 'string'
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LoginLineAuthorizeUrl.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /login/line/authorize_request:
             post:
               description: 'LINEログインユーザーを作成'
               responses:
@@ -665,7 +695,7 @@ Resources:
                 responses:
                   default:
                     statusCode: "200"
-                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LoginLine.Arn}/invocations
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LoginLineAuthorizeRequest.Arn}/invocations
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
@@ -1646,7 +1676,6 @@ Resources:
           LINE_CHANNEL_ID: !Ref LineChannelId
           LINE_CHANNEL_SECRET: !Ref LineChannelSecret
           LINE_LOGIN_COMMON_TEMP_PASSWORD: !Ref LineLoginCommonTempPassword
-          LINE_LOGIN_COMMON_PHONE_NUMBER: !Ref LineLoginCommonPhoneNumber
           LOGIN_SALT: !Ref LoginSalt
           COGNITO_USER_POOL_ID: !Ref CognitoUserPoolId
           COGNITO_USER_POOL_APP_ID: !Ref CognitoUserPoolAppId
@@ -1657,18 +1686,34 @@ Resources:
             Path: /sns_login_initiate
             Method: post
             RestApiId: !Ref RestApi
-  LoginLine:
+  LoginLineAuthorizeUrl:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
       Role: !GetAtt LambdaRole.Arn
-      CodeUri: ./deploy/login_line.zip
+      CodeUri: ./deploy/login_line_authorize_url.zip
+      Environment:
+        Variables:
+          LINE_REDIRECT_URI: !Ref LineRedirectUri
+          LINE_CHANNEL_ID: !Ref LineChannelId
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /login/line/authorize_url
+            Method: get
+            RestApiId: !Ref RestApi
+  LoginLineAuthorizeRequest:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/login_line_authorize_request.zip
       Environment:
         Variables:
           LINE_CHANNEL_ID: !Ref LineChannelId
           LINE_CHANNEL_SECRET: !Ref LineChannelSecret
           LINE_LOGIN_COMMON_TEMP_PASSWORD: !Ref LineLoginCommonTempPassword
-          LINE_LOGIN_COMMON_PHONE_NUMBER: !Ref LineLoginCommonPhoneNumber
           LINE_REDIRECT_URI: !Ref LineRedirectUri
           LINE_LOGIN_MARK: !Ref LineLoginMark
           LOGIN_SALT: !Ref LoginSalt
@@ -1678,7 +1723,7 @@ Resources:
         Api:
           Type: Api
           Properties:
-            Path: /login/line
+            Path: /login/line/authorize_request
             Method: post
             RestApiId: !Ref RestApi
   MeArticlesDraftsCreate:

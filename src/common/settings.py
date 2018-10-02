@@ -196,8 +196,10 @@ TOPIC_INDEX_HASH_KEY = 'topic'
 TAG_DENIED_SYMBOL_PATTERN = '([!-,./:-@[-`{-~]|--| {2})'
 TAG_ALLOWED_SYMBOLS = ['-', ' ']
 
+LINE_AUTHORIZE_URL = 'https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id='
 LINE_TOKEN_END_POINT = 'https://api.line.me/oauth2/v2.1/token'
 LINE_ISSUER = 'https://access.line.me'
 LINE_USERNAME_PREFIX = 'LINE_'
+LINE_REQUEST_SCOPE = '&scope=openid%20profile%20email'
 EMAIL_SUFFIX = '@example.com'
 

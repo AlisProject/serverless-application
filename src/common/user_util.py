@@ -60,7 +60,7 @@ class UserUtil:
             raise e
 
     @staticmethod
-    def create_sns_user(cognito, user_id, email, phone_number, backed_temp_password, backed_password, provider):
+    def create_sns_user(cognito, user_id, email, backed_temp_password, backed_password, provider):
         try:
             cognito.admin_create_user(
                 UserPoolId=os.environ['COGNITO_USER_POOL_ID'],
@@ -69,10 +69,6 @@ class UserUtil:
                     {
                         'Name': 'email',
                         'Value': email
-                    },
-                    {
-                        'Name': 'phone_number',
-                        'Value': phone_number
                     },
                     {
                         'Name': 'email_verified',
@@ -107,6 +103,22 @@ class UserUtil:
             )
         except ClientError as e:
             raise e
+
+    @staticmethod
+    def force_non_verified_phone(cognito, user_id):
+        try:
+            cognito.admin_update_user_attributes(
+                UserPoolId=os.environ['COGNITO_USER_POOL_ID'],
+                Username=user_id,
+                UserAttributes=[
+                    {
+                        'Name': 'phone_number',
+                        'Value': ''
+                    },
+                ]
+            )
+        except ClientError as e:
+           raise e
 
     @staticmethod
     def update_user_profile(dynamodb, user_id, user_display_name, icon_image):

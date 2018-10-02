@@ -60,7 +60,6 @@ aws cloudformation deploy \
     LineChannelId=${SSM_PARAMS_PREFIX}LineChannelId \
     LineChannelSecret=${SSM_PARAMS_PREFIX}LineChannelSecret \
     LineLoginCommonTempPassword=${SSM_PARAMS_PREFIX}LineLoginCommonTempPassword \
-    LineLoginCommonPhoneNumber=${SSM_PARAMS_PREFIX}LineLoginCommonPhoneNumber \
     LineRedirectUri=${SSM_PARAMS_PREFIX}LineRedirectUri \
     LineLoginMark=${SSM_PARAMS_PREFIX}LineLoginMark \
     LoginSalt=${SSM_PARAMS_PREFIX}LoginSalt \

@@ -14,7 +14,7 @@ from user_util import UserUtil
 from Crypto.Cipher import AES
 
 
-class LoginLine(LambdaBase):
+class LoginLineAuthorizeRequest(LambdaBase):
     def get_schema(self):
         pass
 
@@ -88,11 +88,16 @@ class LoginLine(LambdaBase):
                     cognito=self.cognito,
                     user_id=user_id,
                     email=email,
-                    phone_number=os.environ['LINE_LOGIN_COMMON_PHONE_NUMBER'],
                     backed_temp_password=backed_temp_password,
                     backed_password=backed_password,
                     provider=os.environ['LINE_LOGIN_MARK']
                 )
+
+                UserUtil.force_non_verified_phone(
+                    cognito=self.cognito,
+                    user_id=user_id
+                )
+
                 self.__wallet_initialization(user_id)
 
                 UserUtil.update_user_profile(
@@ -102,16 +107,6 @@ class LoginLine(LambdaBase):
                     icon_image=decoded_id_token['picture']
                 )
 
-                self.cognito.admin_update_user_attributes(
-                    UserPoolId=os.environ['COGNITO_USER_POOL_ID'],
-                    Username=user_id,
-                    UserAttributes=[
-                        {
-                            'Name': 'phone_number_verified',
-                            'Value': 'true'
-                        }
-                    ]
-                )
                 password_hash = self.__encrypt_password(backed_password)
 
                 UserUtil.add_sns_user_info(
