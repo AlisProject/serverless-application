@@ -40,9 +40,10 @@ class TwitterUtil:
             raise TwitterOauthError(response.text)
 
         user_info = json.loads(response.text)
-        email = user_info.get(
-            'email', cognito_user_id + '@' + settings.FAKE_USER_EMAIL_DOMAIN)
         display_name = user_info.get('screen_name')
+        email = user_info.get('email')
+        if email is None or email == '':
+            email = cognito_user_id + '@' + settings.FAKE_USER_EMAIL_DOMAIN
 
         return {
             'user_id': cognito_user_id,

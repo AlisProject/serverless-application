@@ -56,6 +56,26 @@ class TestUserUtil(TestCase):
             self.assertEqual(response['email'], 'Twitter-1234@example.com')
             self.assertEqual(response['display_name'], 'screen_name')
 
+            oauth_mock.return_value.post.return_value = TwitterFakeResponse(
+                status_code=200,
+                content='user_id=1234&oauth_token=fake_oauth_token&oauth_token_secret=fake_oauth_token_secret'.encode('utf-8')
+            )
+            oauth_mock.return_value.get.return_value = TwitterFakeResponse(
+                status_code=200,
+                text=json.dumps({
+                    'user_id': '1234',
+                    'email': '',
+                    'screen_name': 'screen_name'
+                })
+            )
+            response = self.twitter.get_user_info(
+                oauth_token='fake_oauth_token',
+                oauth_verifier='fake_oauth_verifier'
+            )
+            self.assertEqual(response['user_id'], 'Twitter-1234')
+            self.assertEqual(response['email'], 'Twitter-1234@example.com')
+            self.assertEqual(response['display_name'], 'screen_name')
+
     def test_get_user_info_ng_with_twitterexception(self):
         with self.assertRaises(TwitterOauthError):
             with patch('twitter_util.OAuth1Session') as oauth_mock:
