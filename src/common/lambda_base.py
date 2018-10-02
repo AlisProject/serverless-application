@@ -37,9 +37,6 @@ class LambdaBase(metaclass=ABCMeta):
         logger.setLevel(logging.INFO)
 
         try:
-            # user validation
-            UserUtil.verified_phone_and_email(self.event)
-
             # init params
             self.params = self.__get_params()
             self.headers = self.__get_headers()

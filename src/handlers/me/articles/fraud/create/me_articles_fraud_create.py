@@ -7,6 +7,7 @@ from db_util import DBUtil
 from botocore.exceptions import ClientError
 from lambda_base import LambdaBase
 from jsonschema import validate, ValidationError
+from user_util import UserUtil
 
 
 class MeArticlesFraudCreate(LambdaBase):
@@ -20,6 +21,8 @@ class MeArticlesFraudCreate(LambdaBase):
         }
 
     def validate_params(self):
+        UserUtil.verified_phone_and_email(self.event)
+
         # single
         if self.event.get('pathParameters') is None:
             raise ValidationError('pathParameters is required')

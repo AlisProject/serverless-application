@@ -7,12 +7,24 @@ from not_verified_user_error import NotVerifiedUserError
 class UserUtil:
 
     @staticmethod
-    def verified_phone_number(event):
-        phone_number_verified = event['requestContext']['authorizer']['claims']['phone_number_verified']
-        if phone_number_verified == 'false':
-            raise NotVerifiedUserError('Not Verified')
-        else:
+    def verified_phone_and_email(event):
+        # get phone_number_verified
+        try:
+            phone_number_verified = event['requestContext']['authorizer']['claims']['phone_number_verified']
+        except (NameError, KeyError):
+            phone_number_verified = False
+
+        # get email_verified
+        try:
+            email_verified = event['requestContext']['authorizer']['claims']['email_verified']
+        except (NameError, KeyError):
+            email_verified = False
+
+        # user who access to some endpoint must verified to phone_number and email
+        if (phone_number_verified == 'true') and (email_verified == 'true'):
             return True
+
+        raise NotVerifiedUserError('Not Verified')
 
     @staticmethod
     def get_cognito_user_info(cognito, user_id):

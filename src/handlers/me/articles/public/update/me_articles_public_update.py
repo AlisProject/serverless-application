@@ -6,7 +6,7 @@ from lambda_base import LambdaBase
 from jsonschema import validate, ValidationError, FormatChecker
 from text_sanitizer import TextSanitizer
 from db_util import DBUtil
-
+from user_util import UserUtil
 
 class MeArticlesPublicUpdate(LambdaBase):
     def get_schema(self):
@@ -22,6 +22,7 @@ class MeArticlesPublicUpdate(LambdaBase):
         }
 
     def validate_params(self):
+        UserUtil.verified_phone_and_email(self.event)
         if not self.event.get('pathParameters'):
             raise ValidationError('pathParameters is required')
 

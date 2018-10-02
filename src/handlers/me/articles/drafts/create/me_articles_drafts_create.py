@@ -12,6 +12,7 @@ from hashids import Hashids
 from text_sanitizer import TextSanitizer
 from time_util import TimeUtil
 from db_util import DBUtil
+from user_util import UserUtil
 
 
 class MeArticlesDraftsCreate(LambdaBase):
@@ -27,6 +28,7 @@ class MeArticlesDraftsCreate(LambdaBase):
         }
 
     def validate_params(self):
+        UserUtil.verified_phone_and_email(self.event)
         if self.event.get('body') is None:
             raise ValidationError('Request parameter is required')
 
