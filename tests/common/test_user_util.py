@@ -242,15 +242,40 @@ class TestUserUtil(TestCase):
 
         self.assertEqual(response, None)
 
-    def test_add_sns_user_info_ng(self):
+    def test_has_alias_user_id_ok_with_return_true(self):
+        self.dynamodb.Table = MagicMock()
+        self.dynamodb.Table.return_value.get_item.return_value = {
+            'Item': {
+                'alias_user_id': 'xxx'
+            }
+        }
+        response = UserUtil.has_alias_user_id(
+            self.dynamodb,
+            'user_id',
+        )
+
+        self.assertTrue(response)
+
+    def test_has_alias_user_id_ok_with_return_false(self):
+        self.dynamodb.Table = MagicMock()
+        self.dynamodb.Table.return_value.get_item.return_value = {
+            'Item': {}
+        }
+        response = UserUtil.has_alias_user_id(
+            self.dynamodb,
+            'user_id',
+        )
+
+        self.assertFalse(response)
+
+    def test_update_user_profile_ng(self):
         with self.assertRaises(ClientError):
             self.dynamodb.Table = MagicMock()
-            self.dynamodb.Table.return_value.put_item.side_effect = ClientError(
+            self.dynamodb.Table.return_value.get_item.side_effect = ClientError(
                 {'Error': {'Code': 'xxxx'}},
                 'operation_name'
             )
-            UserUtil.add_sns_user_info(
+            UserUtil.has_alias_user_id(
                 self.dynamodb,
-                'user_id',
-                'password'
+                'user_id'
             )

@@ -309,6 +309,8 @@ Resources:
                         type: string
                       id_token:
                         type: string
+                      has_alias_user_id:
+                        type: string
               x-amazon-apigateway-integration:
                 responses:
                   default:

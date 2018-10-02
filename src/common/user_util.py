@@ -165,3 +165,19 @@ class UserUtil:
             users.put_item(Item=user, ConditionExpression='attribute_not_exists(user_id)')
         except ClientError as e:
             raise e
+
+    @staticmethod
+    def has_alias_user_id(dynamodb, user_id):
+        try:
+            users_table = dynamodb.Table(os.environ['USERS_TABLE_NAME'])
+            user = users_table.get_item(
+                Key={
+                    'user_id': user_id
+                }
+            )
+
+            if ('Item' in user) and ('alias_user_id' in user['Item']):
+                return True
+            return False
+        except ClientError as e:
+            raise e
