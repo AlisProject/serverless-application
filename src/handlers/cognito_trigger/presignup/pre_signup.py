@@ -21,8 +21,10 @@ class PreSignUp(LambdaBase):
         if params['userName'] in settings.ng_user_name:
             raise ValidationError('This username is not allowed')
 
-        if UserUtil.check_try_to_register_as_twitter_user(params['userName']):
-            raise ValidationError('This username is not allowed')
+        if params['request']['validationData'] is None or\
+                params['request']['validationData'].get('THIRD_PARTY_LOGIN') != 'twitter':
+            if UserUtil.check_try_to_register_as_twitter_user(params['userName']):
+                raise ValidationError('This username is not allowed')
 
         validate(params, self.get_schema())
         if params['triggerSource'] == 'PreSignUp_SignUp':

@@ -103,6 +103,12 @@ class UserUtil:
                         'Value': email
                     },
                 ],
+                ValidationData=[
+                    {
+                        'Name': 'THIRD_PARTY_LOGIN',
+                        'Value': provider
+                    },
+                ],
                 TemporaryPassword=backed_temp_password,
                 MessageAction='SUPPRESS'
             )

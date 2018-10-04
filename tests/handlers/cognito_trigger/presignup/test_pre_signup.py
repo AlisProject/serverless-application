@@ -53,7 +53,10 @@ class TestPostConfirmation(TestCase):
 
     def test_validate_ng_too_long(self):
         event = {
-                'userName': 'y2hogheogehgeoihgeoigewgheoighweoighwe'
+                'userName': 'y2hogheogehgeoihgeoigewgheoighweoighwe',
+                'request': {
+                    'validationData': None
+                }
         }
         presignup = PreSignUp(event=event, context="", dynamodb=dynamodb)
         response = presignup.main()
@@ -61,22 +64,55 @@ class TestPostConfirmation(TestCase):
 
     def test_validate_ng_name(self):
         event = {
-                'userName': 'admin'
+                'userName': 'admin',
+                'request': {
+                    'validationData': None
+                }
         }
         presignup = PreSignUp(event=event, context="", dynamodb=dynamodb)
         response = presignup.main()
         self.assertEqual(response['statusCode'], 400)
 
-    def test_validate_ng_twitter(self):
+    def test_twitter_validate_ng(self):
         event = {
-                'userName': 'Twitter-xxxxx'
+                'userName': 'Twitter-xxxxx',
+                'request': {
+                    'validationData': None
+                }
         }
         presignup = PreSignUp(event=event, context="", dynamodb=dynamodb)
         response = presignup.main()
         self.assertEqual(response['statusCode'], 400)
 
         event = {
-                'userName': 'twitter-xxxxx'
+                'userName': 'twitter-xxxxx',
+                'request': {
+                    'validationData': None
+                }
+        }
+        presignup = PreSignUp(event=event, context="", dynamodb=dynamodb)
+        response = presignup.main()
+        self.assertEqual(response['statusCode'], 400)
+
+        event = {
+                'userName': 'twitter-xxxxx',
+                'request': {
+                    'validationData': {
+                        'THIRD_PARTY_LOGIN': 'line'
+                    }
+                }
+        }
+        presignup = PreSignUp(event=event, context="", dynamodb=dynamodb)
+        response = presignup.main()
+        self.assertEqual(response['statusCode'], 400)
+
+        event = {
+                'userName': 'twitter-xxxxx',
+                'request': {
+                    'validationData': {
+                        'some_value': 'line'
+                    }
+                }
         }
         presignup = PreSignUp(event=event, context="", dynamodb=dynamodb)
         response = presignup.main()
@@ -84,7 +120,10 @@ class TestPostConfirmation(TestCase):
 
     def test_validate_ng_char(self):
         event = {
-                'userName': 'yamasita!'
+                'userName': 'yamasita!',
+                'request': {
+                    'validationData': None
+                }
         }
         presignup = PreSignUp(event=event, context="", dynamodb=dynamodb)
         response = presignup.main()
@@ -92,7 +131,10 @@ class TestPostConfirmation(TestCase):
 
     def test_validate_ng_head_hyphen(self):
         event = {
-                'userName': '-yamasita'
+                'userName': '-yamasita',
+                'request': {
+                    'validationData': None
+                }
         }
         presignup = PreSignUp(event=event, context="", dynamodb=dynamodb)
         response = presignup.main()
@@ -100,7 +142,10 @@ class TestPostConfirmation(TestCase):
 
     def test_validate_ng_end_hyphen(self):
         event = {
-                'userName': 'yamasita-'
+                'userName': 'yamasita-',
+                'request': {
+                    'validationData': None
+                }
         }
         presignup = PreSignUp(event=event, context="", dynamodb=dynamodb)
         response = presignup.main()
@@ -108,7 +153,10 @@ class TestPostConfirmation(TestCase):
 
     def test_validate_ng_double_hyphen(self):
         event = {
-                'userName': 'ya--masita'
+                'userName': 'ya--masita',
+                'request': {
+                    'validationData': None
+                }
         }
         presignup = PreSignUp(event=event, context="", dynamodb=dynamodb)
         response = presignup.main()
@@ -118,7 +166,10 @@ class TestPostConfirmation(TestCase):
         os.environ['BETA_MODE_FLAG'] = "0"
         event = {
                 'userName': 'yamasita',
-                'triggerSource': ''
+                'triggerSource': '',
+                'request': {
+                    'validationData': None
+                }
         }
         presignup = PreSignUp(event=event, context="", dynamodb=dynamodb)
         response = presignup.main()
@@ -132,9 +183,10 @@ class TestPostConfirmation(TestCase):
                     'userAttributes': {
                         'phone_number': '',
                         'email': 'test@example.com'
-                    }
+                    },
+                    'validationData': None
                 },
-                'triggerSource': ''
+                'triggerSource': '',
         }
         presignup = PreSignUp(event=event, context="", dynamodb=dynamodb)
         response = presignup.main()
@@ -148,7 +200,8 @@ class TestPostConfirmation(TestCase):
                     'userAttributes': {
                         'phone_number': '',
                         'email': 'already@example.com'
-                    }
+                    },
+                    'validationData': None
                 }
         }
         presignup = PreSignUp(event=event, context="", dynamodb=dynamodb)
@@ -163,7 +216,8 @@ class TestPostConfirmation(TestCase):
                     'userAttributes': {
                         'phone_number': '',
                         'email': 'hoge@example.com'
-                    }
+                    },
+                    'validationData': None
                 }
         }
         presignup = PreSignUp(event=event, context="", dynamodb=dynamodb)
