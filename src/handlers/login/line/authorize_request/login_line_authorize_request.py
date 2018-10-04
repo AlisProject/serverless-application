@@ -65,12 +65,12 @@ class LoginLineAuthorizeRequest(LambdaBase):
                 return {
                     'statusCode': 200,
                     'body': json.dumps({
-                        'accessToken': response['AuthenticationResult']['AccessToken'],
-                        'lastAuthUser': user_id,
-                        'idToken': response['AuthenticationResult']['IdToken'],
-                        'refreshToken': response['AuthenticationResult']['RefreshToken'],
+                        'access_token': response['AuthenticationResult']['AccessToken'],
+                        'last_auth_user': user_id,
+                        'id_token': response['AuthenticationResult']['IdToken'],
+                        'refresh_token': response['AuthenticationResult']['RefreshToken'],
                         'status': 'login',
-                        'hasAliasUserId': has_alias_user_id
+                        'has_alias_user_id': has_alias_user_id
                     })
                 }
 
@@ -118,12 +118,12 @@ class LoginLineAuthorizeRequest(LambdaBase):
                 return {
                     'statusCode': 200,
                     'body': json.dumps({
-                        'accessToken': response['AuthenticationResult']['AccessToken'],
-                        'lastAuthUser': user_id,
-                        'idToken': response['AuthenticationResult']['IdToken'],
-                        'refreshToken': response['AuthenticationResult']['RefreshToken'],
+                        'access_token': response['AuthenticationResult']['AccessToken'],
+                        'last_auth_user': user_id,
+                        'id_token': response['AuthenticationResult']['IdToken'],
+                        'refresh_token': response['AuthenticationResult']['RefreshToken'],
                         'status': 'sign_up',
-                        'hasAliasUserId': has_alias_user_id
+                        'has_alias_user_id': has_alias_user_id
                     })
                 }
             except ClientError as e:
@@ -165,8 +165,8 @@ class LoginLineAuthorizeRequest(LambdaBase):
                                aws_host=os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'],
                                aws_region='ap-northeast-1',
                                aws_service='execute-api')
-        response = requests.post('https://' + os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'] +
-                                 '/production/accounts/new', auth=auth)
+        response = requests.post(settings.URL_PREFIX + os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'] +
+                                 settings.ETH_ACCOUNT_CREATE_ENDPOINT_SUFFIX, auth=auth)
         return json.loads(response.text)['result']
 
     @staticmethod
