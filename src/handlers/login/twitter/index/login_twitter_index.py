@@ -66,7 +66,8 @@ class LoginTwitterIndex(LambdaBase):
                         'access_token': response['AuthenticationResult']['AccessToken'],
                         'id_token': response['AuthenticationResult']['IdToken'],
                         'refresh_token': response['AuthenticationResult']['RefreshToken'],
-                        'has_alias_user_id': has_alias_user_id
+                        'has_alias_user_id': has_alias_user_id,
+                        'status': 'login'
                     }
                 )
             except ClientError as e:
@@ -114,7 +115,8 @@ class LoginTwitterIndex(LambdaBase):
                     'access_token': response['AuthenticationResult']['AccessToken'],
                     'id_token': response['AuthenticationResult']['IdToken'],
                     'refresh_token': response['AuthenticationResult']['RefreshToken'],
-                    'has_alias_user_id': has_alias_user_id
+                    'has_alias_user_id': has_alias_user_id,
+                    'status': 'sign_up'
                 }
             )
         except ClientError as e:
