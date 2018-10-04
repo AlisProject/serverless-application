@@ -14,6 +14,8 @@ class TestLoginTwitterIndex(TestCase):
         os.environ['TWITTER_CONSUMER_SECRET'] = 'fake_twitter_consumer_secret'
         os.environ['TWITTER_LOGIN_COMMON_TEMP_PASSWORD'] = 'xxxxxxxxxx'
         os.environ['THIRD_PARTY_LOGIN'] = 'xxxxx'
+        os.environ['COGNITO_USER_POOL_ID'] = 'user_pool_id'
+        os.environ['COGNITO_USER_POOL_APP_ID'] = 'user_pool_id'
 
     def assert_bad_request(self, params):
         response = LoginTwitterIndex(params, {}).main()
@@ -79,7 +81,8 @@ class TestLoginTwitterIndex(TestCase):
                     'access_token': 'aaaaa',
                     'id_token': 'bbbbb',
                     'refresh_token': 'ccccc',
-                    'has_alias_user_id': True
+                    'has_alias_user_id': True,
+                    'status': 'sign_up'
                 }
             )
 
@@ -115,7 +118,8 @@ class TestLoginTwitterIndex(TestCase):
                     'access_token': 'aaaaa',
                     'id_token': 'bbbbb',
                     'refresh_token': 'ccccc',
-                    'has_alias_user_id': True
+                    'has_alias_user_id': True,
+                    'status': 'login'
                 }
             )
 

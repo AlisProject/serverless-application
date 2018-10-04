@@ -46,10 +46,15 @@ class LoginTwitterIndex(LambdaBase):
                 body={'message': 'Internal server error'}
             )
 
-        if UserUtil.exists_user(self.cognito, user_info['user_id']):
+        if UserUtil.exists_user(
+                cognito=self.cognito,
+                user_pool_id=os.environ['COGNITO_USER_POOL_ID'],
+                user_id=user_info['user_id']):
             try:
                 response = UserUtil.sns_login(
                     cognito=self.cognito,
+                    user_pool_id=os.environ['COGNITO_USER_POOL_ID'],
+                    user_pool_app_id=os.environ['COGNITO_USER_POOL_APP_ID'],
                     user_id=user_info['user_id'],
                     password=settings.TEXT_PASSWORD,
                     provider=os.environ['THIRD_PARTY_LOGIN']
@@ -80,6 +85,8 @@ class LoginTwitterIndex(LambdaBase):
         try:
             response = UserUtil.create_sns_user(
                 cognito=self.cognito,
+                user_pool_id=os.environ['COGNITO_USER_POOL_ID'],
+                user_pool_app_id=os.environ['COGNITO_USER_POOL_APP_ID'],
                 user_id=user_info['user_id'],
                 email=user_info['email'],
                 backed_temp_password=os.environ['TWITTER_LOGIN_COMMON_TEMP_PASSWORD'],
@@ -89,6 +96,7 @@ class LoginTwitterIndex(LambdaBase):
 
             UserUtil.force_non_verified_phone(
                 cognito=self.cognito,
+                user_pool_id=os.environ['COGNITO_USER_POOL_ID'],
                 user_id=user_info['user_id']
             )
 

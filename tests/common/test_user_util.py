@@ -12,10 +12,6 @@ class TestUserUtil(TestCase):
     def setUp(self):
         self.cognito = boto3.client('cognito-idp')
         self.dynamodb = boto3.resource('dynamodb')
-        os.environ['COGNITO_USER_POOL_ID'] = 'pool_id'
-        os.environ['COGNITO_USER_POOL_APP_ID'] = 'app_id'
-        os.environ['USERS_TABLE_NAME'] = 'Users'
-        os.environ['SNS_USERS_TABLE_NAME'] = 'SnsUsers'
 
     def test_verified_phone_and_email_ok(self):
         event = {
@@ -119,14 +115,14 @@ class TestUserUtil(TestCase):
 
     def test_exists_user_ok(self):
         self.cognito.admin_get_user = MagicMock(return_value='')
-        self.assertTrue(UserUtil.exists_user(self.cognito, 'user_id'))
+        self.assertTrue(UserUtil.exists_user(self.cognito, 'user_pool_id', 'user_id'))
 
     def test_exists_user_ng(self):
         self.cognito.admin_get_user = MagicMock(side_effect=ClientError(
             {'Error': {'Code': 'UserNotFoundException'}},
             'operation_name'
         ))
-        self.assertFalse(UserUtil.exists_user(self.cognito, 'user_id'))
+        self.assertFalse(UserUtil.exists_user(self.cognito, 'user_pool_id', 'user_id'))
 
     def test_create_sns_user_ok(self):
         self.cognito.admin_create_user = MagicMock(return_value=True)
@@ -138,6 +134,8 @@ class TestUserUtil(TestCase):
         )
         response = UserUtil.create_sns_user(
             self.cognito,
+            'user_pool_id',
+            'user_pool_app_id',
             'user_id',
             'mail',
             'pass',
@@ -155,6 +153,8 @@ class TestUserUtil(TestCase):
 
             UserUtil.create_sns_user(
                 self.cognito,
+                'user_pool_id',
+                'user_pool_app_id',
                 'user_id',
                 'mail',
                 'pass',
@@ -168,6 +168,8 @@ class TestUserUtil(TestCase):
         })
         response = UserUtil.sns_login(
             self.cognito,
+            'user_pool_id',
+            'user_pool_app_id',
             'user_id',
             'password',
             'twitter')
@@ -182,6 +184,8 @@ class TestUserUtil(TestCase):
             ))
             UserUtil.sns_login(
                 self.cognito,
+                'user_pool_id',
+                'user_pool_app_id',
                 'user_id',
                 'password',
                 'twitter'
@@ -191,6 +195,7 @@ class TestUserUtil(TestCase):
         self.cognito.admin_update_user_attributes = MagicMock(return_value=True)
         response = UserUtil.force_non_verified_phone(
             self.cognito,
+            'user_pool_id',
             'user_id'
         )
 
@@ -204,6 +209,7 @@ class TestUserUtil(TestCase):
             ))
             UserUtil.force_non_verified_phone(
                 self.cognito,
+                'user_pool_id',
                 'user_id'
             )
 
