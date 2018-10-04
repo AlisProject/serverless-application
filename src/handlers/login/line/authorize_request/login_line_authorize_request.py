@@ -83,7 +83,7 @@ class LoginLineAuthorizeRequest(LambdaBase):
         else:
             try:
                 backed_temp_password = os.environ['LINE_LOGIN_COMMON_TEMP_PASSWORD']
-                backed_password = secrets.token_hex(8)
+                backed_password = secrets.token_hex(settings.TOKEN_SEED_BYTES)
                 response = UserUtil.create_sns_user(
                     cognito=self.cognito,
                     user_id=user_id,
@@ -141,9 +141,8 @@ class LoginLineAuthorizeRequest(LambdaBase):
             }
         )
         if ('Item' in user) and ('alias_user_id' in user['Item']):
-            return 'true'
-        else:
-            return 'false'
+            return True
+        return False
 
     def __wallet_initialization(self, user_id):
         address = self.__create_new_account()
