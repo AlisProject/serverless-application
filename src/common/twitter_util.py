@@ -1,3 +1,4 @@
+import re
 import json
 import settings
 
@@ -40,16 +41,29 @@ class TwitterUtil:
             raise TwitterOauthError(response.text)
 
         user_info = json.loads(response.text)
-        display_name = user_info.get('screen_name')
+        return {
+            'user_id': cognito_user_id,
+            'email': self.__get_email(user_info, cognito_user_id),
+            'display_name': self.__get_display_name(user_info),
+            'icon_image_url': self.__get_icon_image_url(user_info)
+        }
+
+    def __get_icon_image_url(self, user_info):
+        icon_image_url = user_info.get('profile_image_url_https')
+        if re.search(r'/default_profile_images/', icon_image_url):
+            return None
+
+        return icon_image_url.replace('_normal', '')
+
+    def __get_display_name(self, user_info):
+        return user_info.get('screen_name')
+
+    def __get_email(self, user_info, cognito_user_id):
         email = user_info.get('email')
         if email is None or email == '':
             email = cognito_user_id + '@' + settings.FAKE_USER_EMAIL_DOMAIN
 
-        return {
-            'user_id': cognito_user_id,
-            'email': email,
-            'display_name': display_name
-        }
+        return email
 
     def generate_auth_url(self, callback_url):
         twitter = OAuth1Session(

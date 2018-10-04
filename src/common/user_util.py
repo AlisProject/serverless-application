@@ -144,14 +144,21 @@ class UserUtil:
             raise e
 
     @staticmethod
-    def update_user_profile(dynamodb, user_id, user_display_name):
+    def add_user_profile(
+            dynamodb, user_id, user_display_name=None, icon_image_url=None):
         try:
             users = dynamodb.Table(os.environ['USERS_TABLE_NAME'])
             user = {
                 'user_id': user_id,
-                'user_display_name': user_display_name,
                 'sync_elasticsearch': 1
             }
+
+            if user_display_name is not None:
+                user['user_display_name'] = user_display_name
+
+            if icon_image_url is not None:
+                user['icon_image_url'] = icon_image_url
+
             users.put_item(Item=user, ConditionExpression='attribute_not_exists(user_id)')
         except ClientError as e:
             raise e

@@ -213,28 +213,30 @@ class TestUserUtil(TestCase):
                 'user_id'
             )
 
-    def test_update_user_profile_ok(self):
+    def test_add_user_profile_ok(self):
         self.dynamodb.Table = MagicMock()
         self.dynamodb.Table.return_value.put_item.return_value = True
-        response = UserUtil.update_user_profile(
+        response = UserUtil.add_user_profile(
             self.dynamodb,
             'user_id',
-            'display_name'
+            'display_name',
+            'icon_image_url'
         )
 
         self.assertEqual(response, None)
 
-    def test_update_user_profile_ng(self):
+    def test_add_user_profile_ng(self):
         with self.assertRaises(ClientError):
             self.dynamodb.Table = MagicMock()
             self.dynamodb.Table.return_value.put_item.side_effect = ClientError(
                 {'Error': {'Code': 'xxxx'}},
                 'operation_name'
             )
-            UserUtil.update_user_profile(
+            UserUtil.add_user_profile(
                 self.dynamodb,
                 'user_id',
-                'display_name'
+                'display_name',
+                'icon_image_url'
             )
 
     def test_add_sns_user_info_ok(self):

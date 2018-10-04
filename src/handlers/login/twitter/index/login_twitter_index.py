@@ -100,10 +100,11 @@ class LoginTwitterIndex(LambdaBase):
                 user_id=user_info['user_id']
             )
 
-            UserUtil.update_user_profile(
+            UserUtil.add_user_profile(
                 dynamodb=self.dynamodb,
                 user_id=user_info['user_id'],
-                user_display_name=user_info['display_name']
+                user_display_name=user_info['display_name'],
+                icon_image_url=user_info['icon_image_url']
             )
 
             UserUtil.add_sns_user_info(

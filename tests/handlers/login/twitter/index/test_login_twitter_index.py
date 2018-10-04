@@ -52,7 +52,8 @@ class TestLoginTwitterIndex(TestCase):
             twitter_mock.return_value.get_user_info.return_value = {
                 'user_id': 'Twitter-1234',
                 'email': 'Twitter-1234@example.com',
-                'display_name': 'my_name'
+                'display_name': 'my_name',
+                'icon_image_url': 'http://example.com/image'
             }
             user_mock.exists_user.return_value = False
             user_mock.create_sns_user.return_value = {
@@ -92,7 +93,8 @@ class TestLoginTwitterIndex(TestCase):
             twitter_mock.return_value.get_user_info.return_value = {
                 'user_id': 'Twitter-1234',
                 'email': 'Twitter-1234@example.com',
-                'display_name': 'my_name'
+                'display_name': 'my_name',
+                'icon_image_url': 'http://example.com/image'
             }
             user_mock.exists_user.return_value = True
             user_mock.has_alias_user_id.return_value = True
