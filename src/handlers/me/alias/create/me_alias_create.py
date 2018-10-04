@@ -3,9 +3,11 @@
 import json
 import os
 import settings
+import logging
 from boto3.dynamodb.conditions import Key
 from lambda_base import LambdaBase
 from jsonschema import validate, ValidationError
+from botocore.exceptions import ClientError
 
 
 class MeAliasCreate(LambdaBase):
@@ -44,16 +46,24 @@ class MeAliasCreate(LambdaBase):
             raise ValidationError('The alias id of this user has been added.')
 
         elif ('Item' not in exist_check_user) and (len(exist_check_alias_user['Items']) == 0):
-            expression_attribute_values = {
-                ':alias_user_id': body['alias_user_id']
-            }
-            response = users_table.update_item(
-                Key={
-                    'user_id': user_id
-                },
-                UpdateExpression="set alias_user_id=:alias_user_id",
-                ExpressionAttributeValues=expression_attribute_values
-            )
-            return {'statusCode': response['ResponseMetadata']['HTTPStatusCode']}
+            try:
+                expression_attribute_values = {
+                    ':alias_user_id': body['alias_user_id']
+                }
+                response = users_table.update_item(
+                    Key={
+                        'user_id': user_id
+                    },
+                    UpdateExpression="set alias_user_id=:alias_user_id",
+                    ExpressionAttributeValues=expression_attribute_values
+                )
+                return {'statusCode': response['ResponseMetadata']['HTTPStatusCode']}
+            except ClientError as e:
+                logging.fatal(e)
+                return {
+                    'statusCode': 500,
+                    'body': json.dumps({'message': 'Internal server error'})
+                }
+
         else:
             raise ValidationError('This id is already in use.')
