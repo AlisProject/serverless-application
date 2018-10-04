@@ -67,6 +67,21 @@ class TestPostConfirmation(TestCase):
         response = presignup.main()
         self.assertEqual(response['statusCode'], 400)
 
+    def test_validate_ng_twitter(self):
+        event = {
+                'userName': 'Twitter-xxxxx'
+        }
+        presignup = PreSignUp(event=event, context="", dynamodb=dynamodb)
+        response = presignup.main()
+        self.assertEqual(response['statusCode'], 400)
+
+        event = {
+                'userName': 'twitter-xxxxx'
+        }
+        presignup = PreSignUp(event=event, context="", dynamodb=dynamodb)
+        response = presignup.main()
+        self.assertEqual(response['statusCode'], 400)
+
     def test_validate_ng_char(self):
         event = {
                 'userName': 'yamasita!'
