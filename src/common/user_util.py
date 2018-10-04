@@ -1,4 +1,10 @@
 import os
+import json
+import requests
+import settings
+
+from exceptions import PrivateChainApiError
+from aws_requests_auth.aws_auth import AWSRequestsAuth
 from botocore.exceptions import ClientError
 from record_not_found_error import RecordNotFoundError
 from not_verified_user_error import NotVerifiedUserError
@@ -190,3 +196,39 @@ class UserUtil:
             return False
         except ClientError as e:
             raise e
+
+    @staticmethod
+    def wallet_initialization(cognito, user_pool_id, user_id):
+        try:
+            address = UserUtil.__create_new_account_on_private_chain()
+            cognito.admin_update_user_attributes(
+                UserPoolId=user_pool_id,
+                Username=user_id,
+                UserAttributes=[
+                    {
+                        'Name': 'custom:private_eth_address',
+                        'Value': address
+                    },
+                ]
+            )
+        except ClientError as e:
+            raise e
+
+    @staticmethod
+    def __create_new_account_on_private_chain():
+        auth = AWSRequestsAuth(
+            aws_access_key=os.environ['PRIVATE_CHAIN_AWS_ACCESS_KEY'],
+            aws_secret_access_key=os.environ['PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY'],
+            aws_host=os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'],
+            aws_region='ap-northeast-1',
+            aws_service='execute-api'
+        )
+        response = requests.post(
+            settings.PRIVATE_CHAIN_ADD_NEW_ACCOUNT_URL,
+            auth=auth
+        )
+
+        if response.status_code is not 200:
+            raise PrivateChainApiError(response.text)
+
+        return json.loads(response.text)['result']

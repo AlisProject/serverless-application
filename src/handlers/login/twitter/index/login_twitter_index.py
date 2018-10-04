@@ -7,7 +7,7 @@ from twitter_util import TwitterUtil
 from user_util import UserUtil
 from jsonschema import validate, ValidationError
 from botocore.exceptions import ClientError
-from exceptions import TwitterOauthError
+from exceptions import TwitterOauthError, PrivateChainApiError
 from response_builder import ResponseBuilder
 
 
@@ -118,6 +118,12 @@ class LoginTwitterIndex(LambdaBase):
                 user_id=user_info['user_id'],
             )
 
+            UserUtil.wallet_initialization(
+                cognito=self.cognito,
+                user_pool_id=os.environ['COGNITO_USER_POOL_ID'],
+                user_id=user_info['user_id'],
+            )
+
             return ResponseBuilder.response(
                 status_code=200,
                 body={
@@ -128,7 +134,7 @@ class LoginTwitterIndex(LambdaBase):
                     'status': 'sign_up'
                 }
             )
-        except ClientError as e:
+        except (ClientError, PrivateChainApiError) as e:
             logging.fatal(e)
             return ResponseBuilder.response(
                 status_code=500,

@@ -1,10 +1,12 @@
+import boto3
+import os
+
 from user_util import UserUtil
 from botocore.exceptions import ClientError
 from not_verified_user_error import NotVerifiedUserError
 from unittest import TestCase
 from unittest.mock import MagicMock
-import boto3
-import os
+from unittest.mock import patch
 
 
 class TestUserUtil(TestCase):
@@ -287,3 +289,44 @@ class TestUserUtil(TestCase):
                 self.dynamodb,
                 'user_id'
             )
+
+    def test_wallet_initialization_ok(self):
+        with patch('user_util.requests.post') as requests_mock, \
+                patch('user_util.AWSRequestsAuth') as aws_auth_mock:
+            requests_mock.return_value = PrivateChainApiFakeResponse(
+                status_code=200,
+                text='{"result":"my_address"}'
+            )
+            aws_auth_mock.return_value = True
+            self.cognito.admin_update_user_attributes = MagicMock(
+                return_value=True)
+            UserUtil.wallet_initialization(
+                self.cognito,
+                'user_pool_id',
+                'user_id'
+            )
+            self.cognito.admin_update_user_attributes.assert_called_once_with(
+                UserAttributes=[
+                    {
+                        'Name': 'custom:private_eth_address',
+                        'Value': 'my_address'
+                    }
+                ],
+                UserPoolId='user_pool_id',
+                Username='user_id'
+            ),
+
+
+class PrivateChainApiFakeResponse:
+    def __init__(self, status_code, text=''):
+        self._status_code = status_code
+        self._text = text
+
+    def get_status_code(self):
+        return self._status_code
+
+    def get_text(self):
+        return self._text
+
+    status_code = property(get_status_code)
+    text = property(get_text)

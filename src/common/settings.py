@@ -1,3 +1,5 @@
+import os
+
 parameters = {
     'limit': {
         'type': 'integer',
@@ -206,3 +208,5 @@ TWITTER_USERNAME_PREFIX = 'Twitter-'
 
 FAKE_USER_EMAIL_DOMAIN = 'example.com'
 TEXT_PASSWORD = 'textpassword'
+
+PRIVATE_CHAIN_ADD_NEW_ACCOUNT_URL = 'https://' + os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'] + '/production/accounts/new'

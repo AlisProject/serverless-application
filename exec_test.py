@@ -35,6 +35,12 @@ def copy_required_files(path):
     copy_tree('./tests/tests_common', test_dir)
 
 
+def set_global_env_vers():
+    os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'] = 'test'
+    os.environ['PRIVATE_CHAIN_AWS_ACCESS_KEY'] = 'test'
+    os.environ['PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY'] = 'test'
+
+
 def main():
     # テスト事前準備
     if os.path.isdir(TEST_TMP_DIR):
@@ -43,6 +49,9 @@ def main():
     # テスト実行のためのtmpディレクトリを作成し、testsをコピーする
     os.mkdir(TEST_TMP_DIR)
     copy_tree(TEST_DIR, TEST_TMP_DIR)
+
+    # テスト実行のための環境変数をセットする
+    set_global_env_vers()
 
     # 引数でファイル名を受け取っている場合は変数にセットする
     target_file_path = sys.argv[1] if len(sys.argv) == 2 else None
