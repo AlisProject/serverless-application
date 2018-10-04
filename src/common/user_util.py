@@ -1,3 +1,4 @@
+import re
 import os
 import json
 import requests
@@ -213,6 +214,14 @@ class UserUtil:
             )
         except ClientError as e:
             raise e
+
+    @staticmethod
+    def check_try_to_register_as_twitter_user(requested_user_id):
+        if re.match(
+            re.compile(r'%s' % settings.TWITTER_USERNAME_PREFIX.lower()),
+                requested_user_id.lower()):
+            return True
+        return False
 
     @staticmethod
     def __create_new_account_on_private_chain():

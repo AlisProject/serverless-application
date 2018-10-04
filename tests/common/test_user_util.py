@@ -290,6 +290,15 @@ class TestUserUtil(TestCase):
                 'user_id'
             )
 
+    def test_check_try_to_register_as_twitter_user_ng(self):
+        self.assertTrue(UserUtil.check_try_to_register_as_twitter_user('Twitter-xxxxxxx'))
+        self.assertTrue(UserUtil.check_try_to_register_as_twitter_user('twitter-xxxxxxx'))
+        self.assertTrue(UserUtil.check_try_to_register_as_twitter_user('TWITTER-xxxxxxx'))
+
+    def test_check_try_to_register_as_twitter_user_ok(self):
+        self.assertFalse(UserUtil.check_try_to_register_as_twitter_user('myuser'))
+        self.assertFalse(UserUtil.check_try_to_register_as_twitter_user('myuser-Twitter-xxxxxxx'))
+
     def test_wallet_initialization_ok(self):
         with patch('user_util.requests.post') as requests_mock, \
                 patch('user_util.AWSRequestsAuth') as aws_auth_mock:
