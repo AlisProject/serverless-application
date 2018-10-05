@@ -81,7 +81,9 @@ class TestMeArticlesFraudCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'test03'
+                        'cognito:username': 'test03',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
@@ -120,7 +122,9 @@ class TestMeArticlesFraudCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'test04'
+                        'cognito:username': 'test04',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
@@ -144,7 +148,9 @@ class TestMeArticlesFraudCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': self.article_fraud_user_table_items[0]['user_id']
+                        'cognito:username': self.article_fraud_user_table_items[0]['user_id'],
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
