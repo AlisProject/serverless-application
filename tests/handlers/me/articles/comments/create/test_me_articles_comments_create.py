@@ -19,20 +19,43 @@ class TestMeArticlesCommentsCreate(TestCase):
         self.article_info_table_items = [
             {
                 'article_id': 'publicId0001',
-                'user_id': 'article_user01',
+                'user_id': 'article-user01',
                 'status': 'public',
                 'title': 'testid000001 titile',
                 'sort_key': 1520150272000000
             },
             {
                 'article_id': 'publicId0002',
-                'user_id': 'article_user02',
+                'user_id': 'article-user02',
                 'status': 'public',
                 'title': 'testid000002 titile',
                 'sort_key': 1520150272000000
             }
         ]
         TestsUtil.create_table(self.dynamodb, os.environ['ARTICLE_INFO_TABLE_NAME'], self.article_info_table_items)
+
+        self.user_table = self.dynamodb.Table(os.environ['USERS_TABLE_NAME'])
+        self.user_items = [
+            {
+                'user_id': 'mentioned-user01',
+                'user_display_name': 'sample',
+                'self_introduction': 'sample text',
+                'icon_image_url': 'http://example.com'
+            },
+            {
+                'user_id': 'article-user01',
+                'user_display_name': 'sample',
+                'self_introduction': 'sample text',
+                'icon_image_url': 'http://example.com'
+            },
+            {
+                'user_id': 'article-user02',
+                'user_display_name': 'sample',
+                'self_introduction': 'sample text',
+                'icon_image_url': 'http://example.com'
+            }
+        ]
+        TestsUtil.create_table(self.dynamodb, os.environ['USERS_TABLE_NAME'], self.user_items)
 
         self.comment_table = self.dynamodb.Table(os.environ['COMMENT_TABLE_NAME'])
         self.comment_items = [
@@ -72,7 +95,7 @@ class TestMeArticlesCommentsCreate(TestCase):
                 'article_id': 'publicId0001'
             },
             'body': {
-                'text': 'A',
+                'text': '@mentioned-user01 @not-existed-user comment body',
             },
             'requestContext': {
                 'authorizer': {
@@ -96,21 +119,22 @@ class TestMeArticlesCommentsCreate(TestCase):
         unread_notification_manager_after = self.unread_notification_manager_table.scan()['Items']
 
         comment = self.comment_table.get_item(Key={'comment_id': 'HOGEHOGEHOGE'}).get('Item')
-        notification = self.notification_table.get_item(
-            Key={'notification_id': 'comment-article_user01-HOGEHOGEHOGE'}
+        comment_notification = self.notification_table.get_item(
+            Key={'notification_id': 'comment-article-user01-HOGEHOGEHOGE'}
         ).get('Item')
-
-        unread_manager = self.unread_notification_manager_table.get_item(Key={'user_id': 'article_user01'}).get('Item')
+        mention_notification = self.notification_table.get_item(
+            Key={'notification_id': 'comment_mention-mentioned-user01-HOGEHOGEHOGE'}
+        ).get('Item')
 
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(json.loads(response['body'])['comment_id'], 'HOGEHOGEHOGE')
         self.assertEqual(len(comment_after) - len(comment_before), 1)
-        self.assertEqual(len(notification_after) - len(notification_before), 1)
-        self.assertEqual(len(unread_notification_manager_after) - len(unread_notification_manager_before), 1)
+        self.assertEqual(len(notification_after) - len(notification_before), 2)
+        self.assertEqual(len(unread_notification_manager_after) - len(unread_notification_manager_before), 2)
 
         expected_comment = {
             'comment_id': 'HOGEHOGEHOGE',
-            'text': 'A',
+            'text': '@mentioned-user01 @not-existed-user comment body',
             'article_id': 'publicId0001',
             'user_id': 'test_user_id01',
             'created_at': 1520150552,
@@ -118,7 +142,7 @@ class TestMeArticlesCommentsCreate(TestCase):
         }
 
         expected_notification = {
-            'notification_id': 'comment-article_user01-HOGEHOGEHOGE',
+            'notification_id': 'comment-article-user01-HOGEHOGEHOGE',
             'user_id': self.article_info_table_items[0]['user_id'],
             'article_id': self.article_info_table_items[0]['article_id'],
             'article_title': self.article_info_table_items[0]['title'],
@@ -128,14 +152,31 @@ class TestMeArticlesCommentsCreate(TestCase):
             'created_at': 1520150552
         }
 
-        expected_unread_manager = {
-            'user_id': self.article_info_table_items[0]['user_id'],
-            'unread': True
+        expected_mentioned_notification = {
+            'notification_id': 'comment_mention-mentioned-user01-HOGEHOGEHOGE',
+            'user_id': self.user_items[0]['user_id'],
+            'article_id': self.article_info_table_items[0]['article_id'],
+            'article_title': self.article_info_table_items[0]['title'],
+            'acted_user_id': 'test_user_id01',
+            'sort_key': 1520150552000003,
+            'type': 'comment',
+            'created_at': 1520150552
         }
 
+        expected_unread_manager = [
+            {
+                'user_id': self.user_items[0]['user_id'],
+                'unread': True
+            },
+            {
+                'user_id': self.article_info_table_items[0]['user_id'],
+                'unread': True
+            }
+        ]
         self.assertEqual(comment, expected_comment)
-        self.assertEqual(notification, expected_notification)
-        self.assertEqual(unread_manager, expected_unread_manager)
+        self.assertEqual(comment_notification, expected_notification)
+        self.assertEqual(mention_notification, expected_mentioned_notification)
+        self.assertEqual(unread_notification_manager_after, expected_unread_manager)
 
     @patch('me_articles_comments_create.MeArticlesCommentsCreate._MeArticlesCommentsCreate__generate_comment_id',
            MagicMock(return_value='FUGAFUGAFUGA'))
@@ -145,7 +186,7 @@ class TestMeArticlesCommentsCreate(TestCase):
                 'article_id': 'publicId0002'
             },
             'body': {
-                'text': 'A' * 400,
+                'text': '@article-user02 comment body',
             },
             'requestContext': {
                 'authorizer': {
@@ -159,15 +200,23 @@ class TestMeArticlesCommentsCreate(TestCase):
         params['body'] = json.dumps(params['body'])
 
         comment_before = self.comment_table.scan()['Items']
+        notification_before = self.notification_table.scan()['Items']
 
         response = MeArticlesCommentsCreate(params, {}, self.dynamodb).main()
 
         comment_after = self.comment_table.scan()['Items']
+        notification_after = self.notification_table.scan()['Items']
 
         comment = self.comment_table.get_item(Key={'comment_id': 'FUGAFUGAFUGA'}).get('Item')
 
+        mention_notification = self.notification_table.get_item(
+            Key={'notification_id': 'comment_mention-article-user02-FUGAFUGAFUGA'}
+        ).get('Item')
+
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(len(comment_after) - len(comment_before), 1)
+        self.assertEqual(len(notification_after) - len(notification_before), 1)
+        self.assertIsNotNone(mention_notification)
         self.assertIsNotNone(comment)
 
     @patch('me_articles_comments_create.MeArticlesCommentsCreate._MeArticlesCommentsCreate__generate_comment_id',
@@ -183,7 +232,7 @@ class TestMeArticlesCommentsCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'article_user01'
+                        'cognito:username': 'article-user01'
                     }
                 }
             }
@@ -238,7 +287,7 @@ class TestMeArticlesCommentsCreate(TestCase):
             self.assertTrue(args[1])
             self.assertEqual(kwargs['status'], 'public')
 
-    @patch('me_articles_comments_create.MeArticlesCommentsCreate._MeArticlesCommentsCreate__create_comment_notification',
+    @patch('me_articles_comments_create.MeArticlesCommentsCreate._MeArticlesCommentsCreate__create_comment_notifications',
            MagicMock(side_effect=Exception()))
     def test_raise_exception_in_creating_notification(self):
         params = {
@@ -262,6 +311,34 @@ class TestMeArticlesCommentsCreate(TestCase):
         response = MeArticlesCommentsCreate(params, {}, self.dynamodb).main()
 
         self.assertEqual(response['statusCode'], 200)
+
+    def test___get_user_ids_from_comment_body(self):
+        users = [
+            {'user_id': 'mention01'},   # 集計対象: 文頭
+            {'user_id': 'mention02'},   # 集計対象外: @がないuser_id
+            {'user_id': 'mention03'},   # 集計対象外: 前後に空白がない
+            {'user_id': 'mention04'},   # 集計対象外: 前後に空白がない
+            {'user_id': 'mention05'},   # 集計対象外: 前後に空白がない
+            {'user_id': 'mention06'},   # 集計対象: 前後に空白あり
+            # {'user_id': 'mention07'}, # 集計対象外: DBに登録なし
+            {'user_id': 'mention08-'},  # 集計対象外: 正規表現ルールに則っていない
+            {'user_id': 'mention09'},   # 集計対象: 文末
+        ]
+
+        for user in users:
+            self.user_table.put_item(Item=user)
+
+        comment_body = """
+        @mention01 mention02
+        ご指摘ありがとうございます。おっしゃる通りでした。(cc.@mention03)
+        @mention04,@mention05 の指摘もごもっともです。
+        今後ともよろしくお願いします。 @mention06 @mention07 @mention08- @mention09
+        """
+        comments_create = MeArticlesCommentsCreate({}, {}, self.dynamodb)
+
+        results = comments_create._MeArticlesCommentsCreate__get_user_ids_from_comment_body(comment_body)
+
+        self.assertEqual(results, ['mention01', 'mention06', 'mention09'])
 
     def test_validation_with_no_body(self):
         params = {

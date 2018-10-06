@@ -2,6 +2,7 @@
 import json
 import logging
 import os
+import re
 import traceback
 
 import settings
@@ -38,13 +39,14 @@ class MeArticlesCommentsCreate(LambdaBase):
         user_id = self.event['requestContext']['authorizer']['claims']['cognito:username']
 
         comment_id = self.__generate_comment_id(sort_key)
+        comment_body = TextSanitizer.sanitize_text(self.params['text'])
 
         comment_table = self.dynamodb.Table(os.environ['COMMENT_TABLE_NAME'])
 
         comment = {
             'comment_id': comment_id,
             'article_id': self.params['article_id'],
-            'text': TextSanitizer.sanitize_text(self.params['text']),
+            'text': comment_body,
             'user_id': user_id,
             'sort_key': sort_key,
             'created_at': int(time.time())
@@ -61,8 +63,7 @@ class MeArticlesCommentsCreate(LambdaBase):
             article_info = article_info_table.get_item(Key={'article_id': self.params['article_id']})['Item']
 
             if self.__is_notifiable_comment(article_info, user_id):
-                self.__create_comment_notification(article_info, comment_id, user_id)
-                self.__update_unread_notification_manager(article_info)
+                self.__create_comment_notifications(article_info, comment_body, comment_id, user_id)
 
         except Exception as err:
             logging.fatal(err)
@@ -76,27 +77,51 @@ class MeArticlesCommentsCreate(LambdaBase):
     def __is_notifiable_comment(self, article_info, user_id):
         return False if article_info['user_id'] == user_id else True
 
-    def __create_comment_notification(self, article_info, comment_id, user_id):
+    def __create_comment_notifications(self, article_info, comment_body, comment_id, user_id):
         notification_table = self.dynamodb.Table(os.environ['NOTIFICATION_TABLE_NAME'])
-        notification_id = '-'.join(
-            [settings.COMMENT_NOTIFICATION_TYPE, article_info['user_id'], comment_id])
 
-        notification_table.put_item(Item={
-            'notification_id': notification_id,
-            'user_id': article_info['user_id'],
-            'article_id': article_info['article_id'],
-            'article_title': article_info['title'],
-            'acted_user_id': user_id,
-            'sort_key': TimeUtil.generate_sort_key(),
-            'type': settings.COMMENT_NOTIFICATION_TYPE,
-            'created_at': int(time.time())
-        })
+        mentioned_user_ids = self.__get_user_ids_from_comment_body(comment_body)
 
-    def __update_unread_notification_manager(self, article_info):
+        # コメントでメンションされたユーザへの通知処理
+        for mentioned_user_id in mentioned_user_ids:
+            notification_id = '-'.join(
+                [settings.COMMENT_MENTION_NOTIFICATION_TYPE, mentioned_user_id, comment_id])
+
+            notification_table.put_item(Item={
+                'notification_id': notification_id,
+                'user_id': mentioned_user_id,
+                'article_id': article_info['article_id'],
+                'article_title': article_info['title'],
+                'acted_user_id': user_id,
+                'sort_key': TimeUtil.generate_sort_key(),
+                'type': settings.COMMENT_NOTIFICATION_TYPE,
+                'created_at': int(time.time())
+            })
+
+            self.__update_unread_notification_manager(mentioned_user_id)
+
+        # 記事の投稿者がすでにメンション通知対象に入っている場合は通常のコメント通知をSKIPする。
+        if not article_info['user_id'] in mentioned_user_ids:
+            notification_id = '-'.join(
+                [settings.COMMENT_NOTIFICATION_TYPE, article_info['user_id'], comment_id])
+
+            notification_table.put_item(Item={
+                'notification_id': notification_id,
+                'user_id': article_info['user_id'],
+                'article_id': article_info['article_id'],
+                'article_title': article_info['title'],
+                'acted_user_id': user_id,
+                'sort_key': TimeUtil.generate_sort_key(),
+                'type': settings.COMMENT_NOTIFICATION_TYPE,
+                'created_at': int(time.time())
+            })
+            self.__update_unread_notification_manager(article_info['user_id'])
+
+    def __update_unread_notification_manager(self, user_id):
         unread_notification_manager_table = self.dynamodb.Table(os.environ['UNREAD_NOTIFICATION_MANAGER_TABLE_NAME'])
 
         unread_notification_manager_table.update_item(
-            Key={'user_id': article_info['user_id']},
+            Key={'user_id': user_id},
             UpdateExpression='set unread = :unread',
             ExpressionAttributeValues={':unread': True}
         )
@@ -104,3 +129,17 @@ class MeArticlesCommentsCreate(LambdaBase):
     def __generate_comment_id(self, target):
         hashids = Hashids(salt=os.environ['SALT_FOR_ARTICLE_ID'], min_length=settings.COMMENT_ID_LENGTH)
         return hashids.encode(target)
+
+    def __get_user_ids_from_comment_body(self, comment_body):
+        mentioned_user_ids = []
+
+        for words in comment_body.split():
+            mentioned_user_id = words[1:]
+
+            if words.startswith('@') and re.fullmatch(settings.parameters['user_id']['pattern'], mentioned_user_id):
+
+                # 実際に存在ユーザIDでない場合は集計対象としない
+                if DBUtil.exists_user(self.dynamodb, mentioned_user_id):
+                    mentioned_user_ids.append(mentioned_user_id)
+
+        return mentioned_user_ids
