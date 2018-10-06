@@ -36,6 +36,15 @@ class DBUtil:
         return True
 
     @staticmethod
+    def exists_user(dynamodb, user_id):
+        users_table = dynamodb.Table(os.environ['USERS_TABLE_NAME'])
+        user = users_table.get_item(Key={'user_id': user_id}).get('Item')
+
+        if user is None:
+            return False
+        return True
+
+    @staticmethod
     def validate_user_existence(dynamodb, user_id):
         users_table = dynamodb.Table(os.environ['USERS_TABLE_NAME'])
         user = users_table.get_item(Key={'user_id': user_id}).get('Item')

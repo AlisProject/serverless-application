@@ -226,6 +226,20 @@ class TestDBUtil(TestCase):
                 status='draft'
             )
 
+    def test_exists_user_ok(self):
+        result = DBUtil.exists_user(
+            self.dynamodb,
+            self.users_table_items[0]['user_id']
+        )
+        self.assertTrue(result)
+
+    def test_exists_user_ng(self):
+        result = DBUtil.exists_user(
+            self.dynamodb,
+            'piyopiyo'
+        )
+        self.assertFalse(result)
+
     def test_validate_user_existence_ok(self):
         result = DBUtil.validate_user_existence(
             self.dynamodb,
