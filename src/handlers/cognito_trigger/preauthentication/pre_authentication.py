@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 import os
+import json
+import logging
 from lambda_base import LambdaBase
 from jsonschema import ValidationError
+from boto3.dynamodb.conditions import Key
+from botocore.exceptions import ClientError
 
 
 class PreAuthentication(LambdaBase):
@@ -14,7 +18,23 @@ class PreAuthentication(LambdaBase):
     def exec_main_proc(self):
         params = self.event
         sns_users_table = self.dynamodb.Table(os.environ['SNS_USERS_TABLE_NAME'])
+        # alias_user_idを追加する前
         sns_user = sns_users_table.get_item(Key={'user_id': params['userName']}).get('Item')
+        # alias_user_idを追加した後のsns_userの判断
+        if sns_user is None:
+            try:
+                sns_user = sns_users_table.query(
+                    IndexName="alias_user_id-index",
+                    KeyConditionExpression=Key('alias_user_id').eq(params['userName'])
+                )
+                if sns_user.get('Count') == 1:
+                    sns_user = sns_user.get('Items')[0]
+            except ClientError as e:
+                logging.fatal(e)
+                return {
+                    'statusCode': 500,
+                    'body': json.dumps({'message': 'Internal server error'})
+                }
 
         if (sns_user is not None) and (params['request']['validationData'] is not None) and \
            (self.__is_third_party_login_validation_data(params)):

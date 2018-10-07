@@ -4,6 +4,7 @@ import settings
 import re
 from jsonschema import validate, ValidationError
 from lambda_base import LambdaBase
+from user_util import UserUtil
 
 
 class PreSignUp(LambdaBase):
@@ -30,6 +31,8 @@ class PreSignUp(LambdaBase):
             raise ValidationError('This username is not allowed')
         validate(params, self.get_schema())
         if params['triggerSource'] == 'PreSignUp_SignUp':
+            if UserUtil.check_try_to_register_as_line_user(params['userName']):
+                raise ValidationError('This username is not allowed')
             response = self.cognito.list_users(
                     UserPoolId=params['userPoolId'],
                     Filter='email = "%s"' % params['request']['userAttributes']['email'],

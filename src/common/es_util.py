@@ -91,8 +91,7 @@ class ESUtil:
                 "bool": {
                     "should": [
                         {"wildcard": {"user_id": f"*{word}*"}},
-                        {"wildcard": {"user_display_name": f"*{word}*"}},
-                        {"wildcard": {"alias_user_id": f"*{word}*"}}
+                        {"wildcard": {"user_display_name": f"*{word}*"}}
                     ]
                 }
             },

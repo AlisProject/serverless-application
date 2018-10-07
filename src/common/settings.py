@@ -16,8 +16,7 @@ parameters = {
         'pattern': r'^(?!.*--)[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]$'
     },
     'line_id': {
-        'type': 'string',
-        'pattern': r'^LINE_U[0-9a-f]{32}$'
+        'type': 'string'
     },
     'phone_number': {
         'type': 'string',
@@ -202,7 +201,5 @@ LINE_ISSUER = 'https://access.line.me'
 LINE_USERNAME_PREFIX = 'LINE_'
 LINE_REQUEST_SCOPE = '&scope=openid%20profile%20email'
 EMAIL_SUFFIX = '@example.com'
-URL_PREFIX = 'https://'
-ETH_ACCOUNT_CREATE_ENDPOINT_SUFFIX = '/production/accounts/new'
 TOKEN_SEED_BYTES = 8
 
