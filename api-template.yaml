@@ -1491,8 +1491,8 @@ Resources:
                     properties:
                       alias_user_id:
                         type: 'string'
-              security:
-              - cognitoUserPool: []
+#              security:
+#              - cognitoUserPool: []
               x-amazon-apigateway-integration:
                 responses:
                   default:
@@ -2118,6 +2118,13 @@ Resources:
       Handler: handler.lambda_handler
       Role: !GetAtt LambdaRole.Arn
       CodeUri: ./deploy/me_alias_create.zip
+      Environment:
+        Variables:
+          LINE_LOGIN_COMMON_TEMP_PASSWORD: !Ref LineLoginCommonTempPassword
+          LINE_LOGIN_MARK: !Ref LineLoginMark
+          LOGIN_SALT: !Ref LoginSalt
+          COGNITO_USER_POOL_ID: !Ref CognitoUserPoolId
+          COGNITO_USER_POOL_APP_ID: !Ref CognitoUserPoolAppId
       Events:
         Api:
           Type: Api

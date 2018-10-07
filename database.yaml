@@ -331,8 +331,6 @@ Resources:
           AttributeType: S
         - AttributeName: sync_elasticsearch
           AttributeType: N
-        - AttributeName: alias_user_id
-          AttributeType: S
       KeySchema:
         - AttributeName: user_id
           KeyType: HASH
@@ -340,15 +338,6 @@ Resources:
         - IndexName: sync_elasticsearch-index
           KeySchema:
             - AttributeName: sync_elasticsearch
-              KeyType: HASH
-          Projection:
-            ProjectionType: ALL
-          ProvisionedThroughput:
-            ReadCapacityUnits: 2
-            WriteCapacityUnits: 2
-        - IndexName: alias_user_id-index
-          KeySchema:
-            - AttributeName: alias_user_id
               KeyType: HASH
           Projection:
             ProjectionType: ALL
@@ -374,14 +363,26 @@ Resources:
     Type: AWS::DynamoDB::Table
     Properties:
       AttributeDefinitions:
-      - AttributeName: user_id
-        AttributeType: S
+        - AttributeName: user_id
+          AttributeType: S
+        - AttributeName: alias_user_id
+          AttributeType: S
       KeySchema:
-      - AttributeName: user_id
-        KeyType: HASH
+        - AttributeName: user_id
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: alias_user_id-index
+          KeySchema:
+            - AttributeName: alias_user_id
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: 1
+            WriteCapacityUnits: 1
       ProvisionedThroughput:
-        ReadCapacityUnits: 2
-        WriteCapacityUnits: 2
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
   Notification:
     Type: AWS::DynamoDB::Table
     Properties:
