@@ -1491,8 +1491,8 @@ Resources:
                     properties:
                       alias_user_id:
                         type: 'string'
-#              security:
-#              - cognitoUserPool: []
+              security:
+              - cognitoUserPool: []
               x-amazon-apigateway-integration:
                 responses:
                   default:
