@@ -6,12 +6,9 @@ import requests
 import jwt
 import logging
 import secrets
-import base64
 from lambda_base import LambdaBase
 from botocore.exceptions import ClientError
-from aws_requests_auth.aws_auth import AWSRequestsAuth
 from user_util import UserUtil
-from Crypto.Cipher import AES
 
 
 class LoginLineAuthorizeRequest(LambdaBase):
@@ -34,11 +31,8 @@ class LoginLineAuthorizeRequest(LambdaBase):
             'client_id': client_id,
             'client_secret': client_secret
         }
-        response = requests.post(settings.LINE_TOKEN_END_POINT, data=data, headers=headers)
-        params = json.loads(response.text)
-        decoded_id_token = jwt.decode(params['id_token'], client_secret, audience=client_id,
-                                      issuer=settings.LINE_ISSUER, algorithms=['HS256'])
-        print(decoded_id_token)
+        params = self.__get_line_jwt(data, headers)
+        decoded_id_token = self.__decode_jwt(params, client_secret, client_id)
         user_id = settings.LINE_USERNAME_PREFIX + decoded_id_token['sub']
 
         if not decoded_id_token['email']:
@@ -46,21 +40,22 @@ class LoginLineAuthorizeRequest(LambdaBase):
         else:
             email = decoded_id_token['email']
 
-        if UserUtil.exists_user(self.cognito, user_id):
+        if UserUtil.exists_user(self.dynamodb, user_id):
             try:
-                users = self.dynamodb.Table(os.environ['SNS_USERS_TABLE_NAME'])
-                user = users.get_item(Key={'user_id': user_id}).get('Item')
-                hash_data = user['password']
+                sns_users = self.dynamodb.Table(os.environ['SNS_USERS_TABLE_NAME'])
+                sns_user = sns_users.get_item(Key={'user_id': user_id}).get('Item')
+                hash_data = sns_user['password']
                 byte_hash_data = hash_data.encode()
-                password = self.__decrypt_password(byte_hash_data)
+                password = UserUtil.decrypt_password(byte_hash_data)
+                has_alias_user_id = UserUtil.has_alias_user_id(self.dynamodb, user_id)
+                if sns_user is not None and 'alias_user_id' in sns_user:
+                    user_id = sns_user['alias_user_id']
                 response = UserUtil.sns_login(
                     cognito=self.cognito,
                     user_id=user_id,
                     password=password,
                     provider=os.environ['LINE_LOGIN_MARK']
                 )
-
-                has_alias_user_id = self.__confirm_alias_user_id(user_id)
 
                 return {
                     'statusCode': 200,
@@ -98,23 +93,18 @@ class LoginLineAuthorizeRequest(LambdaBase):
                     user_id=user_id
                 )
 
-                self.__wallet_initialization(user_id)
+                UserUtil.wallet_initialization(self.cognito, os.environ['COGNITO_USER_POOL_ID'], user_id)
 
-                UserUtil.update_user_profile(
-                    dynamodb=self.dynamodb,
-                    user_id=user_id,
-                    user_display_name=decoded_id_token['name'],
-                    icon_image=decoded_id_token['picture']
-                )
-
-                password_hash = self.__encrypt_password(backed_password)
+                password_hash = UserUtil.encrypt_password(backed_password)
 
                 UserUtil.add_sns_user_info(
                     dynamodb=self.dynamodb,
                     user_id=user_id,
-                    password=password_hash
+                    password=password_hash,
+                    email=email,
+                    user_display_name=decoded_id_token['name'],
+                    icon_image=decoded_id_token['picture']
                 )
-                has_alias_user_id = self.__confirm_alias_user_id(user_id)
                 return {
                     'statusCode': 200,
                     'body': json.dumps({
@@ -123,7 +113,7 @@ class LoginLineAuthorizeRequest(LambdaBase):
                         'id_token': response['AuthenticationResult']['IdToken'],
                         'refresh_token': response['AuthenticationResult']['RefreshToken'],
                         'status': 'sign_up',
-                        'has_alias_user_id': has_alias_user_id
+                        'has_alias_user_id': False
                     })
                 }
             except ClientError as e:
@@ -133,52 +123,13 @@ class LoginLineAuthorizeRequest(LambdaBase):
                     'body': json.dumps({'message': 'Internal server error'})
                 }
 
-    def __confirm_alias_user_id(self, user_id):
-        users_table = self.dynamodb.Table(os.environ['USERS_TABLE_NAME'])
-        user = users_table.get_item(
-            Key={
-                'user_id': user_id
-            }
-        )
-        if ('Item' in user) and ('alias_user_id' in user['Item']):
-            return True
-        return False
-
-    def __wallet_initialization(self, user_id):
-        address = self.__create_new_account()
-        self.cognito.admin_update_user_attributes(
-            UserPoolId=os.environ['COGNITO_USER_POOL_ID'],
-            Username=user_id,
-            UserAttributes=[
-                {
-                    'Name': 'custom:private_eth_address',
-                    'Value': address
-                },
-            ]
-        )
+    @staticmethod
+    def __get_line_jwt(data, headers):
+        response = requests.post(settings.LINE_TOKEN_END_POINT, data=data, headers=headers)
+        return json.loads(response.text)
 
     @staticmethod
-    def __create_new_account():
-        auth = AWSRequestsAuth(aws_access_key=os.environ['PRIVATE_CHAIN_AWS_ACCESS_KEY'],
-                               aws_secret_access_key=os.environ['PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY'],
-                               aws_host=os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'],
-                               aws_region='ap-northeast-1',
-                               aws_service='execute-api')
-        response = requests.post(settings.URL_PREFIX + os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'] +
-                                 settings.ETH_ACCOUNT_CREATE_ENDPOINT_SUFFIX, auth=auth)
-        return json.loads(response.text)['result']
-
-    @staticmethod
-    def __encrypt_password(password):
-        salt = os.environ['LOGIN_SALT']
-        cipher = AES.new(salt)
-        base64.b64encode(cipher.encrypt(password))
-        return base64.b64encode(cipher.encrypt(password)).decode()
-
-    @staticmethod
-    def __decrypt_password(byte_hash_data):
-        encrypted_data = base64.b64decode(byte_hash_data)
-        salt = os.environ['LOGIN_SALT']
-        cipher = AES.new(salt)
-        password = cipher.decrypt(encrypted_data).decode()
-        return password
+    def __decode_jwt(params, client_secret, client_id):
+        response = jwt.decode(params['id_token'], client_secret, audience=client_id,
+                              issuer=settings.LINE_ISSUER, algorithms=['HS256'])
+        return response
