@@ -41,65 +41,70 @@ class MeAliasCreate(LambdaBase):
 
         elif exist_check_user is None:
             # SNSのidで作成したcognitoのユーザーを除去
-            UserUtil.delete_sns_id_cognito_user(self.cognito, user_id)
+            if UserUtil.delete_sns_id_cognito_user(self.cognito, user_id):
 
-            # alias_user_idでのユーザーの作成のし直し
-            try:
-                email = sns_user['email']
-                hash_data = sns_user['password']
-                byte_hash_data = hash_data.encode()
-                backed_password = UserUtil.decrypt_password(byte_hash_data)
+                # alias_user_idでのCognitoユーザーの作成し直し
+                try:
+                    email = sns_user['email']
+                    hash_data = sns_user['password']
+                    byte_hash_data = hash_data.encode()
+                    backed_password = UserUtil.decrypt_password(byte_hash_data)
 
-                backed_temp_password = self.__generate_temp_pass(sns_user)
-                provider = self.__generate_provider(sns_user)
+                    backed_temp_password = self.__generate_temp_pass(sns_user)
+                    provider = self.__generate_provider(sns_user)
 
-                response = UserUtil.create_sns_user(
-                    cognito=self.cognito,
-                    user_id=body['alias_user_id'],
-                    email=email,
-                    backed_temp_password=backed_temp_password,
-                    backed_password=backed_password,
-                    provider=provider
-                )
+                    response = UserUtil.create_sns_user(
+                        cognito=self.cognito,
+                        user_id=body['alias_user_id'],
+                        email=email,
+                        backed_temp_password=backed_temp_password,
+                        backed_password=backed_password,
+                        provider=provider
+                    )
 
-                UserUtil.force_non_verified_phone(
-                    cognito=self.cognito,
-                    user_id=body['alias_user_id']
-                )
+                    UserUtil.force_non_verified_phone(
+                        cognito=self.cognito,
+                        user_id=body['alias_user_id']
+                    )
 
-                UserUtil.wallet_initialization(self.cognito, os.environ['COGNITO_USER_POOL_ID'], body['alias_user_id'])
+                    UserUtil.wallet_initialization(self.cognito, os.environ['COGNITO_USER_POOL_ID'], body['alias_user_id'])
 
-                # SnsUsersテーブルにaliasを追加
-                UserUtil.add_alias_to_sns_user(body['alias_user_id'], sns_users_table, user_id)
+                    # SnsUsersテーブルにaliasを追加
+                    UserUtil.add_alias_to_sns_user(body['alias_user_id'], sns_users_table, user_id)
 
-                # Usersテーブルにユーザーを作る
-                UserUtil.update_user_profile(
-                    dynamodb=self.dynamodb,
-                    user_id=body['alias_user_id'],
-                    user_display_name=sns_user['user_display_name'],
-                    icon_image=sns_user['icon_image_url']
-                )
+                    # Usersテーブルにユーザーを作成
+                    UserUtil.update_user_profile(
+                        dynamodb=self.dynamodb,
+                        user_id=body['alias_user_id'],
+                        user_display_name=sns_user['user_display_name'],
+                        icon_image=sns_user['icon_image_url']
+                    )
 
-                has_alias_user_id = UserUtil.has_alias_user_id(self.dynamodb, user_id)
+                    has_alias_user_id = UserUtil.has_alias_user_id(self.dynamodb, user_id)
 
-                return {
-                    'statusCode': 200,
-                    'body': json.dumps({
-                        'access_token': response['AuthenticationResult']['AccessToken'],
-                        'last_auth_user': body['alias_user_id'],
-                        'id_token': response['AuthenticationResult']['IdToken'],
-                        'refresh_token': response['AuthenticationResult']['RefreshToken'],
-                        'status': 'login',
-                        'has_alias_user_id': has_alias_user_id
-                    })
-                }
+                    return {
+                        'statusCode': 200,
+                        'body': json.dumps({
+                            'access_token': response['AuthenticationResult']['AccessToken'],
+                            'last_auth_user': body['alias_user_id'],
+                            'id_token': response['AuthenticationResult']['IdToken'],
+                            'refresh_token': response['AuthenticationResult']['RefreshToken'],
+                            'status': 'login',
+                            'has_alias_user_id': has_alias_user_id
+                        })
+                    }
 
-            except ClientError as e:
-                logging.fatal(e)
-                return {
-                    'statusCode': 500,
-                    'body': json.dumps({'message': 'Internal server error'})
-                }
+                except ClientError as e:
+                    logging.fatal(e)
+                    return {
+                        'statusCode': 500,
+                        'body': json.dumps({'message': 'Internal server error'})
+                    }
+
+            return {
+                'statusCode': 500,
+                'body': json.dumps({'message': 'Internal server error'})
+            }
 
         else:
             raise ValidationError('This id is already in use.')
@@ -109,7 +114,8 @@ class MeAliasCreate(LambdaBase):
         if re.match('^LINE_U', sns_user['user_id']):
             return os.environ['LINE_LOGIN_COMMON_TEMP_PASSWORD']
         elif re.match('^Twitter', sns_user['user_id']):
-            return 'twitterpass'  # os.environ['TWITTER_LOGIN_COMMON_TEMP_PASSWORD']
+            return 'twitterpass'
+        # TODO: os.environ['TWITTER_LOGIN_COMMON_TEMP_PASSWORD']
 
     @staticmethod
     def __generate_provider(sns_user):

@@ -3,6 +3,7 @@ import os
 import json
 import requests
 import settings
+import logging
 from exceptions import PrivateChainApiError
 from aws_requests_auth.aws_auth import AWSRequestsAuth
 from botocore.exceptions import ClientError
@@ -247,9 +248,10 @@ class UserUtil:
                 UserPoolId=os.environ['COGNITO_USER_POOL_ID'],
                 Username=user_id
             )
+            return True
         except ClientError as e:
             if e.response['Error']['Code'] == 'UserNotFoundException':
-                raise RecordNotFoundError('Record Not Found')
+                return False
             else:
                 raise e
 
@@ -266,7 +268,8 @@ class UserUtil:
                 UpdateExpression="set alias_user_id=:alias_user_id",
                 ExpressionAttributeValues=expression_attribute_values
             )
-        except ClientError:
+        except ClientError as e:
+            logging.fatal(e)
             return {
                 'statusCode': 500,
                 'body': json.dumps({'message': 'Internal server error'})
