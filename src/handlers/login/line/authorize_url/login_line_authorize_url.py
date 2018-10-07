@@ -15,7 +15,7 @@ class LoginLineAuthorizeUrl(LambdaBase):
 
     def exec_main_proc(self):
         redirect_url = '&redirect_uri=' + os.environ['LINE_REDIRECT_URI']
-        state_and_scope = '&state=' + secrets.token_hex(4) + settings.LINE_REQUEST_SCOPE
+        state_and_scope = '&state=' + self.__generate_state() + settings.LINE_REQUEST_SCOPE
         url = settings.LINE_AUTHORIZE_URL + os.environ['LINE_CHANNEL_ID'] + redirect_url + state_and_scope
 
         return {
@@ -24,3 +24,7 @@ class LoginLineAuthorizeUrl(LambdaBase):
                 'callback_url': url
             })
         }
+
+    @staticmethod
+    def __generate_state():
+        return secrets.token_hex(4)
