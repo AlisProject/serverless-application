@@ -51,26 +51,14 @@ class MeArticlesPvCreate(LambdaBase):
 
     def __create_article_pv_user(self, article_pv_user_table):
         epoch = int(time.time())
-        user_id = self.event['requestContext']['authorizer']['claims']['cognito:username']
-        article_user_id = self.__get_article_user_id(self.event['pathParameters']['article_id'])
         article_pv_user = {
             'article_id': self.event['pathParameters']['article_id'],
-            'user_id': user_id,
-            'article_user_id': article_user_id,
+            'user_id': self.event['requestContext']['authorizer']['claims']['cognito:username'],
+            'article_user_id': self.__get_article_user_id(self.event['pathParameters']['article_id']),
             'created_at': epoch,
             'target_date': time.strftime('%Y-%m-%d', time.gmtime(epoch)),
             'sort_key': TimeUtil.generate_sort_key()
         }
-
-        # 追加のaliasの存在判定
-        users_table = self.dynamodb.Table(os.environ['USERS_TABLE_NAME'])
-        article_user = users_table.get_item(Key={'user_id': article_user_id}).get('Item')
-        user = users_table.get_item(Key={'user_id': user_id}).get('Item')
-        if 'alias_user_id' in article_user:
-            article_pv_user.update({'article_alias_user_id': article_user['alias_user_id']})
-        if 'alias_user_id' in user:
-            article_pv_user.update({'alias_user_id': user['alias_user_id']})
-
         article_pv_user_table.put_item(
             Item=article_pv_user,
             ConditionExpression='attribute_not_exists(article_id)'

@@ -46,14 +46,8 @@ class TestUsersArticlesPublic(TestCase):
             }
         ]
 
-        users = [
-            {
-                'user_id': 'test_user1'
-            }
-        ]
-
         TestsUtil.create_table(cls.dynamodb, os.environ['ARTICLE_INFO_TABLE_NAME'], items)
-        TestsUtil.create_table(cls.dynamodb, os.environ['USERS_TABLE_NAME'], users)
+
     @classmethod
     def tearDownClass(cls):
         TestsUtil.delete_all_tables(cls.dynamodb)

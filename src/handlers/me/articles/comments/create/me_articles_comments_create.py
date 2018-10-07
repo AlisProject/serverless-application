@@ -15,6 +15,7 @@ from time_util import TimeUtil
 from text_sanitizer import TextSanitizer
 from user_util import UserUtil
 
+
 class MeArticlesCommentsCreate(LambdaBase):
     def get_schema(self):
         return {
@@ -42,8 +43,6 @@ class MeArticlesCommentsCreate(LambdaBase):
 
         comment_table = self.dynamodb.Table(os.environ['COMMENT_TABLE_NAME'])
 
-        users_table = self.dynamodb.Table(os.environ['USERS_TABLE_NAME'])
-        user = users_table.get_item(Key={'user_id': user_id}).get('Item')
         comment = {
             'comment_id': comment_id,
             'article_id': self.params['article_id'],
@@ -52,8 +51,6 @@ class MeArticlesCommentsCreate(LambdaBase):
             'sort_key': sort_key,
             'created_at': int(time.time())
         }
-        if 'alias_user_id' in user:
-            comment.update({'alias_user_id': user['alias_user_id']})
 
         comment_table.put_item(
             Item=comment,
@@ -66,7 +63,7 @@ class MeArticlesCommentsCreate(LambdaBase):
             article_info = article_info_table.get_item(Key={'article_id': self.params['article_id']})['Item']
 
             if self.__is_notifiable_comment(article_info, user_id):
-                self.__create_comment_notification(article_info, comment_id, user_id, user)
+                self.__create_comment_notification(article_info, comment_id, user_id)
                 self.__update_unread_notification_manager(article_info)
 
         except Exception as err:
@@ -81,13 +78,12 @@ class MeArticlesCommentsCreate(LambdaBase):
     def __is_notifiable_comment(self, article_info, user_id):
         return False if article_info['user_id'] == user_id else True
 
-    def __create_comment_notification(self, article_info, comment_id, user_id, user):
+    def __create_comment_notification(self, article_info, comment_id, user_id):
         notification_table = self.dynamodb.Table(os.environ['NOTIFICATION_TABLE_NAME'])
         notification_id = '-'.join(
             [settings.COMMENT_NOTIFICATION_TYPE, article_info['user_id'], comment_id])
-        has_alias_user_id_article = True if 'alias_user_id' in article_info else False
-        has_alias_user_id = True if 'alias_user_id' in user else False
-        Item = {
+
+        notification_table.put_item(Item={
             'notification_id': notification_id,
             'user_id': article_info['user_id'],
             'article_id': article_info['article_id'],
@@ -96,13 +92,7 @@ class MeArticlesCommentsCreate(LambdaBase):
             'sort_key': TimeUtil.generate_sort_key(),
             'type': settings.COMMENT_NOTIFICATION_TYPE,
             'created_at': int(time.time())
-        }
-        if has_alias_user_id_article:
-            Item.update({'alias_user_id': article_info['alias_user_id']})
-        if has_alias_user_id:
-            Item.update({'acted_alias_user_id': user['alias_user_id']})
-
-        notification_table.put_item(Item=Item)
+        })
 
     def __update_unread_notification_manager(self, article_info):
         unread_notification_manager_table = self.dynamodb.Table(os.environ['UNREAD_NOTIFICATION_MANAGER_TABLE_NAME'])

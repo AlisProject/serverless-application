@@ -107,31 +107,6 @@ class TestMeArticlesLikeCreate(TestCase):
             self.unread_notification_manager_items
         )
 
-        self.users = [
-            {
-                'user_id': 'test01'
-            },
-            {
-                'user_id': 'test05'
-            },
-            {
-                'user_id': 'test06'
-            },
-            {
-                'user_id': 'article_user_id_00'
-            },
-            {
-                'user_id': 'article_user_id_01'
-            },
-            {
-                'user_id': 'article_user_id_02'
-            }
-        ]
-        TestsUtil.create_table(
-            self.dynamodb, os.environ['USERS_TABLE_NAME'],
-            self.users
-        )
-
     def tearDown(self):
         TestsUtil.delete_all_tables(self.dynamodb)
 

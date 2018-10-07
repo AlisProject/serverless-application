@@ -65,12 +65,10 @@ class MeArticlesDraftsCreate(LambdaBase):
 
     def __create_article_info(self, params, sort_key, article_id):
         article_info_table = self.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
-        users_table = self.dynamodb.Table(os.environ['USERS_TABLE_NAME'])
-        user_id = self.event['requestContext']['authorizer']['claims']['cognito:username']
-        user = users_table.get_item(Key={'user_id': user_id}).get('Item')
+
         article_info = {
             'article_id': article_id,
-            'user_id': user_id,
+            'user_id': self.event['requestContext']['authorizer']['claims']['cognito:username'],
             'status': 'draft',
             'title': TextSanitizer.sanitize_text(params.get('title')),
             'overview': TextSanitizer.sanitize_text(params.get('overview')),
@@ -78,10 +76,6 @@ class MeArticlesDraftsCreate(LambdaBase):
             'sort_key': sort_key,
             'created_at': int(time.time())
         }
-
-        if 'alias_user_id' in user:
-            article_info.update({'alias_user_id': user['alias_user_id']})
-
         DBUtil.items_values_empty_to_none(article_info)
 
         article_info_table.put_item(

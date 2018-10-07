@@ -64,24 +64,6 @@ class TestMeArticlesPvCreate(TestCase):
             os.environ['ARTICLE_INFO_TABLE_NAME'],
             article_info_table_items
         )
-        users = [
-            {
-                'user_id': 'test04'
-            },
-            {
-                'user_id': 'test05'
-            },
-            {
-                'user_id': 'article_user_id_00'
-            },
-            {
-                'user_id': 'article_user_id_01'
-            },
-            {
-                'user_id': 'article_user_id_02'
-            }
-        ]
-        TestsUtil.create_table(cls.dynamodb, os.environ['USERS_TABLE_NAME'], users)
 
     @classmethod
     def tearDownClass(cls):

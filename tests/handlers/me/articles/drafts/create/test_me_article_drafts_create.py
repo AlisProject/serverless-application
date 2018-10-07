@@ -17,14 +17,8 @@ class TestMeArticlesDraftsCreate(TestCase):
         os.environ['SALT_FOR_ARTICLE_ID'] = 'test_salt'
 
     def setUp(self):
-        users = [
-            {
-                'user_id': 'test_user_id'
-            }
-        ]
         TestsUtil.create_table(self.dynamodb, os.environ['ARTICLE_INFO_TABLE_NAME'], [])
         TestsUtil.create_table(self.dynamodb, os.environ['ARTICLE_CONTENT_TABLE_NAME'], [])
-        TestsUtil.create_table(self.dynamodb, os.environ['USERS_TABLE_NAME'], users)
         self.article_info_table = self.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
         self.article_content_table = self.dynamodb.Table(os.environ['ARTICLE_CONTENT_TABLE_NAME'])
 

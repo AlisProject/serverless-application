@@ -105,13 +105,6 @@ class MeWalletTip(LambdaBase):
             'created_at': int(time.time())
         }
 
-        users_table = self.dynamodb.Table(os.environ['USERS_TABLE_NAME'])
-        user = users_table.get_item(Key={'user_id': user_id}).get('Item')
-        if 'alias_user_id' in user:
-            tip_info.update({'alias_user_id': user['alias_user_id']})
-        if 'alias_user_id' in article_info:
-            tip_info.update({'to_alias_user_id': article_info['alias_user_id']})
-
         tip_table.put_item(
             Item=tip_info,
             ConditionExpression='attribute_not_exists(user_id)'

@@ -46,22 +46,6 @@ class TestMeArticlesCommentsCreate(TestCase):
         ]
         TestsUtil.create_table(self.dynamodb, os.environ['COMMENT_TABLE_NAME'], [])
 
-        self.users_items = [
-            {
-                'user_id': 'test_user_id01'
-            },
-            {
-                'user_id': 'comment_user_01'
-            },
-            {
-                'user_id': 'article_user01'
-            },
-            {
-                'user_id': 'test05'
-            }
-        ]
-        TestsUtil.create_table(self.dynamodb, os.environ['USERS_TABLE_NAME'], self.users_items)
-
         self.notification_table = self.dynamodb.Table(os.environ['NOTIFICATION_TABLE_NAME'])
         TestsUtil.create_table(self.dynamodb, os.environ['NOTIFICATION_TABLE_NAME'], [])
 
