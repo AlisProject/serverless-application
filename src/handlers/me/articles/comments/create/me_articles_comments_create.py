@@ -131,15 +131,16 @@ class MeArticlesCommentsCreate(LambdaBase):
         return hashids.encode(target)
 
     def __get_user_ids_from_comment_body(self, comment_body):
-        mentioned_user_ids = []
+        user_ids = []
 
         for words in comment_body.split():
+            if not words.startswith('@'):
+                continue
+
             mentioned_user_id = words[1:]
 
-            if words.startswith('@') and re.fullmatch(settings.parameters['user_id']['pattern'], mentioned_user_id):
+            # 実際にDBに存在するユーザIDでない場合は集計対象としない
+            if DBUtil.exists_user(self.dynamodb, mentioned_user_id):
+                user_ids.append(mentioned_user_id)
 
-                # 実際に存在ユーザIDでない場合は集計対象としない
-                if DBUtil.exists_user(self.dynamodb, mentioned_user_id):
-                    mentioned_user_ids.append(mentioned_user_id)
-
-        return mentioned_user_ids
+        return user_ids
