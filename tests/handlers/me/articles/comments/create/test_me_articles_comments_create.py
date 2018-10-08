@@ -317,7 +317,7 @@ class TestMeArticlesCommentsCreate(TestCase):
             {'user_id': 'mention01'},   # 集計対象: 文頭
             {'user_id': 'mention02'},   # 集計対象外: @がないuser_id
             {'user_id': 'mention03'},   # 集計対象外: 前後に空白がない
-            {'user_id': 'mention04'},   # 集計対象外: 前後に空白がない
+            {'user_id': 'mention04'},   # 集計対象: 改行後
             {'user_id': 'mention05'},   # 集計対象外: 前後に空白がない
             {'user_id': 'mention06'},   # 集計対象: 前後に空白あり
             # {'user_id': 'mention07'}, # 集計対象外: DBに登録なし
@@ -331,14 +331,14 @@ class TestMeArticlesCommentsCreate(TestCase):
         comment_body = """
         @mention01 mention02
         ご指摘ありがとうございます。おっしゃる通りでした。(cc.@mention03)
-        @mention04,@mention05 の指摘もごもっともです。
+        @mention04 ,@mention05 の指摘もごもっともです。
         今後ともよろしくお願いします。 @mention06 @mention07 @mention08- @mention09
         """
         comments_create = MeArticlesCommentsCreate({}, {}, self.dynamodb)
 
         results = comments_create._MeArticlesCommentsCreate__get_user_ids_from_comment_body(comment_body)
 
-        self.assertEqual(results, ['mention01', 'mention06', 'mention09'])
+        self.assertEqual(results, ['mention01', 'mention04', 'mention06', 'mention09'])
 
     def test_validation_with_no_body(self):
         params = {
