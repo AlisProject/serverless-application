@@ -79,6 +79,7 @@ class TestLoginTwitterIndex(TestCase):
                     'access_token': 'aaaaa',
                     'id_token': 'bbbbb',
                     'refresh_token': 'ccccc',
+                    'has_alias_user_id': False,
                     'status': 'sign_up'
                 }
             )

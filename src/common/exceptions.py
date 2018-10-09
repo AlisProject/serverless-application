@@ -12,7 +12,3 @@ class Error(Exception):
 
 class TwitterOauthError(Error):
     pass
-
-
-class PrivateChainApiError(Error):
-    pass
