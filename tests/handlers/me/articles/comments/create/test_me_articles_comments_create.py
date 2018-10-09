@@ -339,6 +339,147 @@ class TestMeArticlesCommentsCreate(TestCase):
 
         self.assertEqual(results, ['mention01', 'mention04', 'mention06', 'mention08'])
 
+    def test___create_comment_notifications(self):
+        article_info = {
+            'article_id': 'publicId0001',
+            'user_id': 'article-user01',
+            'status': 'public',
+            'title': 'testid000001 titile',
+            'sort_key': 1520150272000000
+        }
+        comment_id = "FUGAFUGAFUGA"
+        user_id = 'sample_user'
+        comment_body = '@mention01 @mention02'
+
+        users = [
+            {'user_id': 'mention01'},
+            {'user_id': 'mention02'}
+        ]
+        for user in users:
+            self.user_table.put_item(Item=user)
+
+        mock_lib = MagicMock()
+        with patch('me_articles_comments_create.NotificationUtil', mock_lib):
+            comments_create = MeArticlesCommentsCreate({}, {}, self.dynamodb)
+            comments_create._MeArticlesCommentsCreate__create_comment_notifications(
+                article_info,
+                comment_body,
+                comment_id,
+                user_id
+            )
+
+            self.assertEqual(mock_lib.notify_comment_mention.call_count, 2)
+            for i, (args, _) in enumerate(mock_lib.notify_comment_mention.call_args_list):
+                self.assertEqual(args[0], self.dynamodb)
+                self.assertEqual(args[1], article_info)
+                self.assertEqual(args[2], users[i]['user_id'])
+                self.assertEqual(args[3], user_id)
+                self.assertEqual(args[4], comment_id)
+
+            args, _ = mock_lib.notify_comment.call_args
+            self.assertEqual(mock_lib.notify_comment.call_count, 1)
+            self.assertEqual(args[0], self.dynamodb)
+            self.assertEqual(args[1], article_info)
+            self.assertEqual(args[2], user_id)
+            self.assertEqual(args[3], comment_id)
+
+            self.assertEqual(mock_lib.update_unread_notification_manager.call_count, 3)
+            for i, (args, _) in enumerate(mock_lib.update_unread_notification_manager.call_args_list):
+                self.assertEqual(args[0], self.dynamodb)
+
+                if i < 2:
+                    self.assertEqual(args[1], users[i]['user_id'])
+                else:
+                    self.assertEqual(args[1], article_info['user_id'])
+
+    def test___create_comment_notifications_with_article_user_mentioned(self):
+        article_info = {
+            'article_id': 'publicId0001',
+            'user_id': 'article-user01',
+            'status': 'public',
+            'title': 'testid000001 titile',
+            'sort_key': 1520150272000000
+        }
+        comment_id = "FUGAFUGAFUGA"
+        user_id = 'sample_user'
+        comment_body = '@mention01 @article-user01'
+
+        users = [
+            {'user_id': 'mention01'},
+            {'user_id': 'article-user01'}
+        ]
+        for user in users:
+            self.user_table.put_item(Item=user)
+
+        mock_lib = MagicMock()
+        with patch('me_articles_comments_create.NotificationUtil', mock_lib):
+            comments_create = MeArticlesCommentsCreate({}, {}, self.dynamodb)
+            comments_create._MeArticlesCommentsCreate__create_comment_notifications(
+                article_info,
+                comment_body,
+                comment_id,
+                user_id
+            )
+
+            self.assertEqual(mock_lib.notify_comment_mention.call_count, 2)
+            for i, (args, _) in enumerate(mock_lib.notify_comment_mention.call_args_list):
+                self.assertEqual(args[0], self.dynamodb)
+                self.assertEqual(args[1], article_info)
+                self.assertEqual(args[2], users[i]['user_id'])
+                self.assertEqual(args[3], user_id)
+                self.assertEqual(args[4], comment_id)
+
+            self.assertFalse(mock_lib.notify_comment.called)
+
+            self.assertEqual(mock_lib.update_unread_notification_manager.call_count, 2)
+            for i, (args, _) in enumerate(mock_lib.update_unread_notification_manager.call_args_list):
+                self.assertEqual(args[0], self.dynamodb)
+                self.assertEqual(args[1], users[i]['user_id'])
+
+    def test___create_comment_notifications_with_own_comment(self):
+        article_info = {
+            'article_id': 'publicId0001',
+            'user_id': 'article-user01',
+            'status': 'public',
+            'title': 'testid000001 titile',
+            'sort_key': 1520150272000000
+        }
+        comment_id = "FUGAFUGAFUGA"
+        user_id = 'article-user01'
+        comment_body = '@mention01 @mention02'
+
+        users = [
+            {'user_id': 'mention01'},
+            {'user_id': 'mention02'}
+        ]
+        for user in users:
+            self.user_table.put_item(Item=user)
+
+        mock_lib = MagicMock()
+        with patch('me_articles_comments_create.NotificationUtil', mock_lib):
+            comments_create = MeArticlesCommentsCreate({}, {}, self.dynamodb)
+            comments_create._MeArticlesCommentsCreate__create_comment_notifications(
+                article_info,
+                comment_body,
+                comment_id,
+                user_id
+            )
+
+            self.assertEqual(mock_lib.notify_comment_mention.call_count, 2)
+            for i, (args, _) in enumerate(mock_lib.notify_comment_mention.call_args_list):
+                self.assertEqual(args[0], self.dynamodb)
+                self.assertEqual(args[1], article_info)
+                self.assertEqual(args[2], users[i]['user_id'])
+                self.assertEqual(args[3], user_id)
+                self.assertEqual(args[4], comment_id)
+
+            self.assertFalse(mock_lib.notify_comment.called)
+
+            self.assertEqual(mock_lib.update_unread_notification_manager.call_count, 2)
+            for i, (args, _) in enumerate(mock_lib.update_unread_notification_manager.call_args_list):
+                self.assertEqual(args[0], self.dynamodb)
+                self.assertEqual(args[1], users[i]['user_id'])
+
     def test_validation_with_no_body(self):
         params = {
             'pathParameters': {

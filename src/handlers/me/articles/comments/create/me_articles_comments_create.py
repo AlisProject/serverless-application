@@ -64,8 +64,7 @@ class MeArticlesCommentsCreate(LambdaBase):
             article_info_table = self.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
             article_info = article_info_table.get_item(Key={'article_id': self.params['article_id']})['Item']
 
-            if self.__is_notifiable_comment(article_info, user_id):
-                self.__create_comment_notifications(article_info, comment_body, comment_id, user_id)
+            self.__create_comment_notifications(article_info, comment_body, comment_id, user_id)
 
         except Exception as err:
             logging.fatal(err)
@@ -76,9 +75,6 @@ class MeArticlesCommentsCreate(LambdaBase):
                 'body': json.dumps({'comment_id': comment_id})
             }
 
-    def __is_notifiable_comment(self, article_info, user_id):
-        return False if article_info['user_id'] == user_id else True
-
     def __create_comment_notifications(self, article_info, comment_body, comment_id, user_id):
         mentioned_user_ids = self.__get_user_ids_from_comment_body(comment_body)
 
@@ -87,8 +83,8 @@ class MeArticlesCommentsCreate(LambdaBase):
             NotificationUtil.notify_comment_mention(self.dynamodb, article_info, mentioned_user_id, user_id, comment_id)
             NotificationUtil.update_unread_notification_manager(self.dynamodb, mentioned_user_id)
 
-        # 記事の投稿者がすでにメンション通知対象に入っている場合は通常のコメント通知をSKIPする。
-        if not article_info['user_id'] in mentioned_user_ids:
+        # メンション通知対象に記事投稿者入っている場合、または記事投稿者自身によるコメントの場合は通常のコメント通知をSKIPする。
+        if not article_info['user_id'] in mentioned_user_ids and not article_info['user_id'] == user_id:
             NotificationUtil.notify_comment(self.dynamodb, article_info, user_id, comment_id)
             NotificationUtil.update_unread_notification_manager(self.dynamodb, article_info['user_id'])
 
