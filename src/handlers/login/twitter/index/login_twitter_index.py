@@ -7,7 +7,7 @@ from twitter_util import TwitterUtil
 from user_util import UserUtil
 from jsonschema import validate, ValidationError
 from botocore.exceptions import ClientError
-from exceptions import TwitterOauthError, PrivateChainApiError
+from exceptions import TwitterOauthError
 from response_builder import ResponseBuilder
 
 
@@ -58,7 +58,10 @@ class LoginTwitterIndex(LambdaBase):
                 )
 
                 if has_alias_user_id is True:
-                    user_id = UserUtil.get_alias_user_id(user_info['user_id'])
+                    user_id = UserUtil.get_alias_user_id(
+                        dynamodb=self.dynamodb,
+                        user_id=user_info['user_id']
+                    )
                 else:
                     user_id = user_info['user_id']
 
@@ -115,6 +118,7 @@ class LoginTwitterIndex(LambdaBase):
                     'access_token': response['AuthenticationResult']['AccessToken'],
                     'id_token': response['AuthenticationResult']['IdToken'],
                     'refresh_token': response['AuthenticationResult']['RefreshToken'],
+                    'has_alias_user_id': False,
                     'status': 'sign_up'
                 }
             )

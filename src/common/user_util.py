@@ -1,11 +1,7 @@
 import re
 import os
-import json
-import requests
 import settings
 
-from exceptions import PrivateChainApiError
-from aws_requests_auth.aws_auth import AWSRequestsAuth
 from botocore.exceptions import ClientError
 from record_not_found_error import RecordNotFoundError
 from not_verified_user_error import NotVerifiedUserError
