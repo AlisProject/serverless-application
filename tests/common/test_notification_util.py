@@ -134,8 +134,3 @@ class TestNotificationUtil(TestCase):
         ]
 
         self.assertEqual(after, expected_unread_manager)
-
-
-
-
-
