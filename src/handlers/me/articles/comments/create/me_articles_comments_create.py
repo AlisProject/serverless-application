@@ -87,15 +87,6 @@ class MeArticlesCommentsCreate(LambdaBase):
             NotificationUtil.notify_comment(self.dynamodb, article_info, user_id, comment_id)
             NotificationUtil.update_unread_notification_manager(self.dynamodb, article_info['user_id'])
 
-    def __update_unread_notification_manager(self, user_id):
-        unread_notification_manager_table = self.dynamodb.Table(os.environ['UNREAD_NOTIFICATION_MANAGER_TABLE_NAME'])
-
-        unread_notification_manager_table.update_item(
-            Key={'user_id': user_id},
-            UpdateExpression='set unread = :unread',
-            ExpressionAttributeValues={':unread': True}
-        )
-
     def __generate_comment_id(self, target):
         hashids = Hashids(salt=os.environ['SALT_FOR_ARTICLE_ID'], min_length=settings.COMMENT_ID_LENGTH)
         return hashids.encode(target)
