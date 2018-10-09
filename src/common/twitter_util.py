@@ -19,7 +19,11 @@ class TwitterUtil:
         )
 
         if response.status_code is not 200:
-            raise TwitterOauthError(response.text)
+            raise TwitterOauthError(
+                endpoint=settings.TWITTER_API_ACCESS_TOKEN_URL,
+                status_code=response.status_code,
+                message=response.text
+            )
 
         access_token = self.__parse_api_response(
             response=response
@@ -38,7 +42,11 @@ class TwitterUtil:
         )
 
         if response.status_code is not 200:
-            raise TwitterOauthError(response.text)
+            raise TwitterOauthError(
+                endpoint=settings.TWITTER_API_VERIFY_CREDENTIALS_URL,
+                status_code=response.status_code,
+                message=response.text
+            )
 
         user_info = json.loads(response.text)
         return {
@@ -59,7 +67,11 @@ class TwitterUtil:
         )
 
         if response.status_code is not 200:
-            raise TwitterOauthError(response.text)
+            raise TwitterOauthError(
+                endpoint=settings.TWITTER_API_REQUEST_TOKEN_URL,
+                status_code=response.status_code,
+                message=response.text
+            )
 
         response_body = self.__parse_api_response(
             response=response

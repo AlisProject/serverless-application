@@ -1,5 +1,6 @@
 import os
 import logging
+import traceback
 
 from lambda_base import LambdaBase
 from twitter_util import TwitterUtil
@@ -25,7 +26,9 @@ class LoginTwitterAuthorizationUrl(LambdaBase):
                 callback_url=os.environ['TWITTER_OAUTH_CALLBACK_URL']
             )
         except TwitterOauthError as e:
+            logging.info(self.event)
             logging.fatal(e)
+            traceback.print_exc()
             return ResponseBuilder.response(
                 status_code=500,
                 body={'message': 'Internal server error'}

@@ -177,9 +177,36 @@ class TestLoginTwitterIndex(TestCase):
                 user_pool_id='user_pool_id'
             )
 
+    def test_main_ng_with_auth_error(self):
+        with patch('login_twitter_index.TwitterUtil') as twitter_mock:
+            twitter_mock.return_value.get_user_info.side_effect = TwitterOauthError(
+                endpoint='http://example.com',
+                status_code=401,
+                message='auth error'
+            )
+            params = {
+                'body': {
+                    'oauth_token': 'fake_oauth_token',
+                    'oauth_verifier': 'fake_oauth_verifier'
+                }
+            }
+            params['body'] = json.dumps(params['body'])
+            response = LoginTwitterIndex(params, {}).main()
+            self.assertEqual(response['statusCode'], 401)
+            self.assertEqual(
+                json.loads(response['body']),
+                {
+                    'message': 'auth error'
+                }
+            )
+
     def test_main_ng_with_twitterexception(self):
         with patch('login_twitter_index.TwitterUtil') as twitter_mock:
-            twitter_mock.return_value.get_user_info.side_effect = TwitterOauthError('error')
+            twitter_mock.return_value.get_user_info.side_effect = TwitterOauthError(
+                endpoint='http://example.com',
+                status_code=500,
+                message='error'
+            )
             params = {
                 'body': {
                     'oauth_token': 'fake_oauth_token',

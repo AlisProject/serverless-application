@@ -311,6 +311,13 @@ Resources:
                         type: string
                       has_alias_user_id:
                         type: string
+                "401":
+                  description: "認証エラー"
+                  schema:
+                    type: object
+                    properties:
+                      message:
+                        type: string
               x-amazon-apigateway-integration:
                 responses:
                   default:

@@ -1,6 +1,7 @@
 import os
 import settings
 import logging
+import traceback
 
 from lambda_base import LambdaBase
 from twitter_util import TwitterUtil
@@ -40,7 +41,14 @@ class LoginTwitterIndex(LambdaBase):
                 oauth_verifier=self.params['oauth_verifier']
             )
         except TwitterOauthError as e:
+            if e.status_code == 401:
+                return ResponseBuilder.response(
+                    status_code=401,
+                    body={'message': e.message}
+                )
+            logging.info(self.event)
             logging.fatal(e)
+            traceback.print_exc()
             return ResponseBuilder.response(
                 status_code=500,
                 body={'message': 'Internal server error'}
@@ -85,7 +93,9 @@ class LoginTwitterIndex(LambdaBase):
                     }
                 )
             except ClientError as e:
+                logging.info(self.event)
                 logging.fatal(e)
+                traceback.print_exc()
                 return ResponseBuilder.response(
                     status_code=500,
                     body={'message': 'Internal server error'}
@@ -123,7 +133,9 @@ class LoginTwitterIndex(LambdaBase):
                 }
             )
         except (ClientError) as e:
+            logging.info(self.event)
             logging.fatal(e)
+            traceback.print_exc()
             return ResponseBuilder.response(
                 status_code=500,
                 body={'message': 'Internal server error'}
