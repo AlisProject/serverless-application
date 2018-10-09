@@ -1,12 +1,10 @@
 import boto3
-import os
 
 from user_util import UserUtil
 from botocore.exceptions import ClientError
 from not_verified_user_error import NotVerifiedUserError
 from unittest import TestCase
 from unittest.mock import MagicMock
-from unittest.mock import patch
 
 
 class TestUserUtil(TestCase):
@@ -193,64 +191,35 @@ class TestUserUtil(TestCase):
                 'twitter'
             )
 
-    def test_force_non_verified_phone_ok(self):
-        self.cognito.admin_update_user_attributes = MagicMock(return_value=True)
-        response = UserUtil.force_non_verified_phone(
-            self.cognito,
-            'user_pool_id',
-            'user_id'
-        )
-
-        self.assertEqual(response, None)
-
-    def test_force_non_verified_phone_ng(self):
-        with self.assertRaises(ClientError):
-            self.cognito.admin_update_user_attributes = MagicMock(side_effect=ClientError(
-                {'Error': {'Code': 'xxxx'}},
-                'operation_name'
-            ))
-            UserUtil.force_non_verified_phone(
-                self.cognito,
-                'user_pool_id',
-                'user_id'
-            )
-
-    def test_add_user_profile_ok(self):
-        self.dynamodb.Table = MagicMock()
-        self.dynamodb.Table.return_value.put_item.return_value = True
-        response = UserUtil.add_user_profile(
-            self.dynamodb,
-            'user_id',
-            'display_name',
-            'icon_image_url'
-        )
-
-        self.assertEqual(response, None)
-
-    def test_add_user_profile_ng(self):
-        with self.assertRaises(ClientError):
-            self.dynamodb.Table = MagicMock()
-            self.dynamodb.Table.return_value.put_item.side_effect = ClientError(
-                {'Error': {'Code': 'xxxx'}},
-                'operation_name'
-            )
-            UserUtil.add_user_profile(
-                self.dynamodb,
-                'user_id',
-                'display_name',
-                'icon_image_url'
-            )
-
     def test_add_sns_user_info_ok(self):
         self.dynamodb.Table = MagicMock()
         self.dynamodb.Table.return_value.put_item.return_value = True
         response = UserUtil.add_sns_user_info(
             self.dynamodb,
             'user_id',
-            'password'
+            'password',
+            'email',
+            'display_name',
+            'icon_image_url'
         )
 
         self.assertEqual(response, None)
+
+    def test_add_sns_user_info_ng(self):
+        with self.assertRaises(ClientError):
+            self.dynamodb.Table = MagicMock()
+            self.dynamodb.Table.return_value.put_item.side_effect = ClientError(
+                {'Error': {'Code': 'xxxx'}},
+                'operation_name'
+            )
+            UserUtil.add_sns_user_info(
+                self.dynamodb,
+                'user_id',
+                'password',
+                'email',
+                'display_name',
+                'icon_image_url'
+            )
 
     def test_has_alias_user_id_ok_with_return_true(self):
         self.dynamodb.Table = MagicMock()
@@ -265,6 +234,31 @@ class TestUserUtil(TestCase):
         )
 
         self.assertTrue(response)
+
+    def test_get_alias_user_id_ok(self):
+        self.dynamodb.Table = MagicMock()
+        self.dynamodb.Table.return_value.get_item.return_value = {
+            'Item': {
+                'alias_user_id': 'you_are_alias'
+            }
+        }
+        response = UserUtil.get_alias_user_id(
+            self.dynamodb,
+            'user_id',
+        )
+        self.assertEqual(response, 'you_are_alias')
+
+    def test_get_alias_user_id_ng(self):
+        with self.assertRaises(ClientError):
+            self.dynamodb.Table = MagicMock()
+            self.dynamodb.Table.return_value.get_item.side_effect = ClientError(
+                {'Error': {'Code': 'xxxx'}},
+                'operation_name'
+            )
+            UserUtil.get_alias_user_id(
+                self.dynamodb,
+                'user_id',
+            )
 
     def test_has_alias_user_id_ok_with_return_false(self):
         self.dynamodb.Table = MagicMock()
@@ -298,32 +292,6 @@ class TestUserUtil(TestCase):
     def test_check_try_to_register_as_twitter_user_ok(self):
         self.assertFalse(UserUtil.check_try_to_register_as_twitter_user('myuser'))
         self.assertFalse(UserUtil.check_try_to_register_as_twitter_user('myuser-Twitter-xxxxxxx'))
-
-    def test_wallet_initialization_ok(self):
-        with patch('user_util.requests.post') as requests_mock, \
-                patch('user_util.AWSRequestsAuth') as aws_auth_mock:
-            requests_mock.return_value = PrivateChainApiFakeResponse(
-                status_code=200,
-                text='{"result":"my_address"}'
-            )
-            aws_auth_mock.return_value = True
-            self.cognito.admin_update_user_attributes = MagicMock(
-                return_value=True)
-            UserUtil.wallet_initialization(
-                self.cognito,
-                'user_pool_id',
-                'user_id'
-            )
-            self.cognito.admin_update_user_attributes.assert_called_once_with(
-                UserAttributes=[
-                    {
-                        'Name': 'custom:private_eth_address',
-                        'Value': 'my_address'
-                    }
-                ],
-                UserPoolId='user_pool_id',
-                Username='user_id'
-            ),
 
 
 class PrivateChainApiFakeResponse:

@@ -140,30 +140,14 @@ class UserUtil:
             raise e
 
     @staticmethod
-    def force_non_verified_phone(cognito, user_pool_id, user_id):
+    def add_sns_user_info(dynamodb, user_id, password, email,
+                          user_display_name=None, icon_image_url=None):
         try:
-            cognito.admin_update_user_attributes(
-                UserPoolId=user_pool_id,
-                Username=user_id,
-                UserAttributes=[
-                    {
-                        'Name': 'phone_number',
-                        'Value': ''
-                    },
-                ]
-            )
-
-        except ClientError as e:
-            raise e
-
-    @staticmethod
-    def add_user_profile(
-            dynamodb, user_id, user_display_name=None, icon_image_url=None):
-        try:
-            users = dynamodb.Table(os.environ['USERS_TABLE_NAME'])
+            users = dynamodb.Table(os.environ['SNS_USERS_TABLE_NAME'])
             user = {
                 'user_id': user_id,
-                'sync_elasticsearch': 1
+                'password': password,
+                'email': email,
             }
 
             if user_display_name is not None:
@@ -172,26 +156,15 @@ class UserUtil:
             if icon_image_url is not None:
                 user['icon_image_url'] = icon_image_url
 
-            users.put_item(Item=user, ConditionExpression='attribute_not_exists(user_id)')
-        except ClientError as e:
-            raise e
-
-    @staticmethod
-    def add_sns_user_info(dynamodb, user_id, password):
-        try:
-            users = dynamodb.Table(os.environ['SNS_USERS_TABLE_NAME'])
-            user = {
-                'user_id': user_id,
-                'password': password,
-            }
-            users.put_item(Item=user, ConditionExpression='attribute_not_exists(user_id)')
+            users.put_item(Item=user,
+                           ConditionExpression='attribute_not_exists(user_id)')
         except ClientError as e:
             raise e
 
     @staticmethod
     def has_alias_user_id(dynamodb, user_id):
         try:
-            users_table = dynamodb.Table(os.environ['USERS_TABLE_NAME'])
+            users_table = dynamodb.Table(os.environ['SNS_USERS_TABLE_NAME'])
             user = users_table.get_item(
                 Key={
                     'user_id': user_id
@@ -205,19 +178,16 @@ class UserUtil:
             raise e
 
     @staticmethod
-    def wallet_initialization(cognito, user_pool_id, user_id):
+    def get_alias_user_id(dynamodb, user_id):
         try:
-            address = UserUtil.__create_new_account_on_private_chain()
-            cognito.admin_update_user_attributes(
-                UserPoolId=user_pool_id,
-                Username=user_id,
-                UserAttributes=[
-                    {
-                        'Name': 'custom:private_eth_address',
-                        'Value': address
-                    },
-                ]
+            users_table = dynamodb.Table(os.environ['SNS_USERS_TABLE_NAME'])
+            user = users_table.get_item(
+                Key={
+                    'user_id': user_id
+                }
             )
+
+            return user['Item'].get('alias_user_id')
         except ClientError as e:
             raise e
 
@@ -228,22 +198,3 @@ class UserUtil:
                 requested_user_id.lower()):
             return True
         return False
-
-    @staticmethod
-    def __create_new_account_on_private_chain():
-        auth = AWSRequestsAuth(
-            aws_access_key=os.environ['PRIVATE_CHAIN_AWS_ACCESS_KEY'],
-            aws_secret_access_key=os.environ['PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY'],
-            aws_host=os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'],
-            aws_region='ap-northeast-1',
-            aws_service='execute-api'
-        )
-        response = requests.post(
-            settings.PRIVATE_CHAIN_ADD_NEW_ACCOUNT_URL,
-            auth=auth
-        )
-
-        if response.status_code is not 200:
-            raise PrivateChainApiError(response.text)
-
-        return json.loads(response.text)['result']

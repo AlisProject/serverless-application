@@ -51,18 +51,24 @@ class LoginTwitterIndex(LambdaBase):
                 user_pool_id=os.environ['COGNITO_USER_POOL_ID'],
                 user_id=user_info['user_id']):
             try:
-                response = UserUtil.sns_login(
-                    cognito=self.cognito,
-                    user_pool_id=os.environ['COGNITO_USER_POOL_ID'],
-                    user_pool_app_id=os.environ['COGNITO_USER_POOL_APP_ID'],
-                    user_id=user_info['user_id'],
-                    password=settings.TEXT_PASSWORD,
-                    provider=os.environ['THIRD_PARTY_LOGIN']
-                )
 
                 has_alias_user_id = UserUtil.has_alias_user_id(
                     dynamodb=self.dynamodb,
                     user_id=user_info['user_id'],
+                )
+
+                if has_alias_user_id is True:
+                    user_id = UserUtil.get_alias_user_id(user_info['user_id'])
+                else:
+                    user_id = user_info['user_id']
+
+                response = UserUtil.sns_login(
+                    cognito=self.cognito,
+                    user_pool_id=os.environ['COGNITO_USER_POOL_ID'],
+                    user_pool_app_id=os.environ['COGNITO_USER_POOL_APP_ID'],
+                    user_id=user_id,
+                    password=settings.TEXT_PASSWORD,
+                    provider=os.environ['THIRD_PARTY_LOGIN']
                 )
 
                 return ResponseBuilder.response(
@@ -94,34 +100,13 @@ class LoginTwitterIndex(LambdaBase):
                 provider=os.environ['THIRD_PARTY_LOGIN']
             )
 
-            UserUtil.force_non_verified_phone(
-                cognito=self.cognito,
-                user_pool_id=os.environ['COGNITO_USER_POOL_ID'],
-                user_id=user_info['user_id']
-            )
-
-            UserUtil.add_user_profile(
-                dynamodb=self.dynamodb,
-                user_id=user_info['user_id'],
-                user_display_name=user_info['display_name'],
-                icon_image_url=user_info['icon_image_url']
-            )
-
             UserUtil.add_sns_user_info(
                 dynamodb=self.dynamodb,
                 user_id=user_info['user_id'],
-                password=settings.TEXT_PASSWORD
-            )
-
-            has_alias_user_id = UserUtil.has_alias_user_id(
-                dynamodb=self.dynamodb,
-                user_id=user_info['user_id'],
-            )
-
-            UserUtil.wallet_initialization(
-                cognito=self.cognito,
-                user_pool_id=os.environ['COGNITO_USER_POOL_ID'],
-                user_id=user_info['user_id'],
+                password=settings.TEXT_PASSWORD,
+                email=user_info['email'],
+                user_display_name=user_info['display_name'],
+                icon_image_url=user_info['icon_image_url']
             )
 
             return ResponseBuilder.response(
@@ -130,11 +115,10 @@ class LoginTwitterIndex(LambdaBase):
                     'access_token': response['AuthenticationResult']['AccessToken'],
                     'id_token': response['AuthenticationResult']['IdToken'],
                     'refresh_token': response['AuthenticationResult']['RefreshToken'],
-                    'has_alias_user_id': has_alias_user_id,
                     'status': 'sign_up'
                 }
             )
-        except (ClientError, PrivateChainApiError) as e:
+        except (ClientError) as e:
             logging.fatal(e)
             return ResponseBuilder.response(
                 status_code=500,
