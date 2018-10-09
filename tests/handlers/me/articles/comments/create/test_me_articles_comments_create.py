@@ -387,6 +387,7 @@ class TestMeArticlesCommentsCreate(TestCase):
             for i, (args, _) in enumerate(mock_lib.update_unread_notification_manager.call_args_list):
                 self.assertEqual(args[0], self.dynamodb)
 
+                # 最初の2回はメンション通知、最後の1回は投稿者への通知
                 if i < 2:
                     self.assertEqual(args[1], users[i]['user_id'])
                 else:
