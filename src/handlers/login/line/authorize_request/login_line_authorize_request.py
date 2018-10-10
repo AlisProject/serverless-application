@@ -54,7 +54,7 @@ class LoginLineAuthorizeRequest(LambdaBase):
                     cognito=self.cognito,
                     user_id=user_id,
                     password=password,
-                    provider=os.environ['LINE_LOGIN_MARK']
+                    provider=os.environ['THIRD_PARTY_LOGIN_MARK']
                 )
 
                 return {
@@ -77,7 +77,7 @@ class LoginLineAuthorizeRequest(LambdaBase):
                 }
         else:
             try:
-                backed_temp_password = os.environ['LINE_LOGIN_COMMON_TEMP_PASSWORD']
+                backed_temp_password = os.environ['SNS_LOGIN_COMMON_TEMP_PASSWORD']
                 backed_password = secrets.token_hex(settings.TOKEN_SEED_BYTES)
                 response = UserUtil.create_sns_user(
                     cognito=self.cognito,
@@ -85,15 +85,13 @@ class LoginLineAuthorizeRequest(LambdaBase):
                     email=email,
                     backed_temp_password=backed_temp_password,
                     backed_password=backed_password,
-                    provider=os.environ['LINE_LOGIN_MARK']
+                    provider=os.environ['THIRD_PARTY_LOGIN_MARK']
                 )
 
                 UserUtil.force_non_verified_phone(
                     cognito=self.cognito,
                     user_id=user_id
                 )
-
-                UserUtil.wallet_initialization(self.cognito, os.environ['COGNITO_USER_POOL_ID'], user_id)
 
                 password_hash = UserUtil.encrypt_password(backed_password)
 
@@ -103,7 +101,7 @@ class LoginLineAuthorizeRequest(LambdaBase):
                     password=password_hash,
                     email=email,
                     user_display_name=decoded_id_token['name'],
-                    icon_image=decoded_id_token['picture']
+                    icon_image_url=decoded_id_token['picture']
                 )
                 return {
                     'statusCode': 200,
@@ -118,6 +116,11 @@ class LoginLineAuthorizeRequest(LambdaBase):
                 }
             except ClientError as e:
                 logging.fatal(e)
+                if e.response['Error']['Code'] == 'UsernameExistsException':
+                    return {
+                        'statusCode': 400,
+                        'body': json.dumps({'message': 'An account with the email already exists.'})
+                    }
                 return {
                     'statusCode': 500,
                     'body': json.dumps({'message': 'Internal server error'})
