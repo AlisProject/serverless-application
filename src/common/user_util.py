@@ -74,7 +74,7 @@ class UserUtil:
                     'PASSWORD': password
                 },
                 ClientMetadata={
-                    'THIRD_PARTY_LOGIN': provider
+                    'THIRD_PARTY_LOGIN_MARK': provider
                 }
             )
         except ClientError as e:
@@ -96,6 +96,12 @@ class UserUtil:
                         'Value': 'true'
                     }
                 ],
+                ValidationData=[
+                    {
+                        'Name': 'THIRD_PARTY_LOGIN_MARK',
+                        'Value': provider
+                    },
+                ],
                 TemporaryPassword=backed_temp_password,
                 MessageAction='SUPPRESS'
             )
@@ -108,8 +114,7 @@ class UserUtil:
                     'PASSWORD': backed_temp_password
                 },
                 ClientMetadata={
-                    'THIRD_PARTY_LOGIN': provider,
-                    'FIRST_LOGIN': 'first'
+                    'THIRD_PARTY_LOGIN_MARK': provider
                 }
             )
             return cognito.admin_respond_to_auth_challenge(
@@ -156,16 +161,20 @@ class UserUtil:
             raise e
 
     @staticmethod
-    def add_sns_user_info(dynamodb, user_id, password, email, user_display_name, icon_image):
+    def add_sns_user_info(dynamodb, user_id, password, email, user_display_name=None, icon_image_url=None):
         try:
             users = dynamodb.Table(os.environ['SNS_USERS_TABLE_NAME'])
             user = {
                 'user_id': user_id,
                 'password': password,
-                'email': email,
-                'user_display_name': user_display_name,
-                'icon_image_url': icon_image,
+                'email': email
             }
+
+            if user_display_name is not None:
+                user['user_display_name'] = user_display_name
+            if icon_image_url is not None:
+                user['icon_image_url'] = icon_image_url
+
             users.put_item(Item=user, ConditionExpression='attribute_not_exists(user_id)')
         except ClientError as e:
             raise e
@@ -201,14 +210,6 @@ class UserUtil:
             )
         except ClientError as e:
             raise e
-
-    @staticmethod
-    def check_try_to_register_as_line_user(requested_user_id):
-        if re.match(
-            re.compile(r'%s' % settings.LINE_USERNAME_PREFIX.lower()),
-                requested_user_id.lower()):
-            return True
-        return False
 
     @staticmethod
     def __create_new_account_on_private_chain():

@@ -5,12 +5,13 @@ from not_verified_user_error import NotVerifiedUserError
 from unittest import TestCase
 from unittest.mock import MagicMock
 from botocore.exceptions import ClientError
+from tests_util import TestsUtil
 
 
 class TestUserUtil(TestCase):
     def setUp(self):
         self.cognito = boto3.client('cognito-idp')
-        self.dynamodb = boto3.resource('dynamodb')
+        self.dynamodb = TestsUtil.get_dynamodb_client()
         os.environ['COGNITO_USER_POOL_ID'] = 'cognito_user_pool'
 
     def test_verified_phone_and_email_ok(self):
