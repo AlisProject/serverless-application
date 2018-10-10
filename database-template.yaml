@@ -335,7 +335,7 @@ Resources:
   ArticleFraudUser:
     Type: AWS::DynamoDB::Table
     DependsOn:
-    - ArticleInfo
+    - LikeTokenAggregation
     Properties:
       AttributeDefinitions:
         - AttributeName: article_id
@@ -390,6 +390,8 @@ Resources:
         WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
   SnsUsers:
     Type: AWS::DynamoDB::Table
+    DependsOn:
+    - Users
     Properties:
       AttributeDefinitions:
       - AttributeName: user_id
@@ -414,6 +416,8 @@ Resources:
         WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
   Notification:
     Type: AWS::DynamoDB::Table
+    DependsOn:
+    - Users
     Properties:
       AttributeDefinitions:
         - AttributeName: user_id
@@ -456,6 +460,8 @@ Resources:
         WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
   Comment:
     Type: AWS::DynamoDB::Table
+    DependsOn:
+    - Users
     Properties:
       AttributeDefinitions:
         - AttributeName: comment_id
@@ -528,6 +534,8 @@ Resources:
         WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
   Topic:
     Type: AWS::DynamoDB::Table
+    DependsOn:
+    - Comment
     Properties:
       AttributeDefinitions:
         - AttributeName: name
@@ -556,6 +564,8 @@ Resources:
         WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
   Tag:
     Type: AWS::DynamoDB::Table
+    DependsOn:
+    - Comment
     Properties:
       AttributeDefinitions:
         - AttributeName: name
@@ -568,6 +578,8 @@ Resources:
         WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
   Tip:
     Type: AWS::DynamoDB::Table
+    DependsOn:
+    - Comment
     Properties:
       AttributeDefinitions:
         - AttributeName: user_id

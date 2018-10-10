@@ -17,7 +17,7 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   BetaUsersTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
-  LineLoginMark:
+  ThirdPartyLoginMark:
     Type: 'AWS::SSM::Parameter::Value<String>'
 
 Globals:
@@ -34,7 +34,7 @@ Globals:
         BETA_MODE_FLAG: !Ref BetaModeFlag
         USERS_TABLE_NAME: !Ref UsersTableName
         BETA_USERS_TABLE_NAME: !Ref BetaUsersTableName
-        LINE_LOGIN_MARK: !Ref LineLoginMark
+        THIRD_PARTY_LOGIN_MARK: !Ref ThirdPartyLoginMark
 
 Resources:
   SNSRole:

@@ -71,11 +71,11 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   LineChannelSecret:
     Type: 'AWS::SSM::Parameter::Value<String>'
-  LineLoginCommonTempPassword:
+  SnsLoginCommonTempPassword:
     Type: 'AWS::SSM::Parameter::Value<String>'
   LineRedirectUri:
     Type: 'AWS::SSM::Parameter::Value<String>'
-  LineLoginMark:
+  ThirdPartyLoginMark:
     Type: 'AWS::SSM::Parameter::Value<String>'
   LoginSalt:
     Type: 'AWS::SSM::Parameter::Value<String>'
@@ -162,11 +162,6 @@ Resources:
                 type: string
               created_at:
                 type: integer
-          AliasUserCreate:
-            type: object
-            properties:
-              alias_user_id:
-                type: string
           MeArticlesDraftsCreate:
             type: object
             properties:
@@ -612,52 +607,6 @@ Resources:
                   default:
                     statusCode: "200"
                 uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CommentsLikesShow.Arn}/invocations
-                passthroughBehavior: when_no_templates
-                httpMethod: POST
-                type: aws_proxy
-          # for dev endpoint
-          /alias_user:
-            post:
-              description: 'alias_user_idを作成'
-              parametaers:
-              - name: 'alias_user_id'
-                in: 'body'
-                description: 'SNSログインで作成されたユーザーのID'
-                required: true
-                type: 'string'
-              responses:
-                '200':
-                  description: '作成されたAliasUserID'
-                  schema:
-                    type: object
-                    properties:
-                      alias_user_id:
-                        type: 'string'
-              x-amazon-apigateway-integration:
-                responses:
-                  default:
-                    statusCode: "200"
-                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AliasUserCreate.Arn}/invocations
-                passthroughBehavior: when_no_templates
-                httpMethod: POST
-                type: aws_proxy
-          # for dev endpoint
-          /sns_login_initiate:
-            post:
-              description: 'SNSログインユーザーを作成'
-              responses:
-                '200':
-                  description: 'test'
-                  schema:
-                    type: object
-                    properties:
-                      id_token:
-                        type: 'string'
-              x-amazon-apigateway-integration:
-                responses:
-                  default:
-                    statusCode: "200"
-                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SnsLoginInitiate.Arn}/invocations
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
@@ -1651,41 +1600,6 @@ Resources:
             Path: /me/articles/drafts
             Method: get
             RestApiId: !Ref RestApi
-  AliasUserCreate:
-      Type: AWS::Serverless::Function
-      Properties:
-        Handler: handler.lambda_handler
-        Role: !GetAtt LambdaRole.Arn
-        CodeUri: ./deploy/alias_user_create.zip
-        Events:
-          Api:
-            Type: Api
-            Properties:
-              Path: /alias_user
-              Method: post
-              RestApiId: !Ref RestApi
-  # for dev coding
-  SnsLoginInitiate:
-    Type: AWS::Serverless::Function
-    Properties:
-      Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
-      CodeUri: ./deploy/sns_login_initiate.zip
-      Environment:
-        Variables:
-          LINE_CHANNEL_ID: !Ref LineChannelId
-          LINE_CHANNEL_SECRET: !Ref LineChannelSecret
-          LINE_LOGIN_COMMON_TEMP_PASSWORD: !Ref LineLoginCommonTempPassword
-          LOGIN_SALT: !Ref LoginSalt
-          COGNITO_USER_POOL_ID: !Ref CognitoUserPoolId
-          COGNITO_USER_POOL_APP_ID: !Ref CognitoUserPoolAppId
-      Events:
-        Api:
-          Type: Api
-          Properties:
-            Path: /sns_login_initiate
-            Method: post
-            RestApiId: !Ref RestApi
   LoginLineAuthorizeUrl:
     Type: AWS::Serverless::Function
     Properties:
@@ -1713,9 +1627,9 @@ Resources:
         Variables:
           LINE_CHANNEL_ID: !Ref LineChannelId
           LINE_CHANNEL_SECRET: !Ref LineChannelSecret
-          LINE_LOGIN_COMMON_TEMP_PASSWORD: !Ref LineLoginCommonTempPassword
+          SNS_LOGIN_COMMON_TEMP_PASSWORD: !Ref SnsLoginCommonTempPassword
           LINE_REDIRECT_URI: !Ref LineRedirectUri
-          LINE_LOGIN_MARK: !Ref LineLoginMark
+          THIRD_PARTY_LOGIN_MARK: !Ref ThirdPartyLoginMark
           LOGIN_SALT: !Ref LoginSalt
           COGNITO_USER_POOL_ID: !Ref CognitoUserPoolId
           COGNITO_USER_POOL_APP_ID: !Ref CognitoUserPoolAppId
@@ -2120,8 +2034,8 @@ Resources:
       CodeUri: ./deploy/me_alias_create.zip
       Environment:
         Variables:
-          LINE_LOGIN_COMMON_TEMP_PASSWORD: !Ref LineLoginCommonTempPassword
-          LINE_LOGIN_MARK: !Ref LineLoginMark
+          SNS_LOGIN_COMMON_TEMP_PASSWORD: !Ref SnsLoginCommonTempPassword
+          THIRD_PARTY_LOGIN_MARK: !Ref ThirdPartyLoginMark
           LOGIN_SALT: !Ref LoginSalt
           COGNITO_USER_POOL_ID: !Ref CognitoUserPoolId
           COGNITO_USER_POOL_APP_ID: !Ref CognitoUserPoolAppId
@@ -2154,7 +2068,7 @@ Resources:
       CodeUri: ./deploy/cognito_trigger_preauthentication.zip
       Environment:
         Variables:
-          LINE_LOGIN_MARK: !Ref LineLoginMark
+          THIRD_PARTY_LOGIN_MARK: !Ref ThirdPartyLoginMark
   ElasticSearchSearchArticles:
     Type: AWS::Serverless::Function
     Properties:

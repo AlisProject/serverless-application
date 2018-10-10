@@ -59,8 +59,8 @@ aws cloudformation deploy \
     CognitoUserPoolAppId=${SSM_PARAMS_PREFIX}CognitoUserPoolAppId \
     LineChannelId=${SSM_PARAMS_PREFIX}LineChannelId \
     LineChannelSecret=${SSM_PARAMS_PREFIX}LineChannelSecret \
-    LineLoginCommonTempPassword=${SSM_PARAMS_PREFIX}LineLoginCommonTempPassword \
+    SnsLoginCommonTempPassword=${SSM_PARAMS_PREFIX}SnsLoginCommonTempPassword \
     LineRedirectUri=${SSM_PARAMS_PREFIX}LineRedirectUri \
-    LineLoginMark=${SSM_PARAMS_PREFIX}LineLoginMark \
+    ThirdPartyLoginMark=${SSM_PARAMS_PREFIX}ThirdPartyLoginMark \
     LoginSalt=${SSM_PARAMS_PREFIX}LoginSalt \
   --capabilities CAPABILITY_IAM
