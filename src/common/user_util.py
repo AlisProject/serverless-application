@@ -251,6 +251,7 @@ class UserUtil:
             )
             return True
         except ClientError as e:
+            logging.fatal(e)
             if e.response['Error']['Code'] == 'UserNotFoundException':
                 return False
             else:

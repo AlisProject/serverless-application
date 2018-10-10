@@ -4,7 +4,6 @@ import json
 import os
 import settings
 import logging
-import re
 from lambda_base import LambdaBase
 from jsonschema import validate, ValidationError
 from botocore.exceptions import ClientError
@@ -50,8 +49,8 @@ class MeAliasCreate(LambdaBase):
                     byte_hash_data = hash_data.encode()
                     backed_password = UserUtil.decrypt_password(byte_hash_data)
 
-                    backed_temp_password = self.__generate_temp_pass(sns_user)
-                    provider = self.__generate_provider(sns_user)
+                    backed_temp_password = os.environ['SNS_LOGIN_COMMON_TEMP_PASSWORD']
+                    provider = os.environ['THIRD_PARTY_LOGIN_MARK']
 
                     response = UserUtil.create_sns_user(
                         cognito=self.cognito,
@@ -108,18 +107,3 @@ class MeAliasCreate(LambdaBase):
 
         else:
             raise ValidationError('This id is already in use.')
-
-    @staticmethod
-    def __generate_temp_pass(sns_user):
-        if re.match('^LINE_U', sns_user['user_id']):
-            return os.environ['LINE_LOGIN_COMMON_TEMP_PASSWORD']
-        elif re.match('^Twitter', sns_user['user_id']):
-            return 'twitterpass'
-        # TODO: os.environ['TWITTER_LOGIN_COMMON_TEMP_PASSWORD']
-
-    @staticmethod
-    def __generate_provider(sns_user):
-        if re.match('^LINE_U', sns_user['user_id']):
-            return os.environ['LINE_LOGIN_MARK']
-        elif re.match('^Twitter', sns_user['user_id']):
-            return 'twitter'
