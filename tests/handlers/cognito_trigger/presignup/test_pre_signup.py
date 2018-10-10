@@ -154,3 +154,32 @@ class TestPostConfirmation(TestCase):
         presignup = PreSignUp(event=event, context="", dynamodb=dynamodb)
         response = presignup.main()
         self.assertEqual(response['statusCode'], 500)
+
+    def test_admin_create_command_ng(self):
+        event = {
+                'version': '1',
+                'region': 'us-east-1',
+                'userPoolId': 'us-east-xxxxxxxx',
+                'userName': 'hogehoge',
+                'callerContext': {
+                    'awsSdkVersion': 'aws-sdk-js-2.6.4',
+                    'clientId': 'xxxxx'
+                },
+                'triggerSource': 'PreSignUp_AdminCreateUser',
+                'request': {
+                    'userAttributes': {
+                        'phone_number': '',
+                        'email': 'y2@example.net'
+                    },
+                    'validationData': None
+                },
+                'response': {
+                    'autoConfirmUser': False,
+                    'autoVerifyEmail': False,
+                    'autoVerifyPhone': False
+                }
+        }
+
+        presignup = PreSignUp(event=event, context="", dynamodb=dynamodb)
+        response = presignup.main()
+        self.assertEqual(response['statusCode'], 403)

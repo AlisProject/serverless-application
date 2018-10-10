@@ -4,13 +4,13 @@ import settings
 import re
 from jsonschema import validate, ValidationError
 from lambda_base import LambdaBase
-from user_util import UserUtil
+from not_authorized_error import NotAuthorizedError
 
 
 class PreSignUp(LambdaBase):
     def get_schema(self):
         params = self.event
-        if 'triggerSource' in params and params['triggerSource'] == 'PreSignUp_AdminCreateUser' and re.match('^LINE_U', params['userName']):
+        if params.get('triggerSource') == 'PreSignUp_AdminCreateUser' and re.match('^LINE_U', params['userName']):
             return {
                 'type': 'object',
                 'properties': {
@@ -31,19 +31,21 @@ class PreSignUp(LambdaBase):
             raise ValidationError('This username is not allowed')
         validate(params, self.get_schema())
         if params['triggerSource'] == 'PreSignUp_SignUp':
-            if UserUtil.check_try_to_register_as_line_user(params['userName']):
-                raise ValidationError('This username is not allowed')
             response = self.cognito.list_users(
                     UserPoolId=params['userPoolId'],
                     Filter='email = "%s"' % params['request']['userAttributes']['email'],
                 )
             self.__email_exist_check(response)
-        elif params['triggerSource'] == 'PreSignUp_AdminCreateUser':
+        elif (params['triggerSource'] == 'PreSignUp_AdminCreateUser') and \
+             (params['request'].get('validationData') is not None) and \
+             (params['request']['validationData'].get('THIRD_PARTY_LOGIN_MARK') == os.environ['THIRD_PARTY_LOGIN_MARK']):
             response = self.cognito.list_users(
                 UserPoolId=params['userPoolId'],
                 Filter='email = "%s"' % params['request']['userAttributes']['email'],
             )
             self.__email_exist_check(response)
+        elif params['triggerSource'] == 'PreSignUp_AdminCreateUser':
+            raise NotAuthorizedError('Forbidden')
 
     def exec_main_proc(self):
         if os.environ['BETA_MODE_FLAG'] == "1":
