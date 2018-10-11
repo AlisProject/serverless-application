@@ -54,6 +54,8 @@ class MeAliasCreate(LambdaBase):
                     response = UserUtil.create_sns_user(
                         cognito=self.cognito,
                         user_id=body['alias_user_id'],
+                        user_pool_id=os.environ['COGNITO_USER_POOL_ID'],
+                        user_pool_app_id=os.environ['COGNITO_USER_POOL_APP_ID'],
                         email=email,
                         backed_temp_password=backed_temp_password,
                         backed_password=backed_password,
