@@ -10,3 +10,5 @@ requests_aws4auth
 elasticsearch
 pyjwt
 pycrypto
+requests
+requests_oauthlib
