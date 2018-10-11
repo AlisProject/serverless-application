@@ -122,6 +122,12 @@ parameters = {
         'type': 'number',
         'minimum': 1,
         'maximum': 10 ** 24
+    },
+    'oauth_token': {
+        'type': 'string'
+    },
+    'oauth_verifier': {
+        'type': 'string'
     }
 }
 
@@ -195,11 +201,18 @@ TOPIC_INDEX_HASH_KEY = 'topic'
 TAG_DENIED_SYMBOL_PATTERN = '([!-,./:-@[-`{-~]|--| {2})'
 TAG_ALLOWED_SYMBOLS = ['-', ' ']
 
+TWITTER_API_REQUEST_TOKEN_URL = 'https://api.twitter.com/oauth/request_token'
+TWITTER_API_AUTHENTICATE_URL = 'https://api.twitter.com/oauth/authenticate'
+TWITTER_API_ACCESS_TOKEN_URL = 'https://api.twitter.com/oauth/access_token'
+TWITTER_API_VERIFY_CREDENTIALS_URL = 'https://api.twitter.com/1.1/account/verify_credentials.json'
+TWITTER_USERNAME_PREFIX = 'Twitter-'
+FAKE_USER_EMAIL_DOMAIN = 'example.com'
+
+LINE_REQUEST_HEADER = {'content-type': 'application/x-www-form-urlencoded'}
 LINE_AUTHORIZE_URL = 'https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id='
 LINE_TOKEN_END_POINT = 'https://api.line.me/oauth2/v2.1/token'
 LINE_ISSUER = 'https://access.line.me'
-LINE_USERNAME_PREFIX = 'LINE_'
+LINE_USERNAME_PREFIX = 'LINE-'
 LINE_REQUEST_SCOPE = '&scope=openid%20profile%20email'
-EMAIL_SUFFIX = '@example.com'
 TOKEN_SEED_BYTES = 8
 
