@@ -5,12 +5,13 @@ import re
 from jsonschema import validate, ValidationError
 from lambda_base import LambdaBase
 from not_authorized_error import NotAuthorizedError
+from user_util import UserUtil
 
 
 class PreSignUp(LambdaBase):
     def get_schema(self):
         params = self.event
-        if params.get('triggerSource') == 'PreSignUp_AdminCreateUser' and re.match('^LINE_U', params['userName']):
+        if params.get('triggerSource') == 'PreSignUp_AdminCreateUser' and re.match('^LINE-', params['userName']):
             return {
                 'type': 'object',
                 'properties': {
@@ -31,6 +32,15 @@ class PreSignUp(LambdaBase):
             raise ValidationError('This username is not allowed')
         validate(params, self.get_schema())
         if params['triggerSource'] == 'PreSignUp_SignUp':
+
+            # 通常サインアップユーザーにTwitterから始まる名前を許可しないバリデーション
+            if params['request']['validationData'] is None or \
+               params['request']['validationData'].get('THIRD_PARTY_LOGIN_MARK') != os.environ['THIRD_PARTY_LOGIN_MARK']:
+                if UserUtil.check_try_to_register_as_twitter_user(params['userName']):
+                    raise ValidationError('This username is not allowed')
+                if UserUtil.check_try_to_register_as_line_user(params['userName']):
+                    raise ValidationError('This username is not allowed')
+
             response = self.cognito.list_users(
                     UserPoolId=params['userPoolId'],
                     Filter='email = "%s"' % params['request']['userAttributes']['email'],

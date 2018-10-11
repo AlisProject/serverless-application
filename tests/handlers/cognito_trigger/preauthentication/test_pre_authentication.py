@@ -131,7 +131,6 @@ class TestPreAuthentication(TestCase):
         }
         pre_authentication = PreAuthentication(event=event, context="", dynamodb=dynamodb)
         response = pre_authentication.main()
-        print(response)
 
         self.assertEqual(event, response)
 
