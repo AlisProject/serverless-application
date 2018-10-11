@@ -88,11 +88,8 @@ class ESUtil:
     def search_user(elasticsearch, word, limit, page):
         body = {
             "query": {
-                "bool": {
-                    "should": [
-                        {"wildcard": {"user_id": f"*{word}*"}},
-                        {"wildcard": {"user_display_name": f"*{word}*"}}
-                    ]
+                "wildcard": {
+                    "search_name": f"*{word}*"
                 }
             },
             "from": limit*(page-1),
