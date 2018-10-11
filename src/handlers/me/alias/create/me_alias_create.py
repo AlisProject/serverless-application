@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# TODO: 大文字小文字の区別
 import json
 import os
 import settings
@@ -72,7 +71,7 @@ class MeAliasCreate(LambdaBase):
                     UserUtil.add_alias_to_sns_user(body['alias_user_id'], sns_users_table, user_id)
 
                     # Usersテーブルにユーザーを作成
-                    UserUtil.update_user_profile(
+                    UserUtil.add_user_profile(
                         dynamodb=self.dynamodb,
                         user_id=body['alias_user_id'],
                         user_display_name=sns_user['user_display_name'],

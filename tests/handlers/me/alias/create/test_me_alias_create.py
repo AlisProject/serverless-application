@@ -78,7 +78,7 @@ class TestMeAliasCreate(TestCase):
             user_mock.add_alias_to_sns_user.return_value = None
             user_mock.delete_sns_id_cognito_user.return_value = True
             user_mock.has_alias_user_id.return_value = True
-            user_mock.update_user_profile.return_value = None
+            user_mock.add_user_profile.return_value = None
 
             response = MeAliasCreate(event=event, context="", dynamodb=dynamodb).main()
             self.assertEqual(response['statusCode'], 200)
