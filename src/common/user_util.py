@@ -63,11 +63,11 @@ class UserUtil:
                 raise e
 
     @staticmethod
-    def sns_login(cognito, user_id, password, provider):
+    def sns_login(cognito, user_id, user_pool_id, user_pool_app_id, password, provider):
         try:
             return cognito.admin_initiate_auth(
-                UserPoolId=os.environ['COGNITO_USER_POOL_ID'],
-                ClientId=os.environ['COGNITO_USER_POOL_APP_ID'],
+                UserPoolId=user_pool_id,
+                ClientId=user_pool_app_id,
                 AuthFlow='ADMIN_NO_SRP_AUTH',
                 AuthParameters={
                     'USERNAME': user_id,
@@ -81,10 +81,10 @@ class UserUtil:
             raise e
 
     @staticmethod
-    def create_sns_user(cognito, user_id, email, backed_temp_password, backed_password, provider):
+    def create_sns_user(cognito, user_id, user_pool_id, user_pool_app_id, email, backed_temp_password, backed_password, provider):
         try:
             cognito.admin_create_user(
-                UserPoolId=os.environ['COGNITO_USER_POOL_ID'],
+                UserPoolId=user_pool_id,
                 Username=user_id,
                 UserAttributes=[
                     {
@@ -106,8 +106,8 @@ class UserUtil:
                 MessageAction='SUPPRESS'
             )
             response = cognito.admin_initiate_auth(
-                UserPoolId=os.environ['COGNITO_USER_POOL_ID'],
-                ClientId=os.environ['COGNITO_USER_POOL_APP_ID'],
+                UserPoolId=user_pool_id,
+                ClientId=user_pool_app_id,
                 AuthFlow='ADMIN_NO_SRP_AUTH',
                 AuthParameters={
                     'USERNAME': user_id,
@@ -118,8 +118,8 @@ class UserUtil:
                 }
             )
             return cognito.admin_respond_to_auth_challenge(
-                UserPoolId=os.environ['COGNITO_USER_POOL_ID'],
-                ClientId=os.environ['COGNITO_USER_POOL_APP_ID'],
+                UserPoolId=user_pool_id,
+                ClientId=user_pool_app_id,
                 ChallengeName='NEW_PASSWORD_REQUIRED',
                 ChallengeResponses={
                     'USERNAME': user_id,
@@ -147,7 +147,7 @@ class UserUtil:
             raise e
 
     @staticmethod
-    def update_user_profile(dynamodb, user_id, user_display_name, icon_image):
+    def add_user_profile(dynamodb, user_id, user_display_name, icon_image):
         try:
             users = dynamodb.Table(os.environ['USERS_TABLE_NAME'])
             user = {
@@ -276,3 +276,33 @@ class UserUtil:
                 'statusCode': 500,
                 'body': json.dumps({'message': 'Internal server error'})
             }
+
+    @staticmethod
+    def get_alias_user_id(dynamodb, user_id):
+        try:
+            users_table = dynamodb.Table(os.environ['SNS_USERS_TABLE_NAME'])
+            user = users_table.get_item(
+                Key={
+                    'user_id': user_id
+                }
+            )
+            return user['Item'].get('alias_user_id')
+
+        except ClientError as e:
+            raise e
+
+    @staticmethod
+    def check_try_to_register_as_twitter_user(requested_user_id):
+        if re.match(
+            re.compile(r'%s' % settings.TWITTER_USERNAME_PREFIX.lower()),
+                requested_user_id.lower()):
+            return True
+        return False
+
+    @staticmethod
+    def check_try_to_register_as_line_user(requested_user_id):
+        if re.match(
+            re.compile(r'%s' % settings.LINE_USERNAME_PREFIX.lower()),
+                requested_user_id.lower()):
+            return True
+        return False
