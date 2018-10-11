@@ -63,4 +63,7 @@ aws cloudformation deploy \
     LineRedirectUri=${SSM_PARAMS_PREFIX}LineRedirectUri \
     ThirdPartyLoginMark=${SSM_PARAMS_PREFIX}ThirdPartyLoginMark \
     LoginSalt=${SSM_PARAMS_PREFIX}LoginSalt \
+    TwitterConsumerKey=${SSM_PARAMS_PREFIX}TwitterConsumerKey \
+    TwitterConsumerSecret=${SSM_PARAMS_PREFIX}TwitterConsumerSecret \
+    TwitterOauthCallbackUrl=${SSM_PARAMS_PREFIX}TwitterOauthCallbackUrl \
   --capabilities CAPABILITY_IAM

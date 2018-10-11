@@ -67,6 +67,12 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   SaltForArticleId:
     Type: 'AWS::SSM::Parameter::Value<String>'
+  TwitterConsumerKey:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  TwitterConsumerSecret:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  TwitterOauthCallbackUrl:
+    Type: 'AWS::SSM::Parameter::Value<String>'
   LineChannelId:
     Type: 'AWS::SSM::Parameter::Value<String>'
   LineChannelSecret:
@@ -607,6 +613,71 @@ Resources:
                   default:
                     statusCode: "200"
                 uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CommentsLikesShow.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /login/twitter:
+            post:
+              description: "Twitterログインの実施"
+              parameters:
+              - name: request
+                in: body
+                required: true
+                schema:
+                  type: object
+                  required:
+                  - oauth_token
+                  - oauth_verifier
+                  properties:
+                    oauth_token:
+                      type: string
+                    oauth_verifier:
+                      type: string
+              responses:
+                "200":
+                  description: "アクセストークンを取得"
+                  schema:
+                    type: object
+                    properties:
+                      access_token:
+                        type: string
+                      refresh_token:
+                        type: string
+                      id_token:
+                        type: string
+                      has_alias_user_id:
+                        type: string
+                "401":
+                  description: "認証エラー"
+                  schema:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LoginTwitter.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /login/twitter/authorization_url:
+            get:
+              description: "Twitter認証画面のURLを取得する"
+              responses:
+                "200":
+                  description: "Twitter認証画面のURL"
+                  schema:
+                    type: object
+                    properties:
+                      url:
+                        type: string
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LoginTwitterAuthorizationUrl.Arn}/invocations
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
@@ -1598,6 +1669,46 @@ Resources:
           Type: Api
           Properties:
             Path: /me/articles/drafts
+            Method: get
+            RestApiId: !Ref RestApi
+  LoginTwitter:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/login_twitter_index.zip
+      Environment:
+        Variables:
+          TWITTER_CONSUMER_KEY: !Ref TwitterConsumerKey
+          TWITTER_CONSUMER_SECRET: !Ref TwitterConsumerSecret
+          SNS_LOGIN_COMMON_TEMP_PASSWORD: !Ref SnsLoginCommonTempPassword
+          COGNITO_USER_POOL_ID: !Ref CognitoUserPoolId
+          COGNITO_USER_POOL_APP_ID: !Ref CognitoUserPoolAppId
+          THIRD_PARTY_LOGIN_MARK: !Ref ThirdPartyLoginMark
+          LOGIN_SALT: !Ref LoginSalt
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /login/twitter
+            Method: post
+            RestApiId: !Ref RestApi
+  LoginTwitterAuthorizationUrl:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/login_twitter_authorization_url.zip
+      Environment:
+        Variables:
+          TWITTER_CONSUMER_KEY: !Ref TwitterConsumerKey
+          TWITTER_CONSUMER_SECRET: !Ref TwitterConsumerSecret
+          TWITTER_OAUTH_CALLBACK_URL: !Ref TwitterOauthCallbackUrl
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /login/twitter/authorization_url
             Method: get
             RestApiId: !Ref RestApi
   LoginLineAuthorizeUrl:
