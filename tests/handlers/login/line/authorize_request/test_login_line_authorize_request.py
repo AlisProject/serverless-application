@@ -9,12 +9,13 @@ from botocore.exceptions import ClientError
 dynamodb = TestsUtil.get_dynamodb_client()
 
 
-class TestUserUtil(TestCase):
+class TestLoginLineAuthorizeRequest(TestCase):
     def setUp(self):
         os.environ['LINE_CHANNEL_ID'] = 'aaaaaaaaaaa'
         os.environ['LINE_CHANNEL_SECRET'] = 'bbbbbbbbbbbbb'
         os.environ['LINE_REDIRECT_URI'] = 'https://xxxxxxx.com'
         os.environ['COGNITO_USER_POOL_ID'] = 'cognito-id'
+        os.environ['COGNITO_USER_POOL_APP_ID'] = 'pool-id'
         os.environ['SNS_LOGIN_COMMON_TEMP_PASSWORD'] = 'Password!'
         os.environ['THIRD_PARTY_LOGIN_MARK'] = 'line'
         TestsUtil.set_all_tables_name_to_env()
@@ -22,14 +23,14 @@ class TestUserUtil(TestCase):
 
         self.sns_users_table_items = [
             {
-                'user_id': 'LINE_U_test_user',
+                'user_id': 'LINE-U_test_user',
                 'user_display_name': 'test_display_name01',
                 'email': 'test01@example.com',
                 'password': 'test_pass',
                 'icon_image_url': 'https://xxxxxxxx'
             },
             {
-                'user_id': 'LINE_U_test_user02',
+                'user_id': 'LINE-U_test_user02',
                 'user_display_name': 'test_display_name02',
                 'email': 'test02@example.com',
                 'password': 'test_pass',
@@ -83,7 +84,7 @@ class TestUserUtil(TestCase):
                     'access_token': 'aaaaa',
                     'id_token': 'bbbbb',
                     'refresh_token': 'ccccc',
-                    'last_auth_user': 'LINE_Uxxxxx',
+                    'last_auth_user': 'LINE-Uxxxxx',
                     'has_alias_user_id': False,
                     'status': 'sign_up'
                 }
@@ -128,7 +129,7 @@ class TestUserUtil(TestCase):
                     'access_token': 'aaaaa',
                     'id_token': 'bbbbb',
                     'refresh_token': 'ccccc',
-                    'last_auth_user': 'LINE_U_test_user',
+                    'last_auth_user': 'LINE-U_test_user',
                     'has_alias_user_id': False,
                     'status': 'login'
                 }
@@ -202,7 +203,7 @@ class TestUserUtil(TestCase):
                 'operation_name'
             )
             user_mock.force_non_verified_phone.return_value = None
-            user_mock.update_user_profile.return_value = None
+            user_mock.add_user_profile.return_value = None
             user_mock.add_sns_user_info.return_value = None
             user_mock.has_alias_user_id.return_value = True
 
@@ -277,7 +278,7 @@ class TestUserUtil(TestCase):
                 'operation_name'
             )
             user_mock.force_non_verified_phone.return_value = None
-            user_mock.update_user_profile.return_value = None
+            user_mock.add_user_profile.return_value = None
             user_mock.add_sns_user_info.return_value = None
             user_mock.has_alias_user_id.return_value = False
 
@@ -288,6 +289,6 @@ class TestUserUtil(TestCase):
             self.assertEqual(
                 json.loads(response['body']),
                 {
-                    'message': 'An account with the email already exists.'
+                    'message': 'EmailExistsException'
                 }
             )

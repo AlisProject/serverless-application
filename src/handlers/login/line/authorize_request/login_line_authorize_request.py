@@ -5,10 +5,12 @@ import settings
 import requests
 import jwt
 import logging
+import traceback
 import secrets
 from lambda_base import LambdaBase
 from botocore.exceptions import ClientError
 from user_util import UserUtil
+from response_builder import ResponseBuilder
 
 
 class LoginLineAuthorizeRequest(LambdaBase):
@@ -21,22 +23,18 @@ class LoginLineAuthorizeRequest(LambdaBase):
     def exec_main_proc(self):
         body = json.loads(self.event.get('body'))
         code = body['code']
-        headers = {'content-type': 'application/x-www-form-urlencoded'}
         client_id = os.environ['LINE_CHANNEL_ID']
         client_secret = os.environ['LINE_CHANNEL_SECRET']
-        data = {
-            'grant_type': 'authorization_code',
-            'code': code,
-            'redirect_uri': os.environ['LINE_REDIRECT_URI'],
-            'client_id': client_id,
-            'client_secret': client_secret
-        }
-        params = self.__get_line_jwt(data, headers)
-        decoded_id_token = self.__decode_jwt(params, client_secret, client_id)
+
+        # JWTの取得
+        got_jwt = self.__get_line_jwt(code, client_id, client_secret, settings.LINE_REQUEST_HEADER)
+        # JWTのデコード
+        decoded_id_token = self.__decode_jwt(got_jwt, client_secret, client_id)
+
         user_id = settings.LINE_USERNAME_PREFIX + decoded_id_token['sub']
 
         if not decoded_id_token['email']:
-            email = user_id + settings.EMAIL_SUFFIX
+            email = user_id + '@' + settings.FAKE_USER_EMAIL_DOMAIN
         else:
             email = decoded_id_token['email']
 
@@ -47,50 +45,53 @@ class LoginLineAuthorizeRequest(LambdaBase):
                 hash_data = sns_user['password']
                 byte_hash_data = hash_data.encode()
                 password = UserUtil.decrypt_password(byte_hash_data)
+
                 has_alias_user_id = UserUtil.has_alias_user_id(self.dynamodb, user_id)
                 if sns_user is not None and 'alias_user_id' in sns_user:
                     user_id = sns_user['alias_user_id']
+
                 response = UserUtil.sns_login(
                     cognito=self.cognito,
+                    user_pool_id=os.environ['COGNITO_USER_POOL_ID'],
+                    user_pool_app_id=os.environ['COGNITO_USER_POOL_APP_ID'],
                     user_id=user_id,
                     password=password,
                     provider=os.environ['THIRD_PARTY_LOGIN_MARK']
                 )
 
-                return {
-                    'statusCode': 200,
-                    'body': json.dumps({
+                return ResponseBuilder.response(
+                    status_code=200,
+                    body={
                         'access_token': response['AuthenticationResult']['AccessToken'],
-                        'last_auth_user': user_id,
                         'id_token': response['AuthenticationResult']['IdToken'],
                         'refresh_token': response['AuthenticationResult']['RefreshToken'],
-                        'status': 'login',
-                        'has_alias_user_id': has_alias_user_id
-                    })
-                }
+                        'last_auth_user': user_id,
+                        'has_alias_user_id': has_alias_user_id,
+                        'status': 'login'
+                    }
+                )
 
             except ClientError as e:
+                logging.info(self.event)
                 logging.fatal(e)
-                return {
-                    'statusCode': 500,
-                    'body': json.dumps({'message': 'Internal server error'})
-                }
+                traceback.print_exc()
+                return ResponseBuilder.response(
+                    status_code=500,
+                    body={'message': 'Internal server error'}
+                )
         else:
             try:
                 backed_temp_password = os.environ['SNS_LOGIN_COMMON_TEMP_PASSWORD']
                 backed_password = secrets.token_hex(settings.TOKEN_SEED_BYTES)
                 response = UserUtil.create_sns_user(
                     cognito=self.cognito,
+                    user_pool_id=os.environ['COGNITO_USER_POOL_ID'],
+                    user_pool_app_id=os.environ['COGNITO_USER_POOL_APP_ID'],
                     user_id=user_id,
                     email=email,
                     backed_temp_password=backed_temp_password,
                     backed_password=backed_password,
                     provider=os.environ['THIRD_PARTY_LOGIN_MARK']
-                )
-
-                UserUtil.force_non_verified_phone(
-                    cognito=self.cognito,
-                    user_id=user_id
                 )
 
                 password_hash = UserUtil.encrypt_password(backed_password)
@@ -103,31 +104,40 @@ class LoginLineAuthorizeRequest(LambdaBase):
                     user_display_name=decoded_id_token['name'],
                     icon_image_url=decoded_id_token['picture']
                 )
-                return {
-                    'statusCode': 200,
-                    'body': json.dumps({
+                return ResponseBuilder.response(
+                    status_code=200,
+                    body={
                         'access_token': response['AuthenticationResult']['AccessToken'],
-                        'last_auth_user': user_id,
                         'id_token': response['AuthenticationResult']['IdToken'],
                         'refresh_token': response['AuthenticationResult']['RefreshToken'],
-                        'status': 'sign_up',
-                        'has_alias_user_id': False
-                    })
-                }
-            except ClientError as e:
-                logging.fatal(e)
-                if e.response['Error']['Code'] == 'UsernameExistsException':
-                    return {
-                        'statusCode': 400,
-                        'body': json.dumps({'message': 'An account with the email already exists.'})
+                        'last_auth_user': user_id,
+                        'has_alias_user_id': False,
+                        'status': 'sign_up'
                     }
-                return {
-                    'statusCode': 500,
-                    'body': json.dumps({'message': 'Internal server error'})
-                }
+                )
+            except ClientError as e:
+                logging.info(self.event)
+                logging.fatal(e)
+                traceback.print_exc()
+                if e.response['Error']['Code'] == 'UsernameExistsException':
+                    return ResponseBuilder.response(
+                        status_code=400,
+                        body={'message': 'EmailExistsException'}
+                    )
+                return ResponseBuilder.response(
+                    status_code=500,
+                    body={'message': 'Internal server error'}
+                )
 
     @staticmethod
-    def __get_line_jwt(data, headers):
+    def __get_line_jwt(code, client_id, client_secret, headers):
+        data = {
+            'grant_type': 'authorization_code',
+            'code': code,
+            'redirect_uri': os.environ['LINE_REDIRECT_URI'],
+            'client_id': client_id,
+            'client_secret': client_secret
+        }
         response = requests.post(settings.LINE_TOKEN_END_POINT, data=data, headers=headers)
         return json.loads(response.text)
 
@@ -136,3 +146,5 @@ class LoginLineAuthorizeRequest(LambdaBase):
         response = jwt.decode(params['id_token'], client_secret, audience=client_id,
                               issuer=settings.LINE_ISSUER, algorithms=['HS256'])
         return response
+
+
