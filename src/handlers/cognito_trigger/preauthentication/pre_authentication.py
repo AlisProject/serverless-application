@@ -35,12 +35,13 @@ class PreAuthentication(LambdaBase):
                     'body': json.dumps({'message': 'Internal server error'})
                 }
 
-        if (sns_user is not None) and (self.__is_third_party_login_validation_data(params)):
+        # ThirdPartyLoginのケース
+        if self.__is_third_party_login_validation_data(params):
             return self.event
-        elif (sns_user is None) and (self.__is_third_party_login_validation_data(params)):
-            return self.event
+        # 通常SignInのケース
         elif (sns_user is None) and (params['request']['validationData'] == {}):
             return self.event
+        # ValidationDataが存在しない場合のadmin_initiate_authコマンドでのSignInのケース
         elif (sns_user is None) and (params['request'].get('validationData') is None):
             raise NotAuthorizedError('Forbidden')
         else:
