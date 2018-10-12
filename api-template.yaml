@@ -681,7 +681,7 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
-          /login/line/authorize_url:
+          /login/line/authorization_url:
             get:
               description: 'LINEログイン用URL返却のAPI'
               responses:
@@ -700,7 +700,7 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
-          /login/line/authorize_request:
+          /login/line:
             post:
               description: 'LINEログインユーザーを作成'
               responses:
@@ -1725,7 +1725,7 @@ Resources:
         Api:
           Type: Api
           Properties:
-            Path: /login/line/authorize_url
+            Path: /login/line/authorization_url
             Method: get
             RestApiId: !Ref RestApi
   LoginLineAuthorizeRequest:
@@ -1748,7 +1748,7 @@ Resources:
         Api:
           Type: Api
           Properties:
-            Path: /login/line/authorize_request
+            Path: /login/line
             Method: post
             RestApiId: !Ref RestApi
   MeArticlesDraftsCreate:

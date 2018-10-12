@@ -2,7 +2,6 @@ from abc import ABCMeta, abstractmethod
 import json
 import logging
 import traceback
-from user_util import UserUtil
 from jsonschema import ValidationError
 from record_not_found_error import RecordNotFoundError
 from not_authorized_error import NotAuthorizedError
