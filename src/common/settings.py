@@ -171,6 +171,7 @@ ng_user_name = [
     'xml', 'year'
 ]
 
+ALLOWED_BLOCK_TYPES = ['Rule', 'Text', 'Paragraph', 'Image', 'Quote', 'Heading']
 
 LIKED_RETRY_COUNT = 3
 
