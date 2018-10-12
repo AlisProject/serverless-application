@@ -1,10 +1,12 @@
 import os
 import json
+import settings
 from unittest import TestCase
 from login_line_authorize_request import LoginLineAuthorizeRequest
 from unittest.mock import patch, MagicMock
 from tests_util import TestsUtil
 from botocore.exceptions import ClientError
+from exceptions import LineOauthError
 
 dynamodb = TestsUtil.get_dynamodb_client()
 
@@ -50,9 +52,10 @@ class TestLoginLineAuthorizeRequest(TestCase):
                 'picture': 'https://xxxxxxx.png',
                 'email': 'test@example.com'
             }))
+    @patch("login_line_authorize_request.LoginLineAuthorizeRequest._LoginLineAuthorizeRequest__get_line_jwt",
+           MagicMock(return_value='xxxxxxx'))
     def test_main_sign_up_ok(self):
-        with patch('login_line_authorize_request.UserUtil') as user_mock, \
-             patch('login_line_authorize_request.LoginLineAuthorizeRequest') as line_mock:
+        with patch('login_line_authorize_request.UserUtil') as user_mock:
             event = {
                 'body': {
                     'code': 'testcode',
@@ -73,8 +76,6 @@ class TestLoginLineAuthorizeRequest(TestCase):
                     'RefreshToken': 'ccccc'
                 }
             }
-
-            line_mock.__get_line_jwt.return_value = 'xxxxxxx'
 
             response = LoginLineAuthorizeRequest(event=event, context="", dynamodb=dynamodb).main()
             self.assertEqual(response['statusCode'], 200)
@@ -97,9 +98,10 @@ class TestLoginLineAuthorizeRequest(TestCase):
                 'picture': 'https://xxxxxxx.png',
                 'email': 'test01@example.com'
             }))
+    @patch("login_line_authorize_request.LoginLineAuthorizeRequest._LoginLineAuthorizeRequest__get_line_jwt",
+           MagicMock(return_value='xxxxxxx'))
     def test_main_login_ok(self):
-        with patch('login_line_authorize_request.UserUtil') as user_mock, \
-             patch('login_line_authorize_request.LoginLineAuthorizeRequest') as line_mock:
+        with patch('login_line_authorize_request.UserUtil') as user_mock:
             event = {
                 'body': {
                     'code': 'testcode',
@@ -118,8 +120,6 @@ class TestLoginLineAuthorizeRequest(TestCase):
                 }
             }
             user_mock.has_alias_user_id.return_value = False
-
-            line_mock.__get_line_jwt.return_value = 'xxxxxxx'
 
             response = LoginLineAuthorizeRequest(event=event, context="", dynamodb=dynamodb).main()
             self.assertEqual(response['statusCode'], 200)
@@ -142,9 +142,10 @@ class TestLoginLineAuthorizeRequest(TestCase):
                'picture': 'https://xxxxxxx.png',
                'email': 'test@example.com'
            }))
+    @patch("login_line_authorize_request.LoginLineAuthorizeRequest._LoginLineAuthorizeRequest__get_line_jwt",
+           MagicMock(return_value='xxxxxxx'))
     def test_main_login_ok_with_alias(self):
-        with patch('login_line_authorize_request.UserUtil') as user_mock, \
-             patch('login_line_authorize_request.LoginLineAuthorizeRequest') as line_mock:
+        with patch('login_line_authorize_request.UserUtil') as user_mock:
             event = {
                 'body': {
                     'code': 'testcode',
@@ -163,8 +164,6 @@ class TestLoginLineAuthorizeRequest(TestCase):
                 }
             }
             user_mock.has_alias_user_id.return_value = True
-
-            line_mock.__get_line_jwt.return_value = 'xxxxxxx'
 
             response = LoginLineAuthorizeRequest(event=event, context="", dynamodb=dynamodb).main()
             self.assertEqual(response['statusCode'], 200)
@@ -187,9 +186,10 @@ class TestLoginLineAuthorizeRequest(TestCase):
                 'picture': 'https://xxxxxxx.png',
                 'email': 'test@example.com'
             }))
+    @patch("login_line_authorize_request.LoginLineAuthorizeRequest._LoginLineAuthorizeRequest__get_line_jwt",
+           MagicMock(return_value='xxxxxxx'))
     def test_main_sign_up_with_exception(self):
-        with patch('login_line_authorize_request.UserUtil') as user_mock, \
-             patch('login_line_authorize_request.LoginLineAuthorizeRequest') as line_mock:
+        with patch('login_line_authorize_request.UserUtil') as user_mock:
             event = {
                 'body': {
                     'code': 'testcode',
@@ -207,8 +207,6 @@ class TestLoginLineAuthorizeRequest(TestCase):
             user_mock.add_sns_user_info.return_value = None
             user_mock.has_alias_user_id.return_value = True
 
-            line_mock.__get_line_jwt.return_value = 'xxxxxxx'
-
             response = LoginLineAuthorizeRequest(event=event, context="", dynamodb=dynamodb).main()
             self.assertEqual(response['statusCode'], 500)
             self.assertEqual(
@@ -225,9 +223,10 @@ class TestLoginLineAuthorizeRequest(TestCase):
                 'picture': 'https://xxxxxxx.png',
                 'email': 'test01@example.com'
             }))
+    @patch("login_line_authorize_request.LoginLineAuthorizeRequest._LoginLineAuthorizeRequest__get_line_jwt",
+           MagicMock(return_value='xxxxxxx'))
     def test_main_login_with_exception(self):
-        with patch('login_line_authorize_request.UserUtil') as user_mock, \
-             patch('login_line_authorize_request.LoginLineAuthorizeRequest') as line_mock:
+        with patch('login_line_authorize_request.UserUtil') as user_mock:
             event = {
                 'body': {
                     'code': 'testcode',
@@ -243,8 +242,6 @@ class TestLoginLineAuthorizeRequest(TestCase):
                 'operation_name'
             )
             user_mock.has_alias_user_id.return_value = False
-
-            line_mock.__get_line_jwt.return_value = 'xxxxxxx'
 
             response = LoginLineAuthorizeRequest(event=event, context="", dynamodb=dynamodb).main()
             self.assertEqual(response['statusCode'], 500)
@@ -262,9 +259,10 @@ class TestLoginLineAuthorizeRequest(TestCase):
                 'picture': 'https://xxxxxxx.png',
                 'email': 'test@example.com'
             }))
+    @patch("login_line_authorize_request.LoginLineAuthorizeRequest._LoginLineAuthorizeRequest__get_line_jwt",
+           MagicMock(return_value='xxxxxxx'))
     def test_main_sign_up_with_email_check_exception(self):
-        with patch('login_line_authorize_request.UserUtil') as user_mock, \
-             patch('login_line_authorize_request.LoginLineAuthorizeRequest') as line_mock:
+        with patch('login_line_authorize_request.UserUtil') as user_mock:
             event = {
                 'body': {
                     'code': 'testcode',
@@ -282,8 +280,6 @@ class TestLoginLineAuthorizeRequest(TestCase):
             user_mock.add_sns_user_info.return_value = None
             user_mock.has_alias_user_id.return_value = False
 
-            line_mock.__get_line_jwt.return_value = 'xxxxxxx'
-
             response = LoginLineAuthorizeRequest(event=event, context="", dynamodb=dynamodb).main()
             self.assertEqual(response['statusCode'], 400)
             self.assertEqual(
@@ -292,3 +288,23 @@ class TestLoginLineAuthorizeRequest(TestCase):
                     'message': 'EmailExistsException'
                 }
             )
+
+    @patch("login_line_authorize_request.LoginLineAuthorizeRequest._LoginLineAuthorizeRequest__get_line_jwt",
+           MagicMock(side_effect=LineOauthError(
+               endpoint=settings.LINE_TOKEN_END_POINT,
+               status_code=400,
+               message=json.dumps('error')
+           )))
+    def test_line_400_api_error(self):
+        event = {
+            'body': {
+                'code': 'testcode',
+            }
+        }
+
+        event['body'] = json.dumps(event['body'])
+
+        response = LoginLineAuthorizeRequest(event=event, context="", dynamodb=dynamodb).main()
+        self.assertEqual(response['statusCode'], 400)
+
+

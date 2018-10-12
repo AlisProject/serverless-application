@@ -11,6 +11,7 @@ from lambda_base import LambdaBase
 from botocore.exceptions import ClientError
 from user_util import UserUtil
 from response_builder import ResponseBuilder
+from exceptions import LineOauthError
 
 
 class LoginLineAuthorizeRequest(LambdaBase):
@@ -26,8 +27,18 @@ class LoginLineAuthorizeRequest(LambdaBase):
         client_id = os.environ['LINE_CHANNEL_ID']
         client_secret = os.environ['LINE_CHANNEL_SECRET']
 
-        # JWTの取得
-        got_jwt = self.__get_line_jwt(code, client_id, client_secret, settings.LINE_REQUEST_HEADER)
+        try:
+            # JWTの取得
+            got_jwt = self.__get_line_jwt(code, client_id, client_secret, settings.LINE_REQUEST_HEADER)
+
+        except LineOauthError as e:
+            logging.info(self.event)
+            logging.fatal(e)
+            traceback.print_exc()
+            return ResponseBuilder.response(
+                status_code=e.status_code,
+                body={'message': json.loads(e.message)}
+            )
         # JWTのデコード
         decoded_id_token = self.__decode_jwt(got_jwt, client_secret, client_id)
 
@@ -139,6 +150,12 @@ class LoginLineAuthorizeRequest(LambdaBase):
             'client_secret': client_secret
         }
         response = requests.post(settings.LINE_TOKEN_END_POINT, data=data, headers=headers)
+        if response.status_code is not 200:
+            raise LineOauthError(
+                endpoint=settings.LINE_TOKEN_END_POINT,
+                status_code=response.status_code,
+                message=response.text
+            )
         return json.loads(response.text)
 
     @staticmethod
