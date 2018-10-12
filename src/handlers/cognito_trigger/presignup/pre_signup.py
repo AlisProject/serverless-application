@@ -11,7 +11,8 @@ from user_util import UserUtil
 class PreSignUp(LambdaBase):
     def get_schema(self):
         params = self.event
-        if params.get('triggerSource') == 'PreSignUp_AdminCreateUser' and re.match('^LINE-', params['userName']):
+        # TwitterのIDは30文字以下なので条件分岐を作成していない
+        if params.get('triggerSource') == 'PreSignUp_AdminCreateUser' and re.match(settings.LINE_USERNAME_PREFIX, params['userName']):
             return {
                 'type': 'object',
                 'properties': {
@@ -46,16 +47,19 @@ class PreSignUp(LambdaBase):
                     Filter='email = "%s"' % params['request']['userAttributes']['email'],
                 )
             self.__email_exist_check(response)
-        elif (params['triggerSource'] == 'PreSignUp_AdminCreateUser') and \
-             (params['request'].get('validationData') is not None) and \
-             (params['request']['validationData'].get('THIRD_PARTY_LOGIN_MARK') == os.environ['THIRD_PARTY_LOGIN_MARK']):
-            response = self.cognito.list_users(
-                UserPoolId=params['userPoolId'],
-                Filter='email = "%s"' % params['request']['userAttributes']['email'],
-            )
-            self.__email_exist_check(response)
         elif params['triggerSource'] == 'PreSignUp_AdminCreateUser':
-            raise NotAuthorizedError('Forbidden')
+            if (params['request'].get('validationData') is not None) and \
+             (params['request']['validationData'].get('THIRD_PARTY_LOGIN_MARK') == os.environ['THIRD_PARTY_LOGIN_MARK']):
+                response = self.cognito.list_users(
+                    UserPoolId=params['userPoolId'],
+                    Filter='email = "%s"' % params['request']['userAttributes']['email'],
+                )
+                self.__email_exist_check(response)
+            else:
+                raise NotAuthorizedError('Forbidden')
+        # 現状CognitoTriggerは'PreSignUp_SignUp','PreSignUp_AdminCreateUser'の２種類のみなので異なるTriggerがリクエストされた場合は例外にする
+        else:
+            raise Exception
 
     def exec_main_proc(self):
         if os.environ['BETA_MODE_FLAG'] == "1":

@@ -262,3 +262,31 @@ class TestPreSignUp(TestCase):
         presignup = PreSignUp(event=event, context="", dynamodb=dynamodb)
         response = presignup.main()
         self.assertEqual(response['statusCode'], 403)
+
+    def test_raise_unrecognize_trigger_exception(self):
+        event = {
+            'version': '1',
+            'region': 'us-east-1',
+            'userPoolId': 'us-east-xxxxxxxx',
+            'userName': 'line-test',
+            'callerContext': {
+                'awsSdkVersion': 'aws-sdk-js-2.6.4',
+                'clientId': 'xxxxx'
+            },
+            'triggerSource': 'PreSignUp_hogehoge',
+            'request': {
+                'userAttributes': {
+                    'phone_number': '',
+                    'email': 'test@example.net'
+                },
+                'validationData': None
+            },
+            'response': {
+                'autoConfirmUser': False,
+                'autoVerifyEmail': False,
+                'autoVerifyPhone': False
+            }
+        }
+        presignup = PreSignUp(event=event, context="", dynamodb=dynamodb)
+        response = presignup.main()
+        self.assertEqual(response['statusCode'], 500)
