@@ -6,6 +6,7 @@ from lambda_base import LambdaBase
 from jsonschema import ValidationError
 from boto3.dynamodb.conditions import Key
 from botocore.exceptions import ClientError
+from not_authorized_error import NotAuthorizedError
 
 
 class PreAuthentication(LambdaBase):
@@ -40,6 +41,8 @@ class PreAuthentication(LambdaBase):
             return self.event
         elif (sns_user is None) and (params['request']['validationData'] == {}):
             return self.event
+        elif (sns_user is None) and (params['request'].get('validationData') is None):
+            raise NotAuthorizedError('Forbidden')
         else:
             raise ValidationError('Please login with registered sns')
 

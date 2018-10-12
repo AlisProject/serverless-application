@@ -37,6 +37,7 @@ class PreSignUp(LambdaBase):
             if params['request']['validationData'] is None or \
                params['request']['validationData'].get('THIRD_PARTY_LOGIN_MARK') != os.environ['THIRD_PARTY_LOGIN_MARK']:
                 if UserUtil.check_try_to_register_as_twitter_user(params['userName']):
+                    print('ここ')
                     raise ValidationError('This username is not allowed')
                 if UserUtil.check_try_to_register_as_line_user(params['userName']):
                     raise ValidationError('This username is not allowed')
