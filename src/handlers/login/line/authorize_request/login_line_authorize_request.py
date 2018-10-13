@@ -58,9 +58,9 @@ class LoginLineAuthorizeRequest(LambdaBase):
                 sns_user = sns_users.get_item(Key={'user_id': user_id}).get('Item')
                 hash_data = sns_user['password']
                 byte_hash_data = hash_data.encode()
-                iv = sns_user['iv']
-                aes_iv = iv.encode()
-                password = UserUtil.decrypt_password(byte_hash_data, base64.b64decode(aes_iv))
+                decoded_iv = sns_user['iv']
+                iv = decoded_iv.encode()
+                password = UserUtil.decrypt_password(byte_hash_data, iv)
 
                 has_alias_user_id = UserUtil.has_alias_user_id(self.dynamodb, user_id)
                 if sns_user is not None and 'alias_user_id' in sns_user:

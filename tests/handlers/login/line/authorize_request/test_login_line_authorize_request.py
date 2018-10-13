@@ -29,6 +29,7 @@ class TestLoginLineAuthorizeRequest(TestCase):
                 'user_display_name': 'test_display_name01',
                 'email': 'test01@example.com',
                 'password': 'test_pass',
+                'iv': 'iv',
                 'icon_image_url': 'https://xxxxxxxx'
             },
             {
@@ -36,6 +37,7 @@ class TestLoginLineAuthorizeRequest(TestCase):
                 'user_display_name': 'test_display_name02',
                 'email': 'test02@example.com',
                 'password': 'test_pass',
+                'iv': 'iv',
                 'icon_image_url': 'https://xxxxxxxx',
                 'alias_user_id': 'aliasuser'
             }

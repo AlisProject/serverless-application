@@ -27,6 +27,7 @@ class TestLoginTwitterIndex(TestCase):
                 'user_display_name': 'test_display_name02',
                 'email': 'test02@example.com',
                 'password': 'test_pass',
+                'iv': 'iv',
                 'icon_image_url': 'https://xxxxxxxx'
             },
             {
@@ -34,6 +35,7 @@ class TestLoginTwitterIndex(TestCase):
                 'user_display_name': 'test_display_name02',
                 'email': 'test02@example.com',
                 'password': 'test_pass',
+                'iv': 'iv',
                 'icon_image_url': 'https://xxxxxxxx',
                 'alias_user_id': 'aliasuser'
             }

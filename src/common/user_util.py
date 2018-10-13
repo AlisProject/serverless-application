@@ -245,8 +245,9 @@ class UserUtil:
     @staticmethod
     def decrypt_password(byte_hash_data, iv):
         encrypted_data = base64.b64decode(byte_hash_data)
+        aes_iv = base64.b64decode(iv)
         salt = os.environ['LOGIN_SALT']
-        cipher = AES.new(salt, AES.MODE_CBC, iv)
+        cipher = AES.new(salt, AES.iyaMODE_CBC, aes_iv)
         return cipher.decrypt(encrypted_data).decode()
 
     @staticmethod

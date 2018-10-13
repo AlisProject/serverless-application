@@ -73,9 +73,9 @@ class LoginTwitterIndex(LambdaBase):
                 sns_user = sns_users.get_item(Key={'user_id': user_info['user_id']}).get('Item')
                 hash_data = sns_user['password']
                 byte_hash_data = hash_data.encode()
-                iv = sns_user['iv']
-                aes_iv = iv.encode()
-                password = UserUtil.decrypt_password(byte_hash_data, base64.b64decode(aes_iv))
+                decoded_iv = sns_user['iv']
+                iv = decoded_iv.encode()
+                password = UserUtil.decrypt_password(byte_hash_data, iv)
 
                 response = UserUtil.sns_login(
                     cognito=self.cognito,
