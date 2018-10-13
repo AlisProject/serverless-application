@@ -147,21 +147,22 @@ class UserUtil:
             raise e
 
     @staticmethod
-    def add_user_profile(dynamodb, user_id, user_display_name, icon_image):
+    def add_user_profile(dynamodb, user_id, user_display_name, icon_image=None):
         try:
             users = dynamodb.Table(os.environ['USERS_TABLE_NAME'])
             user = {
                 'user_id': user_id,
                 'user_display_name': user_display_name,
-                'icon_image_url': icon_image,
                 'sync_elasticsearch': 1
             }
+            if icon_image is not None:
+                user['icon_image_url'] = icon_image
             users.put_item(Item=user, ConditionExpression='attribute_not_exists(user_id)')
         except ClientError as e:
             raise e
 
     @staticmethod
-    def add_sns_user_info(dynamodb, user_id, password, email, user_display_name=None, icon_image_url=None):
+    def add_sns_user_info(dynamodb, user_id, password, email, icon_image_url=None):
         try:
             users = dynamodb.Table(os.environ['SNS_USERS_TABLE_NAME'])
             user = {
@@ -170,8 +171,6 @@ class UserUtil:
                 'email': email
             }
 
-            if user_display_name is not None:
-                user['user_display_name'] = user_display_name
             if icon_image_url is not None:
                 user['icon_image_url'] = icon_image_url
 

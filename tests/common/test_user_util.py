@@ -22,6 +22,7 @@ class TestUserUtil(TestCase):
             }
         ]
         TestsUtil.create_table(self.dynamodb, os.environ['SNS_USERS_TABLE_NAME'], self.sns_users_table_items)
+        TestsUtil.create_table(self.dynamodb, os.environ['USERS_TABLE_NAME'], [])
 
     def test_verified_phone_and_email_ok(self):
         event = {
@@ -237,7 +238,6 @@ class TestUserUtil(TestCase):
             'user_id',
             'password',
             'email',
-            'display_name',
             'icon_image_url'
         )
         self.assertEqual(response, None)
@@ -254,7 +254,6 @@ class TestUserUtil(TestCase):
                 'user_id',
                 'password',
                 'email',
-                'display_name',
                 'icon_image_url'
             )
 
@@ -389,6 +388,15 @@ class TestUserUtil(TestCase):
                 'display_name',
                 'icon_image_url'
             )
+
+    def test_add_user_profile_non_picture_ok(self):
+        res = UserUtil.add_user_profile(
+            self.dynamodb,
+            'test-user',
+            'test-user',
+            None
+        )
+        self.assertEqual(res, None)
 
 
 class PrivateChainApiFakeResponse:

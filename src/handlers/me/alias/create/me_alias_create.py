@@ -72,12 +72,17 @@ class MeAliasCreate(LambdaBase):
                     # SnsUsersテーブルにaliasを追加
                     UserUtil.add_alias_to_sns_user(body['alias_user_id'], sns_users_table, user_id)
 
+                    if 'icon_image_url' in sns_user:
+                        icon_image_url = sns_user['icon_image_url']
+                    else:
+                        icon_image_url = None
+
                     # Usersテーブルにユーザーを作成
                     UserUtil.add_user_profile(
                         dynamodb=self.dynamodb,
                         user_id=body['alias_user_id'],
-                        user_display_name=sns_user['user_display_name'],
-                        icon_image=sns_user['icon_image_url']
+                        user_display_name=body['alias_user_id'],
+                        icon_image=icon_image_url
                     )
 
                     has_alias_user_id = UserUtil.has_alias_user_id(self.dynamodb, user_id)

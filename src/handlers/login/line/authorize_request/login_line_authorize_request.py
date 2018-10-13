@@ -115,7 +115,6 @@ class LoginLineAuthorizeRequest(LambdaBase):
                     user_id=user_id,
                     password=password_hash,
                     email=email,
-                    user_display_name=decoded_id_token['name'],
                     icon_image_url=decoded_id_token['picture']
                 )
                 return ResponseBuilder.response(

@@ -21,18 +21,21 @@ class TestMeAliasCreate(TestCase):
         self.sns_users_table_items = [
             {
                 'user_id': 'LINE_U_test_user',
-                'user_display_name': 'test_display_name01',
                 'email': 'test01@example.com',
                 'password': 'test_pass',
                 'icon_image_url': 'https://xxxxxxxx'
             },
             {
                 'user_id': 'Twitter_test_user',
-                'user_display_name': 'test_display_name02',
                 'email': 'test02@example.com',
                 'password': 'test_pass',
                 'icon_image_url': 'https://xxxxxxxx',
                 'alias_user_id': 'aliasusername02'
+            },
+            {
+                'user_id': 'Twitter_test_user_2',
+                'email': 'test02@example.com',
+                'password': 'test_pass',
             }
         ]
         TestsUtil.create_table(dynamodb, os.environ['SNS_USERS_TABLE_NAME'], self.sns_users_table_items)
