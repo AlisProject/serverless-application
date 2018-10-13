@@ -4,6 +4,8 @@ import json
 import requests
 import settings
 import logging
+import string
+import secrets
 from exceptions import PrivateChainApiError
 from aws_requests_auth.aws_auth import AWSRequestsAuth
 from botocore.exceptions import ClientError
@@ -162,12 +164,13 @@ class UserUtil:
             raise e
 
     @staticmethod
-    def add_sns_user_info(dynamodb, user_id, password, email, icon_image_url=None):
+    def add_sns_user_info(dynamodb, user_id, password, iv, email, icon_image_url=None):
         try:
             users = dynamodb.Table(os.environ['SNS_USERS_TABLE_NAME'])
             user = {
                 'user_id': user_id,
                 'password': password,
+                'iv': iv,
                 'email': email
             }
 
@@ -228,17 +231,22 @@ class UserUtil:
         return json.loads(response.text)['result']
 
     @staticmethod
-    def encrypt_password(plain_text_password):
+    def generate_password():
+        seeds = string.ascii_letters + string.digits
+        password = ''.join(secrets.choice(seeds) for i in range(32))
+        return password
+
+    @staticmethod
+    def encrypt_password(plain_text_password, iv):
         salt = os.environ['LOGIN_SALT']
-        cipher = AES.new(salt)
-        base64.b64encode(cipher.encrypt(plain_text_password))
+        cipher = AES.new(salt, AES.MODE_CBC, iv)
         return base64.b64encode(cipher.encrypt(plain_text_password)).decode()
 
     @staticmethod
-    def decrypt_password(byte_hash_data):
+    def decrypt_password(byte_hash_data, iv):
         encrypted_data = base64.b64decode(byte_hash_data)
         salt = os.environ['LOGIN_SALT']
-        cipher = AES.new(salt)
+        cipher = AES.new(salt, AES.MODE_CBC, iv)
         return cipher.decrypt(encrypted_data).decode()
 
     @staticmethod
@@ -292,16 +300,12 @@ class UserUtil:
 
     @staticmethod
     def check_try_to_register_as_twitter_user(requested_user_id):
-        if re.match(
-            re.compile(r'%s' % settings.TWITTER_USERNAME_PREFIX.lower()),
-                requested_user_id.lower()):
+        if re.match(settings.TWITTER_USERNAME_PREFIX, requested_user_id):
             return True
         return False
 
     @staticmethod
     def check_try_to_register_as_line_user(requested_user_id):
-        if re.match(
-            re.compile(r'%s' % settings.LINE_USERNAME_PREFIX.lower()),
-                requested_user_id.lower()):
+        if re.match(settings.LINE_USERNAME_PREFIX, requested_user_id):
             return True
         return False

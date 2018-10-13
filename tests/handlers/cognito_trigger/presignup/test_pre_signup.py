@@ -100,7 +100,7 @@ class TestPreSignUp(TestCase):
         response = presignup.main()
         self.assertEqual(response['statusCode'], 400)
 
-    @patch("pre_signup.PreSignUp._PreSignUp__correct_users",
+    @patch("pre_signup.PreSignUp._PreSignUp__filter_users",
            MagicMock(return_value='xxxxxxx'))
     @patch("pre_signup.PreSignUp._PreSignUp__email_exist_check",
            MagicMock(return_value='xxxxxxx'))
@@ -117,7 +117,7 @@ class TestPreSignUp(TestCase):
         response = presignup.main()
         self.assertEqual(response['userName'], 'yamasita')
 
-    @patch("pre_signup.PreSignUp._PreSignUp__correct_users",
+    @patch("pre_signup.PreSignUp._PreSignUp__filter_users",
            MagicMock(return_value='xxxxxxx'))
     @patch("pre_signup.PreSignUp._PreSignUp__email_exist_check",
            MagicMock(return_value='xxxxxxx'))
@@ -202,7 +202,7 @@ class TestPreSignUp(TestCase):
             'version': '1',
             'region': 'us-east-1',
             'userPoolId': 'us-east-xxxxxxxx',
-            'userName': 'line-test',
+            'userName': 'LINE-test',
             'callerContext': {
                 'awsSdkVersion': 'aws-sdk-js-2.6.4',
                 'clientId': 'xxxxx'
@@ -240,35 +240,11 @@ class TestPreSignUp(TestCase):
         self.assertEqual(response['statusCode'], 400)
 
         event = {
-            'userName': 'twitter-xxxxx',
-            'triggerSource': 'PreSignUp_SignUp',
-            'request': {
-                'validationData': None
-            }
-        }
-        presignup = PreSignUp(event=event, context="", dynamodb=dynamodb)
-        response = presignup.main()
-        self.assertEqual(response['statusCode'], 400)
-
-        event = {
-            'userName': 'twitter-xxxxx',
+            'userName': 'Twitter-xxxxx',
             'triggerSource': 'PreSignUp_AdminCreateUser',
             'request': {
                 'validationData': {
                     'THIRD_PARTY_LOGIN_MARK': 'line'
-                }
-            }
-        }
-        presignup = PreSignUp(event=event, context="", dynamodb=dynamodb)
-        response = presignup.main()
-        self.assertEqual(response['statusCode'], 403)
-
-        event = {
-            'userName': 'twitter-xxxxx',
-            'triggerSource': 'PreSignUp_AdminCreateUser',
-            'request': {
-                'validationData': {
-                    'some_value': 'line'
                 }
             }
         }

@@ -320,8 +320,6 @@ class TestUserUtil(TestCase):
 
     def test_check_try_to_register_as_twitter_user_ng(self):
         self.assertTrue(UserUtil.check_try_to_register_as_twitter_user('Twitter-xxxxxxx'))
-        self.assertTrue(UserUtil.check_try_to_register_as_twitter_user('twitter-xxxxxxx'))
-        self.assertTrue(UserUtil.check_try_to_register_as_twitter_user('TWITTER-xxxxxxx'))
 
     def test_check_try_to_register_as_twitter_user_ok(self):
         self.assertFalse(UserUtil.check_try_to_register_as_twitter_user('myuser'))

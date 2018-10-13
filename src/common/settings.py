@@ -214,5 +214,6 @@ LINE_TOKEN_END_POINT = 'https://api.line.me/oauth2/v2.1/token'
 LINE_ISSUER = 'https://access.line.me'
 LINE_USERNAME_PREFIX = 'LINE-'
 LINE_REQUEST_SCOPE = '&scope=openid%20profile%20email'
-TOKEN_SEED_BYTES = 8
+PASSWORD_LENGTH = 32
+AES_IV_BYTES = 16
 

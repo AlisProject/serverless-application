@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
 import settings
-import re
 from jsonschema import validate, ValidationError
 from lambda_base import LambdaBase
 from not_authorized_error import NotAuthorizedError
@@ -12,7 +11,8 @@ class PreSignUp(LambdaBase):
     def get_schema(self):
         params = self.event
         # TwitterのIDは30文字以下なので条件分岐を作成していない
-        if params.get('triggerSource') == 'PreSignUp_AdminCreateUser' and re.match(settings.LINE_USERNAME_PREFIX, params['userName']):
+        if params.get('triggerSource') == 'PreSignUp_AdminCreateUser' and \
+           UserUtil.check_try_to_register_as_line_user(params['userName']):
             return {
                 'type': 'object',
                 'properties': {

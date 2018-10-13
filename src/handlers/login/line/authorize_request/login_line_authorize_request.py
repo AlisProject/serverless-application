@@ -6,7 +6,7 @@ import requests
 import jwt
 import logging
 import traceback
-import secrets
+import base64
 from lambda_base import LambdaBase
 from botocore.exceptions import ClientError
 from user_util import UserUtil
@@ -58,7 +58,9 @@ class LoginLineAuthorizeRequest(LambdaBase):
                 sns_user = sns_users.get_item(Key={'user_id': user_id}).get('Item')
                 hash_data = sns_user['password']
                 byte_hash_data = hash_data.encode()
-                password = UserUtil.decrypt_password(byte_hash_data)
+                iv = sns_user['iv']
+                aes_iv = iv.encode()
+                password = UserUtil.decrypt_password(byte_hash_data, base64.b64decode(aes_iv))
 
                 has_alias_user_id = UserUtil.has_alias_user_id(self.dynamodb, user_id)
                 if sns_user is not None and 'alias_user_id' in sns_user:
@@ -96,7 +98,7 @@ class LoginLineAuthorizeRequest(LambdaBase):
         else:
             try:
                 backed_temp_password = os.environ['SNS_LOGIN_COMMON_TEMP_PASSWORD']
-                backed_password = secrets.token_hex(settings.TOKEN_SEED_BYTES)
+                backed_password = UserUtil.generate_password()
                 response = UserUtil.create_sns_user(
                     cognito=self.cognito,
                     user_pool_id=os.environ['COGNITO_USER_POOL_ID'],
@@ -108,12 +110,15 @@ class LoginLineAuthorizeRequest(LambdaBase):
                     provider=os.environ['THIRD_PARTY_LOGIN_MARK']
                 )
 
-                password_hash = UserUtil.encrypt_password(backed_password)
+                aes_iv = os.urandom(settings.AES_IV_BYTES)
+                encrypted_password = UserUtil.encrypt_password(backed_password, aes_iv)
+                iv = base64.b64encode(aes_iv).decode()
 
                 UserUtil.add_sns_user_info(
                     dynamodb=self.dynamodb,
                     user_id=user_id,
-                    password=password_hash,
+                    password=encrypted_password,
+                    iv=iv,
                     email=email,
                     icon_image_url=decoded_id_token['picture']
                 )
