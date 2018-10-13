@@ -1,6 +1,7 @@
 import os
 import json
 from unittest import TestCase
+from unittest.mock import MagicMock, patch
 from pre_signup import PreSignUp
 from tests_util import TestsUtil
 
@@ -99,16 +100,27 @@ class TestPreSignUp(TestCase):
         response = presignup.main()
         self.assertEqual(response['statusCode'], 400)
 
+    @patch("pre_signup.PreSignUp._PreSignUp__correct_users",
+           MagicMock(return_value='xxxxxxx'))
+    @patch("pre_signup.PreSignUp._PreSignUp__email_exist_check",
+           MagicMock(return_value='xxxxxxx'))
     def test_validate_ok(self):
         os.environ['BETA_MODE_FLAG'] = "0"
         event = {
             'userName': 'yamasita',
-            'triggerSource': ''
+            'request': {
+                'validationData': None
+            },
+            'triggerSource': 'PreSignUp_SignUp'
         }
         presignup = PreSignUp(event=event, context="", dynamodb=dynamodb)
         response = presignup.main()
         self.assertEqual(response['userName'], 'yamasita')
 
+    @patch("pre_signup.PreSignUp._PreSignUp__correct_users",
+           MagicMock(return_value='xxxxxxx'))
+    @patch("pre_signup.PreSignUp._PreSignUp__email_exist_check",
+           MagicMock(return_value='xxxxxxx'))
     def test_correct_beta_user(self):
         os.environ['BETA_MODE_FLAG'] = "1"
         event = {
@@ -117,9 +129,10 @@ class TestPreSignUp(TestCase):
                 'userAttributes': {
                     'phone_number': '',
                     'email': 'test@example.com'
-                }
+                },
+                'validationData': None
             },
-            'triggerSource': ''
+            'triggerSource': 'PreSignUp_SignUp'
         }
         presignup = PreSignUp(event=event, context="", dynamodb=dynamodb)
         response = presignup.main()

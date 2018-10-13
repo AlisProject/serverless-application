@@ -42,18 +42,12 @@ class PreSignUp(LambdaBase):
                 if UserUtil.check_try_to_register_as_line_user(params['userName']):
                     raise ValidationError('This username is not allowed')
 
-            response = self.cognito.list_users(
-                    UserPoolId=params['userPoolId'],
-                    Filter='email = "%s"' % params['request']['userAttributes']['email'],
-                )
+            response = self.__filter_users(self.cognito, params)
             self.__email_exist_check(response)
         elif params['triggerSource'] == 'PreSignUp_AdminCreateUser':
             if (params['request'].get('validationData') is not None) and \
              (params['request']['validationData'].get('THIRD_PARTY_LOGIN_MARK') == os.environ['THIRD_PARTY_LOGIN_MARK']):
-                response = self.cognito.list_users(
-                    UserPoolId=params['userPoolId'],
-                    Filter='email = "%s"' % params['request']['userAttributes']['email'],
-                )
+                response = self.__filter_users(self.cognito, params)
                 self.__email_exist_check(response)
             else:
                 raise NotAuthorizedError('Forbidden')
@@ -82,3 +76,10 @@ class PreSignUp(LambdaBase):
             for attribute in user['Attributes']:
                 if attribute['Name'] == 'email_verified' and attribute['Value'] == 'true':
                     raise ValidationError('This email is already exists')
+
+    @staticmethod
+    def __filter_users(cognito, params):
+        return cognito.list_users(
+            UserPoolId=params['userPoolId'],
+            Filter='email = "%s"' % params['request']['userAttributes']['email'],
+        )
