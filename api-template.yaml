@@ -2170,7 +2170,6 @@ Resources:
             Path: /topics
             Method: get
             RestApiId: !Ref RestApi
-  #  for dev coding
   CognitoTriggerPreAuthentication:
     Type: AWS::Serverless::Function
     Properties:

@@ -25,8 +25,6 @@ Resources:
           AttributeType: S
         - AttributeName: user_id
           AttributeType: S
-        - AttributeName: alias_user_id
-          AttributeType: S
         - AttributeName: status
           AttributeType: S
         - AttributeName: sort_key
@@ -54,17 +52,6 @@ Resources:
               KeyType: HASH
             - AttributeName: sort_key
               KeyType: RANGE
-          Projection:
-            ProjectionType: ALL
-          ProvisionedThroughput:
-            ReadCapacityUnits: !Ref MinDynamoReadCapacitty
-            WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
-        - IndexName: alias_user_id-sort_key-index
-          KeySchema:
-          - AttributeName: alias_user_id
-            KeyType: HASH
-          - AttributeName: sort_key
-            KeyType: RANGE
           Projection:
             ProjectionType: ALL
           ProvisionedThroughput:
@@ -335,7 +322,7 @@ Resources:
   ArticleFraudUser:
     Type: AWS::DynamoDB::Table
     DependsOn:
-    - LikeTokenAggregation
+    - ArticleInfo
     Properties:
       AttributeDefinitions:
         - AttributeName: article_id
