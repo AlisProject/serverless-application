@@ -46,7 +46,9 @@ class MeAliasCreate(LambdaBase):
                     email = sns_user['email']
                     hash_data = sns_user['password']
                     byte_hash_data = hash_data.encode()
-                    backed_password = UserUtil.decrypt_password(byte_hash_data)
+                    decoded_iv = sns_user['iv']
+                    iv = decoded_iv.encode()
+                    backed_password = UserUtil.decrypt_password(byte_hash_data, iv)
 
                     backed_temp_password = os.environ['SNS_LOGIN_COMMON_TEMP_PASSWORD']
                     provider = os.environ['THIRD_PARTY_LOGIN_MARK']

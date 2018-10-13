@@ -1,6 +1,5 @@
 import os
 import json
-import re
 from unittest import TestCase
 from me_alias_create import MeAliasCreate
 from unittest.mock import patch
@@ -15,6 +14,7 @@ class TestMeAliasCreate(TestCase):
         os.environ['SNS_LOGIN_COMMON_TEMP_PASSWORD'] = 'password!'
         os.environ['THIRD_PARTY_LOGIN_MARK'] = 'line'
         os.environ['COGNITO_USER_POOL_ID'] = 'xxxxxxx'
+        os.environ['COGNITO_USER_POOL_APP_ID'] = 'xxxxxxx'
         TestsUtil.set_all_tables_name_to_env()
         TestsUtil.delete_all_tables(dynamodb)
 
@@ -23,12 +23,14 @@ class TestMeAliasCreate(TestCase):
                 'user_id': 'LINE_U_test_user',
                 'email': 'test01@example.com',
                 'password': 'test_pass',
+                'iv': 'iv',
                 'icon_image_url': 'https://xxxxxxxx'
             },
             {
                 'user_id': 'Twitter_test_user',
                 'email': 'test02@example.com',
                 'password': 'test_pass',
+                'iv': 'iv',
                 'icon_image_url': 'https://xxxxxxxx',
                 'alias_user_id': 'aliasusername02'
             },
@@ -36,6 +38,7 @@ class TestMeAliasCreate(TestCase):
                 'user_id': 'Twitter_test_user_2',
                 'email': 'test02@example.com',
                 'password': 'test_pass',
+                'iv': 'iv'
             }
         ]
         TestsUtil.create_table(dynamodb, os.environ['SNS_USERS_TABLE_NAME'], self.sns_users_table_items)
