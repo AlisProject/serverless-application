@@ -51,11 +51,11 @@ class UserUtil:
                 raise e
 
     @staticmethod
-    def exists_user(dynamodb, user_id):
+    def exists_user(dynamodb, external_provider_user_id):
         try:
-            sns_users = dynamodb.Table(os.environ['SNS_USERS_TABLE_NAME'])
-            sns_user = sns_users.get_item(Key={'user_id': user_id}).get('Item')
-            if sns_user is not None:
+            external_provider_users = dynamodb.Table(os.environ['EXTERNAL_PROVIDER_USERS_TABLE_NAME'])
+            external_provider_user = external_provider_users.get_item(Key={'external_provider_user_id': external_provider_user_id}).get('Item')
+            if external_provider_user is not None:
                 return True
             return False
         except ClientError as e:
@@ -65,7 +65,7 @@ class UserUtil:
                 raise e
 
     @staticmethod
-    def sns_login(cognito, user_id, user_pool_id, user_pool_app_id, password, provider):
+    def external_provider_login(cognito, user_id, user_pool_id, user_pool_app_id, password, provider):
         try:
             return cognito.admin_initiate_auth(
                 UserPoolId=user_pool_id,
@@ -76,14 +76,14 @@ class UserUtil:
                     'PASSWORD': password
                 },
                 ClientMetadata={
-                    'THIRD_PARTY_LOGIN_MARK': provider
+                    'EXTERNAL_PROVIDER_LOGIN_MARK': provider
                 }
             )
         except ClientError as e:
             raise e
 
     @staticmethod
-    def create_sns_user(cognito, user_id, user_pool_id, user_pool_app_id, email, backed_temp_password, backed_password, provider):
+    def create_external_provider_user(cognito, user_id, user_pool_id, user_pool_app_id, email, backed_temp_password, backed_password, provider):
         try:
             cognito.admin_create_user(
                 UserPoolId=user_pool_id,
@@ -100,7 +100,7 @@ class UserUtil:
                 ],
                 ValidationData=[
                     {
-                        'Name': 'THIRD_PARTY_LOGIN_MARK',
+                        'Name': 'EXTERNAL_PROVIDER_LOGIN_MARK',
                         'Value': provider
                     },
                 ],
@@ -116,7 +116,7 @@ class UserUtil:
                     'PASSWORD': backed_temp_password
                 },
                 ClientMetadata={
-                    'THIRD_PARTY_LOGIN_MARK': provider
+                    'EXTERNAL_PROVIDER_LOGIN_MARK': provider
                 }
             )
             return cognito.admin_respond_to_auth_challenge(
@@ -164,33 +164,33 @@ class UserUtil:
             raise e
 
     @staticmethod
-    def add_sns_user_info(dynamodb, user_id, password, iv, email, icon_image_url=None):
+    def add_external_provider_user_info(dynamodb, external_provider_user_id, password, iv, email, icon_image_url=None):
         try:
-            users = dynamodb.Table(os.environ['SNS_USERS_TABLE_NAME'])
-            user = {
-                'user_id': user_id,
+            external_provider_users = dynamodb.Table(os.environ['EXTERNAL_PROVIDER_USERS_TABLE_NAME'])
+            external_provider_user = {
+                'external_provider_user_id': external_provider_user_id,
                 'password': password,
                 'iv': iv,
                 'email': email
             }
 
             if icon_image_url is not None:
-                user['icon_image_url'] = icon_image_url
+                external_provider_user['icon_image_url'] = icon_image_url
 
-            users.put_item(Item=user, ConditionExpression='attribute_not_exists(user_id)')
+            external_provider_users.put_item(Item=external_provider_user, ConditionExpression='attribute_not_exists(external_provider_user_id)')
         except ClientError as e:
             raise e
 
     @staticmethod
-    def has_alias_user_id(dynamodb, user_id):
+    def has_user_id(dynamodb, external_provider_user_id):
         try:
-            sns_users_table = dynamodb.Table(os.environ['SNS_USERS_TABLE_NAME'])
-            sns_user = sns_users_table.get_item(
+            external_provider_users_table = dynamodb.Table(os.environ['EXTERNAL_PROVIDER_USERS_TABLE_NAME'])
+            external_provider_user = external_provider_users_table.get_item(
                 Key={
-                    'user_id': user_id
+                    'external_provider_user_id': external_provider_user_id
                 }
             )
-            if ('Item' in sns_user) and ('alias_user_id' in sns_user['Item']):
+            if ('Item' in external_provider_user) and ('user_id' in external_provider_user['Item']):
                 return True
             return False
         except ClientError as e:
@@ -251,7 +251,7 @@ class UserUtil:
         return cipher.decrypt(encrypted_data).decode()
 
     @staticmethod
-    def delete_sns_id_cognito_user(cognito, user_id):
+    def delete_external_provider_id_cognito_user(cognito, user_id):
         try:
             cognito.admin_delete_user(
                 UserPoolId=os.environ['COGNITO_USER_POOL_ID'],
@@ -266,16 +266,16 @@ class UserUtil:
                 raise e
 
     @staticmethod
-    def add_alias_to_sns_user(alias_user_id, sns_users_table, user_id):
+    def add_user_id_to_external_provider_user(user_id, external_provider_users_table, external_provider_user_id):
         expression_attribute_values = {
-            ':alias_user_id': alias_user_id
+            ':user_id': user_id
         }
         try:
-            sns_users_table.update_item(
+            external_provider_users_table.update_item(
                 Key={
-                    'user_id': user_id
+                    'external_provider_user_id': external_provider_user_id
                 },
-                UpdateExpression="set alias_user_id=:alias_user_id",
+                UpdateExpression="set user_id=:user_id",
                 ExpressionAttributeValues=expression_attribute_values
             )
         except ClientError as e:
@@ -286,15 +286,15 @@ class UserUtil:
             }
 
     @staticmethod
-    def get_alias_user_id(dynamodb, user_id):
+    def get_user_id(dynamodb, external_provider_user_id):
         try:
-            users_table = dynamodb.Table(os.environ['SNS_USERS_TABLE_NAME'])
-            user = users_table.get_item(
+            external_provider_users_table = dynamodb.Table(os.environ['EXTERNAL_PROVIDER_USERS_TABLE_NAME'])
+            external_provider_user = external_provider_users_table.get_item(
                 Key={
-                    'user_id': user_id
+                    'external_provider_user_id': external_provider_user_id
                 }
             )
-            return user['Item'].get('alias_user_id')
+            return external_provider_user['Item'].get('user_id')
 
         except ClientError as e:
             raise e

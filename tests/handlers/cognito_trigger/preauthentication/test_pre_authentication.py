@@ -11,24 +11,24 @@ class TestPreAuthentication(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        os.environ['THIRD_PARTY_LOGIN_MARK'] = 'test_marker'
-        sns_user_items = [
-            {'user_id': 'sns_user', 'password': 'password', 'alias_user_id': 'alias_user_name'}
+        os.environ['EXTERNAL_PROVIDER_LOGIN_MARK'] = 'test_marker'
+        external_provider_user_items = [
+            {'external_provider_user_id': 'external_provider_user', 'password': 'password', 'user_id': 'user_name'}
         ]
         TestsUtil.set_all_tables_name_to_env()
         TestsUtil.delete_all_tables(dynamodb)
-        TestsUtil.create_table(dynamodb, os.environ['SNS_USERS_TABLE_NAME'], sns_user_items)
+        TestsUtil.create_table(dynamodb, os.environ['EXTERNAL_PROVIDER_USERS_TABLE_NAME'], external_provider_user_items)
 
     @classmethod
     def tearDownClass(cls):
         TestsUtil.delete_all_tables(dynamodb)
 
-    def test_validation_sns_user_who_login_in_invalid_route(self):
+    def test_validation_external_provider_user_who_login_in_invalid_route(self):
         event = {
             'version': '1',
             'region': 'us-east-1',
             'userPoolId': 'us-east-xxxxxxxx',
-            'userName': 'sns_user',
+            'userName': 'external_provider_user',
             'callerContext': {
                 'awsSdkVersion': 'aws-sdk-js-2.6.4',
                 'clientId': 'xxxxx'
@@ -51,12 +51,12 @@ class TestPreAuthentication(TestCase):
         response = pre_authentication.main()
         self.assertEqual(response['statusCode'], 400)
 
-    def test_sns_user_ok_login(self):
+    def test_external_provider_user_ok_login(self):
         event = {
             'version': '1',
             'region': 'us-east-1',
             'userPoolId': 'us-east-xxxxxxxx',
-            'userName': 'sns_user',
+            'userName': 'external_provider_user',
             'callerContext': {
                 'awsSdkVersion': 'aws-sdk-js-2.6.4',
                 'clientId': 'xxxxx'
@@ -67,7 +67,7 @@ class TestPreAuthentication(TestCase):
                     'phone_number': '',
                     'email': 'test@example.com'
                 },
-                'validationData': {'THIRD_PARTY_LOGIN_MARK': 'test_marker'}
+                'validationData': {'EXTERNAL_PROVIDER_LOGIN_MARK': 'test_marker'}
             },
             'response': {
                 'autoConfirmUser': False,
@@ -106,12 +106,12 @@ class TestPreAuthentication(TestCase):
         response = pre_authentication.main()
         self.assertEqual(event, response)
 
-    def test_alias_user_login_ok(self):
+    def test_has_user_id_login_ok(self):
         event = {
             'version': '1',
             'region': 'us-east-1',
             'userPoolId': 'us-east-xxxxxxxx',
-            'userName': 'alias_user_name',
+            'userName': 'user_name',
             'callerContext': {
                 'awsSdkVersion': 'aws-sdk-js-2.6.4',
                 'clientId': 'xxxxx'
@@ -121,7 +121,7 @@ class TestPreAuthentication(TestCase):
                 'userAttributes': {
                     'email': 'test@example.com'
                 },
-                'validationData': {'THIRD_PARTY_LOGIN_MARK': 'test_marker'}
+                'validationData': {'EXTERNAL_PROVIDER_LOGIN_MARK': 'test_marker'}
             },
             'response': {
                 'autoConfirmUser': False,

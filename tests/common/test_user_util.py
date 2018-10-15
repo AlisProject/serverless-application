@@ -16,12 +16,12 @@ class TestUserUtil(TestCase):
         TestsUtil.set_all_tables_name_to_env()
         TestsUtil.delete_all_tables(self.dynamodb)
 
-        self.sns_users_table_items = [
+        self.external_provider_users_table_items = [
             {
-                'user_id': 'user_id'
+                'external_provider_user_id': 'external_provider_user_id'
             }
         ]
-        TestsUtil.create_table(self.dynamodb, os.environ['SNS_USERS_TABLE_NAME'], self.sns_users_table_items)
+        TestsUtil.create_table(self.dynamodb, os.environ['EXTERNAL_PROVIDER_USERS_TABLE_NAME'], self.external_provider_users_table_items)
         TestsUtil.create_table(self.dynamodb, os.environ['USERS_TABLE_NAME'], [])
 
     def test_verified_phone_and_email_ok(self):
@@ -125,47 +125,47 @@ class TestUserUtil(TestCase):
                 'user_id'
             )
 
-    def test_delete_sns_id_cognito_user_ok(self):
+    def test_delete_external_provider_id_cognito_user_ok(self):
         self.cognito.admin_delete_user = MagicMock(return_value=True)
         user_id = 'testuser'
-        self.assertEqual(UserUtil.delete_sns_id_cognito_user(self.cognito, user_id), True)
+        self.assertEqual(UserUtil.delete_external_provider_id_cognito_user(self.cognito, user_id), True)
 
-    def test_delete_sns_id_cognito_user_not_found(self):
+    def test_delete_external_provider_id_cognito_user_not_found(self):
         self.cognito.admin_delete_user = MagicMock(side_effect=ClientError(
                 {'Error': {'Code': 'UserNotFoundException'}},
                 'operation_code'
             ))
         user_id = 'testuser'
-        self.assertFalse(UserUtil.delete_sns_id_cognito_user(self.cognito, user_id))
+        self.assertFalse(UserUtil.delete_external_provider_id_cognito_user(self.cognito, user_id))
 
-    def test_add_alias_to_sns_user_ok(self):
+    def test_add_user_id_to_external_provider_user_ok(self):
         self.dynamodb.update_item = MagicMock(return_value=None)
-        response = UserUtil.add_alias_to_sns_user(
-            'alias_id',
+        response = UserUtil.add_user_id_to_external_provider_user(
+            'user_id',
             self.dynamodb,
-            'user_id'
+            'external_provider_user_id'
         )
         self.assertEqual(response, None)
 
-    def test_add_alias_to_sns_user_ng(self):
+    def test_add_user_id_to_external_provider_user_ng(self):
         self.dynamodb.update_item = MagicMock(side_effect=ClientError(
                 {'Error': {'Code': 'xxxxxx'}},
                 'operation_name'
             ))
-        response = UserUtil.add_alias_to_sns_user(
-            'alias_id',
+        response = UserUtil.add_user_id_to_external_provider_user(
+            'user_id',
             self.dynamodb,
-            'user_id'
+            'external_provider_user_id'
         )
         self.assertEqual(response['statusCode'], 500)
 
     def test_exists_user_ok(self):
-        self.assertTrue(UserUtil.exists_user(self.dynamodb, 'user_id'))
+        self.assertTrue(UserUtil.exists_user(self.dynamodb, 'external_provider_user_id'))
 
     def test_exists_user_ng(self):
         self.assertFalse(UserUtil.exists_user(self.dynamodb, 'test-user'))
 
-    def test_create_sns_user_ok(self):
+    def test_create_external_provider_user_ok(self):
         self.cognito.admin_create_user = MagicMock(return_value=True)
         self.cognito.admin_initiate_auth = MagicMock(return_value={
             'Session': 'cwefdscx'
@@ -173,7 +173,7 @@ class TestUserUtil(TestCase):
         self.cognito.admin_respond_to_auth_challenge = MagicMock(return_value={
             'access_token': 'token'}
         )
-        response = UserUtil.create_sns_user(
+        response = UserUtil.create_external_provider_user(
             self.cognito,
             'user_pool_id',
             'user_pool_app_id',
@@ -185,13 +185,13 @@ class TestUserUtil(TestCase):
         )
         self.assertEqual(response['access_token'], 'token')
 
-    def test_create_sns_user_ng(self):
+    def test_create_external_provider_user_ng(self):
         with self.assertRaises(ClientError):
             self.cognito.admin_create_user = MagicMock(side_effect=ClientError(
                 {'Error': {'Code': 'xxxxxx'}},
                 'operation_name'
             ))
-            UserUtil.create_sns_user(
+            UserUtil.create_external_provider_user(
                 self.cognito,
                 'user_pool_id',
                 'user_pool_app_id',
@@ -202,11 +202,11 @@ class TestUserUtil(TestCase):
                 'twitter'
             )
 
-    def test_sns_login_ok(self):
+    def test_external_provider_login_ok(self):
         self.cognito.admin_initiate_auth = MagicMock(return_value={
             'access_token': 'token'
         })
-        response = UserUtil.sns_login(
+        response = UserUtil.external_provider_login(
             self.cognito,
             'user_pool_id',
             'user_pool_app_id',
@@ -215,13 +215,13 @@ class TestUserUtil(TestCase):
             'twitter')
         self.assertEqual(response['access_token'], 'token')
 
-    def test_sns_login_ng(self):
+    def test_external_provider_login_ng(self):
         with self.assertRaises(ClientError):
             self.cognito.admin_get_user = MagicMock(side_effect=ClientError(
                 {'Error': {'Code': 'UserNotFoundException'}},
                 'operation_name'
             ))
-            UserUtil.sns_login(
+            UserUtil.external_provider_login(
                 self.cognito,
                 'user_pool_id',
                 'user_pool_app_id',
@@ -230,92 +230,92 @@ class TestUserUtil(TestCase):
                 'twitter'
             )
 
-    def test_add_sns_user_info_ok(self):
+    def test_add_external_provider_user_info_ok(self):
         self.dynamodb.Table = MagicMock()
         self.dynamodb.Table.return_value.put_item.return_value = True
-        response = UserUtil.add_sns_user_info(
+        response = UserUtil.add_external_provider_user_info(
             self.dynamodb,
-            'user_id',
+            'external_provider_user_id',
             'password',
             'email',
             'icon_image_url'
         )
         self.assertEqual(response, None)
 
-    def test_add_sns_user_info_ng(self):
+    def test_add_external_provider_user_info_ng(self):
         with self.assertRaises(ClientError):
             self.dynamodb.Table = MagicMock()
             self.dynamodb.Table.return_value.put_item.side_effect = ClientError(
                 {'Error': {'Code': 'xxxx'}},
                 'operation_name'
             )
-            UserUtil.add_sns_user_info(
+            UserUtil.add_external_provider_user_info(
                 self.dynamodb,
-                'user_id',
+                'external_provider_user_id',
                 'password',
                 'email',
                 'icon_image_url'
             )
 
-    def test_has_alias_user_id_ok_with_return_true(self):
+    def test_has_user_id_ok_with_return_true(self):
         self.dynamodb.Table = MagicMock()
         self.dynamodb.Table.return_value.get_item.return_value = {
             'Item': {
-                'alias_user_id': 'xxx'
+                'user_id': 'xxx'
             }
         }
-        response = UserUtil.has_alias_user_id(
+        response = UserUtil.has_user_id(
             self.dynamodb,
-            'user_id',
+            'external_provider_user_id',
         )
         self.assertTrue(response)
 
-    def test_get_alias_user_id_ok(self):
+    def test_get_user_id_ok(self):
         self.dynamodb.Table = MagicMock()
         self.dynamodb.Table.return_value.get_item.return_value = {
             'Item': {
-                'alias_user_id': 'you_are_alias'
+                'user_id': 'you_are_external_provider_user'
             }
         }
-        response = UserUtil.get_alias_user_id(
+        response = UserUtil.get_user_id(
             self.dynamodb,
-            'user_id',
+            'external_provider_user_id',
         )
-        self.assertEqual(response, 'you_are_alias')
+        self.assertEqual(response, 'you_are_external_provider_user')
 
-    def test_get_alias_user_id_ng(self):
+    def test_get_user_id_ng(self):
         with self.assertRaises(ClientError):
             self.dynamodb.Table = MagicMock()
             self.dynamodb.Table.return_value.get_item.side_effect = ClientError(
                 {'Error': {'Code': 'xxxx'}},
                 'operation_name'
             )
-            UserUtil.get_alias_user_id(
+            UserUtil.get_user_id(
                 self.dynamodb,
-                'user_id',
+                'external_provider_user_id',
             )
 
-    def test_has_alias_user_id_ok_with_return_false(self):
+    def test_has_user_id_ok_with_return_false(self):
         self.dynamodb.Table = MagicMock()
         self.dynamodb.Table.return_value.get_item.return_value = {
             'Item': {}
         }
-        response = UserUtil.has_alias_user_id(
+        response = UserUtil.has_user_id(
             self.dynamodb,
-            'user_id',
+            'external_provider_user_id',
         )
         self.assertFalse(response)
 
-    def test_has_alias_user_id_ng(self):
+    def test_has_user_id_ng(self):
         with self.assertRaises(ClientError):
             self.dynamodb.Table = MagicMock()
             self.dynamodb.Table.return_value.get_item.side_effect = ClientError(
                 {'Error': {'Code': 'xxxx'}},
                 'operation_name'
             )
-            UserUtil.has_alias_user_id(
+            UserUtil.has_user_id(
                 self.dynamodb,
-                'user_id'
+                'external_provider_user_id'
             )
 
     def test_check_try_to_register_as_twitter_user_ng(self):

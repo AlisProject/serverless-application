@@ -18,16 +18,16 @@ class PreAuthentication(LambdaBase):
 
     def exec_main_proc(self):
         params = self.event
-        sns_users_table = self.dynamodb.Table(os.environ['SNS_USERS_TABLE_NAME'])
-        sns_user = sns_users_table.get_item(Key={'user_id': params['userName']}).get('Item')
-        if sns_user is None:
+        external_provider_users_table = self.dynamodb.Table(os.environ['EXTERNAL_PROVIDER_USERS_TABLE_NAME'])
+        external_provider_user = external_provider_users_table.get_item(Key={'external_provider_user_id': params['userName']}).get('Item')
+        if external_provider_user is None:
             try:
-                sns_users = sns_users_table.query(
-                    IndexName="alias_user_id-index",
-                    KeyConditionExpression=Key('alias_user_id').eq(params['userName'])
+                external_provider_users = external_provider_users_table.query(
+                    IndexName="user_id-index",
+                    KeyConditionExpression=Key('user_id').eq(params['userName'])
                 )
-                if sns_users.get('Count') == 1:
-                    sns_user = sns_users.get('Items')[0]
+                if external_provider_users.get('Count') == 1:
+                    external_provider_user = external_provider_users.get('Items')[0]
             except ClientError as e:
                 logging.fatal(e)
                 return {
@@ -35,21 +35,21 @@ class PreAuthentication(LambdaBase):
                     'body': json.dumps({'message': 'Internal server error'})
                 }
 
-        # ThirdPartyLoginのケース
-        if self.__is_third_party_login_validation_data(params):
+        # ExternalProviderLoginのケース
+        if self.__is_external_provider_login_validation_data(params):
             return self.event
         # 通常SignInのケース
-        elif (sns_user is None) and (params['request']['validationData'] == {}):
+        elif (external_provider_user is None) and (params['request']['validationData'] == {}):
             return self.event
         # ValidationDataが存在しない場合のadmin_initiate_authコマンドでのSignInのケース
-        elif (sns_user is None) and (params['request'].get('validationData') is None):
+        elif (external_provider_user is None) and (params['request'].get('validationData') is None):
             raise NotAuthorizedError('Forbidden')
         else:
-            raise ValidationError('Please login with registered sns')
+            raise ValidationError('Please login with registered external provider')
 
     @staticmethod
-    def __is_third_party_login_validation_data(params):
-        if (('THIRD_PARTY_LOGIN_MARK' in params['request']['validationData']) and
-           (os.environ['THIRD_PARTY_LOGIN_MARK'] == params['request']['validationData']['THIRD_PARTY_LOGIN_MARK'])):
+    def __is_external_provider_login_validation_data(params):
+        if (('EXTERNAL_PROVIDER_LOGIN_MARK' in params['request']['validationData']) and
+           (os.environ['EXTERNAL_PROVIDER_LOGIN_MARK'] == params['request']['validationData']['EXTERNAL_PROVIDER_LOGIN_MARK'])):
             return True
         return False

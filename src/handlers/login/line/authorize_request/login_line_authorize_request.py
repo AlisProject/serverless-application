@@ -54,25 +54,25 @@ class LoginLineAuthorizeRequest(LambdaBase):
 
         if UserUtil.exists_user(self.dynamodb, user_id):
             try:
-                sns_users = self.dynamodb.Table(os.environ['SNS_USERS_TABLE_NAME'])
-                sns_user = sns_users.get_item(Key={'user_id': user_id}).get('Item')
-                hash_data = sns_user['password']
+                external_provider_users = self.dynamodb.Table(os.environ['EXTERNAL_PROVIDER_USERS_TABLE_NAME'])
+                external_provider_user = external_provider_users.get_item(Key={'external_provider_user_id': user_id}).get('Item')
+                hash_data = external_provider_user['password']
                 byte_hash_data = hash_data.encode()
-                decoded_iv = sns_user['iv']
+                decoded_iv = external_provider_user['iv']
                 iv = decoded_iv.encode()
                 password = UserUtil.decrypt_password(byte_hash_data, iv)
 
-                has_alias_user_id = UserUtil.has_alias_user_id(self.dynamodb, user_id)
-                if sns_user is not None and 'alias_user_id' in sns_user:
-                    user_id = sns_user['alias_user_id']
+                has_user_id = UserUtil.has_user_id(self.dynamodb, user_id)
+                if external_provider_user is not None and 'user_id' in external_provider_user:
+                    user_id = external_provider_user['user_id']
 
-                response = UserUtil.sns_login(
+                response = UserUtil.external_provider_login(
                     cognito=self.cognito,
                     user_pool_id=os.environ['COGNITO_USER_POOL_ID'],
                     user_pool_app_id=os.environ['COGNITO_USER_POOL_APP_ID'],
                     user_id=user_id,
                     password=password,
-                    provider=os.environ['THIRD_PARTY_LOGIN_MARK']
+                    provider=os.environ['EXTERNAL_PROVIDER_LOGIN_MARK']
                 )
 
                 return ResponseBuilder.response(
@@ -82,7 +82,7 @@ class LoginLineAuthorizeRequest(LambdaBase):
                         'id_token': response['AuthenticationResult']['IdToken'],
                         'refresh_token': response['AuthenticationResult']['RefreshToken'],
                         'last_auth_user': user_id,
-                        'has_alias_user_id': has_alias_user_id,
+                        'has_user_id': has_user_id,
                         'status': 'login'
                     }
                 )
@@ -97,9 +97,9 @@ class LoginLineAuthorizeRequest(LambdaBase):
                 )
         else:
             try:
-                backed_temp_password = os.environ['SNS_LOGIN_COMMON_TEMP_PASSWORD']
+                backed_temp_password = os.environ['EXTERNAL_PROVIDER_LOGIN_COMMON_TEMP_PASSWORD']
                 backed_password = UserUtil.generate_password()
-                response = UserUtil.create_sns_user(
+                response = UserUtil.create_external_provider_user(
                     cognito=self.cognito,
                     user_pool_id=os.environ['COGNITO_USER_POOL_ID'],
                     user_pool_app_id=os.environ['COGNITO_USER_POOL_APP_ID'],
@@ -107,16 +107,16 @@ class LoginLineAuthorizeRequest(LambdaBase):
                     email=email,
                     backed_temp_password=backed_temp_password,
                     backed_password=backed_password,
-                    provider=os.environ['THIRD_PARTY_LOGIN_MARK']
+                    provider=os.environ['EXTERNAL_PROVIDER_LOGIN_MARK']
                 )
 
                 aes_iv = os.urandom(settings.AES_IV_BYTES)
                 encrypted_password = UserUtil.encrypt_password(backed_password, aes_iv)
                 iv = base64.b64encode(aes_iv).decode()
 
-                UserUtil.add_sns_user_info(
+                UserUtil.add_external_provider_user_info(
                     dynamodb=self.dynamodb,
-                    user_id=user_id,
+                    external_provider_user_id=user_id,
                     password=encrypted_password,
                     iv=iv,
                     email=email,
@@ -129,7 +129,7 @@ class LoginLineAuthorizeRequest(LambdaBase):
                         'id_token': response['AuthenticationResult']['IdToken'],
                         'refresh_token': response['AuthenticationResult']['RefreshToken'],
                         'last_auth_user': user_id,
-                        'has_alias_user_id': False,
+                        'has_user_id': False,
                         'status': 'sign_up'
                     }
                 )

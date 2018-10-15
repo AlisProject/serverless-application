@@ -43,7 +43,7 @@ aws cloudformation deploy \
     ArticleScoreTableName=${SSM_PARAMS_PREFIX}ArticleScoreTableName \
     UsersTableName=${SSM_PARAMS_PREFIX}UsersTableName \
     BetaUsersTableName=${SSM_PARAMS_PREFIX}BetaUsersTableName \
-    SnsUsersTableName=${SSM_PARAMS_PREFIX}SnsUsersTableName \
+    ExternalProviderUsersTableName=${SSM_PARAMS_PREFIX}ExternalProviderUsersTableName \
     NotificationTableName=${SSM_PARAMS_PREFIX}NotificationTableName \
     UnreadNotificationManagerTableName=${SSM_PARAMS_PREFIX}UnreadNotificationManagerTableName \
     TopicTableName=${SSM_PARAMS_PREFIX}TopicTableName \
@@ -59,9 +59,9 @@ aws cloudformation deploy \
     CognitoUserPoolAppId=${SSM_PARAMS_PREFIX}CognitoUserPoolAppId \
     LineChannelId=${SSM_PARAMS_PREFIX}LineChannelId \
     LineChannelSecret=${SSM_PARAMS_PREFIX}LineChannelSecret \
-    SnsLoginCommonTempPassword=${SSM_PARAMS_PREFIX}SnsLoginCommonTempPassword \
+    ExternalProviderLoginCommonTempPassword=${SSM_PARAMS_PREFIX}ExternalProviderLoginCommonTempPassword \
     LineRedirectUri=${SSM_PARAMS_PREFIX}LineRedirectUri \
-    ThirdPartyLoginMark=${SSM_PARAMS_PREFIX}ThirdPartyLoginMark \
+    ExternalProviderLoginMark=${SSM_PARAMS_PREFIX}ExternalProviderLoginMark \
     LoginSalt=${SSM_PARAMS_PREFIX}LoginSalt \
     TwitterConsumerKey=${SSM_PARAMS_PREFIX}TwitterConsumerKey \
     TwitterConsumerSecret=${SSM_PARAMS_PREFIX}TwitterConsumerSecret \

@@ -9,18 +9,18 @@ from botocore.exceptions import ClientError
 from user_util import UserUtil
 
 
-class MeAliasCreate(LambdaBase):
+class MeExternalProviderUserCreate(LambdaBase):
     def get_schema(self):
         return {
             'type': 'object',
             'properties': {
-                'alias_user_id': settings.parameters['user_id']
+                'user_id': settings.parameters['user_id']
             }
         }
 
     def validate_params(self):
         params = json.loads(self.event.get('body'))
-        if params['alias_user_id'] in settings.ng_user_name:
+        if params['user_id'] in settings.ng_user_name:
             raise ValidationError('This username is not allowed')
         validate(params, self.get_schema())
 
@@ -28,34 +28,34 @@ class MeAliasCreate(LambdaBase):
         params = self.event
         body = json.loads(params.get('body'))
         users_table = self.dynamodb.Table(os.environ['USERS_TABLE_NAME'])
-        sns_users_table = self.dynamodb.Table(os.environ['SNS_USERS_TABLE_NAME'])
-        user_id = params['requestContext']['authorizer']['claims']['cognito:username']
-        exist_check_user = users_table.get_item(Key={'user_id': body['alias_user_id']}).get('Item')
+        external_provider_users_table = self.dynamodb.Table(os.environ['EXTERNAL_PROVIDER_USERS_TABLE_NAME'])
+        external_provider_user_id = params['requestContext']['authorizer']['claims']['cognito:username']
+        exist_check_user = users_table.get_item(Key={'user_id': body['user_id']}).get('Item')
 
-        sns_user = sns_users_table.get_item(Key={'user_id': user_id}).get('Item')
+        external_provider_user = external_provider_users_table.get_item(Key={'external_provider_user_id': external_provider_user_id}).get('Item')
 
-        if (sns_user is not None) and ('alias_user_id' in sns_user):
-            raise ValidationError('The alias id of this user has been added.')
+        if (external_provider_user is not None) and ('user_id' in external_provider_user):
+            raise ValidationError('The user id of this user has been added.')
 
         elif exist_check_user is None:
-            # SNSのidで作成したcognitoのユーザーを除去
-            if UserUtil.delete_sns_id_cognito_user(self.cognito, user_id):
+            # EXTERNAL_PROVIDERのidで作成したcognitoのユーザーを除去
+            if UserUtil.delete_external_provider_id_cognito_user(self.cognito, external_provider_user_id):
 
-                # alias_user_idでのCognitoユーザーの作成し直し
+                # user_idでのCognitoユーザーの作成し直し
                 try:
-                    email = sns_user['email']
-                    hash_data = sns_user['password']
+                    email = external_provider_user['email']
+                    hash_data = external_provider_user['password']
                     byte_hash_data = hash_data.encode()
-                    decoded_iv = sns_user['iv']
+                    decoded_iv = external_provider_user['iv']
                     iv = decoded_iv.encode()
                     backed_password = UserUtil.decrypt_password(byte_hash_data, iv)
 
-                    backed_temp_password = os.environ['SNS_LOGIN_COMMON_TEMP_PASSWORD']
-                    provider = os.environ['THIRD_PARTY_LOGIN_MARK']
+                    backed_temp_password = os.environ['EXTERNAL_PROVIDER_LOGIN_COMMON_TEMP_PASSWORD']
+                    provider = os.environ['EXTERNAL_PROVIDER_LOGIN_MARK']
 
-                    response = UserUtil.create_sns_user(
+                    response = UserUtil.create_external_provider_user(
                         cognito=self.cognito,
-                        user_id=body['alias_user_id'],
+                        user_id=body['user_id'],
                         user_pool_id=os.environ['COGNITO_USER_POOL_ID'],
                         user_pool_app_id=os.environ['COGNITO_USER_POOL_APP_ID'],
                         email=email,
@@ -66,38 +66,38 @@ class MeAliasCreate(LambdaBase):
 
                     UserUtil.force_non_verified_phone(
                         cognito=self.cognito,
-                        user_id=body['alias_user_id']
+                        user_id=body['user_id']
                     )
 
-                    UserUtil.wallet_initialization(self.cognito, os.environ['COGNITO_USER_POOL_ID'], body['alias_user_id'])
+                    UserUtil.wallet_initialization(self.cognito, os.environ['COGNITO_USER_POOL_ID'], body['user_id'])
 
-                    # SnsUsersテーブルにaliasを追加
-                    UserUtil.add_alias_to_sns_user(body['alias_user_id'], sns_users_table, user_id)
+                    # ExternalProviderUsersテーブルにuser_idを追加
+                    UserUtil.add_user_id_to_external_provider_user(body['user_id'], external_provider_users_table, external_provider_user_id)
 
-                    if 'icon_image_url' in sns_user:
-                        icon_image_url = sns_user['icon_image_url']
+                    if 'icon_image_url' in external_provider_user:
+                        icon_image_url = external_provider_user['icon_image_url']
                     else:
                         icon_image_url = None
 
                     # Usersテーブルにユーザーを作成
                     UserUtil.add_user_profile(
                         dynamodb=self.dynamodb,
-                        user_id=body['alias_user_id'],
-                        user_display_name=body['alias_user_id'],
+                        user_id=body['user_id'],
+                        user_display_name=body['user_id'],
                         icon_image=icon_image_url
                     )
 
-                    has_alias_user_id = UserUtil.has_alias_user_id(self.dynamodb, user_id)
+                    has_user_id = UserUtil.has_user_id(self.dynamodb, external_provider_user_id)
 
                     return {
                         'statusCode': 200,
                         'body': json.dumps({
                             'access_token': response['AuthenticationResult']['AccessToken'],
-                            'last_auth_user': body['alias_user_id'],
+                            'last_auth_user': body['user_id'],
                             'id_token': response['AuthenticationResult']['IdToken'],
                             'refresh_token': response['AuthenticationResult']['RefreshToken'],
                             'status': 'login',
-                            'has_alias_user_id': has_alias_user_id
+                            'has_user_id': has_user_id
                         })
                     }
 

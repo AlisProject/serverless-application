@@ -18,14 +18,14 @@ class TestLoginLineAuthorizeRequest(TestCase):
         os.environ['LINE_REDIRECT_URI'] = 'https://xxxxxxx.com'
         os.environ['COGNITO_USER_POOL_ID'] = 'cognito-id'
         os.environ['COGNITO_USER_POOL_APP_ID'] = 'pool-id'
-        os.environ['SNS_LOGIN_COMMON_TEMP_PASSWORD'] = 'Password!'
-        os.environ['THIRD_PARTY_LOGIN_MARK'] = 'line'
+        os.environ['EXTERNAL_PROVIDER_LOGIN_COMMON_TEMP_PASSWORD'] = 'Password!'
+        os.environ['EXTERNAL_PROVIDER_LOGIN_MARK'] = 'line'
         TestsUtil.set_all_tables_name_to_env()
         TestsUtil.delete_all_tables(dynamodb)
 
-        self.sns_users_table_items = [
+        self.external_provider_users_table_items = [
             {
-                'user_id': 'LINE-U_test_user',
+                'external_provider_user_id': 'LINE-U_test_user',
                 'user_display_name': 'test_display_name01',
                 'email': 'test01@example.com',
                 'password': 'test_pass',
@@ -33,16 +33,16 @@ class TestLoginLineAuthorizeRequest(TestCase):
                 'icon_image_url': 'https://xxxxxxxx'
             },
             {
-                'user_id': 'LINE-U_test_user02',
+                'external_provider_user_id': 'LINE-U_test_user02',
                 'user_display_name': 'test_display_name02',
                 'email': 'test02@example.com',
                 'password': 'test_pass',
                 'iv': 'iv',
                 'icon_image_url': 'https://xxxxxxxx',
-                'alias_user_id': 'aliasuser'
+                'user_id': 'user'
             }
         ]
-        TestsUtil.create_table(dynamodb, os.environ['SNS_USERS_TABLE_NAME'], self.sns_users_table_items)
+        TestsUtil.create_table(dynamodb, os.environ['EXTERNAL_PROVIDER_USERS_TABLE_NAME'], self.external_provider_users_table_items)
 
     def tearDown(self):
         TestsUtil.delete_all_tables(dynamodb)
@@ -70,8 +70,8 @@ class TestLoginLineAuthorizeRequest(TestCase):
             user_mock.force_non_verified_phone.return_value = None
             user_mock.wallet_initialization.return_value = None
             user_mock.encrypt_password.return_value = '&yjgFwFeOpd0{0=&y566'
-            user_mock.add_sns_user_info.return_value = None
-            user_mock.create_sns_user.return_value = {
+            user_mock.add_external_provider_user_info.return_value = None
+            user_mock.create_external_provider_user.return_value = {
                 'AuthenticationResult': {
                     'AccessToken': 'aaaaa',
                     'IdToken': 'bbbbb',
@@ -88,7 +88,7 @@ class TestLoginLineAuthorizeRequest(TestCase):
                     'id_token': 'bbbbb',
                     'refresh_token': 'ccccc',
                     'last_auth_user': 'LINE-Uxxxxx',
-                    'has_alias_user_id': False,
+                    'has_user_id': False,
                     'status': 'sign_up'
                 }
             )
@@ -114,14 +114,14 @@ class TestLoginLineAuthorizeRequest(TestCase):
 
             user_mock.exists_user.return_value = True
             user_mock.decrypt_password.return_value = 'password'
-            user_mock.sns_login.return_value = {
+            user_mock.external_provider_login.return_value = {
                 'AuthenticationResult': {
                     'AccessToken': 'aaaaa',
                     'IdToken': 'bbbbb',
                     'RefreshToken': 'ccccc'
                 }
             }
-            user_mock.has_alias_user_id.return_value = False
+            user_mock.has_user_id.return_value = False
 
             response = LoginLineAuthorizeRequest(event=event, context="", dynamodb=dynamodb).main()
             self.assertEqual(response['statusCode'], 200)
@@ -132,7 +132,7 @@ class TestLoginLineAuthorizeRequest(TestCase):
                     'id_token': 'bbbbb',
                     'refresh_token': 'ccccc',
                     'last_auth_user': 'LINE-U_test_user',
-                    'has_alias_user_id': False,
+                    'has_user_id': False,
                     'status': 'login'
                 }
             )
@@ -146,7 +146,7 @@ class TestLoginLineAuthorizeRequest(TestCase):
            }))
     @patch("login_line_authorize_request.LoginLineAuthorizeRequest._LoginLineAuthorizeRequest__get_line_jwt",
            MagicMock(return_value='xxxxxxx'))
-    def test_main_login_ok_with_alias(self):
+    def test_main_login_ok_has_user_id(self):
         with patch('login_line_authorize_request.UserUtil') as user_mock:
             event = {
                 'body': {
@@ -158,14 +158,14 @@ class TestLoginLineAuthorizeRequest(TestCase):
 
             user_mock.exists_user.return_value = True
             user_mock.decrypt_password.return_value = 'password'
-            user_mock.sns_login.return_value = {
+            user_mock.external_provider_login.return_value = {
                 'AuthenticationResult': {
                     'AccessToken': 'aaaaa',
                     'IdToken': 'bbbbb',
                     'RefreshToken': 'ccccc'
                 }
             }
-            user_mock.has_alias_user_id.return_value = True
+            user_mock.has_user_id.return_value = True
 
             response = LoginLineAuthorizeRequest(event=event, context="", dynamodb=dynamodb).main()
             self.assertEqual(response['statusCode'], 200)
@@ -175,8 +175,8 @@ class TestLoginLineAuthorizeRequest(TestCase):
                     'access_token': 'aaaaa',
                     'id_token': 'bbbbb',
                     'refresh_token': 'ccccc',
-                    'last_auth_user': 'aliasuser',
-                    'has_alias_user_id': True,
+                    'last_auth_user': 'user',
+                    'has_user_id': True,
                     'status': 'login'
                 }
             )
@@ -200,14 +200,14 @@ class TestLoginLineAuthorizeRequest(TestCase):
 
             event['body'] = json.dumps(event['body'])
             user_mock.exists_user.return_value = False
-            user_mock.create_sns_user.side_effect = ClientError(
+            user_mock.create_external_provider_user.side_effect = ClientError(
                 {'Error': {'Code': 'xxxxxx'}},
                 'operation_name'
             )
             user_mock.force_non_verified_phone.return_value = None
             user_mock.add_user_profile.return_value = None
-            user_mock.add_sns_user_info.return_value = None
-            user_mock.has_alias_user_id.return_value = True
+            user_mock.add_external_provider_user_info.return_value = None
+            user_mock.has_user_id.return_value = True
 
             response = LoginLineAuthorizeRequest(event=event, context="", dynamodb=dynamodb).main()
             self.assertEqual(response['statusCode'], 500)
@@ -239,11 +239,11 @@ class TestLoginLineAuthorizeRequest(TestCase):
 
             user_mock.exists_user.return_value = True
             user_mock.decrypt_password.return_value = 'password'
-            user_mock.sns_login.side_effect = ClientError(
+            user_mock.external_provider_login.side_effect = ClientError(
                 {'Error': {'Code': 'xxxxxx'}},
                 'operation_name'
             )
-            user_mock.has_alias_user_id.return_value = False
+            user_mock.has_user_id.return_value = False
 
             response = LoginLineAuthorizeRequest(event=event, context="", dynamodb=dynamodb).main()
             self.assertEqual(response['statusCode'], 500)
@@ -273,14 +273,14 @@ class TestLoginLineAuthorizeRequest(TestCase):
 
             event['body'] = json.dumps(event['body'])
             user_mock.exists_user.return_value = False
-            user_mock.create_sns_user.side_effect = ClientError(
+            user_mock.create_external_provider_user.side_effect = ClientError(
                 {'Error': {'Code': 'UsernameExistsException'}},
                 'operation_name'
             )
             user_mock.force_non_verified_phone.return_value = None
             user_mock.add_user_profile.return_value = None
-            user_mock.add_sns_user_info.return_value = None
-            user_mock.has_alias_user_id.return_value = False
+            user_mock.add_external_provider_user_info.return_value = None
+            user_mock.has_user_id.return_value = False
 
             response = LoginLineAuthorizeRequest(event=event, context="", dynamodb=dynamodb).main()
             self.assertEqual(response['statusCode'], 400)

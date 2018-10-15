@@ -27,7 +27,7 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   BetaUsersTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
-  SnsUsersTableName:
+  ExternalProviderUsersTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
   NotificationTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
@@ -77,11 +77,11 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   LineChannelSecret:
     Type: 'AWS::SSM::Parameter::Value<String>'
-  SnsLoginCommonTempPassword:
+  ExternalProviderLoginCommonTempPassword:
     Type: 'AWS::SSM::Parameter::Value<String>'
   LineRedirectUri:
     Type: 'AWS::SSM::Parameter::Value<String>'
-  ThirdPartyLoginMark:
+  ExternalProviderLoginMark:
     Type: 'AWS::SSM::Parameter::Value<String>'
   LoginSalt:
     Type: 'AWS::SSM::Parameter::Value<String>'
@@ -113,7 +113,7 @@ Globals:
         TOPIC_TABLE_NAME: !Ref TopicTableName
         TAG_TABLE_NAME: !Ref TagTableName
         TIP_TABLE_NAME: !Ref TipTableName
-        SNS_USERS_TABLE_NAME: !Ref SnsUsersTableName
+        EXTERNAL_PROVIDER_USERS_TABLE_NAME: !Ref ExternalProviderUsersTableName
         DOMAIN: !Ref AlisAppDomain
         PRIVATE_CHAIN_AWS_ACCESS_KEY: !Ref PrivateChainAwsAccessKey
         PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY: !Ref PrivateChainAwsSecretAccessKey
@@ -230,10 +230,10 @@ Resources:
                 type: string
               tip_value:
                 type: integer
-          MeAliasCreate:
+          MeExternalProviderUserCreate:
             type: object
             properties:
-              alias_user_id:
+              user_id:
                 type: string
           LoginLineAuthorizeUrl:
             type: object
@@ -251,7 +251,7 @@ Resources:
                 type: string
               refreshToken:
                 type: string
-              hasAliasUserId:
+              hasUserId:
                 type: boolean
           Notification:
             type: object
@@ -645,7 +645,7 @@ Resources:
                         type: string
                       id_token:
                         type: string
-                      has_alias_user_id:
+                      has_user_id:
                         type: string
                 "401":
                   description: "認証エラー"
@@ -1493,31 +1493,31 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
-          /me/alias:
+          /me/external_provider_user:
             post:
-              description: 'alias_user_idを作成'
+              description: 'user_idを作成'
               parameters:
-              - name: 'alias_user_id'
+              - name: 'user_id'
                 in: 'body'
-                description: 'alias_user_id'
+                description: 'user_id'
                 required: true
                 schema:
-                  $ref: '#/definitions/MeAliasCreate'
+                  $ref: '#/definitions/MeExternalProviderUserCreate'
               responses:
                 '200':
-                  description: '作成されたalias_user_id'
+                  description: '作成されたuser_id'
                   schema:
                     type: object
                     properties:
-                      alias_user_id:
+                      user_id:
                         type: 'string'
-              security:
-              - cognitoUserPool: []
+#              security:
+#              - cognitoUserPool: []
               x-amazon-apigateway-integration:
                 responses:
                   default:
                     statusCode: '201'
-                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeAliasCreate.Arn}/invocations
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeExternalProviderUserCreate.Arn}/invocations
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
@@ -1681,10 +1681,10 @@ Resources:
         Variables:
           TWITTER_CONSUMER_KEY: !Ref TwitterConsumerKey
           TWITTER_CONSUMER_SECRET: !Ref TwitterConsumerSecret
-          SNS_LOGIN_COMMON_TEMP_PASSWORD: !Ref SnsLoginCommonTempPassword
+          EXTERNAL_PROVIDER_LOGIN_COMMON_TEMP_PASSWORD: !Ref ExternalProviderLoginCommonTempPassword
           COGNITO_USER_POOL_ID: !Ref CognitoUserPoolId
           COGNITO_USER_POOL_APP_ID: !Ref CognitoUserPoolAppId
-          THIRD_PARTY_LOGIN_MARK: !Ref ThirdPartyLoginMark
+          EXTERNAL_PROVIDER_LOGIN_MARK: !Ref ExternalProviderLoginMark
           LOGIN_SALT: !Ref LoginSalt
       Events:
         Api:
@@ -1738,9 +1738,9 @@ Resources:
         Variables:
           LINE_CHANNEL_ID: !Ref LineChannelId
           LINE_CHANNEL_SECRET: !Ref LineChannelSecret
-          SNS_LOGIN_COMMON_TEMP_PASSWORD: !Ref SnsLoginCommonTempPassword
+          EXTERNAL_PROVIDER_LOGIN_COMMON_TEMP_PASSWORD: !Ref ExternalProviderLoginCommonTempPassword
           LINE_REDIRECT_URI: !Ref LineRedirectUri
-          THIRD_PARTY_LOGIN_MARK: !Ref ThirdPartyLoginMark
+          EXTERNAL_PROVIDER_LOGIN_MARK: !Ref ExternalProviderLoginMark
           LOGIN_SALT: !Ref LoginSalt
           COGNITO_USER_POOL_ID: !Ref CognitoUserPoolId
           COGNITO_USER_POOL_APP_ID: !Ref CognitoUserPoolAppId
@@ -2137,16 +2137,16 @@ Resources:
             Path: /me/unread_notification_managers
             Method: put
             RestApiId: !Ref RestApi
-  MeAliasCreate:
+  MeExternalProviderUserCreate:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
       Role: !GetAtt LambdaRole.Arn
-      CodeUri: ./deploy/me_alias_create.zip
+      CodeUri: ./deploy/me_external_provider_user_create.zip
       Environment:
         Variables:
-          SNS_LOGIN_COMMON_TEMP_PASSWORD: !Ref SnsLoginCommonTempPassword
-          THIRD_PARTY_LOGIN_MARK: !Ref ThirdPartyLoginMark
+          EXTERNAL_PROVIDER_LOGIN_COMMON_TEMP_PASSWORD: !Ref ExternalProviderLoginCommonTempPassword
+          EXTERNAL_PROVIDER_LOGIN_MARK: !Ref ExternalProviderLoginMark
           LOGIN_SALT: !Ref LoginSalt
           COGNITO_USER_POOL_ID: !Ref CognitoUserPoolId
           COGNITO_USER_POOL_APP_ID: !Ref CognitoUserPoolAppId
@@ -2154,7 +2154,7 @@ Resources:
         Api:
           Type: Api
           Properties:
-            Path: /me/alias
+            Path: /me/external_provider_user
             Method: post
             RestApiId: !Ref RestApi
   TopicsIndex:
@@ -2178,7 +2178,7 @@ Resources:
       CodeUri: ./deploy/cognito_trigger_preauthentication.zip
       Environment:
         Variables:
-          THIRD_PARTY_LOGIN_MARK: !Ref ThirdPartyLoginMark
+          EXTERNAL_PROVIDER_LOGIN_MARK: !Ref ExternalProviderLoginMark
   ElasticSearchSearchArticles:
     Type: AWS::Serverless::Function
     Properties:

@@ -227,7 +227,7 @@ class TestPreSignUp(TestCase):
         self.assertEqual(json.loads(response['body']), {'message': 'Invalid parameter: This username is not allowed'})
 
     def test_twitter_validate_ng(self):
-        os.environ['THIRD_PARTY_LOGIN_MARK'] = 'hogehoge'
+        os.environ['EXTERNAL_PROVIDER_LOGIN_MARK'] = 'hogehoge'
         event = {
             'userName': 'Twitter-xxxxx',
             'triggerSource': 'PreSignUp_SignUp',
@@ -244,7 +244,7 @@ class TestPreSignUp(TestCase):
             'triggerSource': 'PreSignUp_AdminCreateUser',
             'request': {
                 'validationData': {
-                    'THIRD_PARTY_LOGIN_MARK': 'line'
+                    'EXTERNAL_PROVIDER_LOGIN_MARK': 'line'
                 }
             }
         }

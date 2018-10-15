@@ -375,23 +375,23 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: !Ref MinDynamoReadCapacitty
         WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
-  SnsUsers:
+  ExternalProviderUsers:
     Type: AWS::DynamoDB::Table
     DependsOn:
     - Users
     Properties:
       AttributeDefinitions:
-      - AttributeName: user_id
+      - AttributeName: external_provider_user_id
         AttributeType: S
-      - AttributeName: alias_user_id
+      - AttributeName: user_id
         AttributeType: S
       KeySchema:
-      - AttributeName: user_id
+      - AttributeName: external_provider_user_id
         KeyType: HASH
       GlobalSecondaryIndexes:
-        - IndexName: alias_user_id-index
+        - IndexName: user_id-index
           KeySchema:
-          - AttributeName: alias_user_id
+          - AttributeName: user_id
             KeyType: HASH
           Projection:
             ProjectionType: ALL

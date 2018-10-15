@@ -36,7 +36,7 @@ class PreSignUp(LambdaBase):
 
             # 通常サインアップユーザーにTwitter・LINEから始まる名前を許可しないバリデーション
             if params['request']['validationData'] is None or \
-               params['request']['validationData'].get('THIRD_PARTY_LOGIN_MARK') != os.environ['THIRD_PARTY_LOGIN_MARK']:
+               params['request']['validationData'].get('EXTERNAL_PROVIDER_LOGIN_MARK') != os.environ['EXTERNAL_PROVIDER_LOGIN_MARK']:
                 if UserUtil.check_try_to_register_as_twitter_user(params['userName']):
                     raise ValidationError('This username is not allowed')
                 if UserUtil.check_try_to_register_as_line_user(params['userName']):
@@ -46,7 +46,7 @@ class PreSignUp(LambdaBase):
             self.__email_exist_check(response)
         elif params['triggerSource'] == 'PreSignUp_AdminCreateUser':
             if (params['request'].get('validationData') is not None) and \
-             (params['request']['validationData'].get('THIRD_PARTY_LOGIN_MARK') == os.environ['THIRD_PARTY_LOGIN_MARK']):
+             (params['request']['validationData'].get('EXTERNAL_PROVIDER_LOGIN_MARK') == os.environ['EXTERNAL_PROVIDER_LOGIN_MARK']):
                 response = self.__filter_users(self.cognito, params)
                 self.__email_exist_check(response)
             else:

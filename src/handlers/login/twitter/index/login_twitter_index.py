@@ -56,34 +56,34 @@ class LoginTwitterIndex(LambdaBase):
         if UserUtil.exists_user(self.dynamodb, user_info['user_id']):
 
             try:
-                has_alias_user_id = UserUtil.has_alias_user_id(
+                has_user_id = UserUtil.has_user_id(
                     dynamodb=self.dynamodb,
-                    user_id=user_info['user_id'],
+                    external_provider_user_id=user_info['user_id'],
                 )
-                if has_alias_user_id is True:
-                    user_id = UserUtil.get_alias_user_id(
+                if has_user_id is True:
+                    user_id = UserUtil.get_user_id(
                         dynamodb=self.dynamodb,
-                        user_id=user_info['user_id']
+                        external_provider_user_id=user_info['user_id']
                     )
                 else:
                     user_id = user_info['user_id']
 
                 # パスワードの取得、デコード処理追加
-                sns_users = self.dynamodb.Table(os.environ['SNS_USERS_TABLE_NAME'])
-                sns_user = sns_users.get_item(Key={'user_id': user_info['user_id']}).get('Item')
-                hash_data = sns_user['password']
+                external_provider_users = self.dynamodb.Table(os.environ['EXTERNAL_PROVIDER_USERS_TABLE_NAME'])
+                external_provider_user = external_provider_users.get_item(Key={'external_provider_user_id': user_info['user_id']}).get('Item')
+                hash_data = external_provider_user['password']
                 byte_hash_data = hash_data.encode()
-                decoded_iv = sns_user['iv']
+                decoded_iv = external_provider_user['iv']
                 iv = decoded_iv.encode()
                 password = UserUtil.decrypt_password(byte_hash_data, iv)
 
-                response = UserUtil.sns_login(
+                response = UserUtil.external_provider_login(
                     cognito=self.cognito,
                     user_pool_id=os.environ['COGNITO_USER_POOL_ID'],
                     user_pool_app_id=os.environ['COGNITO_USER_POOL_APP_ID'],
                     user_id=user_id,
                     password=password,
-                    provider=os.environ['THIRD_PARTY_LOGIN_MARK']
+                    provider=os.environ['EXTERNAL_PROVIDER_LOGIN_MARK']
                 )
                 return ResponseBuilder.response(
                     status_code=200,
@@ -92,7 +92,7 @@ class LoginTwitterIndex(LambdaBase):
                         'id_token': response['AuthenticationResult']['IdToken'],
                         'refresh_token': response['AuthenticationResult']['RefreshToken'],
                         'last_auth_user': user_id,
-                        'has_alias_user_id': has_alias_user_id,
+                        'has_user_id': has_user_id,
                         'status': 'login'
                     }
                 )
@@ -106,10 +106,10 @@ class LoginTwitterIndex(LambdaBase):
                 )
 
         try:
-            backed_temp_password = os.environ['SNS_LOGIN_COMMON_TEMP_PASSWORD']
+            backed_temp_password = os.environ['EXTERNAL_PROVIDER_LOGIN_COMMON_TEMP_PASSWORD']
             alphabet = string.ascii_letters + string.digits
             backed_password = ''.join(secrets.choice(alphabet) for i in range(settings.PASSWORD_LENGTH))
-            response = UserUtil.create_sns_user(
+            response = UserUtil.create_external_provider_user(
                 cognito=self.cognito,
                 user_pool_id=os.environ['COGNITO_USER_POOL_ID'],
                 user_pool_app_id=os.environ['COGNITO_USER_POOL_APP_ID'],
@@ -117,16 +117,16 @@ class LoginTwitterIndex(LambdaBase):
                 email=user_info['email'],
                 backed_temp_password=backed_temp_password,
                 backed_password=backed_password,
-                provider=os.environ['THIRD_PARTY_LOGIN_MARK']
+                provider=os.environ['EXTERNAL_PROVIDER_LOGIN_MARK']
             )
 
             aes_iv = os.urandom(settings.AES_IV_BYTES)
             encrypted_password = UserUtil.encrypt_password(backed_password, aes_iv)
             iv = base64.b64encode(aes_iv).decode()
 
-            UserUtil.add_sns_user_info(
+            UserUtil.add_external_provider_user_info(
                 dynamodb=self.dynamodb,
-                user_id=user_info['user_id'],
+                external_provider_user_id=user_info['user_id'],
                 password=encrypted_password,
                 iv=iv,
                 email=user_info['email'],
@@ -139,7 +139,7 @@ class LoginTwitterIndex(LambdaBase):
                     'id_token': response['AuthenticationResult']['IdToken'],
                     'refresh_token': response['AuthenticationResult']['RefreshToken'],
                     'last_auth_user': user_info['user_id'],
-                    'has_alias_user_id': False,
+                    'has_user_id': False,
                     'status': 'sign_up'
                 }
             )
