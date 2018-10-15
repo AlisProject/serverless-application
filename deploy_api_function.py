@@ -76,7 +76,7 @@ def main():
             zip_file_contents = zip_file.read()
             lambda_client = boto3.client('lambda')
             lambda_client.update_function_code(
-                FunctionName=function_name+'ssss',
+                FunctionName=function_name,
                 ZipFile=zip_file_contents
             )
             print('[Success]'+function_resource_id+'was uploaded')
