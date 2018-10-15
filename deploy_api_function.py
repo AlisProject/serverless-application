@@ -76,13 +76,13 @@ def main():
             zip_file_contents = zip_file.read()
             lambda_client = boto3.client('lambda')
             lambda_client.update_function_code(
-                FunctionName=function_name,
+                FunctionName=function_name+'ssss',
                 ZipFile=zip_file_contents
             )
             print('[Success]'+function_resource_id+'was uploaded')
             sys.exit(0)
         except ClientError as e:
-            print('[Error]'+e.message)
+            print(e)
             sys.exit(1)
 
 
