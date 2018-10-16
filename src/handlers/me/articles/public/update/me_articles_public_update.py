@@ -8,6 +8,7 @@ from text_sanitizer import TextSanitizer
 from db_util import DBUtil
 from user_util import UserUtil
 
+
 class MeArticlesPublicUpdate(LambdaBase):
     def get_schema(self):
         return {

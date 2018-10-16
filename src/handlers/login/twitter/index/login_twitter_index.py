@@ -70,7 +70,9 @@ class LoginTwitterIndex(LambdaBase):
 
                 # パスワードの取得、デコード処理追加
                 external_provider_users = self.dynamodb.Table(os.environ['EXTERNAL_PROVIDER_USERS_TABLE_NAME'])
-                external_provider_user = external_provider_users.get_item(Key={'external_provider_user_id': user_info['user_id']}).get('Item')
+                external_provider_user = external_provider_users.get_item(Key={
+                    'external_provider_user_id': user_info['user_id']
+                }).get('Item')
                 hash_data = external_provider_user['password']
                 byte_hash_data = hash_data.encode()
                 decoded_iv = external_provider_user['iv']

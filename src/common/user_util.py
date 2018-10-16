@@ -54,7 +54,9 @@ class UserUtil:
     def exists_user(dynamodb, external_provider_user_id):
         try:
             external_provider_users = dynamodb.Table(os.environ['EXTERNAL_PROVIDER_USERS_TABLE_NAME'])
-            external_provider_user = external_provider_users.get_item(Key={'external_provider_user_id': external_provider_user_id}).get('Item')
+            external_provider_user = external_provider_users.get_item(Key={
+                'external_provider_user_id': external_provider_user_id
+            }).get('Item')
             if external_provider_user is not None:
                 return True
             return False
@@ -83,7 +85,16 @@ class UserUtil:
             raise e
 
     @staticmethod
-    def create_external_provider_user(cognito, user_id, user_pool_id, user_pool_app_id, email, backed_temp_password, backed_password, provider):
+    def create_external_provider_user(
+        cognito,
+        user_id,
+        user_pool_id,
+        user_pool_app_id,
+        email,
+        backed_temp_password,
+        backed_password,
+        provider
+    ):
         try:
             cognito.admin_create_user(
                 UserPoolId=user_pool_id,
@@ -172,7 +183,8 @@ class UserUtil:
                 'email': email
             }
 
-            external_provider_users.put_item(Item=external_provider_user, ConditionExpression='attribute_not_exists(external_provider_user_id)')
+            external_provider_users.put_item(Item=external_provider_user,
+                                             ConditionExpression='attribute_not_exists(external_provider_user_id)')
         except ClientError as e:
             raise e
 

@@ -19,7 +19,9 @@ class PreAuthentication(LambdaBase):
     def exec_main_proc(self):
         params = self.event
         external_provider_users_table = self.dynamodb.Table(os.environ['EXTERNAL_PROVIDER_USERS_TABLE_NAME'])
-        external_provider_user = external_provider_users_table.get_item(Key={'external_provider_user_id': params['userName']}).get('Item')
+        external_provider_user = external_provider_users_table.get_item(Key={
+            'external_provider_user_id': params['userName']
+        }).get('Item')
         if external_provider_user is None:
             try:
                 external_provider_users = external_provider_users_table.query(

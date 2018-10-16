@@ -38,7 +38,11 @@ class TestLoginLineAuthorizeRequest(TestCase):
                 'user_id': 'user'
             }
         ]
-        TestsUtil.create_table(dynamodb, os.environ['EXTERNAL_PROVIDER_USERS_TABLE_NAME'], self.external_provider_users_table_items)
+        TestsUtil.create_table(
+          dynamodb,
+          os.environ['EXTERNAL_PROVIDER_USERS_TABLE_NAME'],
+          self.external_provider_users_table_items
+        )
 
     def tearDown(self):
         TestsUtil.delete_all_tables(dynamodb)
@@ -304,5 +308,3 @@ class TestLoginLineAuthorizeRequest(TestCase):
 
         response = LoginLineAuthorizeRequest(event=event, context="", dynamodb=dynamodb).main()
         self.assertEqual(response['statusCode'], 400)
-
-

@@ -52,7 +52,9 @@ class LoginLineAuthorizeRequest(LambdaBase):
         if UserUtil.exists_user(self.dynamodb, user_id):
             try:
                 external_provider_users = self.dynamodb.Table(os.environ['EXTERNAL_PROVIDER_USERS_TABLE_NAME'])
-                external_provider_user = external_provider_users.get_item(Key={'external_provider_user_id': user_id}).get('Item')
+                external_provider_user = external_provider_users.get_item(Key={
+                    'external_provider_user_id': user_id
+                }).get('Item')
                 hash_data = external_provider_user['password']
                 byte_hash_data = hash_data.encode()
                 decoded_iv = external_provider_user['iv']
@@ -166,5 +168,3 @@ class LoginLineAuthorizeRequest(LambdaBase):
         response = jwt.decode(params['id_token'], client_secret, audience=client_id,
                               issuer=settings.LINE_ISSUER, algorithms=['HS256'])
         return response
-
-

@@ -21,7 +21,11 @@ class TestUserUtil(TestCase):
                 'external_provider_user_id': 'external_provider_user_id'
             }
         ]
-        TestsUtil.create_table(self.dynamodb, os.environ['EXTERNAL_PROVIDER_USERS_TABLE_NAME'], self.external_provider_users_table_items)
+        TestsUtil.create_table(
+            self.dynamodb,
+            os.environ['EXTERNAL_PROVIDER_USERS_TABLE_NAME'],
+            self.external_provider_users_table_items
+        )
         TestsUtil.create_table(self.dynamodb, os.environ['USERS_TABLE_NAME'], [])
 
     def test_verified_phone_and_email_ok(self):
@@ -336,8 +340,7 @@ class TestUserUtil(TestCase):
         os.environ['PRIVATE_CHAIN_AWS_ACCESS_KEY'] = 'test'
         os.environ['PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY'] = 'test'
         os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'] = 'test'
-        with patch('user_util.requests.post') as requests_mock, \
-             patch('user_util.AWSRequestsAuth') as aws_auth_mock:
+        with patch('user_util.requests.post') as requests_mock, patch('user_util.AWSRequestsAuth') as aws_auth_mock:
             requests_mock.return_value = PrivateChainApiFakeResponse(
                 status_code=200,
                 text='{"result":"my_address"}'
@@ -398,4 +401,3 @@ class PrivateChainApiFakeResponse:
         return self._text
     status_code = property(get_status_code)
     text = property(get_text)
-

@@ -1,4 +1,3 @@
-import re
 import json
 import settings
 from urllib.parse import parse_qsl
@@ -17,13 +16,13 @@ class TwitterUtil:
             oauth_verifier=oauth_verifier
         )
         if response.status_code is not 200:
-           raise TwitterOauthError(
-               endpoint=settings.TWITTER_API_ACCESS_TOKEN_URL,
-               status_code=response.status_code,
-               message=response.text
-           )
+            raise TwitterOauthError(
+                endpoint=settings.TWITTER_API_ACCESS_TOKEN_URL,
+                status_code=response.status_code,
+                message=response.text
+            )
         access_token = self.__parse_api_response(
-           response=response
+            response=response
         )
         cognito_user_id = self.__generate_user_id(access_token['user_id'])
         twitter = OAuth1Session(
@@ -36,11 +35,11 @@ class TwitterUtil:
             settings.TWITTER_API_VERIFY_CREDENTIALS_URL + '?include_email=true'
         )
         if response.status_code is not 200:
-           raise TwitterOauthError(
-               endpoint=settings.TWITTER_API_VERIFY_CREDENTIALS_URL,
-               status_code=response.status_code,
-               message=response.text
-           )
+            raise TwitterOauthError(
+                endpoint=settings.TWITTER_API_VERIFY_CREDENTIALS_URL,
+                status_code=response.status_code,
+                message=response.text
+            )
         user_info = json.loads(response.text)
         return {
             'user_id': cognito_user_id,
@@ -57,21 +56,23 @@ class TwitterUtil:
             params={'oauth_callback': callback_url}
         )
         if response.status_code is not 200:
-           raise TwitterOauthError(
-               endpoint=settings.TWITTER_API_REQUEST_TOKEN_URL,
-               status_code=response.status_code,
-               message=response.text
-           )
+            raise TwitterOauthError(
+                endpoint=settings.TWITTER_API_REQUEST_TOKEN_URL,
+                status_code=response.status_code,
+                message=response.text
+            )
         response_body = self.__parse_api_response(
-           response=response
+            response=response
         )
         return '%s?oauth_token=%s' \
-            % (settings.TWITTER_API_AUTHENTICATE_URL, response_body['oauth_token'])
+               % (settings.TWITTER_API_AUTHENTICATE_URL, response_body['oauth_token'])
 
-    def __parse_api_response(self, response):
+    @staticmethod
+    def __parse_api_response(response):
         return dict(parse_qsl(response.content.decode('utf-8')))
 
-    def __generate_user_id(self, twitter_user_id):
+    @staticmethod
+    def __generate_user_id(twitter_user_id):
         return settings.TWITTER_USERNAME_PREFIX + twitter_user_id
 
     def __get_access_token(self, oauth_token, oauth_verifier):
@@ -86,7 +87,8 @@ class TwitterUtil:
             params={'oauth_verifier': oauth_verifier}
         )
 
-    def __get_email(self, user_info, cognito_user_id):
+    @staticmethod
+    def __get_email(user_info, cognito_user_id):
         email = user_info.get('email')
         if email is None or email == '':
             email = cognito_user_id + '@' + settings.FAKE_USER_EMAIL_DOMAIN
