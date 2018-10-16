@@ -11,6 +11,8 @@ from botocore.exceptions import ClientError
 
 # This helper copied almost entirely from
 # https://github.com/awslabs/serverless-application-model/blob/master/samtranslator/yaml_helper.py
+
+
 def yaml_parse(yamlstr):
     """Parse a yaml string"""
     yaml.SafeLoader.add_multi_constructor(
