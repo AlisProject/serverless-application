@@ -11,6 +11,7 @@ from db_util import DBUtil
 from parameter_util import ParameterUtil
 from record_not_found_error import RecordNotFoundError
 from tag_util import TagUtil
+from user_util import UserUtil
 
 
 class MeArticlesPublicRepublish(LambdaBase):
@@ -26,6 +27,7 @@ class MeArticlesPublicRepublish(LambdaBase):
         }
 
     def validate_params(self):
+        UserUtil.verified_phone_and_email(self.event)
         if self.event.get('pathParameters') is None:
             raise ValidationError('pathParameters is required')
 

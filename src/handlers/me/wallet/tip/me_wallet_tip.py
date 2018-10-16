@@ -5,7 +5,6 @@ import json
 import requests
 import time
 from time_util import TimeUtil
-from user_util import UserUtil
 from db_util import DBUtil
 from aws_requests_auth.aws_auth import AWSRequestsAuth
 from jsonschema import validate
@@ -13,6 +12,7 @@ from lambda_base import LambdaBase
 from jsonschema import ValidationError
 from record_not_found_error import RecordNotFoundError
 from exceptions import SendTransactionError
+from user_util import UserUtil
 
 
 class MeWalletTip(LambdaBase):
@@ -28,6 +28,7 @@ class MeWalletTip(LambdaBase):
         }
 
     def validate_params(self):
+        UserUtil.verified_phone_and_email(self.event)
         # single
         # フロント（js）の都合上桁数が多い場合は指数表記で値が渡る事があるため、int 型に整形
         self.params['tip_value'] = int(self.params['tip_value'])

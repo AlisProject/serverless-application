@@ -124,18 +124,8 @@ Resources:
         - AttributeName: evaluated_at
           KeyType: RANGE
       ProvisionedThroughput:
-        ReadCapacityUnits: 2
-        WriteCapacityUnits: 2
-      GlobalSecondaryIndexes:
-        - IndexName: evaluated_at-index
-          KeySchema:
-          - AttributeName: evaluated_at
-            KeyType: HASH
-          Projection:
-            ProjectionType: ALL
-          ProvisionedThroughput:
-            ReadCapacityUnits: 2
-            WriteCapacityUnits: 2
+          ReadCapacityUnits: 2
+          WriteCapacityUnits: 2
   ArticleEvaluatedManage:
     Type: AWS::DynamoDB::Table
     DependsOn:
@@ -353,6 +343,30 @@ Resources:
       KeySchema:
         - AttributeName: email
           KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+  ExternalProviderUsers:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: external_provider_user_id
+          AttributeType: S
+        - AttributeName: user_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: external_provider_user_id
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: user_id-index
+          KeySchema:
+            - AttributeName: user_id
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: 1
+            WriteCapacityUnits: 1
       ProvisionedThroughput:
         ReadCapacityUnits: 1
         WriteCapacityUnits: 1

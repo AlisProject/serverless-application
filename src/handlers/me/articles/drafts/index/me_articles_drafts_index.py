@@ -7,6 +7,7 @@ from lambda_base import LambdaBase
 from jsonschema import validate
 from decimal_encoder import DecimalEncoder
 from parameter_util import ParameterUtil
+from user_util import UserUtil
 
 
 class MeArticlesDraftsIndex(LambdaBase):
@@ -21,6 +22,7 @@ class MeArticlesDraftsIndex(LambdaBase):
         }
 
     def validate_params(self):
+        UserUtil.verified_phone_and_email(self.event)
         ParameterUtil.cast_parameter_to_int(self.params, self.get_schema())
         validate(self.params, self.get_schema())
 

@@ -125,7 +125,9 @@ class TestMeArticlesLikeCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'test05'
+                        'cognito:username': 'test05',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
@@ -177,7 +179,9 @@ class TestMeArticlesLikeCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'test06'
+                        'cognito:username': 'test06',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
@@ -226,7 +230,9 @@ class TestMeArticlesLikeCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'test06'
+                        'cognito:username': 'test06',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
@@ -266,7 +272,9 @@ class TestMeArticlesLikeCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'test05'
+                        'cognito:username': 'test05',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
@@ -285,7 +293,9 @@ class TestMeArticlesLikeCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'test05'
+                        'cognito:username': 'test05',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
@@ -309,7 +319,9 @@ class TestMeArticlesLikeCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': self.article_liked_user_table_items[0]['user_id']
+                        'cognito:username': self.article_liked_user_table_items[0]['user_id'],
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }

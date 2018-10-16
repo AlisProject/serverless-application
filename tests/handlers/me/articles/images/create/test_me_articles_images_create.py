@@ -83,7 +83,9 @@ class TestMeArticlesImagesCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': target_article_info['user_id']
+                        'cognito:username': target_article_info['user_id'],
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
@@ -121,7 +123,9 @@ class TestMeArticlesImagesCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': target_article_info['user_id']
+                        'cognito:username': target_article_info['user_id'],
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
@@ -159,7 +163,9 @@ class TestMeArticlesImagesCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': target_article_info['user_id']
+                        'cognito:username': target_article_info['user_id'],
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
@@ -197,7 +203,9 @@ class TestMeArticlesImagesCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': target_article_info['user_id']
+                        'cognito:username': target_article_info['user_id'],
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
@@ -235,7 +243,9 @@ class TestMeArticlesImagesCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': target_article_info['user_id']
+                        'cognito:username': target_article_info['user_id'],
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
@@ -277,7 +287,9 @@ class TestMeArticlesImagesCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': target_article_info['user_id']
+                        'cognito:username': target_article_info['user_id'],
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
@@ -301,7 +313,9 @@ class TestMeArticlesImagesCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': target_article_info['user_id']
+                        'cognito:username': target_article_info['user_id'],
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
@@ -326,7 +340,9 @@ class TestMeArticlesImagesCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': target_article_info['user_id']
+                        'cognito:username': target_article_info['user_id'],
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
@@ -351,7 +367,9 @@ class TestMeArticlesImagesCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': target_article_info['user_id']
+                        'cognito:username': target_article_info['user_id'],
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
@@ -376,7 +394,9 @@ class TestMeArticlesImagesCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': target_article_info['user_id']
+                        'cognito:username': target_article_info['user_id'],
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
@@ -401,7 +421,9 @@ class TestMeArticlesImagesCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': target_article_info['user_id']
+                        'cognito:username': target_article_info['user_id'],
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
@@ -423,7 +445,9 @@ class TestMeArticlesImagesCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'another-user'
+                        'cognito:username': 'another-user',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
@@ -444,7 +468,9 @@ class TestMeArticlesImagesCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': target_article_info['user_id']
+                        'cognito:username': target_article_info['user_id'],
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
@@ -471,7 +497,9 @@ class TestMeArticlesImagesCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': target_article_info['user_id']
+                        'cognito:username': target_article_info['user_id'],
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
@@ -496,7 +524,9 @@ class TestMeArticlesImagesCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': target_article_info['user_id']
+                        'cognito:username': target_article_info['user_id'],
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }

@@ -13,6 +13,7 @@ from db_util import DBUtil
 from parameter_util import ParameterUtil
 from tag_util import TagUtil
 from time_util import TimeUtil
+from user_util import UserUtil
 
 
 class MeArticlesDraftsPublish(LambdaBase):
@@ -28,6 +29,7 @@ class MeArticlesDraftsPublish(LambdaBase):
         }
 
     def validate_params(self):
+        UserUtil.verified_phone_and_email(self.event)
         validate(self.params, self.get_schema())
 
         if self.params.get('tags'):

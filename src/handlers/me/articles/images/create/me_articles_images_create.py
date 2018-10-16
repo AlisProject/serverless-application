@@ -9,6 +9,7 @@ from lambda_base import LambdaBase
 from jsonschema import validate, ValidationError
 from PIL import Image
 from io import BytesIO
+from user_util import UserUtil
 
 
 class MeArticlesImagesCreate(LambdaBase):
@@ -59,6 +60,7 @@ class MeArticlesImagesCreate(LambdaBase):
             raise ValidationError('Bad Request: No supported image format')
 
     def validate_params(self):
+        UserUtil.verified_phone_and_email(self.event)
         # single
         # params
         validate(self.params, self.get_schema())

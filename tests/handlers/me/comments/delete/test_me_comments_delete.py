@@ -80,7 +80,9 @@ class TestMeCommentsDelete(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'comment_user_01'
+                        'cognito:username': 'comment_user_01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
@@ -113,7 +115,9 @@ class TestMeCommentsDelete(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'comment_user_02'
+                        'cognito:username': 'comment_user_02',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
@@ -148,7 +152,9 @@ class TestMeCommentsDelete(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'comment_user_02'
+                        'cognito:username': 'comment_user_02',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
@@ -174,7 +180,9 @@ class TestMeCommentsDelete(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'article_user01'
+                        'cognito:username': 'article_user01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
@@ -192,7 +200,9 @@ class TestMeCommentsDelete(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'article_user02'
+                        'cognito:username': 'article_user02',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
@@ -210,7 +220,9 @@ class TestMeCommentsDelete(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'comment_user_01'
+                        'cognito:username': 'comment_user_01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
@@ -228,7 +240,9 @@ class TestMeCommentsDelete(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'comment_user_02'
+                        'cognito:username': 'comment_user_02',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
@@ -246,7 +260,9 @@ class TestMeCommentsDelete(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'comment_user_01'
+                        'cognito:username': 'comment_user_01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
@@ -268,7 +284,9 @@ class TestMeCommentsDelete(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'comment_user_01'
+                        'cognito:username': 'comment_user_01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
@@ -294,7 +312,9 @@ class TestMeCommentsDelete(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'like_user_01'
+                        'cognito:username': 'like_user_01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
