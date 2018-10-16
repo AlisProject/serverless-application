@@ -9,7 +9,8 @@ from yaml import ScalarNode, SequenceNode
 from six import string_types
 from botocore.exceptions import ClientError
 
-
+# This helper copied almost entirely from
+# https://github.com/awslabs/serverless-application-model/blob/master/samtranslator/yaml_helper.py
 def yaml_parse(yamlstr):
     """Parse a yaml string"""
     yaml.SafeLoader.add_multi_constructor(
@@ -79,7 +80,7 @@ def main():
                 FunctionName=function_name,
                 ZipFile=zip_file_contents
             )
-            print('[Success]'+function_resource_id+'was uploaded')
+            print('[Success]'+function_resource_id+' function was uploaded')
             sys.exit(0)
         except ClientError as e:
             print(e)
