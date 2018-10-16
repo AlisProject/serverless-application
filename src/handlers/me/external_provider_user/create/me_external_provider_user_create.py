@@ -32,7 +32,9 @@ class MeExternalProviderUserCreate(LambdaBase):
         external_provider_user_id = params['requestContext']['authorizer']['claims']['cognito:username']
         exist_check_user = users_table.get_item(Key={'user_id': body['user_id']}).get('Item')
 
-        external_provider_user = external_provider_users_table.get_item(Key={'external_provider_user_id': external_provider_user_id}).get('Item')
+        external_provider_user = external_provider_users_table.get_item(Key={
+            'external_provider_user_id': external_provider_user_id
+        }).get('Item')
 
         if (external_provider_user is not None) and ('user_id' in external_provider_user):
             raise ValidationError('The user id of this user has been added.')
@@ -72,7 +74,11 @@ class MeExternalProviderUserCreate(LambdaBase):
                     UserUtil.wallet_initialization(self.cognito, os.environ['COGNITO_USER_POOL_ID'], body['user_id'])
 
                     # ExternalProviderUsersテーブルにuser_idを追加
-                    UserUtil.add_user_id_to_external_provider_user(body['user_id'], external_provider_users_table, external_provider_user_id)
+                    UserUtil.add_user_id_to_external_provider_user(
+                        body['user_id'],
+                        external_provider_users_table,
+                        external_provider_user_id
+                    )
 
                     # Usersテーブルにユーザーを作成
                     UserUtil.add_user_profile(

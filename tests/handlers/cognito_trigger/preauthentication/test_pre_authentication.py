@@ -133,4 +133,3 @@ class TestPreAuthentication(TestCase):
         response = pre_authentication.main()
 
         self.assertEqual(event, response)
-

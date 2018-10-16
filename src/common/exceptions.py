@@ -18,7 +18,8 @@ class TwitterOauthError(Exception):
         return self._message
 
     def __str__(self):
-        return '[Twitter API Error]endpoint:' + str(self._endpoint) + ' status_code:' + str(self._status_code) + ' message:' + str(self._message)
+        return '[Twitter API Error]endpoint:' + str(self._endpoint) + ' status_code:' + \
+               str(self._status_code) + ' message:' + str(self._message)
 
     endpoint = property(get_status_code)
     status_code = property(get_status_code)
@@ -41,7 +42,8 @@ class LineOauthError(Exception):
         return self._message
 
     def __str__(self):
-        return '[Line API Error]endpoint:' + str(self._endpoint) + ' status_code:' + str(self._status_code) + ' message:' + str(self._message)
+        return '[Line API Error]endpoint:' + str(self._endpoint) + ' status_code:' + str(self._status_code) \
+               + ' message:' + str(self._message)
 
     endpoint = property(get_status_code)
     status_code = property(get_status_code)

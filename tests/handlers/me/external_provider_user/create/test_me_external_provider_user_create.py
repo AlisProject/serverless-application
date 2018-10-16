@@ -39,7 +39,11 @@ class TestMeExternalProviderUserCreate(TestCase):
                 'iv': 'iv'
             }
         ]
-        TestsUtil.create_table(dynamodb, os.environ['EXTERNAL_PROVIDER_USERS_TABLE_NAME'], self.external_provider_users_table_items)
+        TestsUtil.create_table(
+          dynamodb,
+          os.environ['EXTERNAL_PROVIDER_USERS_TABLE_NAME'],
+          self.external_provider_users_table_items
+        )
 
         self.users_table_items = [
             {

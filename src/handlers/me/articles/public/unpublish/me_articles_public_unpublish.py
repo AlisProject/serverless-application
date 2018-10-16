@@ -6,6 +6,7 @@ from jsonschema import validate
 from db_util import DBUtil
 from user_util import UserUtil
 
+
 class MeArticlesPublicUnpublish(LambdaBase):
     def get_schema(self):
         return {
