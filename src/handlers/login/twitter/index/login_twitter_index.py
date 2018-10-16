@@ -129,8 +129,7 @@ class LoginTwitterIndex(LambdaBase):
                 external_provider_user_id=user_info['user_id'],
                 password=encrypted_password,
                 iv=iv,
-                email=user_info['email'],
-                icon_image_url=user_info['icon_image_url']
+                email=user_info['email']
             )
             return ResponseBuilder.response(
                 status_code=200,

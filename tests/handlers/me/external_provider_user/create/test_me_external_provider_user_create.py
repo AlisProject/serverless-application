@@ -23,15 +23,13 @@ class TestMeExternalProviderUserCreate(TestCase):
                 'external_provider_user_id': 'LINE_U_test_user',
                 'email': 'test01@example.com',
                 'password': 'test_pass',
-                'iv': 'iv',
-                'icon_image_url': 'https://xxxxxxxx'
+                'iv': 'iv'
             },
             {
                 'external_provider_user_id': 'Twitter_test_user',
                 'email': 'test02@example.com',
                 'password': 'test_pass',
                 'iv': 'iv',
-                'icon_image_url': 'https://xxxxxxxx',
                 'user_id': 'username02'
             },
             {

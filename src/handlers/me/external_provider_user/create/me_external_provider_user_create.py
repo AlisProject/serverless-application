@@ -74,17 +74,11 @@ class MeExternalProviderUserCreate(LambdaBase):
                     # ExternalProviderUsersテーブルにuser_idを追加
                     UserUtil.add_user_id_to_external_provider_user(body['user_id'], external_provider_users_table, external_provider_user_id)
 
-                    if 'icon_image_url' in external_provider_user:
-                        icon_image_url = external_provider_user['icon_image_url']
-                    else:
-                        icon_image_url = None
-
                     # Usersテーブルにユーザーを作成
                     UserUtil.add_user_profile(
                         dynamodb=self.dynamodb,
                         user_id=body['user_id'],
-                        user_display_name=body['user_id'],
-                        icon_image=icon_image_url
+                        user_display_name=body['user_id']
                     )
 
                     has_user_id = UserUtil.has_user_id(self.dynamodb, external_provider_user_id)

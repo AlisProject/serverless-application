@@ -237,8 +237,8 @@ class TestUserUtil(TestCase):
             self.dynamodb,
             'external_provider_user_id',
             'password',
-            'email',
-            'icon_image_url'
+            'iv',
+            'email'
         )
         self.assertEqual(response, None)
 
@@ -253,8 +253,8 @@ class TestUserUtil(TestCase):
                 self.dynamodb,
                 'external_provider_user_id',
                 'password',
-                'email',
-                'icon_image_url'
+                'iv',
+                'email'
             )
 
     def test_has_user_id_ok_with_return_true(self):
@@ -367,8 +367,7 @@ class TestUserUtil(TestCase):
         response = UserUtil.add_user_profile(
             self.dynamodb,
             'user_id',
-            'display_name',
-            'icon_image_url'
+            'display_name'
         )
 
         self.assertEqual(response, None)
@@ -383,18 +382,8 @@ class TestUserUtil(TestCase):
             UserUtil.add_user_profile(
                 self.dynamodb,
                 'user_id',
-                'display_name',
-                'icon_image_url'
+                'display_name'
             )
-
-    def test_add_user_profile_non_picture_ok(self):
-        res = UserUtil.add_user_profile(
-            self.dynamodb,
-            'test-user',
-            'test-user',
-            None
-        )
-        self.assertEqual(res, None)
 
 
 class PrivateChainApiFakeResponse:

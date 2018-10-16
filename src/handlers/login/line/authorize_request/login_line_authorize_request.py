@@ -42,9 +42,6 @@ class LoginLineAuthorizeRequest(LambdaBase):
         # JWTのデコード
         decoded_id_token = self.__decode_jwt(got_jwt, client_secret, client_id)
 
-        if decoded_id_token.get('picture') is '':
-            decoded_id_token['picture'] = None
-
         user_id = settings.LINE_USERNAME_PREFIX + decoded_id_token['sub']
 
         if not decoded_id_token['email']:
@@ -119,8 +116,7 @@ class LoginLineAuthorizeRequest(LambdaBase):
                     external_provider_user_id=user_id,
                     password=encrypted_password,
                     iv=iv,
-                    email=email,
-                    icon_image_url=decoded_id_token['picture']
+                    email=email
                 )
                 return ResponseBuilder.response(
                     status_code=200,

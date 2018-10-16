@@ -27,8 +27,7 @@ class TestLoginTwitterIndex(TestCase):
                 'user_display_name': 'test_display_name02',
                 'email': 'test02@example.com',
                 'password': 'test_pass',
-                'iv': 'iv',
-                'icon_image_url': 'https://xxxxxxxx'
+                'iv': 'iv'
             },
             {
                 'external_provider_user_id': 'Twitter-12345',
@@ -36,7 +35,6 @@ class TestLoginTwitterIndex(TestCase):
                 'email': 'test02@example.com',
                 'password': 'test_pass',
                 'iv': 'iv',
-                'icon_image_url': 'https://xxxxxxxx',
                 'user_id': 'user'
             }
         ]
@@ -77,8 +75,7 @@ class TestLoginTwitterIndex(TestCase):
             twitter_mock.return_value.get_user_info.return_value = {
                 'user_id': 'Twitter-1234',
                 'email': 'Twitter-1234@example.com',
-                'display_name': 'my_name',
-                'icon_image_url': 'http://example.com/image'
+                'display_name': 'my_name'
             }
             user_mock.exists_user.return_value = False
             user_mock.create_external_provider_user.return_value = {
@@ -116,8 +113,7 @@ class TestLoginTwitterIndex(TestCase):
             twitter_mock.return_value.get_user_info.return_value = {
                 'user_id': 'Twitter-12345',
                 'email': 'Twitter-1234@example.com',
-                'display_name': 'my_name',
-                'icon_image_url': 'http://example.com/image'
+                'display_name': 'my_name'
             }
             user_mock.exists_user.return_value = True
             user_mock.has_user_id.return_value = True
@@ -165,8 +161,7 @@ class TestLoginTwitterIndex(TestCase):
             twitter_mock.return_value.get_user_info.return_value = {
                 'user_id': 'Twitter-1234',
                 'email': 'Twitter-1234@example.com',
-                'display_name': 'my_name',
-                'icon_image_url': 'http://example.com/image'
+                'display_name': 'my_name'
             }
             user_mock.exists_user.return_value = True
             user_mock.has_user_id.return_value = False

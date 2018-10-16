@@ -26,19 +26,15 @@ class TestLoginLineAuthorizeRequest(TestCase):
         self.external_provider_users_table_items = [
             {
                 'external_provider_user_id': 'LINE-U_test_user',
-                'user_display_name': 'test_display_name01',
                 'email': 'test01@example.com',
                 'password': 'test_pass',
-                'iv': 'iv',
-                'icon_image_url': 'https://xxxxxxxx'
+                'iv': 'iv'
             },
             {
                 'external_provider_user_id': 'LINE-U_test_user02',
-                'user_display_name': 'test_display_name02',
                 'email': 'test02@example.com',
                 'password': 'test_pass',
                 'iv': 'iv',
-                'icon_image_url': 'https://xxxxxxxx',
                 'user_id': 'user'
             }
         ]

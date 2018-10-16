@@ -1511,8 +1511,8 @@ Resources:
                     properties:
                       user_id:
                         type: 'string'
-#              security:
-#              - cognitoUserPool: []
+              security:
+              - cognitoUserPool: []
               x-amazon-apigateway-integration:
                 responses:
                   default:

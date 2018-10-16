@@ -44,9 +44,7 @@ class TwitterUtil:
         user_info = json.loads(response.text)
         return {
             'user_id': cognito_user_id,
-            'email': self.__get_email(user_info, cognito_user_id),
-            'display_name': self.__get_display_name(user_info),
-            'icon_image_url': self.__get_icon_image_url(user_info)
+            'email': self.__get_email(user_info, cognito_user_id)
         }
 
     def generate_auth_url(self, callback_url):
@@ -87,15 +85,6 @@ class TwitterUtil:
             settings.TWITTER_API_ACCESS_TOKEN_URL,
             params={'oauth_verifier': oauth_verifier}
         )
-
-    def __get_icon_image_url(self, user_info):
-        icon_image_url = user_info.get('profile_image_url_https')
-        if re.search(r'/default_profile_images/', icon_image_url):
-            return None
-        return icon_image_url.replace('_normal', '')
-
-    def __get_display_name(self, user_info):
-        return user_info.get('screen_name')
 
     def __get_email(self, user_info, cognito_user_id):
         email = user_info.get('email')

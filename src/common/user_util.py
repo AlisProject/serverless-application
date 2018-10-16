@@ -149,7 +149,7 @@ class UserUtil:
             raise e
 
     @staticmethod
-    def add_user_profile(dynamodb, user_id, user_display_name, icon_image=None):
+    def add_user_profile(dynamodb, user_id, user_display_name):
         try:
             users = dynamodb.Table(os.environ['USERS_TABLE_NAME'])
             user = {
@@ -157,14 +157,12 @@ class UserUtil:
                 'user_display_name': user_display_name,
                 'sync_elasticsearch': 1
             }
-            if icon_image is not None:
-                user['icon_image_url'] = icon_image
             users.put_item(Item=user, ConditionExpression='attribute_not_exists(user_id)')
         except ClientError as e:
             raise e
 
     @staticmethod
-    def add_external_provider_user_info(dynamodb, external_provider_user_id, password, iv, email, icon_image_url=None):
+    def add_external_provider_user_info(dynamodb, external_provider_user_id, password, iv, email):
         try:
             external_provider_users = dynamodb.Table(os.environ['EXTERNAL_PROVIDER_USERS_TABLE_NAME'])
             external_provider_user = {
@@ -173,9 +171,6 @@ class UserUtil:
                 'iv': iv,
                 'email': email
             }
-
-            if icon_image_url is not None:
-                external_provider_user['icon_image_url'] = icon_image_url
 
             external_provider_users.put_item(Item=external_provider_user, ConditionExpression='attribute_not_exists(external_provider_user_id)')
         except ClientError as e:
