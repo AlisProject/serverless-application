@@ -20,20 +20,20 @@ class TestMeExternalProviderUserCreate(TestCase):
 
         self.external_provider_users_table_items = [
             {
-                'external_provider_user_id': 'LINE_U_test_user',
+                'external_provider_user_id': 'LINE-U-test-user',
                 'email': 'test01@example.com',
                 'password': 'test_pass',
                 'iv': 'iv'
             },
             {
-                'external_provider_user_id': 'Twitter_test_user',
+                'external_provider_user_id': 'Twitter-test-user',
                 'email': 'test02@example.com',
                 'password': 'test_pass',
                 'iv': 'iv',
                 'user_id': 'username02'
             },
             {
-                'external_provider_user_id': 'Twitter_test_user_2',
+                'external_provider_user_id': 'Twitter-test-user-2',
                 'email': 'test02@example.com',
                 'password': 'test_pass',
                 'iv': 'iv'
@@ -64,7 +64,7 @@ class TestMeExternalProviderUserCreate(TestCase):
                 'requestContext': {
                     'authorizer': {
                         'claims': {
-                            'cognito:username': 'LINE_U_test_user',
+                            'cognito:username': 'LINE-U-test-user',
                         }
                     }
                 }
@@ -112,7 +112,7 @@ class TestMeExternalProviderUserCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'Twitter_test_user',
+                        'cognito:username': 'Twitter-test-user',
                     }
                 }
             }
@@ -131,7 +131,7 @@ class TestMeExternalProviderUserCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'LINE_U_test_user',
+                        'cognito:username': 'LINE-U-test-user',
                     }
                 }
             }
@@ -150,7 +150,7 @@ class TestMeExternalProviderUserCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'LINE_U_test_user',
+                        'cognito:username': 'LINE-U-test-user',
                     }
                 }
             }
@@ -169,7 +169,7 @@ class TestMeExternalProviderUserCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'LINE_U_test_user',
+                        'cognito:username': 'LINE-U-test-user',
                     }
                 }
             }
