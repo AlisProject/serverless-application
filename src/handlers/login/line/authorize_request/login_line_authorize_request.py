@@ -44,11 +44,6 @@ class LoginLineAuthorizeRequest(LambdaBase):
 
         user_id = settings.LINE_USERNAME_PREFIX + decoded_id_token['sub']
 
-        if not decoded_id_token['email']:
-            email = user_id + '@' + settings.FAKE_USER_EMAIL_DOMAIN
-        else:
-            email = decoded_id_token['email']
-
         if UserUtil.exists_user(self.dynamodb, user_id):
             try:
                 external_provider_users = self.dynamodb.Table(os.environ['EXTERNAL_PROVIDER_USERS_TABLE_NAME'])
@@ -96,6 +91,15 @@ class LoginLineAuthorizeRequest(LambdaBase):
                 )
         else:
             try:
+                if 'email' not in decoded_id_token:
+                    return ResponseBuilder.response(
+                        status_code=400,
+                        body={'message': 'NotRegistered'}
+                    )
+                if not decoded_id_token['email']:
+                    email = user_id + '@' + settings.FAKE_USER_EMAIL_DOMAIN
+                else:
+                    email = decoded_id_token['email']
                 backed_temp_password = os.environ['EXTERNAL_PROVIDER_LOGIN_COMMON_TEMP_PASSWORD']
                 backed_password = UserUtil.generate_password()
                 response = UserUtil.create_external_provider_user(

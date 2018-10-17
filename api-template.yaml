@@ -235,6 +235,11 @@ Resources:
             properties:
               user_id:
                 type: string
+          SignUpLineAuthorizeUrl:
+            type: object
+            properties:
+              callback_url:
+                type: string
           LoginLineAuthorizeUrl:
             type: object
             properties:
@@ -678,6 +683,25 @@ Resources:
                   default:
                     statusCode: "200"
                 uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LoginTwitterAuthorizationUrl.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /sign_up/line/authorization_url:
+            get:
+              description: 'LINEサインアップ用URL返却のAPI'
+              responses:
+                '200':
+                  description: 'LINEサインアップ用URL'
+                  schema:
+                    type: object
+                    properties:
+                      callback_url:
+                        type: 'string'
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SignUpLineAuthorizeUrl.Arn}/invocations
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
@@ -1709,6 +1733,23 @@ Resources:
           Type: Api
           Properties:
             Path: /login/twitter/authorization_url
+            Method: get
+            RestApiId: !Ref RestApi
+  SignUpLineAuthorizeUrl:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/sign_up_line_authorize_url.zip
+      Environment:
+        Variables:
+          LINE_REDIRECT_URI: !Ref LineRedirectUri
+          LINE_CHANNEL_ID: !Ref LineChannelId
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /sign_up/line/authorization_url
             Method: get
             RestApiId: !Ref RestApi
   LoginLineAuthorizeUrl:

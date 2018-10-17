@@ -308,3 +308,32 @@ class TestLoginLineAuthorizeRequest(TestCase):
 
         response = LoginLineAuthorizeRequest(event=event, context="", dynamodb=dynamodb).main()
         self.assertEqual(response['statusCode'], 400)
+
+    @patch("login_line_authorize_request.LoginLineAuthorizeRequest._LoginLineAuthorizeRequest__decode_jwt",
+           MagicMock(return_value={
+                'sub': 'U_test_user',
+                'name': 'test_display_name01',
+                'picture': 'https://xxxxxxx.png'
+            }))
+    @patch("login_line_authorize_request.LoginLineAuthorizeRequest._LoginLineAuthorizeRequest__get_line_jwt",
+           MagicMock(return_value='xxxxxxx'))
+    def test_main_login_with_non_register_exception(self):
+        with patch('login_line_authorize_request.UserUtil') as user_mock:
+            event = {
+                'body': {
+                    'code': 'testcode',
+                }
+            }
+
+            event['body'] = json.dumps(event['body'])
+
+            user_mock.exists_user.return_value = False
+
+            response = LoginLineAuthorizeRequest(event=event, context="", dynamodb=dynamodb).main()
+            self.assertEqual(response['statusCode'], 400)
+            self.assertEqual(
+                json.loads(response['body']),
+                {
+                    'message': 'NotRegistered'
+                }
+            )
