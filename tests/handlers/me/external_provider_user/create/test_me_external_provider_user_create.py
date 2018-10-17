@@ -72,6 +72,8 @@ class TestMeExternalProviderUserCreate(TestCase):
 
             event['body'] = json.dumps(event['body'])
 
+            user_mock.check_try_to_register_as_twitter_user.return_value = False
+            user_mock.check_try_to_register_as_line_user.return_value = False
             user_mock.decrypt_password.return_value = 'password'
             user_mock.create_external_provider_user.return_value = {
                 'AuthenticationResult': {
@@ -125,6 +127,44 @@ class TestMeExternalProviderUserCreate(TestCase):
         event = {
             'body': {
                 'user_id': 'username02',
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'LINE_U_test_user',
+                    }
+                }
+            }
+        }
+
+        event['body'] = json.dumps(event['body'])
+
+        response = MeExternalProviderUserCreate(event=event, context="", dynamodb=dynamodb).main()
+        self.assertEqual(response['statusCode'], 400)
+
+    def test_invalid_line_user_id(self):
+        event = {
+            'body': {
+                'user_id': 'LINE-test',
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'LINE_U_test_user',
+                    }
+                }
+            }
+        }
+
+        event['body'] = json.dumps(event['body'])
+
+        response = MeExternalProviderUserCreate(event=event, context="", dynamodb=dynamodb).main()
+        self.assertEqual(response['statusCode'], 400)
+
+    def test_invalid_twitter_user_id(self):
+        event = {
+            'body': {
+                'user_id': 'Twitter-test',
             },
             'requestContext': {
                 'authorizer': {
