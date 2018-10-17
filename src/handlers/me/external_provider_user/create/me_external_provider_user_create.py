@@ -27,6 +27,9 @@ class MeExternalProviderUserCreate(LambdaBase):
     def exec_main_proc(self):
         params = self.event
         body = json.loads(params.get('body'))
+        if UserUtil.check_try_to_register_as_line_user(body['user_id']) or \
+           UserUtil.check_try_to_register_as_twitter_user(body['user_id']):
+            raise ValidationError('This username is not allowed')
         users_table = self.dynamodb.Table(os.environ['USERS_TABLE_NAME'])
         external_provider_users_table = self.dynamodb.Table(os.environ['EXTERNAL_PROVIDER_USERS_TABLE_NAME'])
         external_provider_user_id = params['requestContext']['authorizer']['claims']['cognito:username']
