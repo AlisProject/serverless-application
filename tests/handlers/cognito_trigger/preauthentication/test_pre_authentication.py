@@ -93,8 +93,7 @@ class TestPreAuthentication(TestCase):
             'request': {
                 'userAttributes': {
                     'email': 'test@example.com'
-                },
-                'validationData': {}
+                }
             },
             'response': {
                 'autoConfirmUser': False,
