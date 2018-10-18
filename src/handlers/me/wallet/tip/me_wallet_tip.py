@@ -30,8 +30,11 @@ class MeWalletTip(LambdaBase):
     def validate_params(self):
         UserUtil.verified_phone_and_email(self.event)
         # single
-        # フロント（js）の都合上桁数が多い場合は指数表記で値が渡る事があるため、int 型に整形
-        self.params['tip_value'] = int(self.params['tip_value'])
+        # tip_value について数値でのチェックを行うため、int に変換
+        try:
+            self.params['tip_value'] = int(self.params['tip_value'])
+        except ValueError:
+            raise ValidationError('Tip value must be numeric')
         validate(self.params, self.get_schema())
         # relation
         DBUtil.validate_article_existence(

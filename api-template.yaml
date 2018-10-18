@@ -229,7 +229,7 @@ Resources:
               article_id:
                 type: string
               tip_value:
-                type: integer
+                type: string
           MeExternalProviderUserCreate:
             type: object
             properties:
