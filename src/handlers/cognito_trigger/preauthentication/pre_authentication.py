@@ -6,7 +6,6 @@ from lambda_base import LambdaBase
 from jsonschema import ValidationError
 from boto3.dynamodb.conditions import Key
 from botocore.exceptions import ClientError
-from not_authorized_error import NotAuthorizedError
 
 
 class PreAuthentication(LambdaBase):
