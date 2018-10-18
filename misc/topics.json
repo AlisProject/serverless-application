@@ -22,6 +22,42 @@
       "PutRequest": {
         "Item": {
           "name": {
+            "S": "illustration-comic"
+          },
+          "display_name": {
+            "S": "イラスト・マンガ"
+          },
+          "index_hash_key": {
+            "S": "topic"
+          },
+          "order": {
+            "N": "2"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "name": {
+            "S": "business"
+          },
+          "display_name": {
+            "S": "ビジネス"
+          },
+          "index_hash_key": {
+            "S": "topic"
+          },
+          "order": {
+            "N": "3"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "name": {
             "S": "gourmet"
           },
           "display_name": {
@@ -31,7 +67,7 @@
             "S": "topic"
           },
           "order": {
-            "N": "2"
+            "N": "4"
           }
         }
       }
@@ -49,7 +85,7 @@
             "S": "topic"
           },
           "order": {
-            "N": "3"
+            "N": "5"
           }
         }
       }
