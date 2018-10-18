@@ -6,6 +6,7 @@ import urllib
 import time
 import sys
 import re
+from botocore.exceptions import ClientError
 
 
 class ESconfig:
@@ -60,6 +61,24 @@ class ESconfig:
                 AccessPolicies=self.original_access_policy
         )
 
+    def enable_log_config(self, log_kind, log_name):
+        cloudwatch_logs = boto3.client('logs')
+        response = cloudwatch_logs.describe_log_groups(
+                logGroupNamePrefix=f'{os.environ["ALIS_APP_ID"]}-elasticsearch-{log_name}',
+                limit=1
+        )
+        m = re.match(r'(arn.*):\*$', response["logGroups"][0]["arn"])
+        self.client.update_elasticsearch_domain_config(
+            DomainName=self.domain,
+            LogPublishingOptions={
+                log_kind: {
+                    'CloudWatchLogsLogGroupArn': m.group(1),
+                    'Enabled': True
+                }
+            }
+        )
+        print(f"{log_kind} を有効にしました")
+
     def check_index_exists(self, index):
         url = f"https://{self.endpoint}/{index}"
         request = urllib.request.Request(
@@ -92,6 +111,16 @@ class ESconfig:
                 )
         urllib.request.urlopen(request)
 
+    def create_template(self, name, setting):
+        url = f"https://{self.endpoint}/_template/{name}"
+        request = urllib.request.Request(
+                url,
+                method="PUT",
+                data=json.dumps(setting).encode("utf-8"),
+                headers={"Content-Type": "application/json"}
+                )
+        urllib.request.urlopen(request)
+
 
 esconfig = ESconfig()
 
@@ -103,6 +132,97 @@ print("アクセスポリシー反映中 60秒待機")
 for i in range(6):
     time.sleep(10)
     print(f"{(i+1)*10}秒経過")
+
+# ロググループ作成
+cloudwatch_logs = boto3.client('logs')
+create_log_group_list = [
+        "index-logs",
+        "search-logs",
+        "application-logs"
+]
+for log in create_log_group_list:
+    create_log_name = f'{os.environ["ALIS_APP_ID"]}-elasticsearch-{log}'
+    try:
+        cloudwatch_logs.create_log_group(
+            logGroupName=create_log_name
+        )
+        print(f'{create_log_name} ロググループを作成')
+    except ClientError:
+        print(f'{create_log_name} ロググループは既に存在します')
+
+# リソースポリシー設定
+cloudwatch_logs_create_resource_policy = '''
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "es.amazonaws.com"
+      },
+      "Action": [
+        "logs:PutLogEvents",
+        "logs:CreateLogStream"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+'''
+cloudwatch_logs.put_resource_policy(
+    policyName=f'{os.environ["ALIS_APP_ID"]}-es-policy',
+    policyDocument=cloudwatch_logs_create_resource_policy
+)
+print(f'リソースポリシー {os.environ["ALIS_APP_ID"]}-es-policy を作成')
+
+# ログの有効化
+esconfig.enable_log_config("INDEX_SLOW_LOGS", "index-logs")
+esconfig.enable_log_config("SEARCH_SLOW_LOGS", "search-logs")
+esconfig.enable_log_config("ES_APPLICATION_LOGS", "application-logs")
+
+# 共通テンプレート作成
+template_setting = {
+    "index_patterns": ["*"],
+    "settings": {
+        "index": {
+            "search": {
+                "slowlog": {
+                    "threshold": {
+                        "query": {
+                            "warn": "10s",
+                            "info": "5s",
+                            "debug": "2s",
+                            "trace": "500ms"
+                        },
+                        "fetch": {
+                            "warn": "1s",
+                            "info": "800s",
+                            "debug": "500ms",
+                            "trace": "200ms"
+                        }
+                    },
+                    "level": "info"
+                }
+            },
+            "indexing": {
+                "slowlog": {
+                    "threshold": {
+                        "index": {
+                            "warn": "10s",
+                            "info": "5s",
+                            "debug": "2s",
+                            "trace": "500ms"
+                        }
+                    },
+                    "level": "info"
+                }
+            },
+            "number_of_replicas": 1
+        }
+    }
+}
+esconfig.create_template("common", template_setting)
+print("共通テンプレートを作成しました")
 
 create_index_list = []
 
