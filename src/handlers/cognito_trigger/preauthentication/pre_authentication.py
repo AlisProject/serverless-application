@@ -6,7 +6,6 @@ from lambda_base import LambdaBase
 from jsonschema import ValidationError
 from boto3.dynamodb.conditions import Key
 from botocore.exceptions import ClientError
-from not_authorized_error import NotAuthorizedError
 
 
 class PreAuthentication(LambdaBase):
@@ -36,16 +35,12 @@ class PreAuthentication(LambdaBase):
                     'statusCode': 500,
                     'body': json.dumps({'message': 'Internal server error'})
                 }
-
-        # ExternalProviderLoginのケース
-        if self.__is_external_provider_login_validation_data(params):
-            return self.event
         # 通常SignInのケース
-        elif (external_provider_user is None) and (params['request']['validationData'] == {}):
+        if external_provider_user is None:
             return self.event
-        # ValidationDataが存在しない場合のadmin_initiate_authコマンドでのSignInのケース
-        elif (external_provider_user is None) and (params['request'].get('validationData') is None):
-            raise NotAuthorizedError('Forbidden')
+        # ExternalProviderLoginのケース
+        elif self.__is_external_provider_login_validation_data(params):
+            return self.event
         else:
             raise ValidationError('Please login with registered external provider')
 
