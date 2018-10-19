@@ -86,6 +86,7 @@ class TestsUtil:
             {'env_name': 'DELETED_COMMENT_TABLE_NAME',  'table_name': 'DeletedComment'},
             {'env_name': 'TOPIC_TABLE_NAME', 'table_name': 'Topic'},
             {'env_name': 'TAG_TABLE_NAME', 'table_name': 'Tag'},
+            {'env_name': 'TIP_TABLE_NAME', 'table_name': 'Tip'},
             {'env_name': 'EXTERNAL_PROVIDER_USERS_TABLE_NAME', 'table_name': 'ExternalProviderUsers'}
         ]
         if os.environ.get('IS_DYNAMODB_ENDPOINT_OF_AWS') is not None:
