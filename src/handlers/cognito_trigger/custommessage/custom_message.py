@@ -42,7 +42,7 @@ class CustomMessage(LambdaBase):
                 code=self.event['request']['codeParameter'],
                 user=self.event['userName'])
         else:
-            self.event['response']['smsMessage'] = '{user}さんの検証コードは {code} です。'.format(
+            self.event['response']['smsMessage'] = 'ALISです。\n{user}さんの検証コードは {code} です。'.format(
                 user=self.event['userName'], code=self.event['request']['codeParameter'])
             self.event['response']['emailSubject'] = 'Email確認リンク'
             self.event['response']['emailMessage'] = """\
