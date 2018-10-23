@@ -30,6 +30,15 @@ class ArticlesCommentsIndex(LambdaBase):
         DBUtil.validate_article_existence(self.dynamodb, self.params['article_id'], status='public')
 
     def exec_main_proc(self):
+        response = self.__get_parent_comments()
+        response['Items'] = self.__get_comments_with_replies(response['Items'])
+
+        return {
+            'statusCode': 200,
+            'body': json.dumps(response, cls=DecimalEncoder)
+        }
+
+    def __get_parent_comments(self):
         comment_table = self.dynamodb.Table(os.environ['COMMENT_TABLE_NAME'])
 
         limit = settings.COMMENT_INDEX_DEFAULT_LIMIT
@@ -40,6 +49,7 @@ class ArticlesCommentsIndex(LambdaBase):
             'Limit': limit,
             'IndexName': 'article_id-sort_key-index',
             'KeyConditionExpression': Key('article_id').eq(self.params.get('article_id')),
+            'FilterExpression': 'attribute_not_exists(parent_id)',
             'ScanIndexForward': False
         }
 
@@ -54,7 +64,42 @@ class ArticlesCommentsIndex(LambdaBase):
 
         response = comment_table.query(**query_params)
 
-        return {
-            'statusCode': 200,
-            'body': json.dumps(response, cls=DecimalEncoder)
-        }
+        items = response['Items']
+
+        while 'LastEvaluatedKey' in response and len(response['Items']) < limit:
+            query_params.update({'ExclusiveStartKey': response['LastEvaluatedKey']})
+            response = comment_table.query(**query_params)
+            items.extend(response['Items'])
+
+            if len(items) >= limit:
+                last_evaluated_key = {
+                    'comment_id': items[limit - 1]['comment_id'],
+                    'article_id': items[limit - 1]['article_id'],
+                    'sort_key': int(items[limit - 1]['sort_key'])
+                }
+                response.update({'LastEvaluatedKey': last_evaluated_key})
+                break
+
+        response['Items'] = items[:limit]
+
+        return response
+
+    def __get_comments_with_replies(self, comments):
+        comment_table = self.dynamodb.Table(os.environ['COMMENT_TABLE_NAME'])
+
+        items = []
+
+        for comment in comments:
+            query_params = {
+                'IndexName': 'parent_id-sort_key-index',
+                'KeyConditionExpression': Key('parent_id').eq(comment['comment_id'])
+            }
+
+            replies = comment_table.query(**query_params)['Items']
+
+            if replies:
+                comment['replies'] = replies
+
+            items.append(comment)
+
+        return items

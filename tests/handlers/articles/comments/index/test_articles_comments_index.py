@@ -1,5 +1,6 @@
 import os
 import json
+from typing import Dict, List, Union
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
@@ -57,10 +58,40 @@ class TestArticlesCommentsIndex(TestCase):
                 'sort_key': 1520150272000004,
                 'created_at': 1520150272,
                 'text': 'コメントの内容4'
-            },
+            }
         ]
 
-        TestsUtil.create_table(cls.dynamodb, os.environ['COMMENT_TABLE_NAME'], cls.comment_items)
+        cls.reply_items = [
+            {
+                'comment_id': 'comment00005',
+                'parent_id': 'comment00001',
+                'article_id': 'publicId0001',
+                'user_id': 'test_user_02',
+                'sort_key': 1520150272000006,
+                'created_at': 1520150272,
+                'text': 'コメント1に対する返信1'
+            },
+            {
+                'comment_id': 'comment00006',
+                'parent_id': 'comment00001',
+                'article_id': 'publicId0001',
+                'user_id': 'test_user_01',
+                'sort_key': 1520150272000005,
+                'created_at': 1520150272,
+                'text': 'コメント1に対する返信2'
+            },
+            {
+                'comment_id': 'comment00007',
+                'parent_id': 'comment00002',
+                'article_id': 'publicId0001',
+                'user_id': 'test_user_02',
+                'sort_key': 1520150272000002,
+                'created_at': 1520150272,
+                'text': 'コメント2に対する返信'
+            }
+        ]
+
+        TestsUtil.create_table(cls.dynamodb, os.environ['COMMENT_TABLE_NAME'], cls.comment_items + cls.reply_items)
 
     @classmethod
     def tearDownClass(self):
@@ -88,6 +119,8 @@ class TestArticlesCommentsIndex(TestCase):
         }
 
         response = ArticlesCommentsIndex(params, {}, self.dynamodb).main()
+
+        self.comment_items[1]['replies'] = [self.reply_items[2]]
 
         expected_items = [self.comment_items[2], self.comment_items[1]]
         expected_last_evaluated_key = {
@@ -121,6 +154,8 @@ class TestArticlesCommentsIndex(TestCase):
         }
 
         response = ArticlesCommentsIndex(params, {}, self.dynamodb).main()
+
+        self.comment_items[0]['replies'] = [self.reply_items[1], self.reply_items[0]]
 
         expected_items = [self.comment_items[0]]
 
