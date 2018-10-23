@@ -186,7 +186,7 @@ class TestCustomMessage(TestCase):
         response = custommessage.main()
         self.assertEqual(response['statusCode'],  400)
         self.assertEqual(response['body'],
-                         json.dumps({"message": "Invalid parameter: This user name is not changed"}))
+                         json.dumps({"message": "Invalid parameter: external provider's user can not execute"}))
 
     def test_invalid_twitter_user_attempt_to_register_phone_number(self):
         os.environ['DOMAIN'] = "alis.example.com"
@@ -223,4 +223,4 @@ class TestCustomMessage(TestCase):
         response = custommessage.main()
         self.assertEqual(response['statusCode'],  400)
         self.assertEqual(response['body'],
-                         json.dumps({"message": "Invalid parameter: This user name is not changed"}))
+                         json.dumps({"message": "Invalid parameter: external provider's user can not execute"}))

@@ -20,7 +20,7 @@ class CustomMessage(LambdaBase):
         params = self.event['request']['userAttributes']
         if UserUtil.check_try_to_register_as_line_user(self.event['userName']) or \
            UserUtil.check_try_to_register_as_twitter_user(self.event['userName']):
-            raise ValidationError('This user name is not changed')
+            raise ValidationError("external provider's user can not execute")
         if params.get('phone_number', '') != '' and params.get('phone_number_verified', '') != 'true':
             validate(params, self.get_schema())
             client = boto3.client('cognito-idp')
