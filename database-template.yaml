@@ -457,6 +457,8 @@ Resources:
           AttributeType: S
         - AttributeName: sort_key
           AttributeType: N
+        - AttributeName: parent_id
+          AttributeType: S
       KeySchema:
         - AttributeName: comment_id
           KeyType: HASH
@@ -464,6 +466,17 @@ Resources:
         - IndexName: article_id-sort_key-index
           KeySchema:
             - AttributeName: article_id
+              KeyType: HASH
+            - AttributeName: sort_key
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: !Ref MinDynamoReadCapacitty
+            WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
+        - IndexName: parent_id-sort_key-index
+          KeySchema:
+            - AttributeName: parent_id
               KeyType: HASH
             - AttributeName: sort_key
               KeyType: RANGE
@@ -1667,6 +1680,50 @@ Resources:
       PolicyName: WriteAutoScalingPolicy
       PolicyType: TargetTrackingScaling
       ScalingTargetId: !Ref CommentArticleIdSortKeyIndexWriteCapacityScalableTarget
+      TargetTrackingScalingPolicyConfiguration:
+        TargetValue: 50.0
+        ScaleInCooldown: 60
+        ScaleOutCooldown: 60
+        PredefinedMetricSpecification:
+          PredefinedMetricType: DynamoDBWriteCapacityUtilization
+  CommentParentIdSortKeyIndexReadCapacityScalableTarget:
+    Type: AWS::ApplicationAutoScaling::ScalableTarget
+    DependsOn: ScalingRole
+    Properties:
+      MaxCapacity: !Ref MaxDynamoReadCapacitty
+      MinCapacity: !Ref MinDynamoReadCapacitty
+      ResourceId: !Sub 'table/${Comment}/index/parent_id-sort_key-index'
+      RoleARN: !GetAtt ScalingRole.Arn
+      ScalableDimension: dynamodb:index:ReadCapacityUnits
+      ServiceNamespace: dynamodb
+  CommentParentIdSortKeyIndexWriteCapacityScalableTarget:
+    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
+    DependsOn: ScalingRole
+    Properties:
+      MaxCapacity: !Ref MaxDynamoWriteCapacitty
+      MinCapacity: !Ref MinDynamoWriteCapacitty
+      ResourceId: !Sub 'table/${Comment}/index/parent_id-sort_key-index'
+      RoleARN: !GetAtt ScalingRole.Arn
+      ScalableDimension: dynamodb:index:WriteCapacityUnits
+      ServiceNamespace: dynamodb
+  CommentParentIdSortKeyIndexReadScalingPolicy:
+    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
+    Properties:
+      PolicyName: ReadAutoScalingPolicy
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId: !Ref CommentParentIdSortKeyIndexReadCapacityScalableTarget
+      TargetTrackingScalingPolicyConfiguration:
+        TargetValue: 50.0
+        ScaleInCooldown: 60
+        ScaleOutCooldown: 60
+        PredefinedMetricSpecification:
+          PredefinedMetricType: DynamoDBReadCapacityUtilization
+  CommentParentIdSortKeyIndexWriteScalingPolicy:
+    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
+    Properties:
+      PolicyName: WriteAutoScalingPolicy
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId: !Ref CommentParentIdSortKeyIndexWriteCapacityScalableTarget
       TargetTrackingScalingPolicyConfiguration:
         TargetValue: 50.0
         ScaleInCooldown: 60
