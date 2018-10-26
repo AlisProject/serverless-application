@@ -201,7 +201,7 @@ template_setting = {
                             "trace": "200ms"
                         }
                     },
-                    "level": "info"
+                    "level": "warn"
                 }
             },
             "indexing": {
@@ -214,7 +214,7 @@ template_setting = {
                             "trace": "500ms"
                         }
                     },
-                    "level": "info"
+                    "level": "warn"
                 }
             },
             "number_of_replicas": 1
