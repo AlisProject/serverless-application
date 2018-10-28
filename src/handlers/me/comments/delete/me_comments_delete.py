@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 import os
+import time
 
 from boto3.dynamodb.conditions import Key
 
 import settings
-import time
 
 from db_util import DBUtil
 from lambda_base import LambdaBase
@@ -43,6 +43,7 @@ class MeCommentsDelete(LambdaBase):
 
         with deleted_comment_table.batch_writer() as batch:
             for item in delete_targets:
+                item.update({'deleted_at': int(time.time())})
                 batch.put_item(Item=item)
 
         with comment_table.batch_writer() as batch:
@@ -77,4 +78,3 @@ class MeCommentsDelete(LambdaBase):
         targets.extend(thread_comments)
 
         return targets
-

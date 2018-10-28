@@ -19,6 +19,7 @@ from time_util import TimeUtil
 from text_sanitizer import TextSanitizer
 from user_util import UserUtil
 
+
 class MeArticlesCommentsReply(LambdaBase):
     def get_schema(self):
         return {
@@ -147,4 +148,3 @@ class MeArticlesCommentsReply(LambdaBase):
     def __generate_comment_id(self, target):
         hashids = Hashids(salt=os.environ['SALT_FOR_ARTICLE_ID'], min_length=settings.COMMENT_ID_LENGTH)
         return hashids.encode(target)
-
