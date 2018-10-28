@@ -1074,6 +1074,37 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+          /me/articles/{article_id}/comments/reply:
+            post:
+              description: '指定された article_id の記事に対してコメントの返信を登録する'
+              parameters:
+              - name: 'article_id'
+                in: 'path'
+                description: '対象記事の指定するために使用'
+                required: true
+                type: 'string'
+              responses:
+                '200':
+                  description: 'コメント登録の完了'
+                  schema:
+                    type: object
+                    properties:
+                      comment_id:
+                        type: 'string'
+                      parent_id:
+                        type: 'string'
+                      reply_user_id:
+                        type: 'string'
+              security:
+              - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesCommentsReply.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
           /me/articles/{article_id}/comments/likes:
             get:
               description: '指定された記事のコメントの中で、自分がいいねを実行したコメントのIDの一覧を取得する'
@@ -1952,6 +1983,22 @@ Resources:
           Type: Api
           Properties:
             Path: /me/articles/{article_id}/comments
+            Method: post
+            RestApiId: !Ref RestApi
+  MeArticlesCommentsReply:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_articles_comments_reply.zip
+      Environment:
+          Variables:
+            SALT_FOR_ARTICLE_ID: !Ref SaltForArticleId
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/articles/{article_id}/comments/reply
             Method: post
             RestApiId: !Ref RestApi
   MeArticlesCommentsLikesIndex:
