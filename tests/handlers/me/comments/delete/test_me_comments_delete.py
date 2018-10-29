@@ -40,8 +40,26 @@ class TestMeCommentsDelete(TestCase):
             },
             {
                 'comment_id': 'comment00002',
-                'article_id': 'publicId0001',
+                'article_id': 'publicId0002',
                 'user_id': 'comment_user_02',
+                'sort_key': 1520150272000001,
+                'created_at': 1520150272,
+                'text': 'コメントの内容2'
+            },
+            {
+                'comment_id': 'comment00003',
+                'article_id': 'publicId0002',
+                'parent_id': 'comment00002',
+                'user_id': 'comment_user_03',
+                'sort_key': 1520150272000001,
+                'created_at': 1520150272,
+                'text': 'コメントの内容2'
+            },
+            {
+                'comment_id': 'comment00004',
+                'article_id': 'publicId0002',
+                'parent_id': 'comment00002',
+                'user_id': 'comment_user_04',
                 'sort_key': 1520150272000001,
                 'created_at': 1520150272,
                 'text': 'コメントの内容2'
@@ -53,9 +71,9 @@ class TestMeCommentsDelete(TestCase):
         self.deleted_comment_table = self.dynamodb.Table(os.environ['DELETED_COMMENT_TABLE_NAME'])
         deleted_comment_items = [
             {
-                'comment_id': 'comment00002',
-                'article_id': 'publicId0001',
-                'user_id': 'comment_user_02',
+                'comment_id': 'comment00003',
+                'article_id': 'publicId0002',
+                'user_id': 'comment_user_03',
                 'sort_key': 1520150272000001,
                 'created_at': 1520150272,
                 'deleted_at': 1520160272,
@@ -107,7 +125,7 @@ class TestMeCommentsDelete(TestCase):
         for key, value in self.comment_items[0].items():
             self.assertEqual(deleted_comment[key], value)
 
-    def test_main_ok_deleted_comment_exists(self):
+    def test_main_ok_with_thread_comments(self):
         params = {
             'pathParameters': {
                 'comment_id': self.comment_items[1]['comment_id']
@@ -115,7 +133,7 @@ class TestMeCommentsDelete(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'comment_user_02',
+                        'cognito:username': 'article_user02',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -131,15 +149,52 @@ class TestMeCommentsDelete(TestCase):
         comment_after = self.comment_table.scan()['Items']
         deleted_comment_after = self.deleted_comment_table.scan()['Items']
 
-        comment = self.comment_table.get_item(Key={'comment_id': self.comment_items[1]['comment_id']}).get('Item')
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(len(comment_after) - len(comment_before), -3)
+        self.assertEqual(len(deleted_comment_after) - len(deleted_comment_before), 2)
+
+        for targets in [self.comment_items[1], self.comment_items[2], self.comment_items[3]]:
+            comment = self.comment_table.get_item(Key={'comment_id': targets['comment_id']}).get('Item')
+            deleted_comment = self.deleted_comment_table.get_item(
+                Key={'comment_id': targets['comment_id']}).get('Item')
+
+            self.assertIsNone(comment)
+            for key, value in targets.items():
+                self.assertEqual(deleted_comment[key], value)
+
+    def test_main_ok_deleted_comment_exists(self):
+        params = {
+            'pathParameters': {
+                'comment_id': self.comment_items[2]['comment_id']
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'comment_user_03',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
+            }
+        }
+
+        comment_before = self.comment_table.scan()['Items']
+        deleted_comment_before = self.deleted_comment_table.scan()['Items']
+
+        response = MeCommentsDelete(params, {}, self.dynamodb).main()
+
+        comment_after = self.comment_table.scan()['Items']
+        deleted_comment_after = self.deleted_comment_table.scan()['Items']
+
+        comment = self.comment_table.get_item(Key={'comment_id': self.comment_items[2]['comment_id']}).get('Item')
         deleted_comment = self.deleted_comment_table.get_item(
-            Key={'comment_id': self.comment_items[1]['comment_id']}).get('Item')
+            Key={'comment_id': self.comment_items[2]['comment_id']}).get('Item')
 
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(len(comment_after) - len(comment_before), -1)
         self.assertEqual(len(deleted_comment_after) - len(deleted_comment_before), 0)
         self.assertIsNone(comment)
-        for key, value in self.comment_items[1].items():
+        for key, value in self.comment_items[2].items():
             self.assertEqual(deleted_comment[key], value)
 
     @patch('me_comments_delete.MeCommentsDelete._MeCommentsDelete__is_accessable_comment',
