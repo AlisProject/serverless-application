@@ -86,11 +86,12 @@ class MeArticlesCommentsReply(LambdaBase):
     def __create_comment_notifications(self, article_info, comment):
         notification_tagets = []
 
-        # 返信先のユーザーへの通知
-        NotificationUtil.notify_article_comment(
-            self.dynamodb, article_info, comment, self.params['reply_user_id'], settings.COMMENT_REPLY_NOTIFICATION_TYPE
-        )
-        notification_tagets.append(self.params['reply_user_id'])
+        # 返信先のユーザーへの通知(自分自身に返信も可能なため、その場合は通知しない)
+        if not self.params['reply_user_id'] == comment['user_id']:
+            NotificationUtil.notify_article_comment(
+                self.dynamodb, article_info, comment, self.params['reply_user_id'], settings.COMMENT_REPLY_NOTIFICATION_TYPE
+            )
+            notification_tagets.append(self.params['reply_user_id'])
 
         # スレッド内のユーザへの通知
         thread_notification_targets = self.__get_thread_notification_targets(

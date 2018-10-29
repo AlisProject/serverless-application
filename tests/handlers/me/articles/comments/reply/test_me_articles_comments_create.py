@@ -371,6 +371,51 @@ class TestMeArticlesCommentsReply(TestCase):
                 Key={'notification_id': 'comment-articleuser01-comment_id'}).get('Item'))
 
     '''
+    自分自身のコメントに対する返信の検証
+    スレッド通知 + 記事投稿者への通知が行われる
+    '''
+    def test___create_comment_notifications_reply_own_comment(self):
+        params = {
+            'article_id': 'publicId0001',
+            'text': 'A',
+            'parent_id': 'comment00001',
+            'reply_user_id': 'commentuser01'
+        }
+
+        article_info = self.article_info_table_items[0]
+        comment = {
+            'comment_id': 'comment_id',
+            'user_id': 'commentuser01'
+        }
+
+        me_articles_comments_reply = MeArticlesCommentsReply(params, {}, self.dynamodb)
+        me_articles_comments_reply.params = params
+
+        notification_before = self.notification_table.scan()['Items']
+        unread_notification_manager_before = self.unread_notification_manager_table.scan()['Items']
+
+        me_articles_comments_reply._MeArticlesCommentsReply__create_comment_notifications(
+            article_info, comment)
+
+        notification_after = self.notification_table.scan()['Items']
+        unread_notification_manager_after = self.unread_notification_manager_table.scan()['Items']
+
+        self.assertEqual(len(notification_after) - len(notification_before), 3)
+        self.assertEqual(len(unread_notification_manager_after) - len(unread_notification_manager_before), 3)
+
+        self.assertIsNotNone(
+            self.notification_table.get_item(
+                Key={'notification_id': 'thread-commentuser02-comment_id'}).get('Item'))
+
+        self.assertIsNotNone(
+            self.notification_table.get_item(
+                Key={'notification_id': 'thread-commentuser03-comment_id'}).get('Item'))
+
+        self.assertIsNotNone(
+            self.notification_table.get_item(
+                Key={'notification_id': 'comment-articleuser01-comment_id'}).get('Item'))
+
+    '''
     以下のprivateメソッドの基本的には振る舞いは上記のテストによって暗黙的に網羅テストされているので
     list.remove(args)時にValueErrorを無視する振る舞いのみテストを行う
     '''
