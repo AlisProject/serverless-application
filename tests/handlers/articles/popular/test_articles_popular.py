@@ -219,6 +219,19 @@ class TestArticlesPopular(TestCase):
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(json.loads(response['body'])['Items'], expected_items)
 
+    def test_main_with_no_index(self):
+        TestsEsUtil.delete_alias(self.elasticsearch, settings.ARTICLE_SCORE_INDEX_NAME)
+        params = {
+            'queryStringParameters': {
+                'limit': '2'
+            }
+        }
+
+        response = ArticlesPopular(params, {}, dynamodb=self.dynamodb, elasticsearch=self.elasticsearch).main()
+
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(json.loads(response['body'])['Items'], [])
+
     def test_call_validate_topic(self):
         params = {
             'queryStringParameters': {
