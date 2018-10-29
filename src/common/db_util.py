@@ -115,7 +115,7 @@ class DBUtil:
         return True
 
     @staticmethod
-    def validate_user_existence_in_thread(dynamodb, reply_user_id, parent_comment_id):
+    def validate_user_existence_in_thread(dynamodb, replyed_user_id, parent_comment_id):
 
         comment_table = dynamodb.Table(os.environ['COMMENT_TABLE_NAME'])
 
@@ -128,7 +128,7 @@ class DBUtil:
         thread_user_ids = [comment['user_id'] for comment in thread_comments]
         parent_comment = comment_table.get_item(Key={'comment_id': parent_comment_id})['Item']
 
-        if reply_user_id not in thread_user_ids + [parent_comment['user_id']]:
-            raise ValidationError("Bad Request: {reply_user_id} doesn't exist in thread".format(reply_user_id=reply_user_id))
+        if replyed_user_id not in thread_user_ids + [parent_comment['user_id']]:
+            raise ValidationError("Bad Request: {replyed_user_id} doesn't exist in thread".format(replyed_user_id=replyed_user_id))
 
         return True

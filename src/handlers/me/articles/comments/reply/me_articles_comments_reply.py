@@ -28,9 +28,9 @@ class MeArticlesCommentsReply(LambdaBase):
                 'article_id': settings.parameters['article_id'],
                 'text': settings.parameters['comment']['text'],
                 'parent_id': settings.parameters['comment']['comment_id'],
-                'reply_user_id': settings.parameters['user_id']
+                'replyed_user_id': settings.parameters['user_id']
             },
-            'required': ['article_id', 'text', 'parent_id', 'reply_user_id']
+            'required': ['article_id', 'text', 'parent_id', 'replyed_user_id']
         }
 
     def validate_params(self):
@@ -41,8 +41,8 @@ class MeArticlesCommentsReply(LambdaBase):
         validate(self.params, self.get_schema())
         DBUtil.validate_article_existence(self.dynamodb, self.params['article_id'], status='public')
         DBUtil.validate_parent_comment_existence(self.dynamodb, self.params['parent_id'])
-        DBUtil.validate_user_existence(self.dynamodb, self.params['reply_user_id'])
-        DBUtil.validate_user_existence_in_thread(self.dynamodb, self.params['reply_user_id'], self.params['parent_id'])
+        DBUtil.validate_user_existence(self.dynamodb, self.params['replyed_user_id'])
+        DBUtil.validate_user_existence_in_thread(self.dynamodb, self.params['replyed_user_id'], self.params['parent_id'])
 
     def exec_main_proc(self):
         sort_key = TimeUtil.generate_sort_key()
@@ -57,7 +57,7 @@ class MeArticlesCommentsReply(LambdaBase):
             'article_id': self.params['article_id'],
             'text': TextSanitizer.sanitize_text(self.params['text']),
             'parent_id': self.params['parent_id'],
-            'reply_user_id': self.params['reply_user_id'],
+            'replyed_user_id': self.params['replyed_user_id'],
             'user_id': user_id,
             'sort_key': sort_key,
             'created_at': int(time.time())
@@ -88,15 +88,15 @@ class MeArticlesCommentsReply(LambdaBase):
         notification_tagets = []
 
         # 返信先のユーザーへの通知(自分自身に返信も可能なため、その場合は通知しない)
-        if not self.params['reply_user_id'] == comment['user_id']:
+        if not self.params['replyed_user_id'] == comment['user_id']:
             NotificationUtil.notify_article_comment(
-                self.dynamodb, article_info, comment, self.params['reply_user_id'], settings.COMMENT_REPLY_NOTIFICATION_TYPE
+                self.dynamodb, article_info, comment, self.params['replyed_user_id'], settings.COMMENT_REPLY_NOTIFICATION_TYPE
             )
-            notification_tagets.append(self.params['reply_user_id'])
+            notification_tagets.append(self.params['replyed_user_id'])
 
         # スレッド内のユーザへの通知
         thread_notification_targets = self.__get_thread_notification_targets(
-            comment['user_id'], self.params['reply_user_id'], self.params['parent_id'])
+            comment['user_id'], self.params['replyed_user_id'], self.params['parent_id'])
         notification_tagets.extend(thread_notification_targets)
         for target_user_id in thread_notification_targets:
             NotificationUtil.notify_article_comment(
@@ -114,7 +114,7 @@ class MeArticlesCommentsReply(LambdaBase):
         for target_user_id in notification_tagets:
             NotificationUtil.update_unread_notification_manager(self.dynamodb, target_user_id)
 
-    def __get_thread_notification_targets(self, user_id, reply_user_id, parent_id):
+    def __get_thread_notification_targets(self, user_id, replyed_user_id, parent_id):
         comment_table = self.dynamodb.Table(os.environ['COMMENT_TABLE_NAME'])
 
         query_params = {
@@ -130,7 +130,7 @@ class MeArticlesCommentsReply(LambdaBase):
         target_user_ids = list(set(thread_user_ids + [parent_comment['user_id']]))
 
         # 通知対象から返信先のユーザーと返信したユーザーを削除する。存在しない場合は無視して後続処理を続ける
-        for user_id in [user_id, reply_user_id]:
+        for user_id in [user_id, replyed_user_id]:
             try:
                 target_user_ids.remove(user_id)
             except ValueError:

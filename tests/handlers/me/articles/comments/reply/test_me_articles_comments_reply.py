@@ -49,7 +49,7 @@ class TestMeArticlesCommentsReply(TestCase):
                 'article_id': 'publicId0001',
                 'user_id': 'commentuser02',
                 'parent_id': 'comment00001',
-                'reply_user_id': 'commentuser01',
+                'replyed_user_id': 'commentuser01',
                 'sort_key': 1520150271000000,
                 'created_at': 1520150272,
                 'text': 'コメントの内容1'
@@ -59,7 +59,7 @@ class TestMeArticlesCommentsReply(TestCase):
                 'article_id': 'publicId0001',
                 'user_id': 'commentuser03',
                 'parent_id': 'comment00001',
-                'reply_user_id': 'commentuser02',
+                'replyed_user_id': 'commentuser02',
                 'sort_key': 1520150271000000,
                 'created_at': 1520150272,
                 'text': 'コメントの内容1'
@@ -69,7 +69,7 @@ class TestMeArticlesCommentsReply(TestCase):
                 'article_id': 'publicId0001',
                 'user_id': 'commentuser02',  # スレッド通知が二重に飛ばないことの検証用
                 'parent_id': 'comment00001',
-                'reply_user_id': 'commentuser01',
+                'replyed_user_id': 'commentuser01',
                 'sort_key': 1520150271000000,
                 'created_at': 1520150272,
                 'text': 'コメントの内容1'
@@ -122,7 +122,7 @@ class TestMeArticlesCommentsReply(TestCase):
             'body': {
                 'text': 'A',
                 'parent_id': 'comment00001',
-                'reply_user_id': 'commentuser02'
+                'replyed_user_id': 'commentuser02'
             },
             'requestContext': {
                 'authorizer': {
@@ -160,7 +160,7 @@ class TestMeArticlesCommentsReply(TestCase):
             'article_id': 'publicId0001',
             'user_id': 'test_user_id01',
             'parent_id': 'comment00001',
-            'reply_user_id': 'commentuser02',
+            'replyed_user_id': 'commentuser02',
             'created_at': 1520150552,
             'sort_key': 1520150552000003
         }
@@ -247,7 +247,7 @@ class TestMeArticlesCommentsReply(TestCase):
             'article_id': 'publicId0001',
             'text': 'A',
             'parent_id': 'comment00001',
-            'reply_user_id': 'commentuser01'
+            'replyed_user_id': 'commentuser01'
         }
 
         article_info = self.article_info_table_items[0]
@@ -293,7 +293,7 @@ class TestMeArticlesCommentsReply(TestCase):
             'article_id': 'publicId0001',
             'text': 'A',
             'parent_id': 'comment00001',
-            'reply_user_id': 'commentuser02'
+            'replyed_user_id': 'commentuser02'
         }
 
         article_info = self.article_info_table_items[0]
@@ -338,7 +338,7 @@ class TestMeArticlesCommentsReply(TestCase):
             'article_id': 'publicId0002',
             'text': 'A',
             'parent_id': 'comment00005',
-            'reply_user_id': 'commentuser01'
+            'replyed_user_id': 'commentuser01'
         }
 
         article_info = self.article_info_table_items[0]
@@ -379,7 +379,7 @@ class TestMeArticlesCommentsReply(TestCase):
             'article_id': 'publicId0001',
             'text': 'A',
             'parent_id': 'comment00001',
-            'reply_user_id': 'commentuser01'
+            'replyed_user_id': 'commentuser01'
         }
 
         article_info = self.article_info_table_items[0]
@@ -421,13 +421,13 @@ class TestMeArticlesCommentsReply(TestCase):
     '''
     def test___get_thread_notification_targets_ignore_value_errors(self):
         user_id = 'comment10001'
-        reply_user_id = 'articleuser01'
+        replyed_user_id = 'articleuser01'
         parent_id = 'comment00001'
         me_articles_comments_reply = MeArticlesCommentsReply({}, {}, self.dynamodb)
 
         try:
             me_articles_comments_reply._MeArticlesCommentsReply__get_thread_notification_targets(
-                user_id, reply_user_id, parent_id)
+                user_id, replyed_user_id, parent_id)
         except ValueError:
             self.fail('get_thread_notification_tagets() raised ValueError unexpectedly')
 
@@ -440,7 +440,7 @@ class TestMeArticlesCommentsReply(TestCase):
             'body': {
                 'text': 'sample content',
                 'parent_id': 'comment00001',
-                'reply_user_id': 'commentuser02'
+                'replyed_user_id': 'commentuser02'
             },
             'requestContext': {
                 'authorizer': {
@@ -490,7 +490,7 @@ class TestMeArticlesCommentsReply(TestCase):
             'body': {
                 'text': 'A',
                 'parent_id': 'comment00001',
-                'reply_user_id': 'commentuser02'
+                'replyed_user_id': 'commentuser02'
             },
             'requestContext': {
                 'authorizer': {
@@ -539,7 +539,7 @@ class TestMeArticlesCommentsReply(TestCase):
             'body': {
                 'text': 'sample content',
                 'parent_id': 'comment00001',
-                'reply_user_id': 'commentuser02'
+                'replyed_user_id': 'commentuser02'
             },
             'requestContext': {
                 'authorizer': {
@@ -564,7 +564,7 @@ class TestMeArticlesCommentsReply(TestCase):
             'body': {
                 'text': 'AAA',
                 'parent_id': 'comment00001',
-                'reply_user_id': 'commentuser02'
+                'replyed_user_id': 'commentuser02'
             },
             'requestContext': {
                 'authorizer': {
@@ -577,7 +577,7 @@ class TestMeArticlesCommentsReply(TestCase):
             }
         }
 
-        for param in ['text', 'parent_id', 'reply_user_id']:
+        for param in ['text', 'parent_id', 'replyed_user_id']:
             copy_params = copy.deepcopy(params)
             copy_params['body'][param] = None
 
@@ -585,7 +585,7 @@ class TestMeArticlesCommentsReply(TestCase):
 
             self.assert_bad_request(copy_params)
 
-        for param in ['text', 'parent_id', 'reply_user_id']:
+        for param in ['text', 'parent_id', 'replyed_user_id']:
             copy_params = copy.deepcopy(params)
             copy_params['body'][param] = ''
 
@@ -601,7 +601,7 @@ class TestMeArticlesCommentsReply(TestCase):
             'body': {
                 'text': '',
                 'parent_id': 'comment00001',
-                'reply_user_id': 'commentuser02'
+                'replyed_user_id': 'commentuser02'
             },
             'requestContext': {
                 'authorizer': {
@@ -626,7 +626,7 @@ class TestMeArticlesCommentsReply(TestCase):
             'body': {
                 'text': 'A' * 401,
                 'parent_id': 'comment00001',
-                'reply_user_id': 'commentuser02'
+                'replyed_user_id': 'commentuser02'
             },
             'requestContext': {
                 'authorizer': {
@@ -651,7 +651,7 @@ class TestMeArticlesCommentsReply(TestCase):
             'body': {
                 'text': 'A',
                 'parent_id': 'A' * 13,
-                'reply_user_id': 'commentuser02'
+                'replyed_user_id': 'commentuser02'
             },
             'requestContext': {
                 'authorizer': {
@@ -668,7 +668,7 @@ class TestMeArticlesCommentsReply(TestCase):
 
         self.assert_bad_request(params)
 
-    def test_validation_reply_user_id_max(self):
+    def test_validation_replyed_user_id_max(self):
         params = {
             'pathParameters': {
                 'article_id': 'publicId0001'
@@ -676,7 +676,7 @@ class TestMeArticlesCommentsReply(TestCase):
             'body': {
                 'text': 'A',
                 'parent_id': 'comment00001',
-                'reply_user_id': 'A' * 31
+                'replyed_user_id': 'A' * 31
             },
             'requestContext': {
                 'authorizer': {

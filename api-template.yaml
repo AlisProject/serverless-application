@@ -1093,7 +1093,7 @@ Resources:
                 description: '返信するスレッドの親コメントのid'
                 required: true
                 type: 'string'
-              - name: 'reply_user_id'
+              - name: 'replyed_user_id'
                 in: 'body'
                 description: '返信先のユーザーのid'
                 required: true

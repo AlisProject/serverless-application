@@ -57,7 +57,7 @@ class TestDBUtil(TestCase):
             {
                 'comment_id': 'comment00002',
                 'parent_id': 'comment00001',
-                'reply_user_id': 'commentuser02',
+                'replyed_user_id': 'commentuser02',
                 'article_id': 'testid000001',
                 'user_id': 'test_user',
                 'text': 'hogefugapiyo',
@@ -75,7 +75,7 @@ class TestDBUtil(TestCase):
             {
                 'comment_id': 'comment00004',
                 'parent_id': 'comment00003',
-                'reply_user_id': 'commentuser02',
+                'replyed_user_id': 'commentuser02',
                 'article_id': 'testid000002',
                 'user_id': 'commentuser04',
                 'text': 'hogefugapiyo',
