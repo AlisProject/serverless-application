@@ -464,8 +464,8 @@ class TestMeArticlesCommentsReply(TestCase):
             self.assertEqual(args[1], 'publicId0001')
             self.assertEqual(kwargs['status'], 'public')
 
-            args, _ = mock_lib.validate_comment_existence.call_args
-            self.assertTrue(mock_lib.validate_comment_existence.called)
+            args, _ = mock_lib.validate_parent_comment_existence.call_args
+            self.assertTrue(mock_lib.validate_parent_comment_existence.called)
             self.assertEqual(args[0], self.dynamodb)
             self.assertEqual(args[1], 'comment00001')
 

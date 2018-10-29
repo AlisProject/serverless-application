@@ -53,7 +53,18 @@ class TestDBUtil(TestCase):
                 'text': 'hogefugapiyo',
                 'created_at': 1520150272,
                 'sort_key': 1520150272000000
+            },
+            {
+                'comment_id': 'comment00002',
+                'parent_id': 'comment00001',
+                'reply_user_id': 'test_user',
+                'article_id': 'testid000001',
+                'user_id': 'test_user',
+                'text': 'hogefugapiyo',
+                'created_at': 1520150272,
+                'sort_key': 1520150272000000
             }
+
         ]
         TestsUtil.create_table(cls.dynamodb, os.environ['COMMENT_TABLE_NAME'], cls.comment_items)
 
@@ -266,6 +277,27 @@ class TestDBUtil(TestCase):
             DBUtil.validate_comment_existence(
                 self.dynamodb,
                 'piyopiyo'
+            )
+
+    def test_validate_parent_comment_existence_ok(self):
+        result = DBUtil.validate_parent_comment_existence(
+            self.dynamodb,
+            self.comment_items[0]['comment_id']
+        )
+        self.assertTrue(result)
+
+    def test_validate_parent_comment_existence_ng_not_exists_comment_id(self):
+        with self.assertRaises(RecordNotFoundError):
+            DBUtil.validate_parent_comment_existence(
+                self.dynamodb,
+                'piyopiyo'
+            )
+
+    def test_validate_parent_comment_existence_ng_with_child_comment(self):
+        with self.assertRaises(RecordNotFoundError):
+            DBUtil.validate_parent_comment_existence(
+                self.dynamodb,
+                self.comment_items[1]['comment_id']
             )
 
     def test_get_validated_comment_existence_ok(self):

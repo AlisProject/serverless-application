@@ -63,6 +63,15 @@ class DBUtil:
         return True
 
     @staticmethod
+    def validate_parent_comment_existence(dynamodb, comment_id):
+        table = dynamodb.Table(os.environ['COMMENT_TABLE_NAME'])
+        comment = table.get_item(Key={'comment_id': comment_id}).get('Item')
+
+        if comment is None or comment.get('parent_id'):
+            raise RecordNotFoundError('Record Not Found')
+        return True
+
+    @staticmethod
     def get_validated_comment(dynamodb, comment_id):
         table = dynamodb.Table(os.environ['COMMENT_TABLE_NAME'])
         comment = table.get_item(Key={'comment_id': comment_id}).get('Item')

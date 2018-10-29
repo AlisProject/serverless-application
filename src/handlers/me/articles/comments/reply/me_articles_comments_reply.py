@@ -40,7 +40,7 @@ class MeArticlesCommentsReply(LambdaBase):
 
         validate(self.params, self.get_schema())
         DBUtil.validate_article_existence(self.dynamodb, self.params['article_id'], status='public')
-        DBUtil.validate_comment_existence(self.dynamodb, self.params['parent_id'])
+        DBUtil.validate_parent_comment_existence(self.dynamodb, self.params['parent_id'])
         DBUtil.validate_user_existence(self.dynamodb, self.params['reply_user_id'])
 
     def exec_main_proc(self):
