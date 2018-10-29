@@ -1083,6 +1083,21 @@ Resources:
                 description: '対象記事の指定するために使用'
                 required: true
                 type: 'string'
+              - name: 'text'
+                in: 'body'
+                description: 'コメントの内容'
+                required: true
+                type: 'string'
+              - name: 'parent_id'
+                in: 'body'
+                description: '返信するスレッドの親コメントのid'
+                required: true
+                type: 'string'
+              - name: 'reply_user_id'
+                in: 'body'
+                description: '返信先のユーザーのid'
+                required: true
+                type: 'string'
               responses:
                 '200':
                   description: 'コメント登録の完了'
@@ -1090,10 +1105,6 @@ Resources:
                     type: object
                     properties:
                       comment_id:
-                        type: 'string'
-                      parent_id:
-                        type: 'string'
-                      reply_user_id:
                         type: 'string'
               security:
               - cognitoUserPool: []
