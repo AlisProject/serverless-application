@@ -129,6 +129,7 @@ class DBUtil:
         parent_comment = comment_table.get_item(Key={'comment_id': parent_comment_id})['Item']
 
         if replyed_user_id not in thread_user_ids + [parent_comment['user_id']]:
-            raise ValidationError("Bad Request: {replyed_user_id} doesn't exist in thread".format(replyed_user_id=replyed_user_id))
+            raise ValidationError("Bad Request: {replyed_user_id} doesn't exist in thread"
+                                  .format(replyed_user_id=replyed_user_id))
 
         return True
