@@ -42,6 +42,7 @@ class MeArticlesCommentsReply(LambdaBase):
         DBUtil.validate_article_existence(self.dynamodb, self.params['article_id'], status='public')
         DBUtil.validate_parent_comment_existence(self.dynamodb, self.params['parent_id'])
         DBUtil.validate_user_existence(self.dynamodb, self.params['reply_user_id'])
+        DBUtil.validate_user_existence_in_thread(self.dynamodb, self.params['reply_user_id'], self.params['parent_id'])
 
     def exec_main_proc(self):
         sort_key = TimeUtil.generate_sort_key()

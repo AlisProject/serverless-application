@@ -474,6 +474,12 @@ class TestMeArticlesCommentsReply(TestCase):
             self.assertEqual(args[0], self.dynamodb)
             self.assertEqual(args[1], 'commentuser02')
 
+            args, _ = mock_lib.validate_user_existence_in_thread.call_args
+            self.assertTrue(mock_lib.validate_user_existence_in_thread.called)
+            self.assertEqual(args[0], self.dynamodb)
+            self.assertEqual(args[1], 'commentuser02')
+            self.assertEqual(args[2], 'comment00001')
+
     @patch('me_articles_comments_reply.MeArticlesCommentsReply._MeArticlesCommentsReply__create_comment_notifications',
            MagicMock(side_effect=Exception()))
     def test_raise_exception_in_creating_notification(self):

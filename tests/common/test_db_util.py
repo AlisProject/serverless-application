@@ -49,7 +49,7 @@ class TestDBUtil(TestCase):
             {
                 'comment_id': 'comment00001',
                 'article_id': 'testid000001',
-                'user_id': 'test_user',
+                'user_id': 'commentuser01',
                 'text': 'hogefugapiyo',
                 'created_at': 1520150272,
                 'sort_key': 1520150272000000
@@ -57,9 +57,27 @@ class TestDBUtil(TestCase):
             {
                 'comment_id': 'comment00002',
                 'parent_id': 'comment00001',
-                'reply_user_id': 'test_user',
+                'reply_user_id': 'commentuser02',
                 'article_id': 'testid000001',
                 'user_id': 'test_user',
+                'text': 'hogefugapiyo',
+                'created_at': 1520150272,
+                'sort_key': 1520150272000000
+            },
+            {
+                'comment_id': 'comment00003',
+                'article_id': 'testid000002',
+                'user_id': 'commentuser03',
+                'text': 'hogefugapiyo',
+                'created_at': 1520150272,
+                'sort_key': 1520150272000000
+            },
+            {
+                'comment_id': 'comment00004',
+                'parent_id': 'comment00003',
+                'reply_user_id': 'commentuser02',
+                'article_id': 'testid000002',
+                'user_id': 'commentuser04',
                 'text': 'hogefugapiyo',
                 'created_at': 1520150272,
                 'sort_key': 1520150272000000
@@ -249,6 +267,32 @@ class TestDBUtil(TestCase):
             DBUtil.validate_user_existence(
                 self.dynamodb,
                 'piyopiyo'
+            )
+
+    def test_validate_user_existence_in_thread_ok(self):
+        for user_id in [self.comment_items[0]['user_id'], self.comment_items[1]['user_id']]:
+            result = DBUtil.validate_user_existence_in_thread(
+                self.dynamodb,
+                user_id,
+                self.comment_items[0]['comment_id']
+            )
+            self.assertTrue(result)
+
+    def test_validate_user_existence_in_thread_with_user_id_in_other_thread(self):
+        for user_id in [self.comment_items[2]['user_id'], self.comment_items[3]['user_id']]:
+            with self.assertRaises(ValidationError):
+                DBUtil.validate_user_existence_in_thread(
+                    self.dynamodb,
+                    user_id,
+                    self.comment_items[0]['comment_id']
+                )
+
+    def test_validate_user_existence_in_thread_with_not_exist_id(self):
+        with self.assertRaises(ValidationError):
+            DBUtil.validate_user_existence_in_thread(
+                self.dynamodb,
+                'not_exist_id',
+                self.comment_items[0]['comment_id']
             )
 
     def test_comment_existence_ok(self):
