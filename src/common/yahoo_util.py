@@ -40,7 +40,7 @@ class YahooUtil:
             raise e
         authorization_endpoint = \
             self.endpoints['authorization_endpoint'] + \
-            '?response_type=' + settings.YAHOO_LOGIN_RESPONSE_TYPE + \
+            '?response_type=code' + \
             '&client_id=' + self.client_id + \
             '&scope=' + settings.YAHOO_LOGIN_REQUEST_SCOPE + \
             '&redirect_uri=' + callback_url + \

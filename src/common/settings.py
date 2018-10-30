@@ -274,7 +274,6 @@ YAHOO_LOGIN_GRANT_TYPE = 'authorization_code'
 YAHOO_USERNAME_PREFIX = 'Yahoo-'
 YAHOO_NONCE_EXPIRATION_MINITES = 15
 YAHOO_LOGIN_REQUEST_SCOPE = 'openid%20email%20profile'
-YAHOO_LOGIN_RESPONSE_TYPE = 'code'
 YAHOO_NONCE_LENGTH = 10
 
 TWITTER_API_REQUEST_TOKEN_URL = 'https://api.twitter.com/oauth/request_token'
