@@ -12,7 +12,7 @@ parameters = {
     'user_id': {
         'type': 'string',
         'minLength': 3,
-        'maxLength': 30,
+        'maxLength': 50,
         'pattern': r'^(?!.*--)[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]$'
     },
     'line_id': {
@@ -174,6 +174,12 @@ parameters = {
             'is_got_token',
             'is_created_article'
         ]
+    },
+    'code': {
+        'type': 'string'
+    },
+    'state': {
+        'type': 'string'
     }
 }
 
@@ -260,6 +266,7 @@ TAG_ALLOWED_SYMBOLS = ['-', ' ']
 
 
 YAHOO_API_WELL_KNOWN_URL = 'https://auth.login.yahoo.co.jp/yconnect/v2/.well-known/openid-configuration'
+YAHOO_API_PUBLIC_KEY_URL = 'https://auth.login.yahoo.co.jp/yconnect/v2/public-keys'
 YAHOO_LOGIN_GRANT_TYPE = 'authorization_code'
 YAHOO_USERNAME_PREFIX = 'Yahoo-'
 YAHOO_NONCE_EXPIRATION_MINITES = 15

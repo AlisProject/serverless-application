@@ -30,6 +30,7 @@ class TestNonceUtil(TestCase):
         result = table.get_item(Key={
             'nonce': nonce
         }).get('Item')
+        print(result)
         self.assertEqual(len(result), 4)
 
     def test_generate_ng(self):

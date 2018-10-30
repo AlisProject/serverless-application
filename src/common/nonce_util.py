@@ -26,3 +26,20 @@ class NonceUtil:
         except ClientError as e:
             raise e
         return nonce
+
+    @staticmethod
+    def verify(dynamodb, nonce, provider, type):
+        try:
+            nonce_table = dynamodb.Table(os.environ['NONCE_TABLE_NAME'])
+            result = nonce_table.get_item(Key={
+                'nonce': nonce
+            }).get('Item')
+
+            if result is None:
+                return False
+
+            if result['provider'] != provider or result['type'] != type:
+                return False
+            return True
+        except ClientError as e:
+            raise e

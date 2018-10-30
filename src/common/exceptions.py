@@ -82,5 +82,9 @@ class Error(Exception):
         return str(self.message)
 
 
+class YahooVerifyException(Error):
+    pass
+
+
 class PrivateChainApiError(Error):
     pass

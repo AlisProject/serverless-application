@@ -5,24 +5,27 @@ import traceback
 import secrets
 import string
 import base64
+import jwt
+
 from lambda_base import LambdaBase
-from twitter_util import TwitterUtil
+from yahoo_util import YahooUtil
 from user_util import UserUtil
 from jsonschema import validate, ValidationError
 from botocore.exceptions import ClientError
-from exceptions import TwitterOauthError
+from exceptions import YahooOauthError
+from exceptions import YahooVerifyException
 from response_builder import ResponseBuilder
 
 
-class LoginTwitterIndex(LambdaBase):
+class LoginYahooIndex(LambdaBase):
     def get_schema(self):
         return {
             'type': 'object',
             'properties': {
-                'oauth_token': settings.parameters['oauth_token'],
-                'oauth_verifier': settings.parameters['oauth_verifier']
+                'code': settings.parameters['code'],
+                'state': settings.parameters['state']
             },
-            'required': ['oauth_token', 'oauth_verifier']
+            'required': ['code', 'state']
         }
 
     def validate_params(self):
@@ -31,16 +34,31 @@ class LoginTwitterIndex(LambdaBase):
         validate(self.params, self.get_schema())
 
     def exec_main_proc(self):
-        twitter = TwitterUtil(
-            consumer_key=os.environ['TWITTER_CONSUMER_KEY'],
-            consumer_secret=os.environ['TWITTER_CONSUMER_SECRET']
+        yahoo = YahooUtil(
+            client_id=os.environ['YAHOO_CLIENT_ID'],
+            secret=os.environ['YAHOO_SECRET']
         )
         try:
-            user_info = twitter.get_user_info(
-                oauth_token=self.params['oauth_token'],
-                oauth_verifier=self.params['oauth_verifier']
+            yahoo.verify_state_nonce(
+                dynamodb=self.dynamodb,
+                state=self.params['state']
             )
-        except TwitterOauthError as e:
+
+            token = yahoo.get_access_token(
+                code=self.params['code'],
+                callback_url=os.environ['YAHOO_OAUTH_CALLBACK_URL']
+            )
+
+            yahoo.verify_access_token(
+                dynamodb=self.dynamodb,
+                access_token=token['access_token'],
+                id_token=token['id_token']
+            )
+
+            user_info = yahoo.get_user_info(
+                access_token=token['access_token']
+            )
+        except YahooOauthError as e:
             if e.status_code == 401:
                 return ResponseBuilder.response(
                     status_code=401,
@@ -53,8 +71,22 @@ class LoginTwitterIndex(LambdaBase):
                 status_code=500,
                 body={'message': 'Internal server error'}
             )
-        if UserUtil.exists_user(self.dynamodb, user_info['user_id']):
 
+        except (
+            jwt.ExpiredSignatureError,
+            jwt.InvalidTokenError,
+            ClientError,
+            YahooVerifyException
+        ) as e:
+            logging.info(self.event)
+            logging.fatal(e)
+            traceback.print_exc()
+            return ResponseBuilder.response(
+                status_code=500,
+                body={'message': 'Internal server error'}
+            )
+
+        if UserUtil.exists_user(self.dynamodb, user_info['user_id']):
             try:
                 has_user_id = UserUtil.has_user_id(
                     dynamodb=self.dynamodb,
@@ -108,9 +140,10 @@ class LoginTwitterIndex(LambdaBase):
                 )
 
         try:
-            backed_temp_password = os.environ['EXTERNAL_PROVIDER_LOGIN_COMMON_TEMP_PASSWORD']
+            backed_temp_password = os.environ['YAHOO_EXTERNAL_PROVIDER_LOGIN_COMMON_TEMP_PASSWORD']
             alphabet = string.ascii_letters + string.digits
             backed_password = ''.join(secrets.choice(alphabet) for i in range(settings.PASSWORD_LENGTH))
+            print(backed_password)
             response = UserUtil.create_external_provider_user(
                 cognito=self.cognito,
                 user_pool_id=os.environ['COGNITO_USER_POOL_ID'],

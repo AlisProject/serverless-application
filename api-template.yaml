@@ -827,9 +827,12 @@ Resources:
                 schema:
                   type: object
                   required:
-                  - oauth_token
+                  - code
+                  - state
                   properties:
-                    oauth_token:
+                    code:
+                      type: string
+                    state:
                       type: string
               responses:
                 "200":
