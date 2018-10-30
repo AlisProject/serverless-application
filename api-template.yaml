@@ -21,8 +21,6 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   ArticlePvUserTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
-  ArticleScoreTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
   UsersTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
   BetaUsersTableName:
@@ -102,7 +100,6 @@ Globals:
         ARTICLE_LIKED_USER_TABLE_NAME: !Ref ArticleLikedUserTableName
         ARTICLE_FRAUD_USER_TABLE_NAME: !Ref ArticleFraudUserTableName
         ARTICLE_PV_USER_TABLE_NAME: !Ref ArticlePvUserTableName
-        ARTICLE_SCORE_TABLE_NAME: !Ref ArticleScoreTableName
         USERS_TABLE_NAME: !Ref UsersTableName
         BETA_USERS_TABLE_NAME: !Ref BetaUsersTableName
         NOTIFICATION_TABLE_NAME: !Ref NotificationTableName

@@ -40,7 +40,6 @@ aws cloudformation deploy \
     ArticleLikedUserTableName=${SSM_PARAMS_PREFIX}ArticleLikedUserTableName \
     ArticleFraudUserTableName=${SSM_PARAMS_PREFIX}ArticleFraudUserTableName \
     ArticlePvUserTableName=${SSM_PARAMS_PREFIX}ArticlePvUserTableName \
-    ArticleScoreTableName=${SSM_PARAMS_PREFIX}ArticleScoreTableName \
     UsersTableName=${SSM_PARAMS_PREFIX}UsersTableName \
     BetaUsersTableName=${SSM_PARAMS_PREFIX}BetaUsersTableName \
     ExternalProviderUsersTableName=${SSM_PARAMS_PREFIX}ExternalProviderUsersTableName \

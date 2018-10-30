@@ -226,35 +226,6 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: 2
         WriteCapacityUnits: 2
-  ArticleScore:
-    Type: AWS::DynamoDB::Table
-    DependsOn:
-    - ArticleInfo
-    Properties:
-      AttributeDefinitions:
-        - AttributeName: article_id
-          AttributeType: S
-        - AttributeName: evaluated_at
-          AttributeType: N
-        - AttributeName: score
-          AttributeType: N
-      KeySchema:
-        - AttributeName: evaluated_at
-          KeyType: HASH
-        - AttributeName: article_id
-          KeyType: RANGE
-      LocalSecondaryIndexes:
-        - IndexName: evaluated_at-score-index
-          KeySchema:
-            - AttributeName: evaluated_at
-              KeyType: HASH
-            - AttributeName: score
-              KeyType: RANGE
-          Projection:
-            ProjectionType: ALL
-      ProvisionedThroughput:
-        ReadCapacityUnits: 2
-        WriteCapacityUnits: 2
   ArticleTokenAggregation:
     Type: AWS::DynamoDB::Table
     DependsOn:
