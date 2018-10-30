@@ -12,10 +12,13 @@ parameters = {
     'user_id': {
         'type': 'string',
         'minLength': 3,
-        'maxLength': 50,
+        'maxLength': 30,
         'pattern': r'^(?!.*--)[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]$'
     },
     'line_id': {
+        'type': 'string'
+    },
+    'yahoo_id': {
         'type': 'string'
     },
     'phone_number': {
