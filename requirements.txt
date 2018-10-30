@@ -12,3 +12,4 @@ pyjwt
 pycrypto
 requests
 requests_oauthlib
+cryptography

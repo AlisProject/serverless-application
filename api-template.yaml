@@ -55,6 +55,8 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   TipTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
+  NonceTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
   AlisAppDomain:
     Type: 'AWS::SSM::Parameter::Value<String>'
   PrivateChainAwsAccessKey:
@@ -92,6 +94,14 @@ Parameters:
   ExternalProviderLoginMark:
     Type: 'AWS::SSM::Parameter::Value<String>'
   LoginSalt:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  YahooClientId:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  YahooSecret:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  YahooOauthCallbackUrl:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  YahooExternalProviderLoginCommonTempPassword:
     Type: 'AWS::SSM::Parameter::Value<String>'
 
 Globals:
@@ -133,6 +143,7 @@ Globals:
         BETA_MODE_FLAG: !Ref BetaModeFlag
         DIST_S3_BUCKET_NAME: !Ref DistS3BucketName
         ELASTIC_SEARCH_ENDPOINT: !Ref ElasticSearchEndpoint
+        NONCE_TABLE_NAME: !Ref NonceTableName
 
 Resources:
   RestApi:
@@ -803,6 +814,68 @@ Resources:
                   default:
                     statusCode: "200"
                 uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LoginTwitterAuthorizationUrl.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /login/yahoo:
+            post:
+              description: "Yahooログインの実施"
+              parameters:
+              - name: request
+                in: body
+                required: true
+                schema:
+                  type: object
+                  required:
+                  - oauth_token
+                  properties:
+                    oauth_token:
+                      type: string
+              responses:
+                "200":
+                  description: "アクセストークンを取得"
+                  schema:
+                    type: object
+                    properties:
+                      access_token:
+                        type: string
+                      refresh_token:
+                        type: string
+                      id_token:
+                        type: string
+                      has_user_id:
+                        type: string
+                "401":
+                  description: "認証エラー"
+                  schema:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LoginYahoo.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /login/yahoo/authorization_url:
+            get:
+              description: "Yahoo認証画面のURLを取得する"
+              responses:
+                "200":
+                  description: "Yahoo認証画面のURL"
+                  schema:
+                    type: object
+                    properties:
+                      url:
+                        type: string
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LoginYahooAuthorizationUrl.Arn}/invocations
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
@@ -2232,6 +2305,47 @@ Resources:
           Type: Api
           Properties:
             Path: /login/twitter/authorization_url
+            Method: get
+            RestApiId: !Ref RestApi
+  LoginYahoo:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/login_yahoo_index.zip
+      Environment:
+        Variables:
+          YAHOO_CLIENT_ID: !Ref YahooClientId
+          YAHOO_SECRET: !Ref YahooSecret
+          YAHOO_OAUTH_CALLBACK_URL: !Ref YahooOauthCallbackUrl
+          YAHOO_EXTERNAL_PROVIDER_LOGIN_COMMON_TEMP_PASSWORD: !Ref YahooExternalProviderLoginCommonTempPassword
+          COGNITO_USER_POOL_ID: !Ref CognitoUserPoolId
+          COGNITO_USER_POOL_APP_ID: !Ref CognitoUserPoolAppId
+          EXTERNAL_PROVIDER_LOGIN_MARK: !Ref ExternalProviderLoginMark
+          LOGIN_SALT: !Ref LoginSalt
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /login/yahoo
+            Method: post
+            RestApiId: !Ref RestApi
+  LoginYahooAuthorizationUrl:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/login_yahoo_authorization_url.zip
+      Environment:
+        Variables:
+          YAHOO_CLIENT_ID: !Ref YahooClientId
+          YAHOO_SECRET: !Ref YahooSecret
+          YAHOO_OAUTH_CALLBACK_URL: !Ref YahooOauthCallbackUrl
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /login/yahoo/authorization_url
             Method: get
             RestApiId: !Ref RestApi
   SignUpLineAuthorizeUrl:

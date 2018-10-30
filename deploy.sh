@@ -49,6 +49,7 @@ aws cloudformation deploy \
     TopicTableName=${SSM_PARAMS_PREFIX}TopicTableName \
     TagTableName=${SSM_PARAMS_PREFIX}TagTableName \
     TipTableName=${SSM_PARAMS_PREFIX}TipTableName \
+    NonceTableName=${SSM_PARAMS_PREFIX}NonceTableName \
     CommentTableName=${SSM_PARAMS_PREFIX}CommentTableName \
     CommentLikedUserTableName=${SSM_PARAMS_PREFIX}CommentLikedUserTableName \
     DeletedCommentTableName=${SSM_PARAMS_PREFIX}DeletedCommentTableName \
@@ -70,4 +71,8 @@ aws cloudformation deploy \
     TwitterConsumerKey=${SSM_PARAMS_PREFIX}TwitterConsumerKey \
     TwitterConsumerSecret=${SSM_PARAMS_PREFIX}TwitterConsumerSecret \
     TwitterOauthCallbackUrl=${SSM_PARAMS_PREFIX}TwitterOauthCallbackUrl \
+    YahooClientId=${SSM_PARAMS_PREFIX}YahooClientId \
+    YahooSecret=${SSM_PARAMS_PREFIX}YahooSecret \
+    YahooOauthCallbackUrl=${SSM_PARAMS_PREFIX}YahooOauthCallbackUrl \
+    YahooExternalProviderLoginCommonTempPassword=${SSM_PARAMS_PREFIX}YahooExternalProviderLoginCommonTempPassword \
   --capabilities CAPABILITY_IAM
