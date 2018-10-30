@@ -101,15 +101,10 @@ class LoginYahooIndex(LambdaBase):
                     user_id = user_info['user_id']
 
                 # パスワードの取得、デコード処理追加
-                external_provider_users = self.dynamodb.Table(os.environ['EXTERNAL_PROVIDER_USERS_TABLE_NAME'])
-                external_provider_user = external_provider_users.get_item(Key={
-                    'external_provider_user_id': user_info['user_id']
-                }).get('Item')
-                hash_data = external_provider_user['password']
-                byte_hash_data = hash_data.encode()
-                decoded_iv = external_provider_user['iv']
-                iv = decoded_iv.encode()
-                password = UserUtil.decrypt_password(byte_hash_data, iv)
+                password = UserUtil.get_external_provider_password(
+                    dynamodb=self.dynamodb,
+                    user_id=user_info['user_id']
+                )
 
                 response = UserUtil.external_provider_login(
                     cognito=self.cognito,
@@ -140,17 +135,14 @@ class LoginYahooIndex(LambdaBase):
                 )
 
         try:
-            backed_temp_password = os.environ['YAHOO_EXTERNAL_PROVIDER_LOGIN_COMMON_TEMP_PASSWORD']
-            alphabet = string.ascii_letters + string.digits
-            backed_password = ''.join(secrets.choice(alphabet) for i in range(settings.PASSWORD_LENGTH))
-            print(backed_password)
+            backed_password = UserUtil.generate_backend_password()
             response = UserUtil.create_external_provider_user(
                 cognito=self.cognito,
                 user_pool_id=os.environ['COGNITO_USER_POOL_ID'],
                 user_pool_app_id=os.environ['COGNITO_USER_POOL_APP_ID'],
                 user_id=user_info['user_id'],
                 email=user_info['email'],
-                backed_temp_password=backed_temp_password,
+                backed_temp_password=os.environ['YAHOO_EXTERNAL_PROVIDER_LOGIN_COMMON_TEMP_PASSWORD'],
                 backed_password=backed_password,
                 provider=os.environ['EXTERNAL_PROVIDER_LOGIN_MARK']
             )
