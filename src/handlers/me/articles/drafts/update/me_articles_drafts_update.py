@@ -11,16 +11,31 @@ from user_util import UserUtil
 
 class MeArticlesDraftsUpdate(LambdaBase):
     def get_schema(self):
-        return {
-            'type': 'object',
-            'properties': {
-                'article_id': settings.parameters['article_id'],
-                'title': settings.parameters['title'],
-                'body': settings.parameters['body'],
-                'eye_catch_url': settings.parameters['eye_catch_url'],
-                'overview': settings.parameters['overview']
+        params = json.loads(self.event.get('body'))
+        if 'version' in params and params['version'] is 200:
+            return {
+                'type': 'object',
+                'properties': {
+                    'article_id': settings.parameters['article_id'],
+                    'title': settings.parameters['title'],
+                    'eye_catch_url': settings.parameters['eye_catch_url'],
+                    'overview': settings.parameters['overview'],
+                    'body': {
+                        'type': 'array'
+                    }
+                }
             }
-        }
+        else:
+            return {
+                'type': 'object',
+                'properties': {
+                    'article_id': settings.parameters['article_id'],
+                    'title': settings.parameters['title'],
+                    'body': settings.parameters['body'],
+                    'eye_catch_url': settings.parameters['eye_catch_url'],
+                    'overview': settings.parameters['overview']
+                }
+            }
 
     def validate_params(self):
         UserUtil.verified_phone_and_email(self.event)
@@ -30,7 +45,9 @@ class MeArticlesDraftsUpdate(LambdaBase):
         if not self.event.get('body') or not json.loads(self.event.get('body')):
             raise ValidationError('Request parameter is required')
 
-        validate(self.params, self.get_schema(), format_checker=FormatChecker())
+        params = json.loads(self.event.get('body'))
+
+        validate(params, self.get_schema(), format_checker=FormatChecker())
 
     def exec_main_proc(self):
         DBUtil.validate_article_existence(
@@ -67,11 +84,18 @@ class MeArticlesDraftsUpdate(LambdaBase):
 
     def __update_article_content(self):
         article_content_table = self.dynamodb.Table(os.environ['ARTICLE_CONTENT_TABLE_NAME'])
+        params = json.loads(self.event.get('body'))
+        if 'version' in params and params['version'] is 200:
+            expression_attribute_values = {
+                ':title': TextSanitizer.sanitize_text(self.params.get('title')),
+                ':body': TextSanitizer.sanitize_article_object(self.params.get('body'))
+            }
+        else:
+            expression_attribute_values = {
+                ':title': TextSanitizer.sanitize_text(self.params.get('title')),
+                ':body': TextSanitizer.sanitize_article_body(self.params.get('body'))
+            }
 
-        expression_attribute_values = {
-            ':title': TextSanitizer.sanitize_text(self.params.get('title')),
-            ':body': TextSanitizer.sanitize_article_body(self.params.get('body'))
-        }
         DBUtil.items_values_empty_to_none(expression_attribute_values)
 
         article_content_table.update_item(
