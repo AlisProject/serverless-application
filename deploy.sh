@@ -74,4 +74,7 @@ aws cloudformation deploy \
     YahooClientId=${SSM_PARAMS_PREFIX}YahooClientId \
     YahooSecret=${SSM_PARAMS_PREFIX}YahooSecret \
     YahooOauthCallbackUrl=${SSM_PARAMS_PREFIX}YahooOauthCallbackUrl \
+    FacebookAppId=${SSM_PARAMS_PREFIX}FacebookAppId \
+    FacebookAppSecret=${SSM_PARAMS_PREFIX}FacebookAppSecret \
+    FacebookOauthCallbackUrl=${SSM_PARAMS_PREFIX}FacebookOauthCallbackUrl \
   --capabilities CAPABILITY_IAM

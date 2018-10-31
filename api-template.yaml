@@ -101,6 +101,12 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   YahooOauthCallbackUrl:
     Type: 'AWS::SSM::Parameter::Value<String>'
+  FacebookAppId:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  FacebookAppSecret:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  FacebookOauthCallbackUrl:
+    Type: 'AWS::SSM::Parameter::Value<String>'
 
 Globals:
   Function:
@@ -877,6 +883,71 @@ Resources:
                   default:
                     statusCode: "200"
                 uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LoginYahooAuthorizationUrl.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /login/facebook:
+            post:
+              description: "Facebookログインの実施"
+              parameters:
+              - name: request
+                in: body
+                required: true
+                schema:
+                  type: object
+                  required:
+                  - code
+                  - state
+                  properties:
+                    code:
+                      type: string
+                    state:
+                      type: string
+              responses:
+                "200":
+                  description: "アクセストークンを取得"
+                  schema:
+                    type: object
+                    properties:
+                      access_token:
+                        type: string
+                      refresh_token:
+                        type: string
+                      id_token:
+                        type: string
+                      has_user_id:
+                        type: string
+                "401":
+                  description: "認証エラー"
+                  schema:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LoginFacebook.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /login/facebook/authorization_url:
+            get:
+              description: "Facebook認証画面のURLを取得する"
+              responses:
+                "200":
+                  description: "Facebook認証画面のURL"
+                  schema:
+                    type: object
+                    properties:
+                      url:
+                        type: string
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LoginFacebookAuthorizationUrl.Arn}/invocations
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
@@ -2347,6 +2418,47 @@ Resources:
           Type: Api
           Properties:
             Path: /login/yahoo/authorization_url
+            Method: get
+            RestApiId: !Ref RestApi
+  LoginFacebook:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/login_facebook_index.zip
+      Environment:
+        Variables:
+          FACEBOOK_APP_ID: !Ref FacebookAppId
+          FACEBOOK_APP_SECRET: !Ref FacebookAppSecret
+          FACEBOOK_OAUTH_CALLBACK_URL: !Ref FacebookOauthCallbackUrl
+          EXTERNAL_PROVIDER_LOGIN_COMMON_TEMP_PASSWORD: !Ref ExternalProviderLoginCommonTempPassword
+          COGNITO_USER_POOL_ID: !Ref CognitoUserPoolId
+          COGNITO_USER_POOL_APP_ID: !Ref CognitoUserPoolAppId
+          EXTERNAL_PROVIDER_LOGIN_MARK: !Ref ExternalProviderLoginMark
+          LOGIN_SALT: !Ref LoginSalt
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /login/facebook
+            Method: post
+            RestApiId: !Ref RestApi
+  LoginFacebookAuthorizationUrl:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/login_facebook_authorization_url.zip
+      Environment:
+        Variables:
+          FACEBOOK_APP_ID: !Ref FacebookAppId
+          FACEBOOK_APP_SECRET: !Ref FacebookAppSecret
+          FACEBOOK_OAUTH_CALLBACK_URL: !Ref FacebookOauthCallbackUrl
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /login/facebook/authorization_url
             Method: get
             RestApiId: !Ref RestApi
   SignUpLineAuthorizeUrl:

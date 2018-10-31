@@ -18,32 +18,13 @@ class TestYahooUtil(TestCase):
         )
 
     def test_get_authorization_url_ok(self):
-        with patch('yahoo_util.requests.get') as requests_mock, \
-             patch('yahoo_util.NonceUtil.generate') as nonce_mock:
-            requests_mock.return_value = YahooFakeResponse(
-                status_code=200,
-                text=json.dumps({
-                    'authorization_endpoint': 'http://example.com'
-                })
-            )
+        with patch('yahoo_util.NonceUtil.generate') as nonce_mock:
             nonce_mock.return_value = 'xxxx'
             url = self.yahoo.get_authorization_url(
                 dynamodb=dynamodb,
                 callback_url='http://callback'
             )
-            self.assertEqual(url, 'http://example.com?response_type=code&client_id=fake_client_id&scope=openid%20email%20profile&redirect_uri=http://callback&nonce=xxxx&state=xxxx')
-
-    def test_get_authorization_url_ng_with_yahooexception(self):
-        with self.assertRaises(YahooOauthError):
-            with patch('yahoo_util.requests.get') as requests_mock:
-                requests_mock.return_value = YahooFakeResponse(
-                    status_code=400,
-                    text='error'
-                )
-                self.yahoo.get_authorization_url(
-                    dynamodb=dynamodb,
-                    callback_url='http://callback'
-                )
+            self.assertEqual(url, 'https://auth.login.yahoo.co.jp/yconnect/v2/authorization?response_type=code&client_id=fake_client_id&scope=openid%20email%20profile&redirect_uri=http://callback&nonce=xxxx&state=xxxx')
 
     def test_get_authorization_url_ng_with_clienterror(self):
         with self.assertRaises(ClientError):

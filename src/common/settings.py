@@ -270,11 +270,16 @@ TAG_ALLOWED_SYMBOLS = ['-', ' ']
 
 YAHOO_API_WELL_KNOWN_URL = 'https://auth.login.yahoo.co.jp/yconnect/v2/.well-known/openid-configuration'
 YAHOO_API_PUBLIC_KEY_URL = 'https://auth.login.yahoo.co.jp/yconnect/v2/public-keys'
-YAHOO_LOGIN_GRANT_TYPE = 'authorization_code'
 YAHOO_USERNAME_PREFIX = 'Yahoo-'
 YAHOO_NONCE_EXPIRATION_MINUTES = 15
 YAHOO_LOGIN_REQUEST_SCOPE = 'openid%20email%20profile'
 YAHOO_NONCE_LENGTH = 10
+
+FACEBOOK_API_AUTHENTICATE_URL = 'https://www.facebook.com/dialog/oauth'
+FACEBOOK_USERNAME_PREFIX = 'Facebook-'
+FACEBOOK_NONCE_EXPIRATION_MINUTES = 15
+FACEBOOK_LOGIN_REQUEST_SCOPE = 'email'
+FACEBOOK_NONCE_LENGTH = 10
 
 TWITTER_API_REQUEST_TOKEN_URL = 'https://api.twitter.com/oauth/request_token'
 TWITTER_API_AUTHENTICATE_URL = 'https://api.twitter.com/oauth/authenticate'

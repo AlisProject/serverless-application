@@ -9,9 +9,7 @@ from nonce_util import NonceUtil
 from exceptions import YahooOauthError
 from exceptions import YahooVerifyException
 from botocore.exceptions import ClientError
-
 from jwt.contrib.algorithms.pycrypto import RSAAlgorithm
-jwt.register_algorithm('RS256', RSAAlgorithm(RSAAlgorithm.SHA256))
 
 
 class YahooUtil:
@@ -36,7 +34,7 @@ class YahooUtil:
                 type='state',
                 length=settings.YAHOO_NONCE_LENGTH
             )
-        except (ClientError, YahooOauthError) as e:
+        except (ClientError) as e:
             raise e
         authorization_endpoint = \
             self.endpoints['authorization_endpoint'] + \
@@ -86,6 +84,7 @@ class YahooUtil:
     def verify_access_token(self, dynamodb, access_token, id_token):
         # 以下のコメントはhttps://developer.yahoo.co.jp/yconnect/v2/id_token.htmlの検証手順番号
         try:
+            jwt.register_algorithm('RS256', RSAAlgorithm(RSAAlgorithm.SHA256))
             start_time = time.time()
             header = jwt.get_unverified_header(id_token)
             response = requests.get(
