@@ -318,7 +318,7 @@ class TestTextSanitizer(TestCase):
         obj = [{
             "type": "Paragraph",
             "payload": {
-              "body": "<img src='a'><b>test</b><a href='bbb'>a</a><p>b</p><hr><div>c</div><u>d</u><i>e</i><br>"
+              "body": '<img src="a"><b>test</b><a href="bbb">a</a><p>b</p><hr><div>c</div><u>d</u><i>e</i><br>'
             },
             "children": [
               {
