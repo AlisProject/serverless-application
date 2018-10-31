@@ -146,6 +146,8 @@ COMMENT_ID_LENGTH = 12
 html_allowed_tags = ['a', 'b', 'blockquote', 'br', 'h2', 'h3', 'i', 'p', 'u', 'img', 'hr',
                      'div', 'figure', 'figcaption']
 
+alis_editor_allowed_tags = ['a', 'b', 'br', 'i', 'p', 'u', 'hr', 'div']
+
 ng_user_name = [
     'about', 'account', 'activity', 'add', 'admin', 'all', 'alpha', 'analysis',
     'api', 'app', 'archive', 'article', 'asct', 'asset', 'atom', 'auth',
