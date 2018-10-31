@@ -33,6 +33,14 @@ class TestMeArticlesPublicUpdate(TestCase):
                 'title': 'sample_title2',
                 'status': 'public',
                 'sort_key': 1520150272000000
+            },
+            {
+                'article_id': 'publicId0003',
+                'user_id': 'test03',
+                'title': 'sample_title3',
+                'status': 'public',
+                'sort_key': 1520150272000000,
+                'version': 200
             }
         ]
 
@@ -48,6 +56,18 @@ class TestMeArticlesPublicUpdate(TestCase):
                 'article_id': 'publicId0002',
                 'title': 'sample_title2',
                 'body': 'sample_body2'
+            },
+            {
+                'article_id': 'publicId0003',
+                'title': 'sample_title3',
+                'body': [{
+                    "type": "Paragraph",
+                    "payload": {
+                      "body": "test"
+                    },
+                    "children": []
+                }],
+                'version': 200
             }
         ]
 
@@ -59,6 +79,20 @@ class TestMeArticlesPublicUpdate(TestCase):
                 'user_id': 'test01',
                 'title': 'edit_title1',
                 'body': 'edit_body1',
+                'overview': 'edit_overview',
+                'eye_catch_url': 'http://example.com/edit_eye_catch'
+            },
+            {
+                'article_id': 'publicId0003',
+                'user_id': 'test03',
+                'title': 'edit_title3',
+                'body': [{
+                    "type": "Paragraph",
+                    "payload": {
+                      "body": "update"
+                    },
+                    "children": []
+                }],
                 'overview': 'edit_overview',
                 'eye_catch_url': 'http://example.com/edit_eye_catch'
             }
@@ -365,3 +399,57 @@ class TestMeArticlesPublicUpdate(TestCase):
         params['body'] = json.dumps(params['body'])
 
         self.assert_bad_request(params)
+
+    def test_main_version200_ok(self):
+        body = [{
+                    "type": "Paragraph",
+                    "payload": {
+                      "body": "update"
+                    },
+                    "children": []
+                }]
+
+        params = {
+            'pathParameters': {
+                'article_id': 'publicId0003'
+            },
+            'body': {
+                'eye_catch_url': 'http://example.com/update',
+                'title': 'update title',
+                'body': body,
+                'overview': 'update overview',
+                'version': 200
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test03',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
+            }
+        }
+
+        article_content_edit_before = self.article_content_edit_table.scan()['Items']
+
+        params['body'] = json.dumps(params['body'])
+        response = MeArticlesPublicUpdate(params, {}, self.dynamodb).main()
+
+        article_content_edit_after = self.article_content_edit_table.scan()['Items']
+
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(len(article_content_edit_after) - len(article_content_edit_before), 0)
+
+        article_content_edit = self.article_content_edit_table.get_item(
+            Key={'article_id': params['pathParameters']['article_id']}
+        )['Item']
+
+        self.assertEqual(params['requestContext']['authorizer']['claims']['cognito:username'],
+                         article_content_edit['user_id'])
+
+        for key, value in json.loads(params['body']).items():
+            if key != 'body':
+                self.assertEqual(value, article_content_edit[key])
+            else:
+                self.assertEqual(json.loads(params['body'])['body'], json.loads(article_content_edit['body']))

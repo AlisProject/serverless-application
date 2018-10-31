@@ -4,6 +4,7 @@ from unittest import TestCase
 from me_articles_drafts_update import MeArticlesDraftsUpdate
 from unittest.mock import patch, MagicMock
 from tests_util import TestsUtil
+from text_sanitizer import TextSanitizer
 
 
 class TestMeArticlesDraftsUpdate(TestCase):
@@ -378,3 +379,92 @@ class TestMeArticlesDraftsUpdate(TestCase):
         params['body'] = json.dumps(params['body'])
 
         self.assert_bad_request(params)
+
+    def test_main_version200_ok(self):
+        body = [{
+                    "type": "Paragraph",
+                    "payload": {
+                      "body": "<img src='a'><b>test</b><a href='bbb'>a</a><p>b</p><hr><div>c</div><u>d</u><i>e</i><br>"
+                    },
+                    "children": [
+                      {
+                        "type": "Text",
+                        "payload": {
+                          "body": "アップデートの"
+                        }
+                      },
+                      {
+                        "type": "Link",
+                        "payload": {
+                          "href": "https://example.com"
+                        },
+                        "children": [
+                          {
+                            "type": "Text",
+                            "payload": {
+                              "body": "テスト"
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        "type": "Text",
+                        "payload": {
+                          "body": "です"
+                        }
+                      }
+                    ]
+                }]
+
+        params = {
+            'pathParameters': {
+                'article_id': 'draftId00001'
+            },
+            'body': {
+                'eye_catch_url': 'http://example.com/update',
+                'title': 'update title',
+                'body': body,
+                'overview': 'update overview',
+                'version': 200
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
+            }
+        }
+
+        params['body'] = json.dumps(params['body'])
+
+        article_info_before = self.article_info_table.scan()['Items']
+        article_content_before = self.article_content_table.scan()['Items']
+
+        me_articles_drafts_update = MeArticlesDraftsUpdate(params, {}, self.dynamodb)
+
+        response = me_articles_drafts_update.main()
+
+        article_info_after = self.article_info_table.scan()['Items']
+        article_content_after = self.article_content_table.scan()['Items']
+
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(len(article_info_after) - len(article_info_before), 0)
+        self.assertEqual(len(article_content_after) - len(article_content_before), 0)
+
+        article_info_param_names = ['eye_catch_url', 'title', 'overview']
+        article_content_param_names = ['title', 'body']
+
+        self.assertEqual(params['requestContext']['authorizer']['claims']['cognito:username'],
+                         article_info_after[0]['user_id'])
+
+        for key in article_info_param_names:
+            self.assertEqual(json.loads(params['body'])[key], article_info_after[0][key])
+
+        for key in article_content_param_names:
+            if key != 'body':
+                self.assertEqual(json.loads(params['body'])[key], article_content_after[0][key])
+
+        self.assertEqual(TextSanitizer.sanitize_article_object(body), article_content_after[0]['body'])

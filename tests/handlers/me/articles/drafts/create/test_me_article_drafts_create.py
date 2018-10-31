@@ -3,6 +3,7 @@ from me_articles_drafts_create import MeArticlesDraftsCreate
 from unittest.mock import patch, MagicMock
 from botocore.exceptions import ClientError
 from tests_util import TestsUtil
+from text_sanitizer import TextSanitizer
 import os
 import json
 
@@ -336,3 +337,72 @@ class TestMeArticlesDraftsCreate(TestCase):
         params['body'] = json.dumps(params['body'])
 
         self.assert_bad_request(params)
+
+    @patch("me_articles_drafts_create.MeArticlesDraftsCreate._MeArticlesDraftsCreate__generate_article_id",
+           MagicMock(return_value='HOGEHOGEHOGE'))
+    def test_main_ok_with_editor_version2(self):
+        body = [{
+                    "type": "Paragraph",
+                    "payload": {
+                      "body": "<img src='a'><b>test</b><a href='bbb'>a</a><p>b</p><hr><div>c</div><u>d</u><i>e</i><br>"
+                    },
+                    "children": [
+                      {
+                        "type": "Text",
+                        "payload": {
+                          "body": "<b>詳細は</b>"
+                        }
+                      },
+                      {
+                        "type": "Link",
+                        "payload": {
+                          "href": "https://example.com"
+                        },
+                        "children": [
+                          {
+                            "type": "Text",
+                            "payload": {
+                              "body": "こちら"
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        "type": "Text",
+                        "payload": {
+                          "body": "です"
+                        }
+                      }
+                    ]
+                }]
+
+        params = {
+            'body': {
+                'eye_catch_url': 'http://example.com',
+                'title': 'test',
+                'body': body,
+                'overview': '',
+                'version': 200
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test_user_id',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
+            }
+        }
+
+        params['body'] = json.dumps(params['body'])
+
+        response = MeArticlesDraftsCreate(params, {}, self.dynamodb).main()
+        article_info = self.article_info_table.get_item(Key={'article_id': 'HOGEHOGEHOGE'})['Item']
+        article_content = self.article_content_table.get_item(Key={'article_id': 'HOGEHOGEHOGE'})['Item']
+
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(article_info['title'], 'test')
+        self.assertEqual(article_info['overview'], None)
+        self.assertEqual(article_content['title'], 'test')
+        self.assertEqual(article_content['body'], TextSanitizer.sanitize_article_object(body))

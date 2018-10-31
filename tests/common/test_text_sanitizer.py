@@ -227,3 +227,201 @@ class TestTextSanitizer(TestCase):
         result = TextSanitizer.sanitize_article_body(target_html)
 
         self.assertEqual(result, expected_html)
+
+    def test_invalid_type_block(self):
+        obj = [{
+            "type": "Hoge",
+            "payload": {
+              "body": "hogehoge"
+            }
+        }]
+
+        self.assertRaises(Exception, lambda: TextSanitizer.raise_invalid_type_exception(obj[0]))
+
+    def test_sanitize_paragraph_with_div(self):
+        div_class_paragraph = [{
+            "type": "Paragraph",
+            "payload": {
+              "body": "<div class='test_class'>テスト</div>"
+            },
+            "children": []
+        }]
+        TextSanitizer.sanitize_paragraph(div_class_paragraph)
+        self.assertEqual(div_class_paragraph[0]['payload']['body'], "<div class='test_class'>テスト</div>")
+
+        div_style_paragraph = [{
+            "type": "Paragraph",
+            "payload": {
+                "body": "<div style='test_style'>テスト</div>"
+            },
+            "children": []
+        }]
+        TextSanitizer.sanitize_paragraph(div_style_paragraph)
+        self.assertEqual(div_style_paragraph[0]['payload']['body'], "<div style='test_style'>テスト</div>")
+
+        invalid_div_attribute_paragraph = [{
+            "type": "Paragraph",
+            "payload": {
+                "body": "<div hoge='hoge'>テスト</div>"
+            },
+            "children": []
+        }]
+        TextSanitizer.sanitize_paragraph(invalid_div_attribute_paragraph[0])
+        self.assertEqual(invalid_div_attribute_paragraph[0]['payload']['body'], "<div>テスト</div>")
+
+    def test_sanitize_paragraph_with_a(self):
+        a_tag_with_href_params = [{
+            "type": "Paragraph",
+            "payload": {
+              "body": "<a href='https://example.com'>テスト</a>"
+            },
+            "children": []
+        }]
+        TextSanitizer.sanitize_paragraph(a_tag_with_href_params)
+        self.assertEqual(a_tag_with_href_params[0]['payload']['body'],
+                         "<a href='https://example.com'>テスト</a>")
+
+        a_tag_with_target_params = [{
+            "type": "Paragraph",
+            "payload": {
+                "body": '<a href="https://example.com" target="_blank">テスト</a>'
+            },
+            "children": []
+        }]
+        TextSanitizer.sanitize_paragraph(a_tag_with_target_params)
+        self.assertEqual(a_tag_with_target_params[0]['payload']['body'],
+                         '<a href="https://example.com" target="_blank">テスト</a>')
+
+        invalid_a_attribute_paragraph = [{
+            "type": "Paragraph",
+            "payload": {
+                "body": "<a href='https://example.com' hoge='hoge'>テスト</div>"
+            },
+            "children": []
+        }]
+        TextSanitizer.sanitize_paragraph(invalid_a_attribute_paragraph[0])
+        self.assertEqual(invalid_a_attribute_paragraph[0]['payload']['body'],
+                         '<a href="https://example.com">テスト</a>')
+
+    def test_sanitize_paragraph_with_script_tag(self):
+        invalid_script_tag_paragraph = [{
+            "type": "Paragraph",
+            "payload": {
+                "body": "<script>テスト</script>"
+            },
+            "children": []
+        }]
+        TextSanitizer.sanitize_paragraph(invalid_script_tag_paragraph[0])
+        self.assertEqual(invalid_script_tag_paragraph[0]['payload']['body'], "&lt;script&gt;テスト&lt;/script&gt;")
+
+    def test_sanitize_article_object_with_text_and_link_ok(self):
+        obj = [{
+            "type": "Paragraph",
+            "payload": {
+              "body": "<img src='a'><b>test</b><a href='bbb'>a</a><p>b</p><hr><div>c</div><u>d</u><i>e</i><br>"
+            },
+            "children": [
+              {
+                "type": "Text",
+                "payload": {
+                  "body": "<b>詳細は</b>"
+                }
+              },
+              {
+                "type": "Link",
+                "payload": {
+                  "href": "https://example.com"
+                },
+                "children": [
+                  {
+                    "type": "Text",
+                    "payload": {
+                      "body": "こちら"
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "Text",
+                "payload": {
+                  "body": "です"
+                }
+              }
+            ]
+        }]
+        TextSanitizer.sanitize_article_object(obj)
+        sanitized_paragraph_body_param = {
+            "payload": {
+                "body": '&lt;img src="a"&gt;<b>test</b><a href="bbb">a</a><p>b</p><hr><div>c</div><u>d</u><i>e</i><br>'
+            }
+        }
+
+        self.assertEqual(obj[0]['payload']['body'], sanitized_paragraph_body_param['payload']['body'])
+        self.assertEqual(obj[0]['children'][0]['payload']['body'], "&lt;b&gt;詳細は&lt;/b&gt;")
+        self.assertEqual(obj[0]['children'][1]['children'][0]['payload']['body'], "こちら")
+        self.assertEqual(obj[0]['children'][2]['payload']['body'], "です")
+
+    def test_sanitize_article_object_with_heading_and_img_and_embed_ok(self):
+        obj = [{
+            "type": "Paragraph",
+            "payload": {
+                "body": "テスト"
+            },
+            "children": [
+              {
+                "type": "Heading",
+                "payload": {
+                    "size": 'h2',
+                    "body": "テスト"
+                }
+              },
+              {
+                "type": "Image",
+                "payload": {
+                    "src": "https://example.com/gra67grea7gra.png"
+                },
+                "children": []
+              },
+              {
+                "type": "Embed",
+                "payload": {
+                    "src": "https://example.com"
+                }
+              }
+            ]
+        }]
+
+        os.environ['DOMAIN'] = 'example.com'
+        TextSanitizer.sanitize_article_object(obj)
+
+        self.assertEqual(obj,
+                         [{
+                             "type": "Paragraph",
+                             "payload": {
+                                 "body": "テスト"
+                             },
+                             "children": [
+                                 {
+                                     "type": "Heading",
+                                     "payload": {
+                                         "size": 'h2',
+                                         "body": "テスト"
+                                     }
+                                 },
+                                 {
+                                     "type": "Image",
+                                     "payload": {
+                                         "src": "https://example.com/gra67grea7gra.png"
+                                     },
+                                     "children": []
+                                 },
+                                 {
+                                     "type": "Embed",
+                                     "payload": {
+                                         "src": "https://example.com"
+                                     }
+                                 }
+                             ]
+                         }]
+                         )
+
