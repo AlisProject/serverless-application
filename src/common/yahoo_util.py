@@ -24,14 +24,14 @@ class YahooUtil:
         try:
             nonce = NonceUtil.generate(
                 dynamodb=dynamodb,
-                expiration_minites=settings.YAHOO_NONCE_EXPIRATION_MINITES,
+                expiration_minites=settings.YAHOO_NONCE_EXPIRATION_MINUTES,
                 provider='yahoo',
                 type='nonce',
                 length=settings.YAHOO_NONCE_LENGTH
             )
             state = NonceUtil.generate(
                 dynamodb=dynamodb,
-                expiration_minites=settings.YAHOO_NONCE_EXPIRATION_MINITES,
+                expiration_minites=settings.YAHOO_NONCE_EXPIRATION_MINUTES,
                 provider='yahoo',
                 type='state',
                 length=settings.YAHOO_NONCE_LENGTH

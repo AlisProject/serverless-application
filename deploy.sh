@@ -74,5 +74,4 @@ aws cloudformation deploy \
     YahooClientId=${SSM_PARAMS_PREFIX}YahooClientId \
     YahooSecret=${SSM_PARAMS_PREFIX}YahooSecret \
     YahooOauthCallbackUrl=${SSM_PARAMS_PREFIX}YahooOauthCallbackUrl \
-    YahooExternalProviderLoginCommonTempPassword=${SSM_PARAMS_PREFIX}YahooExternalProviderLoginCommonTempPassword \
   --capabilities CAPABILITY_IAM

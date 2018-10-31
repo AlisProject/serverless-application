@@ -101,8 +101,6 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   YahooOauthCallbackUrl:
     Type: 'AWS::SSM::Parameter::Value<String>'
-  YahooExternalProviderLoginCommonTempPassword:
-    Type: 'AWS::SSM::Parameter::Value<String>'
 
 Globals:
   Function:
@@ -2321,7 +2319,7 @@ Resources:
           YAHOO_CLIENT_ID: !Ref YahooClientId
           YAHOO_SECRET: !Ref YahooSecret
           YAHOO_OAUTH_CALLBACK_URL: !Ref YahooOauthCallbackUrl
-          YAHOO_EXTERNAL_PROVIDER_LOGIN_COMMON_TEMP_PASSWORD: !Ref YahooExternalProviderLoginCommonTempPassword
+          EXTERNAL_PROVIDER_LOGIN_COMMON_TEMP_PASSWORD: !Ref ExternalProviderLoginCommonTempPassword
           COGNITO_USER_POOL_ID: !Ref CognitoUserPoolId
           COGNITO_USER_POOL_APP_ID: !Ref CognitoUserPoolAppId
           EXTERNAL_PROVIDER_LOGIN_MARK: !Ref ExternalProviderLoginMark

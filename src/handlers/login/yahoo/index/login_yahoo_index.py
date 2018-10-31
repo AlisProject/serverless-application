@@ -142,7 +142,7 @@ class LoginYahooIndex(LambdaBase):
                 user_pool_app_id=os.environ['COGNITO_USER_POOL_APP_ID'],
                 user_id=user_info['user_id'],
                 email=user_info['email'],
-                backed_temp_password=os.environ['YAHOO_EXTERNAL_PROVIDER_LOGIN_COMMON_TEMP_PASSWORD'],
+                backed_temp_password=os.environ['EXTERNAL_PROVIDER_LOGIN_COMMON_TEMP_PASSWORD'],
                 backed_password=backed_password,
                 provider=os.environ['EXTERNAL_PROVIDER_LOGIN_MARK']
             )
