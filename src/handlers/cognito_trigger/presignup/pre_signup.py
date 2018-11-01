@@ -28,6 +28,15 @@ class PreSignUp(LambdaBase):
                     'userName': settings.parameters['yahoo_id']
                 }
             }
+        elif params.get('triggerSource') == 'PreSignUp_AdminCreateUser' and \
+            UserUtil.check_try_to_register_as_facebook_user(
+                params['userName']):
+            return {
+                'type': 'object',
+                'properties': {
+                    'userName': settings.parameters['facebook_id']
+                }
+            }
         else:
             return {
                 'type': 'object',
@@ -43,7 +52,7 @@ class PreSignUp(LambdaBase):
         validate(params, self.get_schema())
         if params['triggerSource'] == 'PreSignUp_SignUp':
 
-            # 通常サインアップユーザーにTwitter・LINE・YAHOOから始まる名前を許可しないバリデーション
+            # 通常サインアップユーザーにTwitter・LINE・Yahoo・Facebookから始まる名前を許可しないバリデーション
             if params['request']['validationData'] is None or \
                    params['request']['validationData'].get('EXTERNAL_PROVIDER_LOGIN_MARK') != \
                    os.environ['EXTERNAL_PROVIDER_LOGIN_MARK']:
@@ -52,6 +61,8 @@ class PreSignUp(LambdaBase):
                 if UserUtil.check_try_to_register_as_line_user(params['userName']):
                     raise ValidationError('This username is not allowed')
                 if UserUtil.check_try_to_register_as_yahoo_user(params['userName']):
+                    raise ValidationError('This username is not allowed')
+                if UserUtil.check_try_to_register_as_facebook_user(params['userName']):
                     raise ValidationError('This username is not allowed')
 
             response = self.__filter_users(self.cognito, params)

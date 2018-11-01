@@ -21,6 +21,9 @@ parameters = {
     'yahoo_id': {
         'type': 'string'
     },
+    'facebook_id': {
+        'type': 'string'
+    },
     'phone_number': {
         'type': 'string',
         'minLength': 13,
@@ -276,6 +279,9 @@ YAHOO_LOGIN_REQUEST_SCOPE = 'openid%20email%20profile'
 YAHOO_NONCE_LENGTH = 10
 
 FACEBOOK_API_AUTHENTICATE_URL = 'https://www.facebook.com/dialog/oauth'
+FACEBOOK_API_ACCESSTOKEN_URL = 'https://graph.facebook.com/oauth/access_token'
+FACEBOOK_API_USERINFO_URL = 'https://graph.facebook.com/me'
+FACEBOOK_API_DEBUG_URL = 'https://graph.facebook.com/debug_token'
 FACEBOOK_USERNAME_PREFIX = 'Facebook-'
 FACEBOOK_NONCE_EXPIRATION_MINUTES = 15
 FACEBOOK_LOGIN_REQUEST_SCOPE = 'email'

@@ -110,5 +110,9 @@ class YahooVerifyException(Error):
     pass
 
 
+class FacebookVerifyException(Error):
+    pass
+
+
 class PrivateChainApiError(Error):
     pass

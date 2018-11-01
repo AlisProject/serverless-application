@@ -342,3 +342,9 @@ class UserUtil:
         if re.match(settings.YAHOO_USERNAME_PREFIX, requested_user_id):
             return True
         return False
+
+    @staticmethod
+    def check_try_to_register_as_facebook_user(requested_user_id):
+        if re.match(settings.FACEBOOK_USERNAME_PREFIX, requested_user_id):
+            return True
+        return False

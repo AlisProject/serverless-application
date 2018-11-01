@@ -2,22 +2,19 @@ import os
 import settings
 import logging
 import traceback
-import secrets
-import string
 import base64
-import jwt
 
 from lambda_base import LambdaBase
-from yahoo_util import YahooUtil
+from facebook_util import FacebookUtil
 from user_util import UserUtil
 from jsonschema import validate, ValidationError
 from botocore.exceptions import ClientError
-from exceptions import YahooOauthError
-from exceptions import YahooVerifyException
+from exceptions import FacebookOauthError
+from exceptions import FacebookVerifyException
 from response_builder import ResponseBuilder
 
 
-class LoginYahooIndex(LambdaBase):
+class LoginFacebookIndex(LambdaBase):
     def get_schema(self):
         return {
             'type': 'object',
@@ -34,31 +31,25 @@ class LoginYahooIndex(LambdaBase):
         validate(self.params, self.get_schema())
 
     def exec_main_proc(self):
-        yahoo = YahooUtil(
-            client_id=os.environ['YAHOO_CLIENT_ID'],
-            secret=os.environ['YAHOO_SECRET']
+        fb = FacebookUtil(
+            app_id=os.environ['FACEBOOK_APP_ID'],
+            app_secret=os.environ['FACEBOOK_APP_SECRET'],
+            callback_url=os.environ['FACEBOOK_OAUTH_CALLBACK_URL']
         )
         try:
-            yahoo.verify_state_nonce(
+            fb.verify_state_nonce(
                 dynamodb=self.dynamodb,
                 state=self.params['state']
             )
 
-            token = yahoo.get_access_token(
-                code=self.params['code'],
-                callback_url=os.environ['YAHOO_OAUTH_CALLBACK_URL']
+            access_token = fb.get_access_token(
+                code=self.params['code']
             )
 
-            yahoo.verify_access_token(
-                dynamodb=self.dynamodb,
-                access_token=token['access_token'],
-                id_token=token['id_token']
+            user_info = fb.get_user_info(
+                access_token=access_token
             )
-
-            user_info = yahoo.get_user_info(
-                access_token=token['access_token']
-            )
-        except YahooOauthError as e:
+        except FacebookOauthError as e:
             if e.status_code == 401:
                 return ResponseBuilder.response(
                     status_code=401,
@@ -73,10 +64,8 @@ class LoginYahooIndex(LambdaBase):
             )
 
         except (
-            jwt.ExpiredSignatureError,
-            jwt.InvalidTokenError,
             ClientError,
-            YahooVerifyException
+            FacebookVerifyException
         ) as e:
             logging.info(self.event)
             logging.fatal(e)
