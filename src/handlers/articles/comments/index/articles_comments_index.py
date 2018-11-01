@@ -92,7 +92,8 @@ class ArticlesCommentsIndex(LambdaBase):
         for comment in comments:
             query_params = {
                 'IndexName': 'parent_id-sort_key-index',
-                'KeyConditionExpression': Key('parent_id').eq(comment['comment_id'])
+                'KeyConditionExpression': Key('parent_id').eq(comment['comment_id']),
+                'ScanIndexForward': False
             }
 
             replies = comment_table.query(**query_params)['Items']
