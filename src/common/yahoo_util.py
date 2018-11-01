@@ -11,6 +11,8 @@ from exceptions import YahooVerifyException
 from botocore.exceptions import ClientError
 from jwt.contrib.algorithms.pycrypto import RSAAlgorithm
 
+jwt.register_algorithm('RS256', RSAAlgorithm(RSAAlgorithm.SHA256))
+
 
 class YahooUtil:
     def __init__(self, client_id, secret, callback_url):
@@ -85,7 +87,6 @@ class YahooUtil:
     def verify_access_token(self, dynamodb, access_token, id_token):
         # 以下のコメントはhttps://developer.yahoo.co.jp/yconnect/v2/id_token.htmlの検証手順番号
         try:
-            jwt.register_algorithm('RS256', RSAAlgorithm(RSAAlgorithm.SHA256))
             start_time = time.time()
             header = jwt.get_unverified_header(id_token)
             response = requests.get(

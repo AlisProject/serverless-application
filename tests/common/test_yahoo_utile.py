@@ -94,7 +94,6 @@ class TestYahooUtil(TestCase):
     def test_verify_access_token_ok(self):
         with patch('yahoo_util.jwt.decode') as jwt_mock, \
                 patch('yahoo_util.jwt.get_unverified_header') as jwt_mock_h, \
-                patch('yahoo_util.jwt.register_algorithm') as jwt_mock_al, \
                 patch('yahoo_util.NonceUtil.verify') as nonce_mock:
             jwt_mock.return_value = {
                 'iss': 'https://auth.login.yahoo.co.jp/yconnect/v2',
@@ -106,7 +105,6 @@ class TestYahooUtil(TestCase):
                 'nonce': 'bbbbb',
                 'at_hash': 'hrOQHuo3oE6FR82RIiX1SA'
             }
-            jwt_mock_al.return_value = True
             nonce_mock.return_value = True
             jwt_mock_h.return_value = {
                 'kid': '0cc175b9c0f1b6a831c399e269772661'
