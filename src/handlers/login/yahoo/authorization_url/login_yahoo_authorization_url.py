@@ -18,12 +18,12 @@ class LoginYahooAuthorizationUrl(LambdaBase):
     def exec_main_proc(self):
         yahoo = YahooUtil(
            client_id=os.environ['YAHOO_CLIENT_ID'],
-           secret=os.environ['YAHOO_SECRET']
+           secret=os.environ['YAHOO_SECRET'],
+           callback_url=os.environ['YAHOO_OAUTH_CALLBACK_URL']
         )
         try:
             authentication_url = yahoo.get_authorization_url(
-              dynamodb=self.dynamodb,
-              callback_url=os.environ['YAHOO_OAUTH_CALLBACK_URL']
+              dynamodb=self.dynamodb
             )
         except (ClientError, YahooOauthError) as e:
             logging.info(self.event)
