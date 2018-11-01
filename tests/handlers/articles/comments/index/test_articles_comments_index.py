@@ -154,7 +154,7 @@ class TestArticlesCommentsIndex(TestCase):
 
         response = ArticlesCommentsIndex(params, {}, self.dynamodb).main()
 
-        self.comment_items[0]['replies'] = [self.reply_items[1], self.reply_items[0]]
+        self.comment_items[0]['replies'] = [self.reply_items[0], self.reply_items[1]]
 
         expected_items = [self.comment_items[0]]
 
