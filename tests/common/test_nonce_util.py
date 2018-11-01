@@ -1,4 +1,5 @@
 import os
+import time
 from nonce_util import NonceUtil
 from unittest import TestCase
 from unittest.mock import MagicMock
@@ -46,3 +47,91 @@ class TestNonceUtil(TestCase):
                 type='nonce',
                 length=10
             )
+
+    def test_verify_ok(self):
+        table = self.dynamodb.Table(os.environ['NONCE_TABLE_NAME'])
+        param = {
+            'nonce': 'xxxx',
+            'provider': 'test',
+            'type': 'test',
+            'expiration_time': 1232432234322
+        }
+        table.put_item(
+            Item=param,
+            ConditionExpression='attribute_not_exists(nonce)'
+        )
+
+        result = NonceUtil.verify(
+            dynamodb=self.dynamodb,
+            nonce='xxxx',
+            provider='test',
+            type='test'
+        )
+
+        self.assertTrue(result)
+
+    def test_verify_ng_with_do_not_match_nonce(self):
+        table = self.dynamodb.Table(os.environ['NONCE_TABLE_NAME'])
+        param = {
+            'nonce': 'xxxx',
+            'provider': 'test',
+            'type': 'test',
+            'expiration_time': 1232432234322
+        }
+        table.put_item(
+            Item=param,
+            ConditionExpression='attribute_not_exists(nonce)'
+        )
+
+        result = NonceUtil.verify(
+            dynamodb=self.dynamodb,
+            nonce='xxx',
+            provider='test',
+            type='test'
+        )
+
+        self.assertFalse(result)
+
+    def test_verify_ng_with_do_not_match_provider(self):
+        table = self.dynamodb.Table(os.environ['NONCE_TABLE_NAME'])
+        param = {
+            'nonce': 'xxxx',
+            'provider': 'test',
+            'type': 'test',
+            'expiration_time': 1232432234322
+        }
+        table.put_item(
+            Item=param,
+            ConditionExpression='attribute_not_exists(nonce)'
+        )
+
+        result = NonceUtil.verify(
+            dynamodb=self.dynamodb,
+            nonce='xxxx',
+            provider='test1',
+            type='test'
+        )
+
+        self.assertFalse(result)
+
+    def test_verify_ng_with_do_not_match_type(self):
+        table = self.dynamodb.Table(os.environ['NONCE_TABLE_NAME'])
+        param = {
+            'nonce': 'xxxx',
+            'provider': 'test',
+            'type': 'test',
+            'expiration_time': 1232432234322
+        }
+        table.put_item(
+            Item=param,
+            ConditionExpression='attribute_not_exists(nonce)'
+        )
+
+        result = NonceUtil.verify(
+            dynamodb=self.dynamodb,
+            nonce='xxxx',
+            provider='test',
+            type='test1'
+        )
+
+        self.assertFalse(result)

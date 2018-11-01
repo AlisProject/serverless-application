@@ -13,12 +13,13 @@ from jwt.contrib.algorithms.pycrypto import RSAAlgorithm
 
 
 class YahooUtil:
-    def __init__(self, client_id, secret):
+    def __init__(self, client_id, secret, callback_url):
         self.client_id = client_id
         self.secret = secret
+        self.callback_url = callback_url
         self.endpoints = self.__get_endpoins()
 
-    def get_authorization_url(self, dynamodb, callback_url):
+    def get_authorization_url(self, dynamodb):
         try:
             nonce = NonceUtil.generate(
                 dynamodb=dynamodb,
@@ -41,7 +42,7 @@ class YahooUtil:
             '?response_type=code' + \
             '&client_id=' + self.client_id + \
             '&scope=' + settings.YAHOO_LOGIN_REQUEST_SCOPE + \
-            '&redirect_uri=' + callback_url + \
+            '&redirect_uri=' + self.callback_url + \
             '&nonce='+nonce+'&state='+state
 
         return authorization_endpoint
@@ -58,7 +59,7 @@ class YahooUtil:
             raise YahooVerifyException(state + ' was invalid since it may be expired')
         return True
 
-    def get_access_token(self, code, callback_url):
+    def get_access_token(self, code):
         basicauth_str = self.client_id + ':' + self.secret
         basicauth = base64.b64encode(basicauth_str.encode('utf-8'))
 
@@ -71,7 +72,7 @@ class YahooUtil:
         response = requests.post(
             self.endpoints['token_endpoint'],
             headers=headers,
-            data='grant_type=authorization_code&redirect_uri=' + callback_url + '&code=' + code
+            data='grant_type=authorization_code&redirect_uri=' + self.callback_url + '&code=' + code
         )
         if response.status_code is not 200:
             raise YahooOauthError(
@@ -92,7 +93,7 @@ class YahooUtil:
             )
             if response.status_code is not 200:
                 raise YahooOauthError(
-                    endpoint=settings.YAHOO_API_WELL_KNOWN_URL,
+                    endpoint=settings.YAHOO_API_PUBLIC_KEY_URL,
                     status_code=response.status_code,
                     message=response.text
                 )
@@ -123,6 +124,7 @@ class YahooUtil:
                 token_hash[:int(len(token_hash) / 2)]
             )
             if decoded_data['at_hash'] != at_hash.decode().rstrip('='):
+                print(at_hash.decode().rstrip('='))
                 raise YahooVerifyException('accesstoken was invalid since at_hash did not match')
 
             # 12の検証

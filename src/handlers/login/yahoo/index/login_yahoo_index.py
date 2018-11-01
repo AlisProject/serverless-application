@@ -36,7 +36,8 @@ class LoginYahooIndex(LambdaBase):
     def exec_main_proc(self):
         yahoo = YahooUtil(
             client_id=os.environ['YAHOO_CLIENT_ID'],
-            secret=os.environ['YAHOO_SECRET']
+            secret=os.environ['YAHOO_SECRET'],
+            callback_url=os.environ['YAHOO_OAUTH_CALLBACK_URL']
         )
         try:
             yahoo.verify_state_nonce(
@@ -45,8 +46,7 @@ class LoginYahooIndex(LambdaBase):
             )
 
             token = yahoo.get_access_token(
-                code=self.params['code'],
-                callback_url=os.environ['YAHOO_OAUTH_CALLBACK_URL']
+                code=self.params['code']
             )
 
             yahoo.verify_access_token(
