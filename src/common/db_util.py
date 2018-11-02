@@ -36,6 +36,20 @@ class DBUtil:
         return True
 
     @staticmethod
+    def validate_article_history_existence(dynamodb, article_id):
+        article_history_table = dynamodb.Table(os.environ['ARTICLE_HISTORY_TABLE_NAME'])
+        query_params = {
+            'IndexName': 'article_id-index',
+            'KeyConditionExpression': Key('article_id').eq(article_id)
+        }
+
+        article_histories = article_history_table.query(**query_params)['Items']
+
+        if len(article_histories) != 0:
+            raise RecordNotFoundError('This article is not removable')
+        return True
+
+    @staticmethod
     def validate_user_existence(dynamodb, user_id):
         users_table = dynamodb.Table(os.environ['USERS_TABLE_NAME'])
         user = users_table.get_item(Key={'user_id': user_id}).get('Item')

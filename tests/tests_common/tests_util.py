@@ -77,6 +77,8 @@ class TestsUtil:
             {'env_name': 'ARTICLE_CONTENT_EDIT_TABLE_NAME', 'table_name': 'ArticleContentEdit'},
             {'env_name': 'ARTICLE_FRAUD_USER_TABLE_NAME', 'table_name': 'ArticleFraudUser'},
             {'env_name': 'ARTICLE_PV_USER_TABLE_NAME', 'table_name': 'ArticlePvUser'},
+            {'env_name': 'DELETED_DRAFT_ARTICLE_INFO_TABLE_NAME', 'table_name': 'DeletedDraftArticleInfo'},
+            {'env_name': 'DELETED_DRAFT_ARTICLE_CONTENT_TABLE_NAME', 'table_name': 'DeletedDraftArticleContent'},
             {'env_name': 'USERS_TABLE_NAME', 'table_name': 'Users'},
             {'env_name': 'BETA_USERS_TABLE_NAME', 'table_name': 'BetaUsers'},
             {'env_name': 'NOTIFICATION_TABLE_NAME', 'table_name': 'Notification'},

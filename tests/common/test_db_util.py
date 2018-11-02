@@ -31,6 +31,12 @@ class TestDBUtil(TestCase):
                 'status': 'draft',
                 'user_id': 'user0002',
                 'sort_key': 1520150272000000
+            },
+            {
+                'article_id': 'testid000003',
+                'status': 'draft',
+                'user_id': 'user0003',
+                'sort_key': 1520150272000000
             }
         ]
         TestsUtil.create_table(cls.dynamodb, os.environ['ARTICLE_INFO_TABLE_NAME'], cls.article_info_table_items)
@@ -129,6 +135,16 @@ class TestDBUtil(TestCase):
             }
         ]
         TestsUtil.create_table(cls.dynamodb, os.environ['ARTICLE_PV_USER_TABLE_NAME'], article_pv_user_items)
+
+        article_history_items = [
+            {
+                'article_id': 'history_article_id',
+                'created_at': 1540525512,
+                'body': 'hogehoge',
+                'title': 'test-title'
+            }
+        ]
+        TestsUtil.create_table(cls.dynamodb, os.environ['ARTICLE_HISTORY_TABLE_NAME'], article_history_items)
 
         topic_items = [
             {'name': 'crypto', 'order': 1, 'index_hash_key': settings.TOPIC_INDEX_HASH_KEY},
@@ -399,3 +415,10 @@ class TestDBUtil(TestCase):
     def test_validate_topic_ng(self):
         with self.assertRaises(ValidationError):
             DBUtil.validate_topic(self.dynamodb, 'BTC')
+
+    def test_validate_article_history_ok(self):
+        self.assertTrue(DBUtil.validate_article_history_existence(self.dynamodb, 'history_article_id_valid'))
+
+    def test_validate_article_history_ng(self):
+        with self.assertRaises(RecordNotFoundError):
+            DBUtil.validate_article_history_existence(self.dynamodb, 'history_article_id')

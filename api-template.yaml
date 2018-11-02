@@ -39,6 +39,10 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   DeletedCommentTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
+  DeletedDraftArticleInfoTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  DeletedDraftArticleContentTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
   ElasticSearchEndpoint:
     Type: 'AWS::SSM::Parameter::Value<String>'
   TopicTableName:
@@ -110,6 +114,8 @@ Globals:
         COMMENT_TABLE_NAME: !Ref CommentTableName
         COMMENT_LIKED_USER_TABLE_NAME: !Ref CommentLikedUserTableName
         DELETED_COMMENT_TABLE_NAME: !Ref DeletedCommentTableName
+        DELETED_DRAFT_ARTICLE_INFO_TABLE_NAME: !Ref DeletedDraftArticleInfoTableName
+        DELETED_DRAFT_ARTICLE_CONTENT_TABLE_NAME: !Ref DeletedDraftArticleContentTableName
         TOPIC_TABLE_NAME: !Ref TopicTableName
         TAG_TABLE_NAME: !Ref TagTableName
         TIP_TABLE_NAME: !Ref TipTableName
@@ -805,6 +811,28 @@ Resources:
                   default:
                     statusCode: '200'
                 uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesDraftsCreate.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /me/articles/{article_id}:
+            delete:
+              description: '指定された公開されたことのない下書き記事を削除する'
+              parameters:
+              - name: 'article_id'
+                in: 'path'
+                description: '対象下書き記事を指定するために使用'
+                required: true
+                type: 'string'
+              responses:
+                '200':
+                  description: '下書き記事削除の完了'
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesDelete.Arn}/invocations
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
@@ -1966,6 +1994,19 @@ Resources:
           Properties:
             Path: /me/articles/{article_id}/like
             Method: post
+            RestApiId: !Ref RestApi
+  MeArticlesDelete:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_articles_delete.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/articles/{article_id}
+            Method: delete
             RestApiId: !Ref RestApi
   ArticlesCommentsIndex:
     Type: AWS::Serverless::Function
