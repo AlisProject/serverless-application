@@ -91,6 +91,16 @@ Resources:
           KeyType: HASH
         - AttributeName: created_at
           KeyType: RANGE
+      GlobalSecondaryIndexes:
+      - IndexName: article_id-index
+        KeySchema:
+        - AttributeName: article_id
+          KeyType: HASH
+        Projection:
+          ProjectionType: ALL
+        ProvisionedThroughput:
+          ReadCapacityUnits: 2
+          WriteCapacityUnits: 2
       ProvisionedThroughput:
         ReadCapacityUnits: 2
         WriteCapacityUnits: 2
@@ -274,6 +284,34 @@ Resources:
         ReadCapacityUnits: 2
         WriteCapacityUnits: 2
     DeletionPolicy: Retain
+  DeletedDraftArticleInfo:
+    Type: AWS::DynamoDB::Table
+    DependsOn:
+    - ArticleInfo
+    Properties:
+      AttributeDefinitions:
+      - AttributeName: article_id
+        AttributeType: S
+      KeySchema:
+      - AttributeName: article_id
+        KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 2
+        WriteCapacityUnits: 2
+  DeletedDraftArticleContent:
+    Type: AWS::DynamoDB::Table
+    DependsOn:
+    - ArticleInfo
+    Properties:
+      AttributeDefinitions:
+      - AttributeName: article_id
+        AttributeType: S
+      KeySchema:
+      - AttributeName: article_id
+        KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 2
+        WriteCapacityUnits: 2
   LikeTokenAggregation:
     Type: AWS::DynamoDB::Table
     DependsOn:
