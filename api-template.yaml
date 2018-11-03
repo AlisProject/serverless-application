@@ -1218,13 +1218,13 @@ Resources:
                 required: true
                 type: 'string'
               - name: 'Fraud'
-                  in: 'body'
-                  required: true
-                  schema:
-                    $ref: '#/definitions/Fraud'
-                responses:
-                  '200':
-                    description: '不正報告の実施成功'
+                in: 'body'
+                required: true
+                schema:
+                  $ref: '#/definitions/Fraud'
+              responses:
+                '200':
+                  description: '不正報告の実施成功'
               security:
                 - cognitoUserPool: []
               x-amazon-apigateway-integration:
