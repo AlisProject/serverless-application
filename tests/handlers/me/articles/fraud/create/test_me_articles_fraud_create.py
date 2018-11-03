@@ -423,6 +423,136 @@ class TestMeArticlesFraudCreate(TestCase):
 
         self.assert_bad_request(params)
 
+    def test_validation_origin_url_max(self):
+        base_url = 'http://example.com/'
+        params = {
+            'pathParameters': {
+                'article_id': 'testid000000'
+            },
+            'body': {
+                'reason': 'copyright_violation',
+                'origin_url': base_url + 'A' * (2048 - len(base_url) + 1),
+                'free_text': 'hogefugapiyo'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test03',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
+            }
+        }
+
+        params['body'] = json.dumps(params['body'])
+
+        self.assert_bad_request(params)
+
+    def test_validation_origin_required_with_copyright_violation(self):
+        invalid_value = [None, '']
+
+        for value in invalid_value:
+            params = {
+                'pathParameters': {
+                    'article_id': 'testid000000'
+                },
+                'body': {
+                    'reason': 'copyright_violation',
+                    'origin_url': value,
+                    'free_text': 'hogefugapiyo'
+                },
+                'requestContext': {
+                    'authorizer': {
+                        'claims': {
+                            'cognito:username': 'test03',
+                            'phone_number_verified': 'true',
+                            'email_verified': 'true'
+                        }
+                    }
+                }
+            }
+
+            params['body'] = json.dumps(params['body'])
+
+            self.assert_bad_request(params)
+
+    def test_validation_origin_allow_none(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'testid000000'
+            },
+            'body': {
+                'reason': 'illegal_act',
+                'origin_url': None,
+                'free_text': 'hogefugapiyo'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test03',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
+            }
+        }
+
+        params['body'] = json.dumps(params['body'])
+
+        response = MeArticlesFraudCreate(params, {}, self.dynamodb).main()
+        self.assertEqual(response['statusCode'], 200)
+
+    def test_validation_origin_url_format(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'testid000000'
+            },
+            'body': {
+                'reason': 'copyright_violation',
+                'origin_url': 'hogehoge',
+                'free_text': 'hogefugapiyo'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test03',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
+            }
+        }
+
+        params['body'] = json.dumps(params['body'])
+
+        self.assert_bad_request(params)
+
+    def test_validation_free_text_max(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'testid000000'
+            },
+            'body': {
+                'reason': 'copyright_violation',
+                'origin_url': 'http://example.com',
+                'free_text': 'A' * 401
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test03',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
+            }
+        }
+
+        params['body'] = json.dumps(params['body'])
+
+        self.assert_bad_request(params)
+
     def test_validation_reason_enum(self):
         valid_target = [
             'illegal_act',

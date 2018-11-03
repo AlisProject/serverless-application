@@ -186,6 +186,29 @@ parameters = {
     },
     'state': {
         'type': 'string'
+    },
+    'fraud_user': {
+        'reason': {
+            'type': 'string',
+            'enum': [
+                'illegal_act',
+                'anything_contrary_to_public_order',
+                'nuisance',
+                'copyright_violation',
+                'slander',
+                'illegal_token_usage',
+                'other'
+            ]
+        },
+        'origin_url': {
+            'type': ['string', 'null'],
+            'format': 'uri',
+            'maxLength': 2048
+        },
+        'free_text': {
+            'type': 'string',
+            'maxLength': 400
+        }
     }
 }
 
