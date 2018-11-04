@@ -112,7 +112,7 @@ Globals:
         COMMENT_TABLE_NAME: !Ref CommentTableName
         COMMENT_LIKED_USER_TABLE_NAME: !Ref CommentLikedUserTableName
         DELETED_COMMENT_TABLE_NAME: !Ref DeletedCommentTableName
-        USER_FRAUD_TABLE_NAME: !Ref DeletedCommentTableName
+        USER_FRAUD_TABLE_NAME: !Ref UserFraudTableName
         TOPIC_TABLE_NAME: !Ref TopicTableName
         TAG_TABLE_NAME: !Ref TagTableName
         TIP_TABLE_NAME: !Ref TipTableName
