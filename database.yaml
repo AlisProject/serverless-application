@@ -310,6 +310,24 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: 2
         WriteCapacityUnits: 2
+  UserFraud:
+    Type: AWS::DynamoDB::Table
+    DependsOn:
+    - ArticleInfo
+    Properties:
+      AttributeDefinitions:
+      - AttributeName: target_user_id
+        AttributeType: S
+      - AttributeName: user_id
+        AttributeType: S
+      KeySchema:
+      - AttributeName: target_user_id
+        KeyType: HASH
+      - AttributeName: user_id
+        KeyType: RANGE
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
   Users:
     Type: AWS::DynamoDB::Table
     Properties:

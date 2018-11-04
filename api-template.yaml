@@ -317,6 +317,21 @@ Resources:
                 type: integer
               created_at:
                 type: integer
+          UserFraud:
+            type: object
+            properties:
+              reason:
+                type: 'string'
+                enum:
+                - 'illegal_act'
+                - 'anything_contrary_to_public_order'
+                - 'nuisance'
+                - 'copyright_violation'
+                - 'slander'
+                - 'illegal_token_usage'
+                - 'other'
+              free_text:
+                type: 'string'
         paths:
           /search/articles:
             get:
@@ -1605,6 +1620,33 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+          /me/users/{user_id}/fraud:
+            post:
+              description: '対象ユーザーに不正報告を行う'
+              parameters:
+              - name: 'user_id'
+                in: 'path'
+                description: '対象ユーザーの指定するために使用'
+                required: true
+                type: 'string'
+              - name: 'UserFraud'
+                in: 'body'
+                required: true
+                schema:
+                  $ref: '#/definitions/UserFraud'
+              responses:
+                '200':
+                  description: '不正報告の実施成功'
+              security:
+              - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeUsersFraudCreate.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
         securityDefinitions:
           cognitoUserPool:
             type: apiKey
@@ -2315,6 +2357,19 @@ Resources:
           Type: Api
           Properties:
             Path: /search/tags
+            Method: get
+            RestApiId: !Ref RestApi
+  MeUsersFraudCreate:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_users_fraud_create.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/users/{user_id}/fraud
             Method: get
             RestApiId: !Ref RestApi
   ElasticSearchService:
