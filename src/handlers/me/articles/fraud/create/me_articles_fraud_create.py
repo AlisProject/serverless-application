@@ -7,6 +7,8 @@ from db_util import DBUtil
 from botocore.exceptions import ClientError
 from lambda_base import LambdaBase
 from jsonschema import validate, ValidationError, FormatChecker
+
+from text_sanitizer import TextSanitizer
 from user_util import UserUtil
 
 
@@ -66,7 +68,7 @@ class MeArticlesFraudCreate(LambdaBase):
             'user_id': self.event['requestContext']['authorizer']['claims']['cognito:username'],
             'reason': self.params.get('reason'),
             'origin_url': self.params.get('origin_url'),
-            'free_text': self.params.get('free_text'),
+            'free_text': TextSanitizer.sanitize_text(self.params.get('free_text')),
             'created_at': int(time.time())
         }
         article_fraud_user_table.put_item(
