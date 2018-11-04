@@ -113,7 +113,7 @@ class FacebookUtil:
 
         if response.status_code is not 200:
             raise FacebookOauthError(
-                endpoint=settings.FACEBOOK_API_USERINFO_URL,
+                endpoint=settings.FACEBOOK_API_DEBUG_URL,
                 status_code=response.status_code,
                 message=response.text
             )
