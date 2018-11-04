@@ -8,6 +8,7 @@ from jsonschema import validate, ValidationError
 import settings
 from db_util import DBUtil
 from lambda_base import LambdaBase
+from text_sanitizer import TextSanitizer
 from user_util import UserUtil
 
 
@@ -57,7 +58,7 @@ class MeUsersFraudCreate(LambdaBase):
             'target_user_id': self.event['pathParameters']['user_id'],
             'user_id': self.event['requestContext']['authorizer']['claims']['cognito:username'],
             'reason': self.params.get('reason'),
-            'free_text': self.params.get('free_text'),
+            'free_text': TextSanitizer.sanitize_text(self.params.get('free_text')),
             'created_at': int(time.time())
         }
         article_user_fraud_table.put_item(
