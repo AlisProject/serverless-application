@@ -19,6 +19,18 @@ class TestFacebookUtil(TestCase):
             callback_url='http://callback'
         )
 
+    def test_remove_postfix_str_from_state_token_ok(self):
+        self.assertEqual(
+            'ssssss',
+            self.fb.remove_postfix_str_from_state_token('ssssss#_=_')
+        )
+
+    def test_remove_postfix_str_from_state_token_ok_with_do_nothing(self):
+        self.assertEqual(
+            'aaaaa',
+            self.fb.remove_postfix_str_from_state_token('aaaaa')
+        )
+
     def test_get_authorization_url_ok(self):
         with patch('facebook_util.NonceUtil.generate') as nonce_mock:
             nonce_mock.return_value = 'xxxx'

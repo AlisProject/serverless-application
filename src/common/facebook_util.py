@@ -28,6 +28,9 @@ class FacebookUtil:
             raise FacebookVerifyException(state + ' was invalid since it may be expired')
         return True
 
+    def remove_postfix_str_from_state_token(self, state):
+        return state.rstrip('#_=_')
+
     def get_authorization_url(self, dynamodb):
         try:
             state = NonceUtil.generate(

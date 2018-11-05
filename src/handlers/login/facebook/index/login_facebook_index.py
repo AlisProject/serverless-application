@@ -37,9 +37,10 @@ class LoginFacebookIndex(LambdaBase):
             callback_url=os.environ['FACEBOOK_OAUTH_CALLBACK_URL']
         )
         try:
+            state = fb.remove_postfix_str_from_state_token(self.params['state'])
             fb.verify_state_nonce(
                 dynamodb=self.dynamodb,
-                state=self.params['state']
+                state=state
             )
 
             access_token = fb.get_access_token(
