@@ -6,6 +6,7 @@ import secrets
 import string
 import base64
 import jwt
+import json
 
 from lambda_base import LambdaBase
 from yahoo_util import YahooUtil
@@ -60,9 +61,10 @@ class LoginYahooIndex(LambdaBase):
             )
         except YahooOauthError as e:
             if e.status_code == 401:
+                message = json.loads(e.message)
                 return ResponseBuilder.response(
                     status_code=401,
-                    body={'message': e.message}
+                    body={'message': message['error_description']}
                 )
             logging.info(self.event)
             logging.fatal(e)

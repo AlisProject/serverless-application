@@ -3,6 +3,7 @@ import settings
 import logging
 import traceback
 import base64
+import json
 
 from lambda_base import LambdaBase
 from facebook_util import FacebookUtil
@@ -52,10 +53,11 @@ class LoginFacebookIndex(LambdaBase):
                 access_token=access_token
             )
         except FacebookOauthError as e:
-            if e.status_code == 401:
+            if e.status_code == 400:
+                message = json.loads(e.message)
                 return ResponseBuilder.response(
                     status_code=401,
-                    body={'message': e.message}
+                    body={'message': message['error']['message']}
                 )
             logging.info(self.event)
             logging.fatal(e)
