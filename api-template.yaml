@@ -107,6 +107,8 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   FacebookOauthCallbackUrl:
     Type: 'AWS::SSM::Parameter::Value<String>'
+  FacebookAppToken:
+    Type: 'AWS::SSM::Parameter::Value<String>'
 
 Globals:
   Function:
@@ -2431,6 +2433,7 @@ Resources:
           FACEBOOK_APP_ID: !Ref FacebookAppId
           FACEBOOK_APP_SECRET: !Ref FacebookAppSecret
           FACEBOOK_OAUTH_CALLBACK_URL: !Ref FacebookOauthCallbackUrl
+          FACEBOOK_APP_TOKEN: !Ref FacebookAppToken
           EXTERNAL_PROVIDER_LOGIN_COMMON_TEMP_PASSWORD: !Ref ExternalProviderLoginCommonTempPassword
           COGNITO_USER_POOL_ID: !Ref CognitoUserPoolId
           COGNITO_USER_POOL_APP_ID: !Ref CognitoUserPoolAppId
@@ -2454,6 +2457,7 @@ Resources:
           FACEBOOK_APP_ID: !Ref FacebookAppId
           FACEBOOK_APP_SECRET: !Ref FacebookAppSecret
           FACEBOOK_OAUTH_CALLBACK_URL: !Ref FacebookOauthCallbackUrl
+          FACEBOOK_APP_TOKEN: !Ref FacebookAppToken
       Events:
         Api:
           Type: Api

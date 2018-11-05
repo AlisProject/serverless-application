@@ -11,10 +11,11 @@ from exceptions import FacebookVerifyException
 
 
 class FacebookUtil:
-    def __init__(self, app_id, app_secret, callback_url):
+    def __init__(self, app_id, app_secret, callback_url, app_token):
         self.app_id = app_id
         self.app_secret = app_secret
         self.callback_url = callback_url
+        self.app_token = app_token
 
     def verify_state_nonce(self, dynamodb, state):
         nonce_checked = NonceUtil.verify(
@@ -109,7 +110,7 @@ class FacebookUtil:
     def __verify_access_token(self, access_token, user_id):
         response = requests.get(
             settings.FACEBOOK_API_DEBUG_URL +
-            '?access_token=' + access_token +
+            '?access_token=' + self.app_token +
             '&input_token=' + access_token +
             '&appsecret_proof=' + self.__get_appsecret_proof(access_token)
         )

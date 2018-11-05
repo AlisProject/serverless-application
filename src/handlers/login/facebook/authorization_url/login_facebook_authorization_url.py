@@ -18,7 +18,8 @@ class LoginFacebookAuthorizationUrl(LambdaBase):
         facebook = FacebookUtil(
            app_id=os.environ['FACEBOOK_APP_ID'],
            app_secret=os.environ['FACEBOOK_APP_SECRET'],
-           callback_url=os.environ['FACEBOOK_OAUTH_CALLBACK_URL']
+           callback_url=os.environ['FACEBOOK_OAUTH_CALLBACK_URL'],
+           app_token=os.environ['FACEBOOK_APP_TOKEN']
         )
         try:
             authentication_url = facebook.get_authorization_url(

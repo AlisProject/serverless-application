@@ -13,6 +13,7 @@ class TestLoginFacebookAuthorizationUrl(TestCase):
         os.environ['FACEBOOK_APP_ID'] = 'fake_facebook_consumer_key'
         os.environ['FACEBOOK_APP_SECRET'] = 'fake_facebook_consumer_secret'
         os.environ['FACEBOOK_OAUTH_CALLBACK_URL'] = 'http://localhost'
+        os.environ['FACEBOOK_APP_TOKEN'] = 'fake_facebook_token'
 
     def test_exec_main_ok(self):
         with patch('login_facebook_authorization_url.FacebookUtil') as fb_mock:

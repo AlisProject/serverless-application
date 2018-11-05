@@ -15,6 +15,7 @@ class TestLoginFacebookIndex(TestCase):
     def setUp(self):
         os.environ['FACEBOOK_APP_ID'] = 'fake_client_id'
         os.environ['FACEBOOK_APP_SECRET'] = 'fake_secret'
+        os.environ['FACEBOOK_APP_TOKEN'] = 'fake_token'
         os.environ['FACEBOOK_OAUTH_CALLBACK_URL'] = 'http://callback'
         os.environ['EXTERNAL_PROVIDER_LOGIN_COMMON_TEMP_PASSWORD'] = 'xxxxxxxx'
         os.environ['EXTERNAL_PROVIDER_LOGIN_MARK'] = 'xxxxx'
