@@ -39,6 +39,8 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   DeletedCommentTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
+  UserFraudTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
   ElasticSearchEndpoint:
     Type: 'AWS::SSM::Parameter::Value<String>'
   TopicTableName:
@@ -110,6 +112,7 @@ Globals:
         COMMENT_TABLE_NAME: !Ref CommentTableName
         COMMENT_LIKED_USER_TABLE_NAME: !Ref CommentLikedUserTableName
         DELETED_COMMENT_TABLE_NAME: !Ref DeletedCommentTableName
+        USER_FRAUD_TABLE_NAME: !Ref UserFraudTableName
         TOPIC_TABLE_NAME: !Ref TopicTableName
         TAG_TABLE_NAME: !Ref TagTableName
         TIP_TABLE_NAME: !Ref TipTableName
@@ -1627,6 +1630,33 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+          /me/users/{user_id}/fraud:
+            post:
+              description: '対象ユーザーに不正報告を行う'
+              parameters:
+              - name: 'user_id'
+                in: 'path'
+                description: '対象ユーザーの指定するために使用'
+                required: true
+                type: 'string'
+              - name: 'Fraud'
+                in: 'body'
+                required: true
+                schema:
+                  $ref: '#/definitions/Fraud'
+              responses:
+                '200':
+                  description: '不正報告の実施成功'
+              security:
+              - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeUsersFraudCreate.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
         securityDefinitions:
           cognitoUserPool:
             type: apiKey
@@ -2338,6 +2368,19 @@ Resources:
           Properties:
             Path: /search/tags
             Method: get
+            RestApiId: !Ref RestApi
+  MeUsersFraudCreate:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_users_fraud_create.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/users/{user_id}/fraud
+            Method: post
             RestApiId: !Ref RestApi
   ElasticSearchService:
     Type: "AWS::Elasticsearch::Domain"
