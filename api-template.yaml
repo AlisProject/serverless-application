@@ -317,6 +317,23 @@ Resources:
                 type: integer
               created_at:
                 type: integer
+          Fraud:
+            type: object
+            properties:
+              reason:
+                type: 'string'
+                enum:
+                - 'illegal_act'
+                - 'anything_contrary_to_public_order'
+                - 'nuisance'
+                - 'copyright_violation'
+                - 'slander'
+                - 'illegal_token_usage'
+                - 'other'
+              origin_url:
+                type: 'string'
+              free_text:
+                type: 'string'
         paths:
           /search/articles:
             get:
@@ -1200,6 +1217,11 @@ Resources:
                 description: '対象記事の指定するために使用'
                 required: true
                 type: 'string'
+              - name: 'Fraud'
+                in: 'body'
+                required: true
+                schema:
+                  $ref: '#/definitions/Fraud'
               responses:
                 '200':
                   description: '不正報告の実施成功'

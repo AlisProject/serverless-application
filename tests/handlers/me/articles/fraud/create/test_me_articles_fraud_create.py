@@ -1,4 +1,8 @@
+import copy
+import json
 import os
+
+from jsonschema import ValidationError
 from tests_util import TestsUtil
 from unittest import TestCase
 from me_articles_fraud_create import MeArticlesFraudCreate
@@ -9,13 +13,12 @@ from boto3.dynamodb.conditions import Key
 class TestMeArticlesFraudCreate(TestCase):
     dynamodb = TestsUtil.get_dynamodb_client()
 
-    @classmethod
-    def setUpClass(cls):
+    def setUp(self):
         TestsUtil.set_all_tables_name_to_env()
-        TestsUtil.delete_all_tables(cls.dynamodb)
+        TestsUtil.delete_all_tables(self.dynamodb)
 
         # create article_fraud_user_table
-        cls.article_fraud_user_table_items = [
+        self.article_fraud_user_table_items = [
             {
                 'article_id': 'testid000000',
                 'user_id': 'test01',
@@ -33,9 +36,9 @@ class TestMeArticlesFraudCreate(TestCase):
             }
         ]
         TestsUtil.create_table(
-            cls.dynamodb,
+            self.dynamodb,
             os.environ['ARTICLE_FRAUD_USER_TABLE_NAME'],
-            cls.article_fraud_user_table_items
+            self.article_fraud_user_table_items
         )
 
         # create article_info_table
@@ -57,14 +60,13 @@ class TestMeArticlesFraudCreate(TestCase):
             }
         ]
         TestsUtil.create_table(
-            cls.dynamodb,
+            self.dynamodb,
             os.environ['ARTICLE_INFO_TABLE_NAME'],
             article_info_table_items
         )
 
-    @classmethod
-    def tearDownClass(cls):
-        TestsUtil.delete_all_tables(cls.dynamodb)
+    def tearDown(self):
+        TestsUtil.delete_all_tables(self.dynamodb)
 
     def assert_bad_request(self, params):
         test_function = MeArticlesFraudCreate(params, {}, self.dynamodb)
@@ -78,6 +80,11 @@ class TestMeArticlesFraudCreate(TestCase):
             'pathParameters': {
                 'article_id': self.article_fraud_user_table_items[0]['article_id']
             },
+            'body': {
+                'reason': 'copyright_violation',
+                'origin_url': 'http://example.com',
+                'free_text': 'A' * 400
+            },
             'requestContext': {
                 'authorizer': {
                     'claims': {
@@ -88,6 +95,8 @@ class TestMeArticlesFraudCreate(TestCase):
                 }
             }
         }
+
+        params['body'] = json.dumps(params['body'])
 
         article_fraud_user_table = self.dynamodb.Table(os.environ['ARTICLE_FRAUD_USER_TABLE_NAME'])
         article_fraud_user_before = article_fraud_user_table.scan()['Items']
@@ -105,6 +114,9 @@ class TestMeArticlesFraudCreate(TestCase):
         expected_items = {
             'article_id': target_article_id,
             'user_id': target_user_id,
+            'reason': 'copyright_violation',
+            'origin_url': 'http://example.com',
+            'free_text': 'A' * 400,
             'created_at': 1520150272000003
         }
 
@@ -119,6 +131,11 @@ class TestMeArticlesFraudCreate(TestCase):
             'pathParameters': {
                 'article_id': 'testid000002'
             },
+            'body': {
+                'reason': 'copyright_violation',
+                'origin_url': 'http://example.com',
+                'free_text': 'hogefugapiyo'
+            },
             'requestContext': {
                 'authorizer': {
                     'claims': {
@@ -129,6 +146,8 @@ class TestMeArticlesFraudCreate(TestCase):
                 }
             }
         }
+
+        params['body'] = json.dumps(params['body'])
 
         mock_lib = MagicMock()
         with patch('me_articles_fraud_create.DBUtil', mock_lib):
@@ -145,6 +164,11 @@ class TestMeArticlesFraudCreate(TestCase):
             'pathParameters': {
                 'article_id': self.article_fraud_user_table_items[0]['article_id']
             },
+            'body': {
+                'reason': 'copyright_violation',
+                'origin_url': 'http://example.com',
+                'free_text': 'hogefugapiyo'
+            },
             'requestContext': {
                 'authorizer': {
                     'claims': {
@@ -155,6 +179,8 @@ class TestMeArticlesFraudCreate(TestCase):
                 }
             }
         }
+
+        params['body'] = json.dumps(params['body'])
 
         response = MeArticlesFraudCreate(event=params, context={}, dynamodb=self.dynamodb).main()
 
@@ -167,21 +193,248 @@ class TestMeArticlesFraudCreate(TestCase):
 
     def test_validation_article_id_max(self):
         params = {
-            'queryStringParameters': {
+            'pathParameters': {
                 'article_id': 'A' * 13
+            },
+            'body': {
+                'reason': 'copyright_violation',
+                'origin_url': 'http://example.com',
+                'free_text': 'hogefugapiyo'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test03',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
             }
         }
+
+        params['body'] = json.dumps(params['body'])
 
         self.assert_bad_request(params)
 
     def test_validation_article_id_min(self):
         params = {
-            'queryStringParameters': {
+            'pathParameters': {
                 'article_id': 'A' * 11
+            },
+            'body': {
+                'reason': 'copyright_violation',
+                'origin_url': 'http://example.com',
+                'free_text': 'hogefugapiyo'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test03',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
             }
         }
 
+        params['body'] = json.dumps(params['body'])
+
         self.assert_bad_request(params)
+
+    def test_validation_origin_url_max(self):
+        base_url = 'http://example.com/'
+        params = {
+            'pathParameters': {
+                'article_id': 'testid000000'
+            },
+            'body': {
+                'reason': 'copyright_violation',
+                'origin_url': base_url + 'A' * (2048 - len(base_url) + 1),
+                'free_text': 'hogefugapiyo'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test03',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
+            }
+        }
+
+        params['body'] = json.dumps(params['body'])
+
+        self.assert_bad_request(params)
+
+    def test_validation_origin_required_with_copyright_violation(self):
+        invalid_value = [None, '']
+
+        for value in invalid_value:
+            params = {
+                'pathParameters': {
+                    'article_id': 'testid000000'
+                },
+                'body': {
+                    'reason': 'copyright_violation',
+                    'origin_url': value,
+                    'free_text': 'hogefugapiyo'
+                },
+                'requestContext': {
+                    'authorizer': {
+                        'claims': {
+                            'cognito:username': 'test03',
+                            'phone_number_verified': 'true',
+                            'email_verified': 'true'
+                        }
+                    }
+                }
+            }
+
+            params['body'] = json.dumps(params['body'])
+
+            self.assert_bad_request(params)
+
+    def test_validation_origin_allow_none(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'testid000000'
+            },
+            'body': {
+                'reason': 'illegal_act',
+                'origin_url': None,
+                'free_text': 'hogefugapiyo'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test03',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
+            }
+        }
+
+        params['body'] = json.dumps(params['body'])
+
+        response = MeArticlesFraudCreate(params, {}, self.dynamodb).main()
+        self.assertEqual(response['statusCode'], 200)
+
+    def test_validation_origin_url_format(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'testid000000'
+            },
+            'body': {
+                'reason': 'copyright_violation',
+                'origin_url': 'hogehoge',
+                'free_text': 'hogefugapiyo'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test03',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
+            }
+        }
+
+        params['body'] = json.dumps(params['body'])
+
+        self.assert_bad_request(params)
+
+    def test_validation_free_text_max(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'testid000000'
+            },
+            'body': {
+                'reason': 'copyright_violation',
+                'origin_url': 'http://example.com',
+                'free_text': 'A' * 401
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test03',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
+            }
+        }
+
+        params['body'] = json.dumps(params['body'])
+
+        self.assert_bad_request(params)
+
+    def test_validation_reason_enum(self):
+        valid_target = [
+            'illegal_act',
+            'anything_contrary_to_public_order',
+            'nuisance',
+            'copyright_violation',
+            'slander',
+            'illegal_token_usage',
+            'other'
+        ]
+
+        invalid_target = [
+            None,
+            '',
+            'not_in_enum'
+        ]
+
+        def get_event(reason):
+            return {
+                'pathParameters': {
+                    'article_id': 'testid000000'
+                },
+                'body': {
+                    'reason': reason,
+                    'origin_url': 'http://example.com',
+                    'free_text': 'hogefugapiyo'
+                },
+                'requestContext': {
+                    'authorizer': {
+                        'claims': {
+                            'cognito:username': 'test03',
+                            'phone_number_verified': 'true',
+                            'email_verified': 'true'
+                        }
+                    }
+                }
+            }
+
+        for target in valid_target:
+            me_article_fraud_create = MeArticlesFraudCreate({}, {}, self.dynamodb)
+            event = get_event(target)
+            me_article_fraud_create.event = event
+
+            params = copy.deepcopy(event['body'])
+            params.update(event['pathParameters'])
+            me_article_fraud_create.params = params
+
+            try:
+                me_article_fraud_create.validate_params()
+            except ValidationError:
+                self.fail('No error is expected')
+
+        for target in invalid_target:
+            me_article_fraud_create = MeArticlesFraudCreate({}, {}, self.dynamodb)
+            event = get_event(target)
+            me_article_fraud_create.event = event
+
+            params = copy.deepcopy(event['body'])
+            params.update(event['pathParameters'])
+
+            me_article_fraud_create.params = params
+
+            with self.assertRaises(ValidationError):
+                me_article_fraud_create.validate_params()
 
     def get_article_fraud_user(self, article_id, user_id):
         query_params = {
