@@ -1634,11 +1634,11 @@ Resources:
                 description: '対象ユーザーの指定するために使用'
                 required: true
                 type: 'string'
-              - name: 'UserFraud'
+              - name: 'Fraud'
                 in: 'body'
                 required: true
                 schema:
-                  $ref: '#/definitions/UserFraud'
+                  $ref: '#/definitions/Fraud'
               responses:
                 '200':
                   description: '不正報告の実施成功'
