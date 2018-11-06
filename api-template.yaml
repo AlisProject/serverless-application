@@ -320,7 +320,7 @@ Resources:
                 type: integer
               created_at:
                 type: integer
-          UserFraud:
+          Fraud:
             type: object
             properties:
               reason:
@@ -333,6 +333,8 @@ Resources:
                 - 'slander'
                 - 'illegal_token_usage'
                 - 'other'
+              origin_url:
+                type: 'string'
               free_text:
                 type: 'string'
         paths:

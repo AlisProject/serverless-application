@@ -129,7 +129,7 @@ parameters = {
     'oauth_verifier': {
         'type': 'string'
     },
-    'fraud_user': {
+    'fraud': {
         'reason': {
             'type': 'string',
             'enum': [
