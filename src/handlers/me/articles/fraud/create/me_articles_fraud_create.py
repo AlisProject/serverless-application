@@ -18,9 +18,9 @@ class MeArticlesFraudCreate(LambdaBase):
             'type': 'object',
             'properties': {
                 'article_id': settings.parameters['article_id'],
-                'reason': settings.parameters['fraud_user']['reason'],
-                'origin_url': settings.parameters['fraud_user']['origin_url'],
-                'free_text': settings.parameters['fraud_user']['free_text']
+                'reason': settings.parameters['fraud']['reason'],
+                'origin_url': settings.parameters['fraud']['origin_url'],
+                'free_text': settings.parameters['fraud']['free_text']
             },
             'required': ['article_id', 'reason']
         }
