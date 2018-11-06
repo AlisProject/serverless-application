@@ -171,44 +171,6 @@ parameters = {
             'type': 'string',
             'maxLength': 400
         }
-    },
-    'user_first_experience': {
-        'type': 'string',
-        'enum': [
-            'is_liked_article',
-            'is_tipped_article',
-            'is_got_token',
-            'is_created_article'
-        ]
-    },
-    'code': {
-        'type': 'string'
-    },
-    'state': {
-        'type': 'string'
-    },
-    'fraud_user': {
-        'reason': {
-            'type': 'string',
-            'enum': [
-                'illegal_act',
-                'anything_contrary_to_public_order',
-                'nuisance',
-                'copyright_violation',
-                'slander',
-                'illegal_token_usage',
-                'other'
-            ]
-        },
-        'origin_url': {
-            'type': ['string', 'null'],
-            'format': 'uri',
-            'maxLength': 2048
-        },
-        'free_text': {
-            'type': 'string',
-            'maxLength': 400
-        }
     }
 }
 
