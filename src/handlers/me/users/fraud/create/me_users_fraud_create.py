@@ -3,7 +3,7 @@ import os
 import time
 
 from botocore.exceptions import ClientError
-from jsonschema import validate, ValidationError
+from jsonschema import validate, ValidationError, FormatChecker
 
 import settings
 from db_util import DBUtil
