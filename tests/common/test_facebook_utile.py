@@ -16,7 +16,8 @@ class TestFacebookUtil(TestCase):
         self.fb = FacebookUtil(
             app_id='fake_client_id',
             app_secret='fake_secret',
-            callback_url='http://callback'
+            callback_url='http://callback',
+            app_token='fake_token'
         )
 
     def test_remove_postfix_str_from_state_token_ok(self):

@@ -19,7 +19,9 @@ class CustomMessage(LambdaBase):
     def validate_params(self):
         params = self.event['request']['userAttributes']
         if UserUtil.check_try_to_register_as_line_user(self.event['userName']) or \
-           UserUtil.check_try_to_register_as_twitter_user(self.event['userName']):
+           UserUtil.check_try_to_register_as_twitter_user(self.event['userName']) or \
+           UserUtil.check_try_to_register_as_yahoo_user(self.event['userName']) or \
+           UserUtil.check_try_to_register_as_facebook_user(self.event['userName']):
             raise ValidationError("external provider's user can not execute")
         if params.get('phone_number', '') != '' and \
            params.get('phone_number_verified', '') != 'true' and \

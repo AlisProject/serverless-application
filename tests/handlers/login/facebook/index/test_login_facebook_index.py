@@ -225,8 +225,8 @@ class TestLoginFacebookIndex(TestCase):
         with patch('login_facebook_index.FacebookUtil') as facebook_mock:
             facebook_mock.return_value.get_user_info.side_effect = FacebookOauthError(
                 endpoint='http://example.com',
-                status_code=401,
-                message='auth error'
+                status_code=400,
+                message='{"error":{"message":"auth error"}}'
             )
             params = {
                 'body': {

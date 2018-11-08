@@ -226,7 +226,7 @@ class TestLoginYahooIndex(TestCase):
             yahoo_mock.return_value.get_user_info.side_effect = YahooOauthError(
                 endpoint='http://example.com',
                 status_code=401,
-                message='auth error'
+                message='{"error_description":"auth error"}'
             )
             params = {
                 'body': {

@@ -224,3 +224,77 @@ class TestCustomMessage(TestCase):
         self.assertEqual(response['statusCode'],  400)
         self.assertEqual(response['body'],
                          json.dumps({"message": "Invalid parameter: external provider's user can not execute"}))
+
+    def test_invalid_yahoo_user_attempt_to_register_phone_number(self):
+        os.environ['DOMAIN'] = "alis.example.com"
+        event = {
+                    'version': '1',
+                    'region': 'us-east-1',
+                    'userPoolId': 'us-east-1_xxxxxxxxx',
+                    'userName': 'Yahoo-user',
+                    'callerContext': {
+                        'awsSdkVersion': 'aws-sdk-js-2.179.0',
+                        'clientId': 'abcdefghijklmnopqrstuvwxy'
+                    },
+                    'triggerSource': 'CustomMessage_VerifyUserAttribute',
+                    'request': {
+                        'userAttributes': {
+                            'sub': '12345678-2157-480a-8f33-e6945ccb856b',
+                            'email_verified': 'true',
+                            'cognito:user_status': 'CONFIRMED',
+                            'cognito:email_alias': 'hoge3@example.net',
+                            'phone_number_verified': 'false',
+                            'phone_number': '+818011112222',
+                            'email': 'hoge3@example.net'
+                        },
+                        'codeParameter': '{####}',
+                        'usernameParameter': None
+                    },
+                    'response': {
+                        'smsMessage': None,
+                        'emailMessage': None,
+                        'emailSubject': None
+                    }
+                }
+        custommessage = CustomMessage(event=event, context="", dynamodb=dynamodb)
+        response = custommessage.main()
+        self.assertEqual(response['statusCode'],  400)
+        self.assertEqual(response['body'],
+                         json.dumps({"message": "Invalid parameter: external provider's user can not execute"}))
+
+    def test_invalid_facebook_user_attempt_to_register_phone_number(self):
+        os.environ['DOMAIN'] = "alis.example.com"
+        event = {
+                    'version': '1',
+                    'region': 'us-east-1',
+                    'userPoolId': 'us-east-1_xxxxxxxxx',
+                    'userName': 'Facebook-user',
+                    'callerContext': {
+                        'awsSdkVersion': 'aws-sdk-js-2.179.0',
+                        'clientId': 'abcdefghijklmnopqrstuvwxy'
+                    },
+                    'triggerSource': 'CustomMessage_VerifyUserAttribute',
+                    'request': {
+                        'userAttributes': {
+                            'sub': '12345678-2157-480a-8f33-e6945ccb856b',
+                            'email_verified': 'true',
+                            'cognito:user_status': 'CONFIRMED',
+                            'cognito:email_alias': 'hoge3@example.net',
+                            'phone_number_verified': 'false',
+                            'phone_number': '+818011112222',
+                            'email': 'hoge3@example.net'
+                        },
+                        'codeParameter': '{####}',
+                        'usernameParameter': None
+                    },
+                    'response': {
+                        'smsMessage': None,
+                        'emailMessage': None,
+                        'emailSubject': None
+                    }
+                }
+        custommessage = CustomMessage(event=event, context="", dynamodb=dynamodb)
+        response = custommessage.main()
+        self.assertEqual(response['statusCode'],  400)
+        self.assertEqual(response['body'],
+                         json.dumps({"message": "Invalid parameter: external provider's user can not execute"}))
