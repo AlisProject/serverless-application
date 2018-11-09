@@ -21,7 +21,9 @@ class CustomMessage(LambdaBase):
         if UserUtil.check_try_to_register_as_line_user(self.event['userName']) or \
            UserUtil.check_try_to_register_as_twitter_user(self.event['userName']):
             raise ValidationError("external provider's user can not execute")
-        if params.get('phone_number', '') != '' and params.get('phone_number_verified', '') != 'true':
+        if params.get('phone_number', '') != '' and \
+           params.get('phone_number_verified', '') != 'true' and \
+           self.event['triggerSource'] != 'CustomMessage_ForgotPassword':
             validate(params, self.get_schema())
             client = boto3.client('cognito-idp')
             response = client.list_users(
