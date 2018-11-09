@@ -172,4 +172,3 @@ class TextSanitizer:
             pass
         else:
             obj['payload']['size'] = 'h2'
-        obj['payload']['body'] = bleach.clean(text=obj['payload']['body'], tags=[])

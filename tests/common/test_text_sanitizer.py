@@ -371,9 +371,16 @@ class TestTextSanitizer(TestCase):
               {
                 "type": "Heading",
                 "payload": {
-                    "size": 'h2',
-                    "body": "テスト"
-                }
+                    "size": 'h2'
+                },
+                "children": [
+                    {
+                        "type": "Text",
+                        "payload": {
+                            "body": "テスト"
+                        }
+                    }
+                ]
               },
               {
                 "type": "Image",
@@ -404,9 +411,16 @@ class TestTextSanitizer(TestCase):
                                  {
                                      "type": "Heading",
                                      "payload": {
-                                         "size": 'h2',
-                                         "body": "テスト"
-                                     }
+                                         "size": 'h2'
+                                     },
+                                     "children": [
+                                        {
+                                          "type": "Text",
+                                          "payload": {
+                                            "body": "テスト"
+                                          }
+                                        }
+                                     ]
                                  },
                                  {
                                      "type": "Image",
