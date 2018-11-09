@@ -104,6 +104,57 @@ class TestMeUsersFraudCreate(TestCase):
         for key in expected_items.keys():
             self.assertEqual(expected_items[key], article_fraud_user[key])
 
+    @patch('time.time', MagicMock(return_value=1520150272000003))
+    def test_main_ok_empty_free_text(self):
+        params = {
+            'pathParameters': {
+                'user_id': self.user_items[0]['user_id']
+            },
+            'body': {
+                'reason': 'illegal_act',
+                'origin_url': 'http://example.com',
+                'free_text': ''
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'testuser02',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
+            }
+        }
+
+        params['body'] = json.dumps(params['body'])
+
+        user_fraud_table = self.dynamodb.Table(os.environ['USER_FRAUD_TABLE_NAME'])
+        fraud_user_before = user_fraud_table.scan()['Items']
+
+        article_fraud_user = MeUsersFraudCreate(event=params, context={}, dynamodb=self.dynamodb)
+        response = article_fraud_user.main()
+
+        fraud_user_after = user_fraud_table.scan()['Items']
+
+        target_user_id = params['pathParameters']['user_id']
+        user_id = params['requestContext']['authorizer']['claims']['cognito:username']
+
+        article_fraud_user = user_fraud_table.get_item(Key={'target_user_id': target_user_id, 'user_id': user_id})['Item']
+
+        expected_items = {
+            'target_user_id': target_user_id,
+            'user_id': user_id,
+            'reason': 'illegal_act',
+            'free_text': None,
+            'created_at': 1520150272000003
+        }
+
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(len(fraud_user_after), len(fraud_user_before) + 1)
+
+        for key in expected_items.keys():
+            self.assertEqual(expected_items[key], article_fraud_user[key])
+
     def test_call_validate_user_existence(self):
         params = {
             'pathParameters': {
