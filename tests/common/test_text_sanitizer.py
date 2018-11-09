@@ -314,6 +314,17 @@ class TestTextSanitizer(TestCase):
         TextSanitizer.sanitize_paragraph(invalid_script_tag_paragraph[0])
         self.assertEqual(invalid_script_tag_paragraph[0]['payload']['body'], "&lt;script&gt;テスト&lt;/script&gt;")
 
+    def test_sanitize_heading_block_with_400(self):
+        invalid_request_heading_block = [{
+            "type": "Heading",
+            "payload": {
+                "size": "neakgnjeaw"
+            },
+            "children": []
+        }]
+        response = TextSanitizer.sanitize_heading_block(invalid_request_heading_block[0])
+        self.assertEqual(400, response['statusCode'])
+
     def test_sanitize_article_object_with_text_and_link_ok(self):
         obj = [{
             "type": "Paragraph",

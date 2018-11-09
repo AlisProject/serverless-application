@@ -171,4 +171,7 @@ class TextSanitizer:
         if size == 'h2' or size == 'h3':
             pass
         else:
-            obj['payload']['size'] = 'h2'
+            return {
+                'statusCode': 400,
+                'body': json.dumps({'message': "Invalid request params"})
+            }
