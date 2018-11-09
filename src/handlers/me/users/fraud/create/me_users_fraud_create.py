@@ -68,6 +68,8 @@ class MeUsersFraudCreate(LambdaBase):
             'free_text': TextSanitizer.sanitize_text(self.params.get('free_text')),
             'created_at': int(time.time())
         }
+        DBUtil.items_values_empty_to_none(user_fraud)
+
         article_user_fraud_table.put_item(
             Item=user_fraud,
             ConditionExpression='attribute_not_exists(user_id)'

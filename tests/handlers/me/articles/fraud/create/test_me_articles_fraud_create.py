@@ -122,8 +122,60 @@ class TestMeArticlesFraudCreate(TestCase):
 
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(len(article_fraud_user_after), len(article_fraud_user_before) + 1)
-        article_fraud_user_param_names = ['article_id', 'user_id', 'created_at']
-        for key in article_fraud_user_param_names:
+
+        for key in expected_items.keys():
+            self.assertEqual(expected_items[key], article_fraud_user[key])
+
+    @patch('time.time', MagicMock(return_value=1520150272000003))
+    def test_main_ok_empty_free_text(self):
+        params = {
+            'pathParameters': {
+                'article_id': self.article_fraud_user_table_items[0]['article_id']
+            },
+            'body': {
+                'reason': 'copyright_violation',
+                'origin_url': 'http://example.com',
+                'free_text': ''
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test03',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
+            }
+        }
+
+        params['body'] = json.dumps(params['body'])
+
+        article_fraud_user_table = self.dynamodb.Table(os.environ['ARTICLE_FRAUD_USER_TABLE_NAME'])
+        article_fraud_user_before = article_fraud_user_table.scan()['Items']
+
+        article_fraud_user = MeArticlesFraudCreate(event=params, context={}, dynamodb=self.dynamodb)
+        response = article_fraud_user.main()
+
+        article_fraud_user_after = article_fraud_user_table.scan()['Items']
+
+        target_article_id = params['pathParameters']['article_id']
+        target_user_id = params['requestContext']['authorizer']['claims']['cognito:username']
+
+        article_fraud_user = self.get_article_fraud_user(target_article_id, target_user_id)
+
+        expected_items = {
+            'article_id': target_article_id,
+            'user_id': target_user_id,
+            'reason': 'copyright_violation',
+            'origin_url': 'http://example.com',
+            'free_text': None,
+            'created_at': 1520150272000003
+        }
+
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(len(article_fraud_user_after), len(article_fraud_user_before) + 1)
+
+        for key in expected_items.keys():
             self.assertEqual(expected_items[key], article_fraud_user[key])
 
     def test_call_validate_article_existence(self):
