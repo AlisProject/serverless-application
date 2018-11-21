@@ -4,6 +4,7 @@ deploy
 vendor-package
 .envrc
 _tmp_*
+src/**/__pycache__
 
 # for tests
 tmp_tests

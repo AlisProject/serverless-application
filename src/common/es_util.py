@@ -44,8 +44,7 @@ class ESUtil:
                 }
             },
             "sort": [
-                "_score",
-                {"published_at": "desc"}
+                {"sort_key": "desc"}
             ],
             "from": limit*(page-1),
             "size": limit
@@ -72,11 +71,13 @@ class ESUtil:
                 }
                 body["query"]["bool"]["must"].append(query)
 
+                # 文字列による検索の場合は検索スコアを第一ソートとする
+                body['sort'].insert(0, {'_score': 'desc'})
+
         # tagが渡ってきたときはそのタグで一致検索を行う
         # TODO: 大文字小文字区別なしで検索を行えること
         if tag:
             body['query']['bool']['must'].append({'term': {'tags.keyword': tag}})
-            body['sort'] = [{"published_at": "desc"}]
 
         res = elasticsearch.search(
                 index="articles",
@@ -88,11 +89,8 @@ class ESUtil:
     def search_user(elasticsearch, word, limit, page):
         body = {
             "query": {
-                "bool": {
-                    "should": [
-                        {"wildcard": {"user_id": f"*{word}*"}},
-                        {"wildcard": {"user_display_name": f"*{word}*"}}
-                    ]
+                "wildcard": {
+                    "search_name": f"*{word}*"
                 }
             },
             "from": limit*(page-1),
@@ -106,6 +104,9 @@ class ESUtil:
 
     @staticmethod
     def search_popular_articles(elasticsearch, params, limit, page):
+        if not elasticsearch.indices.exists(index='article_scores'):
+            return []
+
         body = {
             'query': {
                 'bool': {
@@ -155,7 +156,6 @@ class ESUtil:
             doc_type='article',
             body=body
         )
-
         articles = [item['_source'] for item in res['hits']['hits']]
 
         return articles

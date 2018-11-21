@@ -126,7 +126,7 @@ Specify generated ApiLambdaRole to SSM.
 
 ```bash
 # Show generated Rest API ID
-aws apigateway  get-rest-apis | jq '.items[] | if .name == "'${ALIS_APP_ID}'api" then .id else empty end' 
+aws apigateway  get-rest-apis | jq '.items[] | if .name == "'${ALIS_APP_ID}'api" then .id else empty end'
 
 # Set SERVERLESS_REST_API_ID to .envrc
 direnv edit
@@ -146,7 +146,15 @@ aws es describe-elasticsearch-domain --domain-name ${ALIS_APP_ID}api | jq '.Doma
 And add ElasticSearch Endpoint to SSM.
 - See: https://github.com/AlisProject/environment
 
-Add Your local IP to ES access policy. 
+Add Your local IP to ES access policy.
 ```bash
 python elasticsearch-setup.py $(curl https://checkip.amazonaws.com/)
+```
+
+### Single API Lambda Function
+You can deploy single function on `api-template.yaml` with using `deploy_api_function.py` script.
+Following example is that `ArticlesRecent` function is deployed.
+
+```bash
+python make_deploy_zip.py && ./deploy_api_function.py ArticlesRecent
 ```

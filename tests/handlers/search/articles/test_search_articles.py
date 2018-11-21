@@ -12,35 +12,39 @@ class TestSearchArticles(TestCase):
     def setUp(self):
         items = [
             {
-                'article_id': "test1",
+                'article_id': 'test1',
                 'created_at': 1530112710,
-                'title': "abc1",
-                "published_at": 1530112710,
-                'body': "huga test",
+                'title': 'abc1',
+                'published_at': 1530112710,
+                'sort_key': 1530112710000000,
+                'body': 'huga test',
                 'tags': ['A', 'B', 'C', 'd']
             },
             {
-                'article_id': "test2",
+                'article_id': 'test2',
                 'created_at': 1530112720,
-                'title': "abc2",
-                "published_at": 1530112720,
-                'body': "foo bar",
+                'title': 'abc2',
+                'published_at': 1530112720,
+                'sort_key': 1530112720000000,
+                'body': 'foo bar',
                 'tags': ['c', 'd', 'e', 'abcde']
             },
             {
-                'article_id': "test3",
+                'article_id': 'test3',
                 'created_at': 1530112753,
-                'title': "abc2",
-                "published_at": 1530112753,
-                'body': "foo bar",
+                'title': 'abc2',
+                'published_at': 1530112753,
+                'sort_key': 1530112753000000,
+                'body': 'foo bar',
                 'tags': ['ﾊﾝｶｸ', '＆＄％！”＃', '𪚲🍣𪚲', 'aaa-aaa', 'abcde vwxyz']
             },
             {
-                'article_id': "test4",
+                'article_id': 'test4',
                 'created_at': 1530112700,
-                'title': "abc2",
-                "published_at": 1530112700,
-                'body': "foo bar",
+                'title': 'abc2',
+                'published_at': 1530112700,
+                'sort_key': 1530112700000000,
+                'body': 'foo bar',
                 'tags': ['d']
             }
         ]

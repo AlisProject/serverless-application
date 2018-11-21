@@ -15,6 +15,9 @@ parameters = {
         'maxLength': 30,
         'pattern': r'^(?!.*--)[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]$'
     },
+    'line_id': {
+        'type': 'string'
+    },
     'phone_number': {
         'type': 'string',
         'minLength': 13,
@@ -119,6 +122,35 @@ parameters = {
         'type': 'number',
         'minimum': 1,
         'maximum': 10 ** 24
+    },
+    'oauth_token': {
+        'type': 'string'
+    },
+    'oauth_verifier': {
+        'type': 'string'
+    },
+    'fraud': {
+        'reason': {
+            'type': 'string',
+            'enum': [
+                'illegal_act',
+                'anything_contrary_to_public_order',
+                'nuisance',
+                'copyright_violation',
+                'slander',
+                'illegal_token_usage',
+                'other'
+            ]
+        },
+        'origin_url': {
+            'type': ['string', 'null'],
+            'format': 'uri',
+            'maxLength': 2048
+        },
+        'free_text': {
+            'type': 'string',
+            'maxLength': 400
+        }
     }
 }
 
@@ -185,9 +217,34 @@ S3_INFO_ICON_PATH = 'd/api/info_icon/'
 
 LIKE_NOTIFICATION_TYPE = 'like'
 COMMENT_NOTIFICATION_TYPE = 'comment'
+COMMENT_REPLY_NOTIFICATION_TYPE = 'reply'
+COMMENT_THREAD_NOTIFICATION_TYPE = 'thread'
+
+COMMENT_NOTIFICATION_TYPES = [
+    COMMENT_NOTIFICATION_TYPE,
+    COMMENT_REPLY_NOTIFICATION_TYPE,
+    COMMENT_THREAD_NOTIFICATION_TYPE
+]
 
 ARTICLE_SCORE_INDEX_NAME = 'article_scores'
 TOPIC_INDEX_HASH_KEY = 'topic'
 
 TAG_DENIED_SYMBOL_PATTERN = '([!-,./:-@[-`{-~]|--| {2})'
 TAG_ALLOWED_SYMBOLS = ['-', ' ']
+
+TWITTER_API_REQUEST_TOKEN_URL = 'https://api.twitter.com/oauth/request_token'
+TWITTER_API_AUTHENTICATE_URL = 'https://api.twitter.com/oauth/authenticate'
+TWITTER_API_ACCESS_TOKEN_URL = 'https://api.twitter.com/oauth/access_token'
+TWITTER_API_VERIFY_CREDENTIALS_URL = 'https://api.twitter.com/1.1/account/verify_credentials.json'
+TWITTER_USERNAME_PREFIX = 'Twitter-'
+FAKE_USER_EMAIL_DOMAIN = 'example.com'
+
+LINE_REQUEST_HEADER = {'content-type': 'application/x-www-form-urlencoded'}
+LINE_AUTHORIZE_URL = 'https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id='
+LINE_TOKEN_END_POINT = 'https://api.line.me/oauth2/v2.1/token'
+LINE_ISSUER = 'https://access.line.me'
+LINE_USERNAME_PREFIX = 'LINE-'
+LINE_REQUEST_SCOPE = '&scope=openid%20profile%20email'
+LINE_LOGIN_REQUEST_SCOPE = '&scope=openid%20profile'
+PASSWORD_LENGTH = 32
+AES_IV_BYTES = 16

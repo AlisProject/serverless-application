@@ -44,7 +44,9 @@ class TestMeArticlesDraftsCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'test_user_id'
+                        'cognito:username': 'test_user_id',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
@@ -93,7 +95,9 @@ class TestMeArticlesDraftsCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'test_user_id'
+                        'cognito:username': 'test_user_id',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
@@ -123,7 +127,9 @@ class TestMeArticlesDraftsCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'test_user_id'
+                        'cognito:username': 'test_user_id',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
@@ -159,7 +165,9 @@ class TestMeArticlesDraftsCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'test_user_id'
+                        'cognito:username': 'test_user_id',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
@@ -202,7 +210,9 @@ class TestMeArticlesDraftsCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'test_user_id'
+                        'cognito:username': 'test_user_id',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }

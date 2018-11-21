@@ -13,6 +13,7 @@ from lambda_base import LambdaBase
 from jsonschema import validate, ValidationError
 from time_util import TimeUtil
 from text_sanitizer import TextSanitizer
+from user_util import UserUtil
 
 
 class MeArticlesCommentsCreate(LambdaBase):
@@ -27,6 +28,7 @@ class MeArticlesCommentsCreate(LambdaBase):
         }
 
     def validate_params(self):
+        UserUtil.verified_phone_and_email(self.event)
         if not self.event.get('body'):
             raise ValidationError('Request parameter is required')
 

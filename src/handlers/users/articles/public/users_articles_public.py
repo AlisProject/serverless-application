@@ -30,7 +30,6 @@ class UsersArticlesPublic(LambdaBase):
 
         if self.event.get('queryStringParameters') is not None:
             params.update(self.event.get('queryStringParameters'))
-
         ParameterUtil.cast_parameter_to_int(params, self.get_schema())
 
         validate(params, self.get_schema())

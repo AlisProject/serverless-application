@@ -8,6 +8,7 @@ from botocore.exceptions import ClientError
 from db_util import DBUtil
 from lambda_base import LambdaBase
 from jsonschema import validate
+from user_util import UserUtil
 
 
 class MeCommentsLikesCreate(LambdaBase):
@@ -21,6 +22,7 @@ class MeCommentsLikesCreate(LambdaBase):
         }
 
     def validate_params(self):
+        UserUtil.verified_phone_and_email(self.event)
         validate(self.params, self.get_schema())
         comment = DBUtil.get_validated_comment(self.dynamodb, self.params['comment_id'])
         DBUtil.validate_article_existence(self.dynamodb, comment['article_id'], status='public')

@@ -6,6 +6,7 @@ from lambda_base import LambdaBase
 from jsonschema import validate, ValidationError
 from decimal_encoder import DecimalEncoder
 from db_util import DBUtil
+from user_util import UserUtil
 
 
 class MeArticlesDraftsShow(LambdaBase):
@@ -19,6 +20,7 @@ class MeArticlesDraftsShow(LambdaBase):
         }
 
     def validate_params(self):
+        UserUtil.verified_phone_and_email(self.event)
         if self.event.get('pathParameters') is None:
             raise ValidationError('pathParameters is required')
 

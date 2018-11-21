@@ -15,7 +15,6 @@ class TestMeArticlesCommentsCreate(TestCase):
 
         os.environ['SALT_FOR_ARTICLE_ID'] = 'test_salt'
 
-        self.article_info_table = self.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
         self.article_info_table_items = [
             {
                 'article_id': 'publicId0001',
@@ -77,7 +76,9 @@ class TestMeArticlesCommentsCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'test_user_id01'
+                        'cognito:username': 'test_user_id01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
@@ -150,7 +151,9 @@ class TestMeArticlesCommentsCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'comment_user_01'
+                        'cognito:username': 'comment_user_01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
@@ -183,7 +186,9 @@ class TestMeArticlesCommentsCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'article_user01'
+                        'cognito:username': 'article_user01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
@@ -220,7 +225,9 @@ class TestMeArticlesCommentsCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'comment_user_01'
+                        'cognito:username': 'comment_user_01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
@@ -251,7 +258,9 @@ class TestMeArticlesCommentsCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'test05'
+                        'cognito:username': 'test05',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
@@ -273,7 +282,9 @@ class TestMeArticlesCommentsCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'comment_user_01'
+                        'cognito:username': 'comment_user_01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
@@ -294,7 +305,9 @@ class TestMeArticlesCommentsCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'comment_user_01'
+                        'cognito:username': 'comment_user_01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
@@ -315,7 +328,9 @@ class TestMeArticlesCommentsCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'comment_user_01'
+                        'cognito:username': 'comment_user_01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
@@ -336,7 +351,9 @@ class TestMeArticlesCommentsCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'comment_user_01'
+                        'cognito:username': 'comment_user_01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
@@ -357,7 +374,9 @@ class TestMeArticlesCommentsCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'comment_user_01'
+                        'cognito:username': 'comment_user_01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }

@@ -43,6 +43,7 @@ aws cloudformation deploy \
     ArticleScoreTableName=${SSM_PARAMS_PREFIX}ArticleScoreTableName \
     UsersTableName=${SSM_PARAMS_PREFIX}UsersTableName \
     BetaUsersTableName=${SSM_PARAMS_PREFIX}BetaUsersTableName \
+    ExternalProviderUsersTableName=${SSM_PARAMS_PREFIX}ExternalProviderUsersTableName \
     NotificationTableName=${SSM_PARAMS_PREFIX}NotificationTableName \
     UnreadNotificationManagerTableName=${SSM_PARAMS_PREFIX}UnreadNotificationManagerTableName \
     TopicTableName=${SSM_PARAMS_PREFIX}TopicTableName \
@@ -51,8 +52,19 @@ aws cloudformation deploy \
     CommentTableName=${SSM_PARAMS_PREFIX}CommentTableName \
     CommentLikedUserTableName=${SSM_PARAMS_PREFIX}CommentLikedUserTableName \
     DeletedCommentTableName=${SSM_PARAMS_PREFIX}DeletedCommentTableName \
+    UserFraudTableName=${SSM_PARAMS_PREFIX}UserFraudTableName \
     DistS3BucketName=${SSM_PARAMS_PREFIX}DistS3BucketName \
     ApiLambdaRole=${SSM_PARAMS_PREFIX}ApiLambdaRole \
     ElasticSearchEndpoint=${SSM_PARAMS_PREFIX}ElasticSearchEndpoint \
     CognitoUserPoolId=${SSM_PARAMS_PREFIX}CognitoUserPoolId \
+    CognitoUserPoolAppId=${SSM_PARAMS_PREFIX}CognitoUserPoolAppId \
+    LineChannelId=${SSM_PARAMS_PREFIX}LineChannelId \
+    LineChannelSecret=${SSM_PARAMS_PREFIX}LineChannelSecret \
+    ExternalProviderLoginCommonTempPassword=${SSM_PARAMS_PREFIX}ExternalProviderLoginCommonTempPassword \
+    LineRedirectUri=${SSM_PARAMS_PREFIX}LineRedirectUri \
+    ExternalProviderLoginMark=${SSM_PARAMS_PREFIX}ExternalProviderLoginMark \
+    LoginSalt=${SSM_PARAMS_PREFIX}LoginSalt \
+    TwitterConsumerKey=${SSM_PARAMS_PREFIX}TwitterConsumerKey \
+    TwitterConsumerSecret=${SSM_PARAMS_PREFIX}TwitterConsumerSecret \
+    TwitterOauthCallbackUrl=${SSM_PARAMS_PREFIX}TwitterOauthCallbackUrl \
   --capabilities CAPABILITY_IAM

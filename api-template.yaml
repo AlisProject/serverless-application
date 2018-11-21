@@ -27,6 +27,8 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   BetaUsersTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
+  ExternalProviderUsersTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
   NotificationTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
   UnreadNotificationManagerTableName:
@@ -36,6 +38,8 @@ Parameters:
   CommentLikedUserTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
   DeletedCommentTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  UserFraudTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
   ElasticSearchEndpoint:
     Type: 'AWS::SSM::Parameter::Value<String>'
@@ -61,7 +65,27 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   CognitoUserPoolArn:
     Type: 'AWS::SSM::Parameter::Value<String>'
+  CognitoUserPoolAppId:
+    Type: 'AWS::SSM::Parameter::Value<String>'
   SaltForArticleId:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  TwitterConsumerKey:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  TwitterConsumerSecret:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  TwitterOauthCallbackUrl:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  LineChannelId:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  LineChannelSecret:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  ExternalProviderLoginCommonTempPassword:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  LineRedirectUri:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  ExternalProviderLoginMark:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  LoginSalt:
     Type: 'AWS::SSM::Parameter::Value<String>'
 
 Globals:
@@ -88,15 +112,18 @@ Globals:
         COMMENT_TABLE_NAME: !Ref CommentTableName
         COMMENT_LIKED_USER_TABLE_NAME: !Ref CommentLikedUserTableName
         DELETED_COMMENT_TABLE_NAME: !Ref DeletedCommentTableName
+        USER_FRAUD_TABLE_NAME: !Ref UserFraudTableName
         TOPIC_TABLE_NAME: !Ref TopicTableName
         TAG_TABLE_NAME: !Ref TagTableName
         TIP_TABLE_NAME: !Ref TipTableName
+        EXTERNAL_PROVIDER_USERS_TABLE_NAME: !Ref ExternalProviderUsersTableName
         DOMAIN: !Ref AlisAppDomain
         PRIVATE_CHAIN_AWS_ACCESS_KEY: !Ref PrivateChainAwsAccessKey
         PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY: !Ref PrivateChainAwsSecretAccessKey
         PRIVATE_CHAIN_EXECUTE_API_HOST: !Ref PrivateChainExecuteApiHost
         BETA_MODE_FLAG: !Ref BetaModeFlag
         DIST_S3_BUCKET_NAME: !Ref DistS3BucketName
+        ELASTIC_SEARCH_ENDPOINT: !Ref ElasticSearchEndpoint
 
 Resources:
   RestApi:
@@ -205,7 +232,35 @@ Resources:
               article_id:
                 type: string
               tip_value:
-                type: integer
+                type: string
+          MeExternalProviderUserCreate:
+            type: object
+            properties:
+              user_id:
+                type: string
+          SignUpLineAuthorizeUrl:
+            type: object
+            properties:
+              callback_url:
+                type: string
+          LoginLineAuthorizeUrl:
+            type: object
+            properties:
+              callback_url:
+                type: string
+          LoginLineAuthorizeRequest:
+            type: object
+            properties:
+              accessToken:
+                type: string
+              lastAuthUser:
+                type: string
+              idToken:
+                type: string
+              refreshToken:
+                type: string
+              hasUserId:
+                type: boolean
           Notification:
             type: object
             properties:
@@ -265,6 +320,23 @@ Resources:
                 type: integer
               created_at:
                 type: integer
+          Fraud:
+            type: object
+            properties:
+              reason:
+                type: 'string'
+                enum:
+                - 'illegal_act'
+                - 'anything_contrary_to_public_order'
+                - 'nuisance'
+                - 'copyright_violation'
+                - 'slander'
+                - 'illegal_token_usage'
+                - 'other'
+              origin_url:
+                type: 'string'
+              free_text:
+                type: 'string'
         paths:
           /search/articles:
             get:
@@ -372,7 +444,7 @@ Resources:
                 responses:
                   default:
                     statusCode: "200"
-                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ElasticSearchSearchUsers.Arn}/invocations
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ElasticSearchSearchTags.Arn}/invocations
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
@@ -566,6 +638,128 @@ Resources:
                   default:
                     statusCode: "200"
                 uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CommentsLikesShow.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /login/twitter:
+            post:
+              description: "Twitterログインの実施"
+              parameters:
+              - name: request
+                in: body
+                required: true
+                schema:
+                  type: object
+                  required:
+                  - oauth_token
+                  - oauth_verifier
+                  properties:
+                    oauth_token:
+                      type: string
+                    oauth_verifier:
+                      type: string
+              responses:
+                "200":
+                  description: "アクセストークンを取得"
+                  schema:
+                    type: object
+                    properties:
+                      access_token:
+                        type: string
+                      refresh_token:
+                        type: string
+                      id_token:
+                        type: string
+                      has_user_id:
+                        type: string
+                "401":
+                  description: "認証エラー"
+                  schema:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LoginTwitter.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /login/twitter/authorization_url:
+            get:
+              description: "Twitter認証画面のURLを取得する"
+              responses:
+                "200":
+                  description: "Twitter認証画面のURL"
+                  schema:
+                    type: object
+                    properties:
+                      url:
+                        type: string
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LoginTwitterAuthorizationUrl.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /sign_up/line/authorization_url:
+            get:
+              description: 'LINEサインアップ用URL返却のAPI'
+              responses:
+                '200':
+                  description: 'LINEサインアップ用URL'
+                  schema:
+                    type: object
+                    properties:
+                      callback_url:
+                        type: 'string'
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SignUpLineAuthorizeUrl.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /login/line/authorization_url:
+            get:
+              description: 'LINEログイン用URL返却のAPI'
+              responses:
+                '200':
+                  description: 'LINEログイン用URL'
+                  schema:
+                    type: object
+                    properties:
+                      callback_url:
+                        type: 'string'
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LoginLineAuthorizeUrl.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /login/line:
+            post:
+              description: 'LINEログインユーザーを作成'
+              responses:
+                '200':
+                  description: '認証用codeの受け渡し'
+                  schema:
+                    type: object
+                    properties:
+                      code:
+                        type: 'string'
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LoginLineAuthorizeRequest.Arn}/invocations
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
@@ -900,7 +1094,48 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
-
+          /me/articles/{article_id}/comments/reply:
+            post:
+              description: '指定された article_id の記事に対してコメントの返信を登録する'
+              parameters:
+              - name: 'article_id'
+                in: 'path'
+                description: '対象記事の指定するために使用'
+                required: true
+                type: 'string'
+              - name: 'text'
+                in: 'body'
+                description: 'コメントの内容'
+                required: true
+                type: 'string'
+              - name: 'parent_id'
+                in: 'body'
+                description: '返信するスレッドの親コメントのid'
+                required: true
+                type: 'string'
+              - name: 'replyed_user_id'
+                in: 'body'
+                description: '返信先のユーザーのid'
+                required: true
+                type: 'string'
+              responses:
+                '200':
+                  description: 'コメント登録の完了'
+                  schema:
+                    type: object
+                    properties:
+                      comment_id:
+                        type: 'string'
+              security:
+              - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesCommentsReply.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
           /me/articles/{article_id}/comments/likes:
             get:
               description: '指定された記事のコメントの中で、自分がいいねを実行したコメントのIDの一覧を取得する'
@@ -985,6 +1220,11 @@ Resources:
                 description: '対象記事の指定するために使用'
                 required: true
                 type: 'string'
+              - name: 'Fraud'
+                in: 'body'
+                required: true
+                schema:
+                  $ref: '#/definitions/Fraud'
               responses:
                 '200':
                   description: '不正報告の実施成功'
@@ -1344,6 +1584,34 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+          /me/external_provider_user:
+            post:
+              description: 'user_idを作成'
+              parameters:
+              - name: 'user_id'
+                in: 'body'
+                description: 'user_id'
+                required: true
+                schema:
+                  $ref: '#/definitions/MeExternalProviderUserCreate'
+              responses:
+                '200':
+                  description: '作成されたuser_id'
+                  schema:
+                    type: object
+                    properties:
+                      user_id:
+                        type: 'string'
+              security:
+              - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '201'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeExternalProviderUserCreate.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
           /topics:
             get:
               description: トピックの一覧を取得
@@ -1359,6 +1627,33 @@ Resources:
                   default:
                     statusCode: '200'
                 uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${TopicsIndex.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /me/users/{user_id}/fraud:
+            post:
+              description: '対象ユーザーに不正報告を行う'
+              parameters:
+              - name: 'user_id'
+                in: 'path'
+                description: '対象ユーザーの指定するために使用'
+                required: true
+                type: 'string'
+              - name: 'Fraud'
+                in: 'body'
+                required: true
+                schema:
+                  $ref: '#/definitions/Fraud'
+              responses:
+                '200':
+                  description: '不正報告の実施成功'
+              security:
+              - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeUsersFraudCreate.Arn}/invocations
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
@@ -1396,9 +1691,6 @@ Resources:
       Handler: handler.lambda_handler
       Role: !GetAtt LambdaRole.Arn
       CodeUri: ./deploy/articles_recent.zip
-      Environment:
-        Variables:
-          ELASTIC_SEARCH_ENDPOINT: !Ref ElasticSearchEndpoint
       Events:
         Api:
           Type: Api
@@ -1412,9 +1704,6 @@ Resources:
       Handler: handler.lambda_handler
       Role: !GetAtt LambdaRole.Arn
       CodeUri: ./deploy/articles_popular.zip
-      Environment:
-        Variables:
-          ELASTIC_SEARCH_ENDPOINT: !Ref ElasticSearchEndpoint
       Events:
         Api:
           Type: Api
@@ -1499,6 +1788,103 @@ Resources:
           Properties:
             Path: /me/articles/drafts
             Method: get
+            RestApiId: !Ref RestApi
+  LoginTwitter:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/login_twitter_index.zip
+      Environment:
+        Variables:
+          TWITTER_CONSUMER_KEY: !Ref TwitterConsumerKey
+          TWITTER_CONSUMER_SECRET: !Ref TwitterConsumerSecret
+          EXTERNAL_PROVIDER_LOGIN_COMMON_TEMP_PASSWORD: !Ref ExternalProviderLoginCommonTempPassword
+          COGNITO_USER_POOL_ID: !Ref CognitoUserPoolId
+          COGNITO_USER_POOL_APP_ID: !Ref CognitoUserPoolAppId
+          EXTERNAL_PROVIDER_LOGIN_MARK: !Ref ExternalProviderLoginMark
+          LOGIN_SALT: !Ref LoginSalt
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /login/twitter
+            Method: post
+            RestApiId: !Ref RestApi
+  LoginTwitterAuthorizationUrl:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/login_twitter_authorization_url.zip
+      Environment:
+        Variables:
+          TWITTER_CONSUMER_KEY: !Ref TwitterConsumerKey
+          TWITTER_CONSUMER_SECRET: !Ref TwitterConsumerSecret
+          TWITTER_OAUTH_CALLBACK_URL: !Ref TwitterOauthCallbackUrl
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /login/twitter/authorization_url
+            Method: get
+            RestApiId: !Ref RestApi
+  SignUpLineAuthorizeUrl:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/sign_up_line_authorize_url.zip
+      Environment:
+        Variables:
+          LINE_REDIRECT_URI: !Ref LineRedirectUri
+          LINE_CHANNEL_ID: !Ref LineChannelId
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /sign_up/line/authorization_url
+            Method: get
+            RestApiId: !Ref RestApi
+  LoginLineAuthorizeUrl:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/login_line_authorize_url.zip
+      Environment:
+        Variables:
+          LINE_REDIRECT_URI: !Ref LineRedirectUri
+          LINE_CHANNEL_ID: !Ref LineChannelId
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /login/line/authorization_url
+            Method: get
+            RestApiId: !Ref RestApi
+  LoginLineAuthorizeRequest:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/login_line_authorize_request.zip
+      Environment:
+        Variables:
+          LINE_CHANNEL_ID: !Ref LineChannelId
+          LINE_CHANNEL_SECRET: !Ref LineChannelSecret
+          EXTERNAL_PROVIDER_LOGIN_COMMON_TEMP_PASSWORD: !Ref ExternalProviderLoginCommonTempPassword
+          LINE_REDIRECT_URI: !Ref LineRedirectUri
+          EXTERNAL_PROVIDER_LOGIN_MARK: !Ref ExternalProviderLoginMark
+          LOGIN_SALT: !Ref LoginSalt
+          COGNITO_USER_POOL_ID: !Ref CognitoUserPoolId
+          COGNITO_USER_POOL_APP_ID: !Ref CognitoUserPoolAppId
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /login/line
+            Method: post
             RestApiId: !Ref RestApi
   MeArticlesDraftsCreate:
       Type: AWS::Serverless::Function
@@ -1660,6 +2046,22 @@ Resources:
           Type: Api
           Properties:
             Path: /me/articles/{article_id}/comments
+            Method: post
+            RestApiId: !Ref RestApi
+  MeArticlesCommentsReply:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_articles_comments_reply.zip
+      Environment:
+          Variables:
+            SALT_FOR_ARTICLE_ID: !Ref SaltForArticleId
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/articles/{article_id}/comments/reply
             Method: post
             RestApiId: !Ref RestApi
   MeArticlesCommentsLikesIndex:
@@ -1886,6 +2288,26 @@ Resources:
             Path: /me/unread_notification_managers
             Method: put
             RestApiId: !Ref RestApi
+  MeExternalProviderUserCreate:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_external_provider_user_create.zip
+      Environment:
+        Variables:
+          EXTERNAL_PROVIDER_LOGIN_COMMON_TEMP_PASSWORD: !Ref ExternalProviderLoginCommonTempPassword
+          EXTERNAL_PROVIDER_LOGIN_MARK: !Ref ExternalProviderLoginMark
+          LOGIN_SALT: !Ref LoginSalt
+          COGNITO_USER_POOL_ID: !Ref CognitoUserPoolId
+          COGNITO_USER_POOL_APP_ID: !Ref CognitoUserPoolAppId
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/external_provider_user
+            Method: post
+            RestApiId: !Ref RestApi
   TopicsIndex:
     Type: AWS::Serverless::Function
     Properties:
@@ -1899,15 +2321,21 @@ Resources:
             Path: /topics
             Method: get
             RestApiId: !Ref RestApi
+  CognitoTriggerPreAuthentication:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/cognito_trigger_preauthentication.zip
+      Environment:
+        Variables:
+          EXTERNAL_PROVIDER_LOGIN_MARK: !Ref ExternalProviderLoginMark
   ElasticSearchSearchArticles:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
       Role: !GetAtt LambdaRole.Arn
       CodeUri: ./deploy/search_articles.zip
-      Environment:
-        Variables:
-          ELASTIC_SEARCH_ENDPOINT: !Ref ElasticSearchEndpoint
       Events:
         Api:
           Type: Api
@@ -1921,9 +2349,6 @@ Resources:
       Handler: handler.lambda_handler
       Role: !GetAtt LambdaRole.Arn
       CodeUri: ./deploy/search_users.zip
-      Environment:
-        Variables:
-          ELASTIC_SEARCH_ENDPOINT: !Ref ElasticSearchEndpoint
       Events:
         Api:
           Type: Api
@@ -1931,19 +2356,29 @@ Resources:
             Path: /search/users
             Method: get
             RestApiId: !Ref RestApi
-  ElasticSearchSearchTag:
+  ElasticSearchSearchTags:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
       Role: !GetAtt LambdaRole.Arn
       CodeUri: ./deploy/search_tags.zip
-      Environment:
-        Variables:
-          ELASTIC_SEARCH_ENDPOINT: !Ref ElasticSearchEndpoint
       Events:
         Api:
           Type: Api
           Properties:
             Path: /search/tags
             Method: get
+            RestApiId: !Ref RestApi
+  MeUsersFraudCreate:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_users_fraud_create.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/users/{user_id}/fraud
+            Method: post
             RestApiId: !Ref RestApi

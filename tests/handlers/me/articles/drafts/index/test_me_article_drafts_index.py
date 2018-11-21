@@ -66,7 +66,9 @@ class TestMeArticlesDraftsIndex(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'test_user_id'
+                        'cognito:username': 'test_user_id',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
@@ -102,7 +104,9 @@ class TestMeArticlesDraftsIndex(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'test_user_id'
+                        'cognito:username': 'test_user_id',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
@@ -131,7 +135,9 @@ class TestMeArticlesDraftsIndex(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'test_user_id'
+                        'cognito:username': 'test_user_id',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
@@ -168,7 +174,9 @@ class TestMeArticlesDraftsIndex(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'test_user_id'
+                        'cognito:username': 'test_user_id',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
@@ -202,7 +210,9 @@ class TestMeArticlesDraftsIndex(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'public_test_user'
+                        'cognito:username': 'public_test_user',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
@@ -228,7 +238,9 @@ class TestMeArticlesDraftsIndex(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'not_exists_user_id'
+                        'cognito:username': 'not_exists_user_id',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
@@ -245,7 +257,9 @@ class TestMeArticlesDraftsIndex(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'test_user_id'
+                        'cognito:username': 'test_user_id',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }

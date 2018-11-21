@@ -110,6 +110,7 @@ create_index_list = []
 articles_setting = {
     "settings": {
         "index": {
+            "max_result_window": "1000000",
             "number_of_replicas": "1"
         },
         "analysis": {
@@ -155,6 +156,31 @@ users_setting = {
                 "default": {
                     "tokenizer": "keyword"
                 }
+            },
+            "normalizer": {
+                "lowcase": {
+                    "type": "custom",
+                    "char_filter": [],
+                    "filter": ["lowercase"]
+                }
+            }
+        }
+    },
+    "mappings": {
+        "user": {
+            "properties": {
+                "user_id": {
+                    "type": "keyword",
+                    "copy_to": "search_name"
+                },
+                "user_display_name": {
+                    "type": "keyword",
+                    "copy_to": "search_name"
+                },
+                "search_name": {
+                    "type": "keyword",
+                    "normalizer": "lowcase"
+                }
             }
         }
     }
@@ -170,6 +196,23 @@ tag_settings = {
                     'char_filter': [],
                     'filter': ['lowercase']
                 }
+            },
+            'filter': {
+                'autocomplete_filter': {
+                    'type': 'edge_ngram',
+                    'min_gram': 1,
+                    'max_gram': 20
+                }
+            },
+            'analyzer': {
+                'autocomplete': {
+                    'type': 'custom',
+                    'tokenizer': 'keyword',
+                    'filter': [
+                        'lowercase',
+                        'autocomplete_filter'
+                    ]
+                }
             }
         }
     },
@@ -179,6 +222,10 @@ tag_settings = {
                 'name': {
                     'type': 'keyword',
                     'normalizer': 'lowercase_normalizer'
+                },
+                'name_with_analyzer': {
+                    'type': 'text',
+                    'analyzer': 'autocomplete'
                 },
                 'created_at': {
                     'type': 'integer'

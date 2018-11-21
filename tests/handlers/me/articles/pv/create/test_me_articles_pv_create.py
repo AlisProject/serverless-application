@@ -84,7 +84,9 @@ class TestMeArticlesPvCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'test04'
+                        'cognito:username': 'test04',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
@@ -127,7 +129,9 @@ class TestMeArticlesPvCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'test04'
+                        'cognito:username': 'test04',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }
@@ -152,7 +156,9 @@ class TestMeArticlesPvCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'test05'
+                        'cognito:username': 'test05',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
                     }
                 }
             }

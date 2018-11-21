@@ -4,6 +4,7 @@ import settings
 from lambda_base import LambdaBase
 from jsonschema import validate
 from db_util import DBUtil
+from user_util import UserUtil
 
 
 class MeArticlesPublicUnpublish(LambdaBase):
@@ -17,6 +18,7 @@ class MeArticlesPublicUnpublish(LambdaBase):
         }
 
     def validate_params(self):
+        UserUtil.verified_phone_and_email(self.event)
         validate(self.params, self.get_schema())
 
         DBUtil.validate_article_existence(

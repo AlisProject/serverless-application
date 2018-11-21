@@ -63,6 +63,15 @@ class DBUtil:
         return True
 
     @staticmethod
+    def validate_parent_comment_existence(dynamodb, comment_id):
+        table = dynamodb.Table(os.environ['COMMENT_TABLE_NAME'])
+        comment = table.get_item(Key={'comment_id': comment_id}).get('Item')
+
+        if comment is None or comment.get('parent_id'):
+            raise RecordNotFoundError('Record Not Found')
+        return True
+
+    @staticmethod
     def get_validated_comment(dynamodb, comment_id):
         table = dynamodb.Table(os.environ['COMMENT_TABLE_NAME'])
         comment = table.get_item(Key={'comment_id': comment_id}).get('Item')
@@ -103,4 +112,24 @@ class DBUtil:
 
         if topic_name not in [topic['name'] for topic in topics]:
             raise ValidationError('Bad Request: Invalid topic')
+        return True
+
+    @staticmethod
+    def validate_user_existence_in_thread(dynamodb, replyed_user_id, parent_comment_id):
+
+        comment_table = dynamodb.Table(os.environ['COMMENT_TABLE_NAME'])
+
+        query_params = {
+            'IndexName': 'parent_id-sort_key-index',
+            'KeyConditionExpression': Key('parent_id').eq(parent_comment_id)
+        }
+
+        thread_comments = comment_table.query(**query_params)['Items']
+        thread_user_ids = [comment['user_id'] for comment in thread_comments]
+        parent_comment = comment_table.get_item(Key={'comment_id': parent_comment_id})['Item']
+
+        if replyed_user_id not in thread_user_ids + [parent_comment['user_id']]:
+            raise ValidationError("Bad Request: {replyed_user_id} doesn't exist in thread"
+                                  .format(replyed_user_id=replyed_user_id))
+
         return True
