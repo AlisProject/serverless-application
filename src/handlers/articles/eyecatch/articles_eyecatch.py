@@ -7,10 +7,7 @@ from lambda_base import LambdaBase
 
 class ArticlesEyecatch(LambdaBase):
     def get_schema(self):
-        return {
-            'type': 'object',
-            'properties': {}
-        }
+        pass
 
     def validate_params(self):
         pass
