@@ -522,6 +522,24 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+          /articles/eyecatch:
+            get:
+              description: '人気記事一覧情報を取得'
+              responses:
+                '200':
+                  description: 'アイキャッチ記事一覧'
+                  schema:
+                    type: array
+                    items:
+                      $ref: '#/definitions/ArticleInfo'
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ArticlesEyecatch.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
           /articles/{article_id}:
             get:
               description: "指定されたarticle_idの記事情報を取得"
@@ -1714,6 +1732,19 @@ Resources:
             Path: /articles/popular
             Method: get
             RestApiId: !Ref RestApi
+  ArticlesEyecatch:
+    Type: AWS::Serverless::Function
+      Properties:
+        Handler: handler.lambda_handler
+        Role: !GetAtt LambdaRole.Arn
+        CodeUri: ./deploy/articles_recommended.zip
+        Events:
+          Api:
+            Type: Api
+            Properties:
+              Path: /articles/eyecatch
+              Method: get
+              RestApiId: !Ref RestApi
   ArticlesShow:
     Type: AWS::Serverless::Function
     Properties:
