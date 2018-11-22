@@ -41,6 +41,8 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   UserFraudTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
+  ScreenedArticleTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
   ElasticSearchEndpoint:
     Type: 'AWS::SSM::Parameter::Value<String>'
   TopicTableName:
@@ -113,6 +115,7 @@ Globals:
         COMMENT_LIKED_USER_TABLE_NAME: !Ref CommentLikedUserTableName
         DELETED_COMMENT_TABLE_NAME: !Ref DeletedCommentTableName
         USER_FRAUD_TABLE_NAME: !Ref UserFraudTableName
+        SCREENED_ARTICLE_TABLE_NAME: !Ref ScreenedArticleTableName
         TOPIC_TABLE_NAME: !Ref TopicTableName
         TAG_TABLE_NAME: !Ref TagTableName
         TIP_TABLE_NAME: !Ref TipTableName
