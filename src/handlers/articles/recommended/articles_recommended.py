@@ -28,7 +28,9 @@ class ArticlesRecommended(LambdaBase):
         recommended_article_ids = self.__get_screened_article_ids('recommended')
 
         excluded_article_ids = self.__get_screened_article_ids('eyecatch') + self.__get_screened_article_ids('blacklisted')
-        recommended_article_ids = [article_id for article_id in recommended_article_ids if article_id not in excluded_article_ids]
+        recommended_article_ids = [
+            article_id for article_id in recommended_article_ids if article_id not in excluded_article_ids
+        ]
 
         articles = self.__get_public_articles_from_ids(recommended_article_ids)
 
@@ -69,5 +71,3 @@ class ArticlesRecommended(LambdaBase):
             return []
 
         return screened_article['articles']
-
-
