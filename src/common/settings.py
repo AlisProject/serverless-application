@@ -249,3 +249,4 @@ LINE_REQUEST_SCOPE = '&scope=openid%20profile%20email'
 LINE_LOGIN_REQUEST_SCOPE = '&scope=openid%20profile'
 PASSWORD_LENGTH = 32
 AES_IV_BYTES = 16
+DYNAMO_BATCH_GET_MAX = 100

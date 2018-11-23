@@ -1,5 +1,6 @@
 import json
 import os
+import time
 from unittest import TestCase
 
 from tests_util import TestsUtil
@@ -156,7 +157,7 @@ class TestArticlesRecommended(TestCase):
         recommended_articles = []
 
         # ArticleInfoの登録
-        for i in range(20):
+        for i in range(200):
             article = {
                 'article_id': 'default000' + str(i),
                 'user_id': 'matsumatsu20',

@@ -1,4 +1,5 @@
 import json
+import math
 import os
 
 from jsonschema import validate
@@ -50,19 +51,6 @@ class ArticlesRecommended(LambdaBase):
 
         return items[start:end]
 
-    def __get_public_articles_from_ids(self, target_article_ids):
-        article_info_table = self.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
-
-        result = []
-
-        for article_id in target_article_ids:
-            article_info = article_info_table.get_item(Key={'article_id': article_id}).get('Item')
-
-            if article_info and article_info['status'] == 'public':
-                result.append(article_info)
-
-        return result
-
     def __get_screened_article_ids(self, article_type):
         screened_article_table = self.dynamodb.Table(os.environ['SCREENED_ARTICLE_TABLE_NAME'])
         screened_article = screened_article_table.get_item(Key={'article_type': article_type}).get('Item')
@@ -71,3 +59,40 @@ class ArticlesRecommended(LambdaBase):
             return []
 
         return screened_article['articles']
+
+    def __get_public_articles_from_ids(self, target_article_ids):
+        if not target_article_ids:
+            return []
+
+        # batch_get_itemが100件よりも多い件数を扱うとエラーになるため100件ごと区切って処理する
+        split_num = math.floor(len(target_article_ids) / settings.DYNAMO_BATCH_GET_MAX)
+        if not len(target_article_ids) % settings.DYNAMO_BATCH_GET_MAX == 0:
+            split_num += 1
+
+        split_article_ids = [
+            target_article_ids[index*settings.DYNAMO_BATCH_GET_MAX:(index+1)*settings.DYNAMO_BATCH_GET_MAX]
+            for index
+            in range(split_num)
+        ]
+
+        public_articles = []
+
+        for article_ids in split_article_ids:
+            response = self.dynamodb.batch_get_item(
+                RequestItems={
+                    os.environ['ARTICLE_INFO_TABLE_NAME']: {
+                        'Keys': [{'article_id': article_id} for article_id in article_ids]
+                    }
+                }
+            )
+            articles = response['Responses']['ArticleInfo']
+            public_articles.extend([article for article in articles if article['status'] == 'public'])
+
+        # dynamodbのbatch_get_itemsは順序が保証されないため、target_article_idsを駆動表にして順序を並べなおす
+        articles = {}
+        for article in public_articles:
+            articles[article['article_id']] = article
+
+        result = [articles[article_id] for article_id in target_article_ids if articles.get(article_id)]
+
+        return result
