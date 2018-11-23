@@ -1,6 +1,5 @@
 import json
 import os
-import time
 from unittest import TestCase
 
 from tests_util import TestsUtil
