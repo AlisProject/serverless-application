@@ -64,6 +64,8 @@ class ArticlesRecommended(LambdaBase):
         if not target_article_ids:
             return []
 
+        article_info_table_name = os.environ['ARTICLE_INFO_TABLE_NAME']
+
         # batch_get_itemが100件よりも多い件数を扱うとエラーになるため100件ごと区切って処理する
         split_num = math.floor(len(target_article_ids) / settings.DYNAMO_BATCH_GET_MAX)
         if not len(target_article_ids) % settings.DYNAMO_BATCH_GET_MAX == 0:
@@ -80,12 +82,12 @@ class ArticlesRecommended(LambdaBase):
         for article_ids in split_article_ids:
             response = self.dynamodb.batch_get_item(
                 RequestItems={
-                    os.environ['ARTICLE_INFO_TABLE_NAME']: {
+                    article_info_table_name: {
                         'Keys': [{'article_id': article_id} for article_id in article_ids]
                     }
                 }
             )
-            articles = response['Responses']['ArticleInfo']
+            articles = response['Responses'][article_info_table_name]
             public_articles.extend([article for article in articles if article['status'] == 'public'])
 
         # dynamodbのbatch_get_itemsは順序が保証されないため、target_article_idsを駆動表にして順序を並べなおす
