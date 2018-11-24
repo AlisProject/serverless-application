@@ -67,9 +67,7 @@ class ArticlesRecommended(LambdaBase):
         article_info_table_name = os.environ['ARTICLE_INFO_TABLE_NAME']
 
         # batch_get_itemが100件よりも多い件数を扱うとエラーになるため100件ごと区切って処理する
-        split_num = math.floor(len(target_article_ids) / settings.DYNAMO_BATCH_GET_MAX)
-        if not len(target_article_ids) % settings.DYNAMO_BATCH_GET_MAX == 0:
-            split_num += 1
+        split_num = math.ceil(len(target_article_ids) / settings.DYNAMO_BATCH_GET_MAX)
 
         split_article_ids = [
             target_article_ids[index*settings.DYNAMO_BATCH_GET_MAX:(index+1)*settings.DYNAMO_BATCH_GET_MAX]
