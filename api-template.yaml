@@ -342,15 +342,15 @@ Resources:
                 type: 'string'
           DistributedTokens:
             type: object
-              properties:
-                article:
-                  type: integer
-                like:
-                  type: integer
-                tip:
-                  type: integer
-                bonus:
-                  type: integer
+            properties:
+              article:
+                type: integer
+              like:
+                type: integer
+              tip:
+                type: integer
+              bonus:
+                type: integer
         paths:
           /search/articles:
             get:
