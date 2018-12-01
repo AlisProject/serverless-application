@@ -340,6 +340,17 @@ Resources:
                 type: 'string'
               free_text:
                 type: 'string'
+          DistributedTokens:
+            type: object
+              properties:
+                article:
+                  type: integer
+                like:
+                  type: integer
+                tip:
+                  type: integer
+                bonus:
+                  type: integer
         paths:
           /search/articles:
             get:
@@ -1555,6 +1566,24 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+          /me/wallet/distributed_tokens:
+            get:
+              description: 'ログインユーザのトークン付与情報を取得'
+              responses:
+                '200':
+                  description: 'ログインユーザのトークン付与情報'
+                  schema:
+                    $ref: '#/definitions/DistributedTokens'
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeWalletDistributedTokensShow.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
           /me/wallet/tip:
             post:
               description: '投げ銭を行う'
@@ -2309,6 +2338,19 @@ Resources:
           Type: Api
           Properties:
             Path: /me/wallet/balance
+            Method: get
+            RestApiId: !Ref RestApi
+  MeWalletDistributedTokensShow:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_wallet_distributed_tokens_show.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/wallet/distributed_tokens
             Method: get
             RestApiId: !Ref RestApi
   MeWalletTip:
