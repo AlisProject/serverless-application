@@ -54,6 +54,7 @@ aws cloudformation deploy \
     DeletedCommentTableName=${SSM_PARAMS_PREFIX}DeletedCommentTableName \
     UserFraudTableName=${SSM_PARAMS_PREFIX}UserFraudTableName \
     ScreenedArticleTableName=${SSM_PARAMS_PREFIX}ScreenedArticleTableName \
+    TokenDistributionTableName=${SSM_PARAMS_PREFIX}TokenDistributionTableName \
     DistS3BucketName=${SSM_PARAMS_PREFIX}DistS3BucketName \
     ApiLambdaRole=${SSM_PARAMS_PREFIX}ApiLambdaRole \
     ElasticSearchEndpoint=${SSM_PARAMS_PREFIX}ElasticSearchEndpoint \

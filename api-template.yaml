@@ -43,6 +43,8 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   ScreenedArticleTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
+  TokenDistributionTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
   ElasticSearchEndpoint:
     Type: 'AWS::SSM::Parameter::Value<String>'
   TopicTableName:
@@ -116,6 +118,7 @@ Globals:
         DELETED_COMMENT_TABLE_NAME: !Ref DeletedCommentTableName
         USER_FRAUD_TABLE_NAME: !Ref UserFraudTableName
         SCREENED_ARTICLE_TABLE_NAME: !Ref ScreenedArticleTableName
+        TOKEN_DISTRIBUTION_TABLE_NAME: !Ref TokenDistributionTableName
         TOPIC_TABLE_NAME: !Ref TopicTableName
         TAG_TABLE_NAME: !Ref TagTableName
         TIP_TABLE_NAME: !Ref TipTableName
