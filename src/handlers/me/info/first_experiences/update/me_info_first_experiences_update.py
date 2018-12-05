@@ -4,7 +4,6 @@ from jsonschema import validate
 
 import settings
 from lambda_base import LambdaBase
-from user_util import UserUtil
 
 
 class MeInfoFirstExperiencesUpdate(LambdaBase):
@@ -19,7 +18,6 @@ class MeInfoFirstExperiencesUpdate(LambdaBase):
         }
 
     def validate_params(self):
-        # UserUtil.verified_phone_and_email(self.event)
         validate(self.params, self.get_schema())
 
     def exec_main_proc(self):
