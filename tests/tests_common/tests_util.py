@@ -90,7 +90,8 @@ class TestsUtil:
             {'env_name': 'EXTERNAL_PROVIDER_USERS_TABLE_NAME', 'table_name': 'ExternalProviderUsers'},
             {'env_name': 'USER_FRAUD_TABLE_NAME', 'table_name': 'UserFraud'},
             {'env_name': 'SCREENED_ARTICLE_TABLE_NAME', 'table_name': 'ScreenedArticle'},
-            {'env_name': 'TOKEN_DISTRIBUTION_TABLE_NAME', 'table_name': 'TokenDistribution'}
+            {'env_name': 'TOKEN_DISTRIBUTION_TABLE_NAME', 'table_name': 'TokenDistribution'},
+            {'env_name': 'USER_FIRST_EXPERIENCE_TABLE_NAME', 'table_name': 'UserFirstExperience'},
         ]
         if os.environ.get('IS_DYNAMODB_ENDPOINT_OF_AWS') is not None:
             for table in cls.all_tables:

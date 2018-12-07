@@ -45,6 +45,8 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   TokenDistributionTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
+  UserFirstExperienceTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
   ElasticSearchEndpoint:
     Type: 'AWS::SSM::Parameter::Value<String>'
   TopicTableName:
@@ -119,6 +121,7 @@ Globals:
         USER_FRAUD_TABLE_NAME: !Ref UserFraudTableName
         SCREENED_ARTICLE_TABLE_NAME: !Ref ScreenedArticleTableName
         TOKEN_DISTRIBUTION_TABLE_NAME: !Ref TokenDistributionTableName
+        USER_FIRST_EXPERIENCE_TABLE_NAME: !Ref UserFirstExperienceTableName
         TOPIC_TABLE_NAME: !Ref TopicTableName
         TAG_TABLE_NAME: !Ref TagTableName
         TIP_TABLE_NAME: !Ref TipTableName
@@ -1415,6 +1418,34 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+          /me/info/first_experiences:
+            put:
+              description: 'ユーザーのALIS上での初体験を登録する'
+              parameters:
+              - name: 'user_first_experience'
+                in: 'body'
+                description: '登録するユーザーの体験情報'
+                required: true
+                schema:
+                  type: 'string'
+                  enum:
+                  - 'is_liked_article'
+                  - 'is_tipped_article'
+                  - 'is_got_token'
+                  - 'is_created_article'
+              responses:
+                '200':
+                  description: 'ユーザ情報更新成功'
+              security:
+              - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeInfoFirstExperiencesUpdate.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
           /users/{user_id}/articles/public:
             get:
               description: '指定されたユーザーの公開記事一覧情報を取得'
@@ -2265,6 +2296,19 @@ Resources:
               Path: /me/info/icon
               Method: post
               RestApiId: !Ref RestApi
+  MeInfoFirstExperiencesUpdate:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_info_first_experiences_update.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/info/first_experiences
+            Method: put
+            RestApiId: !Ref RestApi
   MeArticlesLikesShow:
     Type: AWS::Serverless::Function
     Properties:
