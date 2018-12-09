@@ -1347,6 +1347,49 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+          /me/articles/{article_id}/image_upload_url:
+            get:
+              description: '対象記事に画像データをアップロードできるURLを取得'
+              parameters:
+              - name: 'article_id'
+                description: '対象記事の指定するために使用'
+                in: 'path'
+                required: true
+                type: 'string'
+              - name: 'upload_image_size'
+                in: 'query'
+                description: '対象画像のサイズ(byte)'
+                required: true
+                type: 'integer'
+              - name: 'upload_image_extension'
+                in: 'query'
+                description: '対象画像の拡張子'
+                required: true
+                schema:
+                  type: 'string'
+                  enum:
+                  - 'gif'
+                  - 'jpg'
+                  - 'jpeg'
+                  - 'png'
+              responses:
+                '200':
+                  description: 'アップロード用のURL'
+                  schema:
+                    type: object
+                    properties:
+                      image_url:
+                        type: 'string'
+              security:
+              - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesImageUploadUrlShow.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
           /me/info:
             get:
               description: 'ログインユーザ情報を取得'
@@ -2283,6 +2326,19 @@ Resources:
               Path: /me/articles/{article_id}/images
               Method: post
               RestApiId: !Ref RestApi
+  MeArticlesImageUploadUrlShow:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_articles_image_upload_url_show.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/articles/{article_id}/image_upload_url
+            Method: get
+            RestApiId: !Ref RestApi
   MeInfoIconCreate:
       Type: AWS::Serverless::Function
       Properties:

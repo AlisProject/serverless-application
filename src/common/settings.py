@@ -55,6 +55,20 @@ parameters = {
         'type': 'string',
         'maxLength': 8388608
     },
+    'upload_image_size': {
+        'type': 'integer',
+        'minimum': 1,
+        'maximum': 10485760
+    },
+    'upload_image_extension': {
+        'type': 'string',
+        'enum': [
+            'gif',
+            'jpg',
+            'jpeg',
+            'png'
+        ]
+    },
     'eye_catch_url': {
         'type': 'string',
         'format': 'uri',
