@@ -13,3 +13,6 @@ tests/**/__pycache__
 
 # editor
 .idea
+
+# for mac os
+.DS_Store
