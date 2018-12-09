@@ -21,7 +21,7 @@ class MeArticlesImageUploadUrlShow(LambdaBase):
                 'upload_image_size': settings.parameters['upload_image_size'],
                 'upload_image_extension': settings.parameters['upload_image_extension']
             },
-            'required': ['article_id', 'upload_image_size']
+            'required': ['article_id', 'upload_image_size', 'upload_image_extension']
         }
 
     def validate_params(self):
