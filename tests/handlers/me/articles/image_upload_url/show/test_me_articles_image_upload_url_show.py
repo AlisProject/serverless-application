@@ -251,13 +251,13 @@ class TestMeArticlesImageUploadUrlShow(TestCase):
 
         self.assert_bad_request(params)
 
-    def test_validation_invalid_upload_image_required(self):
+    def test_validation_upload_image_extension_required(self):
         params = {
             'pathParameters': {
                 'article_id': self.article_info_table_items[0]['article_id']
             },
             'queryStringParameters': {
-                'upload_image_extension': 'py'
+                'upload_image_size': '100'
             },
             'requestContext': {
                 'authorizer': {
