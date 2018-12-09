@@ -50,7 +50,7 @@ class TestMeArticlesImageUploadUrlShow(TestCase):
                 'article_id': article_id
             },
             'queryStringParameters': {
-                'upload_image_size': 100,
+                'upload_image_size': '100',
                 'upload_image_extension': 'jpg'
             },
             'requestContext': {
@@ -85,7 +85,7 @@ class TestMeArticlesImageUploadUrlShow(TestCase):
                 'article_id': self.article_info_table_items[0]['article_id']
             },
             'queryStringParameters': {
-                'upload_image_size': 100,
+                'upload_image_size': '100',
                 'upload_image_extension': 'jpg'
             },
             'requestContext': {
@@ -115,7 +115,7 @@ class TestMeArticlesImageUploadUrlShow(TestCase):
                 'article_id': self.article_info_table_items[0]['article_id']
             },
             'queryStringParameters': {
-                'upload_image_size': 100,
+                'upload_image_size': '100',
                 'upload_image_extension': 'jpg'
             },
             'requestContext': {
@@ -148,7 +148,7 @@ class TestMeArticlesImageUploadUrlShow(TestCase):
                 'article_id': 'A' * 13
             },
             'queryStringParameters': {
-                'upload_image_size': 100,
+                'upload_image_size': '100',
                 'upload_image_extension': 'jpg'
             },
             'requestContext': {
@@ -170,7 +170,7 @@ class TestMeArticlesImageUploadUrlShow(TestCase):
                 'article_id': 'A' * 11
             },
             'queryStringParameters': {
-                'upload_image_size': 100,
+                'upload_image_size': '100',
                 'upload_image_extension': 'jpg'
             },
             'requestContext': {
@@ -213,7 +213,7 @@ class TestMeArticlesImageUploadUrlShow(TestCase):
                 'article_id': self.article_info_table_items[0]['article_id']
             },
             'queryStringParameters': {
-                'upload_image_size': 0,
+                'upload_image_size': '0',
                 'upload_image_extension': 'jpg'
             },
             'requestContext': {
@@ -235,7 +235,7 @@ class TestMeArticlesImageUploadUrlShow(TestCase):
                 'article_id': self.article_info_table_items[0]['article_id']
             },
             'queryStringParameters': {
-                'upload_image_size': 10485761,
+                'upload_image_size': '10485761',
                 'upload_image_extension': 'jpg'
             },
             'requestContext': {
@@ -278,7 +278,7 @@ class TestMeArticlesImageUploadUrlShow(TestCase):
                 'article_id': self.article_info_table_items[0]['article_id']
             },
             'queryStringParameters': {
-                'upload_image_size': 100,
+                'upload_image_size': '100',
                 'upload_image_extension': 'py'
             },
             'requestContext': {
