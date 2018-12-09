@@ -8,6 +8,7 @@ from jsonschema import validate
 import settings
 from db_util import DBUtil
 from lambda_base import LambdaBase
+from parameter_util import ParameterUtil
 from user_util import UserUtil
 
 
@@ -24,6 +25,7 @@ class MeArticlesImageUploadUrlShow(LambdaBase):
         }
 
     def validate_params(self):
+        ParameterUtil.cast_parameter_to_int(self.params, self.get_schema())
         UserUtil.verified_phone_and_email(self.event)
         validate(self.params, self.get_schema())
         DBUtil.validate_article_existence(
