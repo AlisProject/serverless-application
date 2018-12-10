@@ -35,7 +35,7 @@ class MeArticlesImageUploadUrlShow(LambdaBase):
         )
 
     def exec_main_proc(self):
-        s3_cli = boto3.client('s3')
+        s3_cli = boto3.client('s3', region_name='ap-northeast-1')
         bucket = os.environ['DIST_S3_BUCKET_NAME']
 
         user_id = self.event['requestContext']['authorizer']['claims']['cognito:username']
