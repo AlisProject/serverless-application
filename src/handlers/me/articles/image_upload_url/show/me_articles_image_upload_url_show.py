@@ -3,6 +3,7 @@ import os
 import uuid
 
 import boto3
+from botocore.config import Config
 from jsonschema import validate
 
 import settings
@@ -35,7 +36,7 @@ class MeArticlesImageUploadUrlShow(LambdaBase):
         )
 
     def exec_main_proc(self):
-        s3_cli = boto3.client('s3', region_name='ap-northeast-1')
+        s3_cli = boto3.client('s3', config=Config(signature_version='s3v4'), region_name='ap-northeast-1')
         bucket = os.environ['DIST_S3_BUCKET_NAME']
 
         user_id = self.event['requestContext']['authorizer']['claims']['cognito:username']
@@ -44,16 +45,14 @@ class MeArticlesImageUploadUrlShow(LambdaBase):
 
         content_length = self.params['upload_image_size']
 
-        post = s3_cli.generate_presigned_post(
-            Bucket=bucket,
-            Key=key,
+        url = s3_cli.generate_presigned_url(
+            ClientMethod='put_object',
+            Params={'Bucket': bucket, 'Key': key, 'ContentLength': content_length},
             ExpiresIn=300,
-            Conditions=[
-                ["content-length-range", content_length, content_length]
-            ]
+            HttpMethod='PUT'
         )
 
         return {
             'statusCode': 200,
-            'body': json.dumps(post)
+            'body': json.dumps({'url': url})
         }

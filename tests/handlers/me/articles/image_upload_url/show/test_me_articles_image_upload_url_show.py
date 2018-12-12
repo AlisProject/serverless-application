@@ -65,19 +65,20 @@ class TestMeArticlesImageUploadUrlShow(TestCase):
         }
         response = MeArticlesImageUploadUrlShow(params, {}, dynamodb=self.dynamodb).main()
 
-        self.assertEqual(response['statusCode'], 200)
-        post_param = json.loads(response['body'])
-        self.assertEqual(post_param['url'], 'https://test-bucket.s3.amazonaws.com/')
-        self.assertEqual(
-            post_param['fields']['key'],
-            '{s3_path}{user_id}/{article_id}/uuid.jpg'.format(
-                s3_path=settings.S3_ARTICLES_IMAGES_PATH, user_id=user_id, article_id=article_id
-            )
-        )
+        expected_url = 'https://test-bucket.s3.amazonaws.com/'
+        expected_path = '{s3_path}{user_id}/{article_id}/uuid.jpg'.format(
+            s3_path=settings.S3_ARTICLES_IMAGES_PATH, user_id=user_id, article_id=article_id)
 
-        expected_exists_keys = ['AWSAccessKeyId', 'policy', 'signature']
+        self.assertEqual(response['statusCode'], 200)
+
+        post_param = json.loads(response['body'])
+        actual_path = post_param['url'][:post_param['url'].find('?')]
+
+        self.assertEqual(actual_path, expected_url + expected_path)
+
+        expected_exists_keys = ['X-Amz-Algorithm', 'X-Amz-Credential', 'X-Amz-Signature', 'X-Amz-Expires', 'X-Amz-Date']
         for key in expected_exists_keys:
-            self.assertTrue(post_param['fields'].get(key))
+            self.assertNotEqual(post_param['url'].find(key), -1)
 
     def test_call_validate_article_existence(self):
         params = {
