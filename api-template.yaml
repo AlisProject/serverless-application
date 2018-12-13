@@ -1378,7 +1378,7 @@ Resources:
                   schema:
                     type: object
                     properties:
-                      image_url:
+                      url:
                         type: 'string'
               security:
               - cognitoUserPool: []
