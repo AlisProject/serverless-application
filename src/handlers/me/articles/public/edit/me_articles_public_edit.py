@@ -36,10 +36,11 @@ class MeArticlesPublicEdit(LambdaBase):
 
         article_content_edit = article_content_edit_table.get_item(Key={'article_id': self.params['article_id']}).get('Item')
 
-        return_value = {}
-
         if article_content_edit:
-            return_value = article_content_edit
+            article_info_table = self.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
+            article_info = article_info_table.get_item(Key={'article_id': self.params['article_id']}).get('Item')
+            article_info.update(article_content_edit)
+            return_value = article_info
         else:
             article_info_table = self.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
             article_content_table = self.dynamodb.Table(os.environ['ARTICLE_CONTENT_TABLE_NAME'])
