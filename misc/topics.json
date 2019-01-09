@@ -1,13 +1,31 @@
 {
   "Topic": [
     {
+      "DeleteRequest": {
+        "Key": {
+          "name": {
+            "S": "illustration-comic"
+          }
+        }
+      }
+    },
+    {
+      "DeleteRequest": {
+        "Key": {
+          "name": {
+            "S": "gosyuin"
+          }
+        }
+      }
+    },
+    {
       "PutRequest": {
         "Item": {
           "name": {
-            "S": "crypto"
+            "S": "technology"
           },
           "display_name": {
-            "S": "クリプト"
+            "S": "テクノロジー"
           },
           "index_hash_key": {
             "S": "topic"
@@ -22,10 +40,10 @@
       "PutRequest": {
         "Item": {
           "name": {
-            "S": "illustration-comic"
+            "S": "comic-animation"
           },
           "display_name": {
-            "S": "イラスト・マンガ"
+            "S": "マンガ・アニメ"
           },
           "index_hash_key": {
             "S": "topic"
@@ -58,10 +76,10 @@
       "PutRequest": {
         "Item": {
           "name": {
-            "S": "gourmet"
+            "S": "crypto"
           },
           "display_name": {
-            "S": "グルメ"
+            "S": "クリプト"
           },
           "index_hash_key": {
             "S": "topic"
@@ -76,16 +94,88 @@
       "PutRequest": {
         "Item": {
           "name": {
-            "S": "gosyuin"
+            "S": "gourmet"
           },
           "display_name": {
-            "S": "御朱印"
+            "S": "グルメ"
           },
           "index_hash_key": {
             "S": "topic"
           },
           "order": {
             "N": "5"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "name": {
+            "S": "travel"
+          },
+          "display_name": {
+            "S": "トラベル"
+          },
+          "index_hash_key": {
+            "S": "topic"
+          },
+          "order": {
+            "N": "6"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "name": {
+            "S": "sport"
+          },
+          "display_name": {
+            "S": "スポーツ"
+          },
+          "index_hash_key": {
+            "S": "topic"
+          },
+          "order": {
+            "N": "7"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "name": {
+            "S": "entertainment"
+          },
+          "display_name": {
+            "S": "おもしろ"
+          },
+          "index_hash_key": {
+            "S": "topic"
+          },
+          "order": {
+            "N": "8"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "name": {
+            "S": "others"
+          },
+          "display_name": {
+            "S": "他カテゴリ"
+          },
+          "index_hash_key": {
+            "S": "topic"
+          },
+          "order": {
+            "N": "9"
           }
         }
       }
