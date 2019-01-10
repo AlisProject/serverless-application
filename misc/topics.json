@@ -1,24 +1,6 @@
 {
   "Topic": [
     {
-      "DeleteRequest": {
-        "Key": {
-          "name": {
-            "S": "illustration-comic"
-          }
-        }
-      }
-    },
-    {
-      "DeleteRequest": {
-        "Key": {
-          "name": {
-            "S": "gosyuin"
-          }
-        }
-      }
-    },
-    {
       "PutRequest": {
         "Item": {
           "name": {
@@ -31,7 +13,7 @@
             "S": "topic"
           },
           "order": {
-            "N": "1"
+            "N": "3"
           }
         }
       }
@@ -67,7 +49,7 @@
             "S": "topic"
           },
           "order": {
-            "N": "3"
+            "N": "1"
           }
         }
       }
