@@ -20,6 +20,7 @@ class NotificationUtil:
             'notification_id': notification_id,
             'user_id': target_user_id,
             'article_id': article_info['article_id'],
+            'article_user_id': article_info['user_id'],
             'article_title': article_info['title'],
             'acted_user_id': comment['user_id'],
             'sort_key': TimeUtil.generate_sort_key(),

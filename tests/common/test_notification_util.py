@@ -33,7 +33,7 @@ class TestNotificationUtil(TestCase):
     def tearDown(self):
         TestsUtil.delete_all_tables(self.dynamodb)
 
-    def notify_article_comment_with_invalid_type(self):
+    def test_notify_article_comment_with_invalid_type(self):
         comment = {
             'comment_id': 'comment_id',
             'user_id': 'comment_user01'
@@ -52,7 +52,7 @@ class TestNotificationUtil(TestCase):
 
     @patch('time_util.TimeUtil.generate_sort_key', MagicMock(return_value=1520150552000003))
     @patch('time.time', MagicMock(return_value=1520150552.000003))
-    def notify_article_comment(self):
+    def test_notify_article_comment(self):
         comment = {
             'comment_id': 'comment_id',
             'user_id': 'comment_user01'
@@ -80,6 +80,7 @@ class TestNotificationUtil(TestCase):
                 'user_id': target_user_id,
                 'article_id': article_info['article_id'],
                 'article_title': article_info['title'],
+                'article_user_id': article_info['user_id'],
                 'acted_user_id': comment['user_id'],
                 'sort_key': 1520150552000003,
                 'type': comment_type,
