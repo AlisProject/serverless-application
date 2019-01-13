@@ -4,27 +4,25 @@ import os
 
 import requests
 
-from lambda_base import LambdaBase
+import settings
 
 
-class Authorizer(LambdaBase):
+class Authorizer:
     AUTHLETE_INTROSPECTION_ENDPOINT = 'https://api.authlete.com/api/auth/introspection'
 
-    def get_schema(self):
-        pass
+    def __init__(self, event, context):
+        self.event = event
+        self.context = context
 
-    def validate_params(self):
-        pass
-
-    def exec_main_proc(self):
-        http_method, resource_path = self.__extract_method_and_path(self.params['methodArn'])
+    def main(self):
+        http_method, resource_path = self.__extract_method_and_path(self.event['methodArn'])
         scopes = self.__get_required_scopes(http_method, resource_path)
         response = self.__introspect(scopes)
 
         if response['action'] == 'OK':
-            return self.__generate_policy(response['subject'], 'Allow', self.params['methodArn'])
+            return self.__generate_policy(response['subject'], 'Allow', self.event['methodArn'])
         elif response['action'] in ['BAD_REQUEST', 'FORBIDDEN']:
-            return self.__generate_policy(response['subject'], 'Deny', self.params['methodArn'])
+            return self.__generate_policy(response['subject'], 'Deny', self.event['methodArn'])
         elif response['action'] == 'UNAUTHORIZED':
             raise Exception('Unauthorized')
         else:
@@ -32,11 +30,15 @@ class Authorizer(LambdaBase):
             raise Exception('Internal Server Error')
 
     def __introspect(self, scopes):
-        response = requests.post(
-            self.AUTHLETE_INTROSPECTION_ENDPOINT,
-            data={'token': self.params["authorizationToken"], 'scopes': scopes},
-            auth=(os.environ['AUTHLETE_API_KEY'], os.environ['AUTHLETE_API_SECRET'])
-        )
+        try:
+            response = requests.post(
+                self.AUTHLETE_INTROSPECTION_ENDPOINT,
+                data={'token': self.event["authorizationToken"], 'scopes': scopes},
+                auth=(os.environ['AUTHLETE_API_KEY'], os.environ['AUTHLETE_API_SECRET'])
+            )
+        except requests.exceptions.RequestException as e:
+            logging.info(e)
+            raise Exception('Internal Server Error(RequestException)')
 
         return json.loads(response.text)
 
@@ -55,9 +57,16 @@ class Authorizer(LambdaBase):
             }
         }
 
-    # TODO: 後追いで実装する
+    # TODO: 詳細が決まり次第ロジックは変更する
     def __get_required_scopes(self, http_method, resource_path):
-        return []
+        # 全てのAPIcallにはread権限が必要
+        scopes = [settings.AUTHLETE_SCOPE_READ]
+
+        # GET以外のHTTPメソッドの場合はwriteスコープも必要
+        if http_method != 'GET':
+            scopes.append(settings.AUTHLETE_SCOPE_WRITE)
+
+        return scopes
 
     def __extract_method_and_path(self, arn):
         arn_elements = arn.split(':', maxsplit=5)
@@ -65,4 +74,3 @@ class Authorizer(LambdaBase):
         http_method = resource_elements[2]
         resource_path = resource_elements[3]
         return http_method, resource_path
-
