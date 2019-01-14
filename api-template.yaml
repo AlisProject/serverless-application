@@ -193,7 +193,7 @@ Resources:
                   - lambda:InvokeAsync
                   - lambda:InvokeFunction
                 Resource:
-                  Fn::Sub: ${CustomAuthorizerFunction.Arn}
+                  Fn::Sub: ${Authorizer.Arn}
   Authorizer:
     Type: AWS::Serverless::Function
     Properties:

@@ -1,161 +1,12 @@
 swagger: "2.0"
 info:
-  title: !Ref "AWS::StackName"
+  title:
+    Ref: "AWS::StackName"
   version: 1.0.0
 basePath: /
 schemes:
   - https
 definitions:
-  ArticleInfo:
-    type: object
-    properties:
-      article_id:
-        type: string
-      user_id:
-        type: string
-      title:
-        type: string
-      overview:
-        type: string
-      eye_catch_url:
-        type: string
-      created_at:
-        type: integer
-  ArticleContent:
-    type: object
-    properties:
-      article_id:
-        type: string
-      user_id:
-        type: string
-      title:
-        type: string
-      overview:
-        type: string
-      eye_catch_url:
-        type: string
-      body:
-        type: string
-      created_at:
-        type: integer
-  MeArticlesDraftsCreate:
-    type: object
-    properties:
-      title:
-        type: string
-      body:
-        type: string
-      eye_catch_url:
-        type: string
-      overview:
-        type: string
-  MeInfoUpdate:
-    type: object
-    properties:
-      user_display_name:
-        type: string
-      self_introduction:
-        type: string
-  MeInfoIcon:
-    type: object
-    properties:
-      icon_image:
-        type: string
-  ArticleImage:
-    type: object
-    properties:
-      article_image:
-        type: string
-  UserInfo:
-    type: object
-    properties:
-      user_id:
-        type: string
-      user_display_name:
-        type: string
-      icon_image_url:
-        type: string
-      self_introduction:
-        type: string
-  UpdateArticle:
-    type: object
-    properties:
-      title:
-        type: string
-      body:
-        type: string
-      eye_catch_url:
-        type: string
-      overview:
-        type: string
-  MeWalletBalance:
-    type: object
-    properties:
-      private_eth_address:
-        type: string
-  MeWalletTip:
-    type: object
-    properties:
-      article_id:
-        type: string
-      tip_value:
-        type: string
-  MeExternalProviderUserCreate:
-    type: object
-    properties:
-      user_id:
-        type: string
-  SignUpLineAuthorizeUrl:
-    type: object
-    properties:
-      callback_url:
-        type: string
-  LoginLineAuthorizeUrl:
-    type: object
-    properties:
-      callback_url:
-        type: string
-  LoginLineAuthorizeRequest:
-    type: object
-    properties:
-      accessToken:
-        type: string
-      lastAuthUser:
-        type: string
-      idToken:
-        type: string
-      refreshToken:
-        type: string
-      hasUserId:
-        type: boolean
-  Notification:
-    type: object
-    properties:
-      user_id:
-        type: string
-      sort_key:
-        type: integer
-      type:
-        type: string
-      acted_user_id:
-        type: string
-      created_at:
-        type: integer
-  Comment:
-    type: object
-    properties:
-      comment_id:
-        type: string
-      article_id:
-        type: string
-      sort_key:
-        type: integer
-      user_id:
-        type: string
-      text:
-        type: string
-      created_at:
-        type: integer
   Topic:
     type: object
     properties:
@@ -167,54 +18,6 @@ definitions:
         type: integer
       index_hash_key:
         type: string
-  Publish:
-    type: object
-    properties:
-      topic:
-        type: string
-      tgas:
-        type: array
-        items:
-          type: string
-  Tag:
-    type: object
-    properties:
-      name:
-        type: string
-      name_with_analyzer:
-        type: string
-      count:
-        type: integer
-      created_at:
-        type: integer
-  Fraud:
-    type: object
-    properties:
-      reason:
-        type: 'string'
-        enum:
-        - 'illegal_act'
-        - 'anything_contrary_to_public_order'
-        - 'nuisance'
-        - 'copyright_violation'
-        - 'slander'
-        - 'illegal_token_usage'
-        - 'other'
-      origin_url:
-        type: 'string'
-      free_text:
-        type: 'string'
-  DistributedTokens:
-    type: object
-    properties:
-      article:
-        type: integer
-      like:
-        type: integer
-      tip:
-        type: integer
-      bonus:
-        type: integer
 paths:
   /topics:
     get:
@@ -230,7 +33,9 @@ paths:
         responses:
           default:
             statusCode: '200'
-        uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${TopicsIndex.Arn}/invocations
+        uri:
+          Fn::Sub:
+            arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${TopicsIndex.Arn}/invocations
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
