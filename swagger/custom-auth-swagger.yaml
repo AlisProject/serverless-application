@@ -39,8 +39,8 @@ paths:
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
-    security:
-      - CustomAuthorizer: []
+      security:
+        - CustomAuthorizer: []
 securityDefinitions:
   CustomAuthorizer:
     type: apiKey

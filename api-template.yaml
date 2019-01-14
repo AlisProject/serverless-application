@@ -909,6 +909,12 @@ Resources:
             Path: /topics
             Method: get
             RestApiId: !Ref RestApi
+        ApiWithAuth:
+          Type: Api
+          Properties:
+            Path: /articles/recent
+            Method: get
+            RestApiId: !Ref RestApiWithCustomAuthorizer
   CognitoTriggerPreAuthentication:
     Type: AWS::Serverless::Function
     Properties:
