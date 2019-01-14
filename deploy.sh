@@ -70,4 +70,6 @@ aws cloudformation deploy \
     TwitterConsumerKey=${SSM_PARAMS_PREFIX}TwitterConsumerKey \
     TwitterConsumerSecret=${SSM_PARAMS_PREFIX}TwitterConsumerSecret \
     TwitterOauthCallbackUrl=${SSM_PARAMS_PREFIX}TwitterOauthCallbackUrl \
+    AuthleteApiKey=${SSM_PARAMS_PREFIX}AuthleteApiKey \
+    AuthleteApiSecret=${SSM_PARAMS_PREFIX}AuthleteApiSecret \
   --capabilities CAPABILITY_IAM

@@ -93,6 +93,10 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   LoginSalt:
     Type: 'AWS::SSM::Parameter::Value<String>'
+  AuthleteApiKey:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  AuthleteApiSecret:
+    Type: 'AWS::SSM::Parameter::Value<String>'
 
 Globals:
   Function:
@@ -200,6 +204,10 @@ Resources:
       Handler: handler.lambda_handler
       Role: !GetAtt LambdaRole.Arn
       CodeUri: ./deploy/authorizer.zip
+      Environment:
+        Variables:
+          AUTHLETE_API_KEY: !Ref AuthleteApiKey
+          AUTHLETE_API_SECRET: !Ref AuthleteApiSecret
   ArticlesRecent:
     Type: AWS::Serverless::Function
     Properties:
