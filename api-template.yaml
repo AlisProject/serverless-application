@@ -912,7 +912,7 @@ Resources:
         ApiWithAuth:
           Type: Api
           Properties:
-            Path: /articles/recent
+            Path: /topics
             Method: get
             RestApiId: !Ref RestApiWithCustomAuthorizer
   CognitoTriggerPreAuthentication:

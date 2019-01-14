@@ -1,7 +1,7 @@
 swagger: "2.0"
 info:
   title:
-    Ref: "AWS::StackName"
+    Fn::Sub: ${AWS::StackName}-with-custom-auth
   version: 1.0.0
 basePath: /
 schemes:
