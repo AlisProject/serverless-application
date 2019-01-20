@@ -7,6 +7,7 @@ import settings
 from authlete_util import AuthleteUtil
 from lambda_base import LambdaBase
 from no_permission_error import NoPermissionError
+from parameter_util import ParameterUtil
 
 
 class MeApplicationShow(LambdaBase):
@@ -19,6 +20,7 @@ class MeApplicationShow(LambdaBase):
         }
 
     def validate_params(self):
+        ParameterUtil.cast_parameter_to_int(self.params, self.get_schema())
         validate(self.params, self.get_schema())
 
         user_id = self.event['requestContext']['authorizer']['claims']['cognito:username']
