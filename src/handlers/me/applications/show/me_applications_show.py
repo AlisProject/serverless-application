@@ -1,4 +1,3 @@
-import json
 import os
 
 import requests
@@ -42,4 +41,3 @@ class MeApplicationShow(LambdaBase):
             'statusCode': 200,
             'body': response.text
         }
-

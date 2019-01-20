@@ -33,7 +33,3 @@ class MeApplicationIndex(LambdaBase):
             'statusCode': 200,
             'body': response.text
         }
-
-
-
-

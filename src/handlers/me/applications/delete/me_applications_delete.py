@@ -1,7 +1,4 @@
-import json
-import logging
 import os
-
 import requests
 from jsonschema import validate
 
@@ -9,7 +6,6 @@ import settings
 from authlete_util import AuthleteUtil
 from lambda_base import LambdaBase
 from no_permission_error import NoPermissionError
-from record_not_found_error import RecordNotFoundError
 
 
 class MeApplicationDelete(LambdaBase):
