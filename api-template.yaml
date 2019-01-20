@@ -2681,12 +2681,12 @@ Resources:
             Path: /me/users/{user_id}/fraud
             Method: post
             RestApiId: !Ref RestApi
-  MeApplicationIndex:
+  MeApplicationsIndex:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
       Role: !GetAtt LambdaRole.Arn
-      CodeUri: ./deploy/me_application_index.zip
+      CodeUri: ./deploy/me_applications_index.zip
       Environment:
         Variables:
           AUTHLETE_API_KEY: !Ref AuthleteApiKey
@@ -2698,12 +2698,12 @@ Resources:
             Path: /me/applications
             Method: get
             RestApiId: !Ref RestApi
-  MeApplicationShow:
+  MeApplicationsShow:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
       Role: !GetAtt LambdaRole.Arn
-      CodeUri: ./deploy/me_application_show.zip
+      CodeUri: ./deploy/me_applications_show.zip
       Environment:
         Variables:
           AUTHLETE_API_KEY: !Ref AuthleteApiKey
@@ -2715,12 +2715,12 @@ Resources:
             Path: /me/applications/{client_id}
             Method: get
             RestApiId: !Ref RestApi
-  MeApplicationCreate:
+  MeApplicationsCreate:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
       Role: !GetAtt LambdaRole.Arn
-      CodeUri: ./deploy/me_application_create.zip
+      CodeUri: ./deploy/me_applications_create.zip
       Environment:
         Variables:
           AUTHLETE_API_KEY: !Ref AuthleteApiKey
@@ -2732,12 +2732,12 @@ Resources:
             Path: /me/applications
             Method: post
             RestApiId: !Ref RestApi
-  MeApplicationUpdate:
+  MeApplicationsUpdate:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
       Role: !GetAtt LambdaRole.Arn
-      CodeUri: ./deploy/me_application_update.zip
+      CodeUri: ./deploy/me_applications_update.zip
       Environment:
         Variables:
           AUTHLETE_API_KEY: !Ref AuthleteApiKey
@@ -2749,12 +2749,12 @@ Resources:
             Path: /me/applications/{client_id}
             Method: put
             RestApiId: !Ref RestApi
-  MeApplicationDelete:
+  MeApplicationsDelete:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
       Role: !GetAtt LambdaRole.Arn
-      CodeUri: ./deploy/me_application_delete.zip
+      CodeUri: ./deploy/me_applications_delete.zip
       Environment:
         Variables:
           AUTHLETE_API_KEY: !Ref AuthleteApiKey
