@@ -179,7 +179,7 @@ parameters = {
     },
     'oauth_client': {
         'client_id': {
-            'type': 'number',
+            'type': 'integer',
             'minimum': 1,
             'maximum': sys.maxsize
         },
