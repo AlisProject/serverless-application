@@ -93,6 +93,10 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   LoginSalt:
     Type: 'AWS::SSM::Parameter::Value<String>'
+  AuthleteApiKey:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  AuthleteApiSecret:
+    Type: 'AWS::SSM::Parameter::Value<String>'
 
 Globals:
   Function:
@@ -1815,6 +1819,78 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+          /me/applications:
+            get:
+              description: '管理アプリケーションの一覧を取得する'
+              schema:
+                type: array
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeApplicationsIndex.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+            post:
+              description: '管理アプリケーションを作成する'
+              schema:
+                type: array
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeApplicationsCreate.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /me/applications/{client_id}:
+            get:
+              description: '管理アプリケーションの詳細を取得する'
+              schema:
+                type: array
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeApplicationsShow.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+            put:
+              description: '管理アプリケーションを更新する'
+              schema:
+                type: array
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeApplicationsUpdate.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+            delete:
+              description: '管理アプリケーションの詳細を削除する'
+              schema:
+                type: array
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeApplicationsShow.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
         securityDefinitions:
           cognitoUserPool:
             type: apiKey
@@ -2604,6 +2680,91 @@ Resources:
           Properties:
             Path: /me/users/{user_id}/fraud
             Method: post
+            RestApiId: !Ref RestApi
+  MeApplicationsIndex:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_applications_index.zip
+      Environment:
+        Variables:
+          AUTHLETE_API_KEY: !Ref AuthleteApiKey
+          AUTHLETE_API_SECRET: !Ref AuthleteApiSecret
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/applications
+            Method: get
+            RestApiId: !Ref RestApi
+  MeApplicationsShow:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_applications_show.zip
+      Environment:
+        Variables:
+          AUTHLETE_API_KEY: !Ref AuthleteApiKey
+          AUTHLETE_API_SECRET: !Ref AuthleteApiSecret
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/applications/{client_id}
+            Method: get
+            RestApiId: !Ref RestApi
+  MeApplicationsCreate:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_applications_create.zip
+      Environment:
+        Variables:
+          AUTHLETE_API_KEY: !Ref AuthleteApiKey
+          AUTHLETE_API_SECRET: !Ref AuthleteApiSecret
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/applications
+            Method: post
+            RestApiId: !Ref RestApi
+  MeApplicationsUpdate:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_applications_update.zip
+      Environment:
+        Variables:
+          AUTHLETE_API_KEY: !Ref AuthleteApiKey
+          AUTHLETE_API_SECRET: !Ref AuthleteApiSecret
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/applications/{client_id}
+            Method: put
+            RestApiId: !Ref RestApi
+  MeApplicationsDelete:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_applications_delete.zip
+      Environment:
+        Variables:
+          AUTHLETE_API_KEY: !Ref AuthleteApiKey
+          AUTHLETE_API_SECRET: !Ref AuthleteApiSecret
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/applications/{client_id}
+            Method: delete
             RestApiId: !Ref RestApi
   ElasticSearchService:
     Type: "AWS::Elasticsearch::Domain"
