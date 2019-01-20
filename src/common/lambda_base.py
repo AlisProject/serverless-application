@@ -3,6 +3,8 @@ import json
 import logging
 import traceback
 from jsonschema import ValidationError
+
+from no_permission_error import NoPermissionError
 from record_not_found_error import RecordNotFoundError
 from not_authorized_error import NotAuthorizedError
 from not_verified_user_error import NotVerifiedUserError
@@ -62,6 +64,14 @@ class LambdaBase(metaclass=ABCMeta):
                 'body': json.dumps({'message': "Bad Request: {0}".format(err)})
             }
         except NotAuthorizedError as err:
+            logger.fatal(err)
+            logger.info(self.event)
+
+            return {
+                'statusCode': 403,
+                'body': json.dumps({'message': str(err)})
+            }
+        except NoPermissionError as err:
             logger.fatal(err)
             logger.info(self.event)
 
