@@ -308,4 +308,4 @@ PASSWORD_LENGTH = 32
 AES_IV_BYTES = 16
 DYNAMO_BATCH_GET_MAX = 100
 
-AUTHLETE_CLIENT_ENDPOINT = 'https://api.authlete.com/api/api/client'
+AUTHLETE_CLIENT_ENDPOINT = 'https://api.authlete.com/api/client'
