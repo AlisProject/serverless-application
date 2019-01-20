@@ -1822,75 +1822,75 @@ Resources:
           /me/applications:
             get:
               description: '管理アプリケーションの一覧を取得する'
-                schema:
-                  type: array
-                security:
-                  - cognitoUserPool: []
-                x-amazon-apigateway-integration:
-                  responses:
-                    default:
-                      statusCode: '200'
-                  uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeApplicationsIndex.Arn}/invocations
-                  passthroughBehavior: when_no_templates
-                  httpMethod: POST
-                  type: aws_proxy
+              schema:
+                type: array
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeApplicationsIndex.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
             post:
               description: '管理アプリケーションを作成する'
-                schema:
-                  type: array
-                security:
-                  - cognitoUserPool: []
-                x-amazon-apigateway-integration:
-                  responses:
-                    default:
-                      statusCode: '200'
-                  uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeApplicationsCreate.Arn}/invocations
-                  passthroughBehavior: when_no_templates
-                  httpMethod: POST
-                  type: aws_proxy
+              schema:
+                type: array
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeApplicationsCreate.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
           /me/applications/{client_id}:
             get:
               description: '管理アプリケーションの詳細を取得する'
-                schema:
-                  type: array
-                security:
-                  - cognitoUserPool: []
-                x-amazon-apigateway-integration:
-                  responses:
-                    default:
-                      statusCode: '200'
-                  uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeApplicationsShow.Arn}/invocations
-                  passthroughBehavior: when_no_templates
-                  httpMethod: POST
-                  type: aws_proxy
+              schema:
+                type: array
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeApplicationsShow.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
             put:
               description: '管理アプリケーションを更新する'
-                schema:
-                  type: array
-                security:
-                  - cognitoUserPool: []
-                x-amazon-apigateway-integration:
-                  responses:
-                    default:
-                      statusCode: '200'
-                  uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeApplicationsUpdate.Arn}/invocations
-                  passthroughBehavior: when_no_templates
-                  httpMethod: POST
-                  type: aws_proxy
+              schema:
+                type: array
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeApplicationsUpdate.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
             delete:
               description: '管理アプリケーションの詳細を削除する'
-                schema:
-                  type: array
-                security:
-                  - cognitoUserPool: []
-                x-amazon-apigateway-integration:
-                  responses:
-                    default:
-                      statusCode: '200'
-                  uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeApplicationsShow.Arn}/invocations
-                  passthroughBehavior: when_no_templates
-                  httpMethod: POST
-                  type: aws_proxy
+              schema:
+                type: array
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeApplicationsShow.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
         securityDefinitions:
           cognitoUserPool:
             type: apiKey
