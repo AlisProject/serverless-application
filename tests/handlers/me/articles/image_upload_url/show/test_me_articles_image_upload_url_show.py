@@ -11,6 +11,8 @@ class TestMeArticlesImageUploadUrlShow(TestCase):
     dynamodb = TestsUtil.get_dynamodb_client()
 
     def setUp(self):
+        os.environ['DOMAIN'] = 'example.com'
+        os.environ['DIST_S3_BUCKET_NAME'] = 'test-bucket'
         TestsUtil.set_all_tables_name_to_env()
         TestsUtil.delete_all_tables(self.dynamodb)
 
@@ -41,7 +43,7 @@ class TestMeArticlesImageUploadUrlShow(TestCase):
 
     @patch('uuid.uuid4', MagicMock(return_value='uuid'))
     def test_main_ok(self):
-        os.environ['DIST_S3_BUCKET_NAME'] = 'test-bucket'
+
         article_id = self.article_info_table_items[0]['article_id']
         user_id = self.article_info_table_items[0]['user_id']
 
@@ -72,13 +74,17 @@ class TestMeArticlesImageUploadUrlShow(TestCase):
         self.assertEqual(response['statusCode'], 200)
 
         post_param = json.loads(response['body'])
-        actual_path = post_param['url'][:post_param['url'].find('?')]
+        actual_upload_path = post_param['upload_url'][:post_param['upload_url'].find('?')]
 
-        self.assertEqual(actual_path, expected_url + expected_path)
+        self.assertEqual(actual_upload_path, expected_url + expected_path)
+
+        expected_show_path = 'https://' + os.environ['DOMAIN'] + \
+                             '/d/api/articles_images/' + user_id + '/' + article_id + '/uuid.jpg'
+        self.assertEqual(post_param['show_url'], expected_show_path)
 
         expected_exists_keys = ['X-Amz-Algorithm', 'X-Amz-Credential', 'X-Amz-Signature', 'X-Amz-Expires', 'X-Amz-Date']
         for key in expected_exists_keys:
-            self.assertNotEqual(post_param['url'].find(key), -1)
+            self.assertNotEqual(post_param['upload_url'].find(key), -1)
 
     def test_call_validate_article_existence(self):
         params = {
