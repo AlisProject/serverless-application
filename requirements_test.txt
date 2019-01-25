@@ -1,6 +1,6 @@
 boto3
 pycodestyle
-pyflakes
+pyflakes == 2.0.0
 green
 awscli
 six
