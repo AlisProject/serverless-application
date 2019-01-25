@@ -1,5 +1,5 @@
 boto3
-pycodestyle
+pycodestyle == 2.4.0
 pyflakes == 2.0.0
 green
 awscli
