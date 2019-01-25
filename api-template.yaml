@@ -191,6 +191,26 @@ Resources:
                 type: string
               overview:
                 type: string
+          MeArticlesDraftsUpdateTitle:
+            type: object
+            properties:
+              title:
+                type: string
+          MeArticlesPublicUpdateTitle:
+            type: object
+            properties:
+              title:
+                type: string
+          MeArticlesDraftsUpdateBody:
+            type: object
+            properties:
+              body:
+                type: string
+          MeArticlesPublicUpdateBody:
+            type: object
+            properties:
+              body:
+                type: string
           MeInfoUpdate:
             type: object
             properties:
@@ -1581,6 +1601,118 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+          /me/articles/{article_id}/drafts/title:
+            put:
+              description: '下書き記事のタイトル更新'
+              parameters:
+              - name: 'article_id'
+                in: 'path'
+                description: '対象記事を指定するために使用'
+                required: true
+                type: 'string'
+              - name: 'title'
+                in: 'body'
+                description: 'title object'
+                required: true
+                schema:
+                  $ref: '#/definitions/MeArticlesDraftsUpdateTitle'
+              responses:
+                '200':
+                  description: 'successful operation'
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesDraftsUpdateTitle.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /me/articles/{article_id}/drafts/body:
+            put:
+              description: '下書き記事のbody更新'
+              parameters:
+              - name: 'article_id'
+                in: 'path'
+                description: '対象記事を指定するために使用'
+                required: true
+                type: 'string'
+              - name: 'body'
+                in: 'body'
+                description: 'body object'
+                required: true
+                schema:
+                  $ref: '#/definitions/MeArticlesDraftsUpdateBody'
+              responses:
+                '200':
+                  description: 'successful operation'
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesDraftsUpdateBody.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /me/articles/{article_id}/public/title:
+            put:
+              description: '公開記事のタイトル更新'
+              parameters:
+              - name: 'article_id'
+                in: 'path'
+                description: '対象記事を指定するために使用'
+                required: true
+                type: 'string'
+              - name: 'title'
+                in: 'body'
+                description: 'title object'
+                required: true
+                schema:
+                  $ref: '#/definitions/MeArticlesPublicUpdateTitle'
+              responses:
+                '200':
+                  description: 'successful operation'
+              security:
+              - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesPublicUpdateTitle.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /me/articles/{article_id}/public/body:
+            put:
+              description: '公開記事のbody更新'
+              parameters:
+              - name: 'article_id'
+                in: 'path'
+                description: '対象記事を指定するために使用'
+                required: true
+                type: 'string'
+              - name: 'body'
+                in: 'body'
+                description: 'body object'
+                required: true
+                schema:
+                  $ref: '#/definitions/MeArticlesPublicUpdateBody'
+              responses:
+                '200':
+                  description: 'successful operation'
+              security:
+              - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesPublicUpdateBody.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
           /me/articles/{article_id}/pv:
             post:
               description: '対象記事の閲覧をカウント'
@@ -2112,6 +2244,32 @@ Resources:
               Path: /me/articles/{article_id}/drafts
               Method: put
               RestApiId: !Ref RestApi
+  MeArticlesDraftsUpdateTitle:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_articles_drafts_update_title.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/articles/{article_id}/drafts/title
+            Method: put
+            RestApiId: !Ref RestApi
+  MeArticlesDraftsUpdateBody:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_articles_drafts_update_body.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/articles/{article_id}/drafts/body
+            Method: put
+            RestApiId: !Ref RestApi
   MeArticlesPublicIndex:
     Type: AWS::Serverless::Function
     Properties:
@@ -2162,6 +2320,32 @@ Resources:
           Type: Api
           Properties:
             Path: /me/articles/{article_id}/public
+            Method: put
+            RestApiId: !Ref RestApi
+  MeArticlesPublicUpdateTitle:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_articles_public_update_title.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/articles/{article_id}/public/title
+            Method: put
+            RestApiId: !Ref RestApi
+  MeArticlesPublicUpdateBody:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_articles_public_update_body.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/articles/{article_id}/public/body
             Method: put
             RestApiId: !Ref RestApi
   MeArticlesPublicUnpublish:
