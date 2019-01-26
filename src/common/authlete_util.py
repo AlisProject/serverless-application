@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import requests
 import settings
@@ -13,6 +14,10 @@ class AuthleteUtil:
                 settings.AUTHLETE_CLIENT_ENDPOINT + '/get/' + client_id,
                 auth=(os.environ['AUTHLETE_API_KEY'], os.environ['AUTHLETE_API_SECRET'])
             )
+
+            if response.status_code == 404:
+                raise RecordNotFoundError('{0} is not found.'.format(client_id))
+
         except requests.exceptions.RequestException as err:
             raise Exception('Something went wrong when call Authlete API: {0}'.format(err))
 
