@@ -30,6 +30,6 @@ class AuthleteUtil:
         if request_client_id and response.status_code == 404:
             raise RecordNotFoundError('{0} is not found.'.format(request_client_id))
 
-        if response.status_code != 200:
+        if response.status_code not in [200, 201, 204]:
             raise Exception('Something went wrong when call Authlete API: {0}, {1}'
                             .format(response.status_code, response.text))

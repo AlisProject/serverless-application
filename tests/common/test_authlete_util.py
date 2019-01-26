@@ -16,7 +16,29 @@ class TestAuthleteUtil(TestCase):
         os.environ['AUTHLETE_API_SECRET'] = 'YYYYYYYYYYYYYY'
 
     @responses.activate
-    def test_is_accessible_client_ok_true(self):
+    def test_is_accessible_client_ok_true_with200(self):
+        client_id = 123456789
+        user_id = 'user01'
+
+        responses.add(responses.GET, settings.AUTHLETE_CLIENT_ENDPOINT + '/get/' + str(client_id),
+                      json={'developer': user_id}, status=200)
+
+        result = AuthleteUtil.is_accessible_client(client_id, user_id)
+        self.assertEqual(result, True)
+
+    @responses.activate
+    def test_is_accessible_client_ok_true_with201(self):
+        client_id = 123456789
+        user_id = 'user01'
+
+        responses.add(responses.GET, settings.AUTHLETE_CLIENT_ENDPOINT + '/get/' + str(client_id),
+                      json={'developer': user_id}, status=200)
+
+        result = AuthleteUtil.is_accessible_client(client_id, user_id)
+        self.assertEqual(result, True)
+
+    @responses.activate
+    def test_is_accessible_client_ok_true_with204(self):
         client_id = 123456789
         user_id = 'user01'
 
