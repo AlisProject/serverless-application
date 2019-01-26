@@ -10,7 +10,7 @@ class AuthleteUtil:
     def is_accessible_client(client_id, user_id):
         try:
             response = requests.get(
-                settings.AUTHLETE_CLIENT_ENDPOINT + '/get/' + client_id,
+                settings.AUTHLETE_CLIENT_ENDPOINT + '/get/' + str(client_id),
                 auth=(os.environ['AUTHLETE_API_KEY'], os.environ['AUTHLETE_API_SECRET'])
             )
 

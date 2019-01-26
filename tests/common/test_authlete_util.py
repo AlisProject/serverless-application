@@ -1,4 +1,3 @@
-import logging
 import os
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
@@ -18,10 +17,10 @@ class TestAuthleteUtil(TestCase):
 
     @responses.activate
     def test_is_accessible_client_ok_true(self):
-        client_id = '123456789'
+        client_id = 123456789
         user_id = 'user01'
 
-        responses.add(responses.GET, settings.AUTHLETE_CLIENT_ENDPOINT + '/get/' + client_id,
+        responses.add(responses.GET, settings.AUTHLETE_CLIENT_ENDPOINT + '/get/' + str(client_id),
                       json={'developer': user_id}, status=200)
 
         result = AuthleteUtil.is_accessible_client(client_id, user_id)
@@ -29,10 +28,10 @@ class TestAuthleteUtil(TestCase):
 
     @responses.activate
     def test_is_accessible_client_ok_false(self):
-        client_id = '123456789'
+        client_id = 123456789
         user_id = 'user01'
 
-        responses.add(responses.GET, settings.AUTHLETE_CLIENT_ENDPOINT + '/get/' + client_id,
+        responses.add(responses.GET, settings.AUTHLETE_CLIENT_ENDPOINT + '/get/' + str(client_id),
                       json={'developer': user_id}, status=200)
 
         result = AuthleteUtil.is_accessible_client(client_id, 'user02')
@@ -40,10 +39,10 @@ class TestAuthleteUtil(TestCase):
 
     @responses.activate
     def test_is_accessible_client_404(self):
-        client_id = '123456789'
+        client_id = 123456789
         user_id = 'user01'
 
-        responses.add(responses.GET, settings.AUTHLETE_CLIENT_ENDPOINT + '/get/' + client_id,
+        responses.add(responses.GET, settings.AUTHLETE_CLIENT_ENDPOINT + '/get/' + str(client_id),
                       json={}, status=404)
 
         with self.assertRaises(RecordNotFoundError):
@@ -51,9 +50,7 @@ class TestAuthleteUtil(TestCase):
 
     @patch('requests.get', MagicMock(side_effect=requests.exceptions.RequestException()))
     def test_is_accessible_client_with_exception(self):
-        logging.fatal('きてるよね')
-
-        client_id = '123456789'
+        client_id = 123456789
         user_id = 'user01'
 
         with self.assertRaises(Exception):
