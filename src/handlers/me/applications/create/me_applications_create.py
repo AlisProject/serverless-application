@@ -1,3 +1,4 @@
+import json
 import os
 import requests
 from jsonschema import validate, FormatChecker
@@ -37,7 +38,8 @@ class MeApplicationsCreate(LambdaBase):
         try:
             response = requests.post(
                 settings.AUTHLETE_CLIENT_ENDPOINT + '/create',
-                data=create_params,
+                json.dumps(create_params),
+                headers={'Content-Type': 'application/json'},
                 auth=(os.environ['AUTHLETE_API_KEY'], os.environ['AUTHLETE_API_SECRET'])
             )
         except requests.exceptions.RequestException as err:

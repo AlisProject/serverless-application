@@ -1,3 +1,4 @@
+import json
 import os
 
 import requests
@@ -42,7 +43,8 @@ class MeApplicationUpdate(LambdaBase):
         try:
             response = requests.post(
                 settings.AUTHLETE_CLIENT_ENDPOINT + '/update/' + str(self.params['client_id']),
-                data=update_params,
+                json.dumps(update_params),
+                headers={'Content-Type': 'application/json'},
                 auth=(os.environ['AUTHLETE_API_KEY'], os.environ['AUTHLETE_API_SECRET'])
             )
         except requests.exceptions.RequestException as err:
