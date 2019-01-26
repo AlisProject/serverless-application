@@ -1,3 +1,4 @@
+import logging
 import os
 import requests
 from jsonschema import validate, FormatChecker
@@ -32,7 +33,7 @@ class MeApplicationsCreate(LambdaBase):
             'applicationType': self.params['application_type'],
             'clientType': self.__get_client_type_from_application_type(self.params['application_type']),
             'developer': self.event['requestContext']['authorizer']['claims']['cognito:username'],
-            'redirectUris': self.params['redirectUris']
+            'redirectUris': self.params['redirect_urls']
         }
         try:
             response = requests.post(
