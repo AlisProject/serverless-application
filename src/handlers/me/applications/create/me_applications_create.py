@@ -1,4 +1,3 @@
-import logging
 import os
 import requests
 from jsonschema import validate, FormatChecker
@@ -19,7 +18,7 @@ class MeApplicationsCreate(LambdaBase):
                 'application_type': settings.parameters['oauth_client']['application_type'],
                 'redirect_urls': settings.parameters['oauth_client']['redirect_urls']
             },
-            'required': ['name', 'description', 'application_type', 'redirect_urls']
+            'required': ['name', 'application_type', 'redirect_urls']
         }
 
     def validate_params(self):
@@ -29,7 +28,7 @@ class MeApplicationsCreate(LambdaBase):
     def exec_main_proc(self):
         create_params = {
             'clientName': self.params['name'],
-            'description': self.params['description'],
+            'description': self.params.get('description'),
             'applicationType': self.params['application_type'],
             'clientType': self.__get_client_type_from_application_type(self.params['application_type']),
             'developer': self.event['requestContext']['authorizer']['claims']['cognito:username'],

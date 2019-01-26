@@ -17,7 +17,7 @@ class TestAuthleteUtil(TestCase):
         os.environ['AUTHLETE_API_SECRET'] = 'YYYYYYYYYYYYYY'
 
     @responses.activate
-    def test_is_accessible_client_ok(self):
+    def test_is_accessible_client_ok_true(self):
         client_id = '123456789'
         user_id = 'user01'
 
@@ -28,7 +28,7 @@ class TestAuthleteUtil(TestCase):
         self.assertEqual(result, True)
 
     @responses.activate
-    def test_is_accessible_client_ok(self):
+    def test_is_accessible_client_ok_false(self):
         client_id = '123456789'
         user_id = 'user01'
 

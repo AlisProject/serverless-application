@@ -26,7 +26,8 @@ class TestMeApplicationsCreate(TestCase):
                 'name': 'あ' * 80,
                 'description': 'A' * 180,
                 'application_type': 'WEB',
-                'redirect_urls': ['http://example.com/1', 'http://example.com/2', 'http://example.com/3', 'http://example.com/4', 'http://example.com/5']
+                'redirect_urls': ['http://example.com/1', 'http://example.com/2',
+                                  'http://example.com/3', 'http://example.com/4', 'http://example.com/5']
             },
             'requestContext': {
                 'authorizer': {
@@ -212,7 +213,7 @@ class TestMeApplicationsCreate(TestCase):
     def test_validation_redirect_urls_invalid_type(self):
         base_url = 'http://example.com/'
         invalid_types = [
-            'hogefugapiyo', # URLの形式がおかしいパターン
+            'hogefugapiyo',  # URLの形式がおかしいパターン
             base_url + 'A' * (201-len(base_url))  # URLが200文字以上になるパターン
         ]
 
@@ -242,3 +243,59 @@ class TestMeApplicationsCreate(TestCase):
             logging.fatal(response)
             self.assertEqual(response['statusCode'], 400)
 
+    def test_validation_required_params(self):
+        required_params = ['name', 'application_type', 'redirect_urls']
+
+        for param in required_params:
+            params = {
+                'body': {
+                    'name': 'あ' * 80,
+                    'description': 'A' * 180,
+                    'application_type': 'WEB',
+                    'redirect_urls': ['http://example.com/1', 'http://example.com/2',
+                                      'http://example.com/3', 'http://example.com/4', 'http://example.com/5']
+                },
+                'requestContext': {
+                    'authorizer': {
+                        'claims': {
+                            'cognito:username': 'user01',
+                            'phone_number_verified': 'true',
+                            'email_verified': 'true'
+                        }
+                    }
+                }
+            }
+
+            del params['body'][param]
+            params['body'] = json.dumps(params['body'])
+
+            response = MeApplicationsCreate(params, {}).main()
+            logging.fatal(response)
+            self.assertEqual(response['statusCode'], 400)
+
+    @responses.activate
+    def test_validation_empty_description_ok(self):
+        params = {
+            'body': {
+                'name': 'あ' * 80,
+                'application_type': 'WEB',
+                'redirect_urls': ['http://example.com']
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'user01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
+            }
+        }
+
+        params['body'] = json.dumps(params['body'])
+
+        responses.add(responses.POST, settings.AUTHLETE_CLIENT_ENDPOINT + '/create',
+                      json={"developer": "matsumatsu20"}, status=200)
+
+        response = MeApplicationsCreate(params, {}).main()
+        self.assertEqual(response['statusCode'], 200)
