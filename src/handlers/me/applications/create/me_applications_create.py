@@ -17,7 +17,8 @@ class MeApplicationsCreate(LambdaBase):
                 'description': settings.parameters['oauth_client']['description'],
                 'application_type': settings.parameters['oauth_client']['application_type'],
                 'redirect_urls': settings.parameters['oauth_client']['redirect_urls']
-            }
+            },
+            'required': ['name', 'description', 'application_type', 'redirect_urls']
         }
 
     def validate_params(self):
@@ -28,8 +29,8 @@ class MeApplicationsCreate(LambdaBase):
         create_params = {
             'clientName': self.params['name'],
             'description': self.params['description'],
-            'applicationType': self.params['applicationType'],
-            'clientType': self.__get_client_type_from_application_type(self.params['applicationType']),
+            'applicationType': self.params['application_type'],
+            'clientType': self.__get_client_type_from_application_type(self.params['application_type']),
             'developer': self.event['requestContext']['authorizer']['claims']['cognito:username'],
             'redirectUris': self.params['redirectUris']
         }
