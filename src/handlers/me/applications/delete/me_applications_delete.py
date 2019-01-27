@@ -29,8 +29,8 @@ class MeApplicationDelete(LambdaBase):
 
     def exec_main_proc(self):
         try:
-            response = requests.get(
-                settings.AUTHLETE_CLIENT_ENDPOINT + '/delete/' + self.params['client_id'],
+            response = requests.delete(
+                settings.AUTHLETE_CLIENT_ENDPOINT + '/delete/' + str(self.params['client_id']),
                 auth=(os.environ['AUTHLETE_API_KEY'], os.environ['AUTHLETE_API_SECRET'])
             )
         except requests.exceptions.RequestException as err:
