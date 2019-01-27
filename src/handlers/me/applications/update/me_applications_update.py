@@ -19,6 +19,7 @@ class MeApplicationUpdate(LambdaBase):
                 'name': settings.parameters['oauth_client']['name'],
                 'description': settings.parameters['oauth_client']['description'],
                 'client_id': settings.parameters['oauth_client']['client_id'],
+                'developer': self.event['requestContext']['authorizer']['claims']['cognito:username'],
                 'redirect_urls': settings.parameters['oauth_client']['redirect_urls']
             },
             'required': ['name', 'redirect_urls']
