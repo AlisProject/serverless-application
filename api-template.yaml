@@ -361,6 +361,75 @@ Resources:
                 type: integer
               bonus:
                 type: integer
+          ApplicationCreate:
+            type: object
+            properties:
+              name:
+                type: string
+              description:
+                type: string
+              application_type:
+                type: string
+                enum:
+                  - 'WEB'
+                  - 'NATIVE'
+              redirect_urls:
+                type: array
+                items:
+                  type: string
+          ApplicationUpdate:
+            type: object
+            properties:
+              name:
+                type: string
+              description:
+                type: string
+              redirect_urls:
+                type: array
+                items:
+                  type: string
+          AuthleteClient:
+            type: object
+              properties:
+                applicationType:
+                  type: string
+                  enum:
+                    - 'WEB'
+                    - 'NATIVE'
+                clientId:
+                  type: integer
+                authTimeRequired:
+                  type: boolean
+                clientIdAliasEnabled:
+                  type: boolean
+                clientName:
+                  type: string
+                clientSecret:
+                  type: string
+                createdAt:
+                  type: integer
+                defaultMaxAge:
+                  type: integer
+                description:
+                  type: string
+                developer:
+                  type: string
+                idTokenSignAlg:
+                  type: string
+                modifiedAt:
+                  type: integer
+                number:
+                  type: integer
+                redirect_urls:
+                  type: array
+                  items:
+                    type: string
+                subjectType:
+                  type: string
+                tlsClientCertificateBoundAccessTokens:
+                  type: boolean
+                tokenAuthMethod:
+                  type: string
         paths:
           /search/articles:
             get:
@@ -1823,7 +1892,20 @@ Resources:
             get:
               description: '管理アプリケーションの一覧を取得する'
               schema:
-                type: array
+                type: object
+                  properties:
+                    clients:
+                      type: array
+                      items:
+                        $ref: '#/definitions/AuthleteClient'
+                    developer:
+                      type: string
+                    start:
+                      type: integer
+                    end:
+                      type: integer
+                    totalCount:
+                      type: integer
               security:
                 - cognitoUserPool: []
               x-amazon-apigateway-integration:
@@ -1836,8 +1918,12 @@ Resources:
                 type: aws_proxy
             post:
               description: '管理アプリケーションを作成する'
-              schema:
-                type: array
+              parameters:
+              - name: 'Application'
+                in: 'body'
+                required: true
+                schema:
+                  $ref: '#/definitions/ApplicationCreate'
               security:
                 - cognitoUserPool: []
               x-amazon-apigateway-integration:
@@ -1851,8 +1937,14 @@ Resources:
           /me/applications/{client_id}:
             get:
               description: '管理アプリケーションの詳細を取得する'
+              parameters:
+              - name: 'client_id'
+                in: 'path'
+                description: '対象アプリケーションの指定するために使用'
+                required: true
+                type: integer
               schema:
-                type: array
+                $ref: '#/definitions/AuthleteClient'
               security:
                 - cognitoUserPool: []
               x-amazon-apigateway-integration:
@@ -1865,8 +1957,17 @@ Resources:
                 type: aws_proxy
             put:
               description: '管理アプリケーションを更新する'
-              schema:
-                type: array
+              parameters:
+              - name: 'client_id'
+                in: 'path'
+                description: '対象アプリケーションの指定するために使用'
+                required: true
+                type: integer
+              - name: 'Application'
+                in: 'body'
+                required: true
+                schema:
+                  $ref: '#/definitions/ApplicationUpdate'
               security:
                 - cognitoUserPool: []
               x-amazon-apigateway-integration:
@@ -1879,8 +1980,12 @@ Resources:
                 type: aws_proxy
             delete:
               description: '管理アプリケーションの詳細を削除する'
-              schema:
-                type: array
+              parameters:
+              - name: 'client_id'
+                in: 'path'
+                description: '対象アプリケーションの指定するために使用'
+                required: true
+                type: integer
               security:
                 - cognitoUserPool: []
               x-amazon-apigateway-integration:
