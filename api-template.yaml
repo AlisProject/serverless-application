@@ -1893,19 +1893,19 @@ Resources:
               description: '管理アプリケーションの一覧を取得する'
               schema:
                 type: object
-                  properties:
-                    clients:
-                      type: array
-                      items:
-                        $ref: '#/definitions/AuthleteClient'
-                    developer:
-                      type: string
-                    start:
-                      type: integer
-                    end:
-                      type: integer
-                    totalCount:
-                      type: integer
+                properties:
+                  clients:
+                    type: array
+                    items:
+                      $ref: '#/definitions/AuthleteClient'
+                  developer:
+                    type: string
+                  start:
+                    type: integer
+                  end:
+                    type: integer
+                  totalCount:
+                    type: integer
               security:
                 - cognitoUserPool: []
               x-amazon-apigateway-integration:
