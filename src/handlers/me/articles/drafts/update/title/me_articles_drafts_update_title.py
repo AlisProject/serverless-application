@@ -27,6 +27,7 @@ class MeArticlesDraftsUpdateTitle(LambdaBase):
             status='draft'
         )
 
+        self.__update_article_info()
         self.__update_article_content()
 
         return {
@@ -35,7 +36,6 @@ class MeArticlesDraftsUpdateTitle(LambdaBase):
 
     def __update_article_content(self):
         article_content_table = self.dynamodb.Table(os.environ['ARTICLE_CONTENT_TABLE_NAME'])
-
         expression_attribute_values = {
             ':title': TextSanitizer.sanitize_text(self.params.get('title'))
         }
@@ -47,5 +47,20 @@ class MeArticlesDraftsUpdateTitle(LambdaBase):
                 'article_id': self.params['article_id'],
             },
             UpdateExpression="set title=:title",
+            ExpressionAttributeValues=expression_attribute_values
+        )
+
+    def __update_article_info(self):
+        article_info_table = self.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
+        expression_attribute_values = {
+            ':title': TextSanitizer.sanitize_text(self.params.get('title')),
+        }
+        DBUtil.items_values_empty_to_none(expression_attribute_values)
+
+        article_info_table.update_item(
+            Key={
+                'article_id': self.params['article_id'],
+            },
+            UpdateExpression="set title = :title",
             ExpressionAttributeValues=expression_attribute_values
         )

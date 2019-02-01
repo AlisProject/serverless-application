@@ -24,7 +24,9 @@ class MeArticlesPublicUpdateBody(LambdaBase):
 
         expression_attribute_values = {
             ':user_id': self.event['requestContext']['authorizer']['claims']['cognito:username'],
-            ':body': TextSanitizer.sanitize_article_body(self.params.get('body')),
+            # ':body': TextSanitizer.sanitize_article_body(self.params.get('body')),
+            ':body': self.params.get('body')
+
         }
         DBUtil.items_values_empty_to_none(expression_attribute_values)
 

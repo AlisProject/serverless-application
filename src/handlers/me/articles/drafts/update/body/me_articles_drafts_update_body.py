@@ -37,7 +37,8 @@ class MeArticlesDraftsUpdateBody(LambdaBase):
         article_content_table = self.dynamodb.Table(os.environ['ARTICLE_CONTENT_TABLE_NAME'])
 
         expression_attribute_values = {
-            ':body': TextSanitizer.sanitize_article_body(self.params.get('body'))
+            # ':body': TextSanitizer.sanitize_article_body(self.params.get('body'))
+            ':body': self.params.get('body')
         }
 
         DBUtil.items_values_empty_to_none(expression_attribute_values)
