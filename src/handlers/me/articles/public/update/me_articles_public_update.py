@@ -45,8 +45,7 @@ class MeArticlesPublicUpdate(LambdaBase):
         expression_attribute_values = {
             ':user_id': self.event['requestContext']['authorizer']['claims']['cognito:username'],
             ':title': TextSanitizer.sanitize_text(self.params.get('title')),
-            ':body': self.params.get('body'),
-            # ':body': TextSanitizer.sanitize_article_body(self.params.get('body')),
+            ':body': TextSanitizer.sanitize_article_body(self.params.get('body')),
             ':overview': TextSanitizer.sanitize_text(self.params.get('overview')),
             ':eye_catch_url': self.params.get('eye_catch_url')
         }
