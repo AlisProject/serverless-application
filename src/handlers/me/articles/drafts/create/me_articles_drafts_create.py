@@ -75,7 +75,7 @@ class MeArticlesDraftsCreate(LambdaBase):
             'eye_catch_url': params.get('eye_catch_url'),
             'sort_key': sort_key,
             'created_at': int(time.time()),
-            'version': 200
+            'version': 2
         }
         DBUtil.items_values_empty_to_none(article_info)
 
