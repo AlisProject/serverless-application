@@ -50,7 +50,6 @@ class DBUtil:
 
         return False
 
-
     @staticmethod
     def validate_user_existence(dynamodb, user_id):
         users_table = dynamodb.Table(os.environ['USERS_TABLE_NAME'])
