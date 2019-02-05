@@ -15,7 +15,8 @@ class MeArticlesDraftsUpdateTitle(LambdaBase):
             'properties': {
                 'article_id': settings.parameters['article_id'],
                 'title': settings.parameters['title']
-            }
+            },
+            'required': ['article_id', 'title']
         }
 
     def validate_params(self):

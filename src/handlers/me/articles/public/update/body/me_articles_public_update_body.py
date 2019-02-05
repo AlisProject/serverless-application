@@ -5,6 +5,7 @@ from lambda_base import LambdaBase
 from jsonschema import validate, FormatChecker
 from db_util import DBUtil
 from user_util import UserUtil
+from text_sanitizer import TextSanitizer
 
 
 class MeArticlesPublicUpdateBody(LambdaBase):
@@ -14,7 +15,8 @@ class MeArticlesPublicUpdateBody(LambdaBase):
             'properties': {
                 'article_id': settings.parameters['article_id'],
                 'body': settings.parameters['body']
-            }
+            },
+            'required': ['article_id', 'body']
         }
 
     def validate_params(self):
@@ -34,9 +36,7 @@ class MeArticlesPublicUpdateBody(LambdaBase):
 
         expression_attribute_values = {
             ':user_id': self.event['requestContext']['authorizer']['claims']['cognito:username'],
-            # ':body': TextSanitizer.sanitize_article_body(self.params.get('body')),
-            ':body': self.params.get('body')
-
+            ':body': TextSanitizer.sanitize_article_body_v2(self.params.get('body'))
         }
         DBUtil.items_values_empty_to_none(expression_attribute_values)
 

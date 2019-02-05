@@ -33,7 +33,7 @@ class DBUtil:
             raise NotAuthorizedError('Forbidden')
         if status is not None and article_info['status'] != status:
             raise RecordNotFoundError('Record Not Found')
-        if version is not None and cls.__validate_version(article_info, version):
+        if version is not None and not cls.__validate_version(article_info, version):
             raise RecordNotFoundError('Record Not Found')
 
         return True
@@ -42,10 +42,10 @@ class DBUtil:
     def __validate_version(cls, article_info, version):
         # version が 1 の場合は設定されていないことを確認
         if version == 1:
-            if article_info['version'] is None:
+            if article_info.get('version') is None:
                 return True
         # version 2 以降の場合は直接値を比較する
-        elif article_info['version'] == version:
+        elif article_info.get('version') == version:
             return True
 
         return False

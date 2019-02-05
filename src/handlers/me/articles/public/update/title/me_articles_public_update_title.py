@@ -15,7 +15,8 @@ class MeArticlesPublicUpdateTitle(LambdaBase):
             'properties': {
                 'article_id': settings.parameters['article_id'],
                 'title': settings.parameters['title']
-            }
+            },
+            'required': ['article_id', 'title']
         }
 
     def validate_params(self):
@@ -35,7 +36,7 @@ class MeArticlesPublicUpdateTitle(LambdaBase):
 
         expression_attribute_values = {
             ':user_id': self.event['requestContext']['authorizer']['claims']['cognito:username'],
-            ':title': TextSanitizer.sanitize_article_body(self.params.get('title')),
+            ':title': TextSanitizer.sanitize_text(self.params.get('title'))
         }
         DBUtil.items_values_empty_to_none(expression_attribute_values)
 
