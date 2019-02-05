@@ -33,7 +33,9 @@ class MeApplicationsCreate(LambdaBase):
             'applicationType': self.params['application_type'],
             'clientType': self.__get_client_type_from_application_type(self.params['application_type']),
             'developer': self.event['requestContext']['authorizer']['claims']['cognito:username'],
-            'redirectUris': self.params['redirect_urls']
+            'redirectUris': self.params['redirect_urls'],
+            'grantTypes': ['AUTHORIZATION_CODE'],
+            'responseTypes': ['CODE']
         }
         try:
             response = requests.post(
