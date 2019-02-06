@@ -183,10 +183,6 @@ class TestMeArticlesDraftsArticleIdCreate(TestCase):
         )
 
         article_id = 'HOGEHOGEHOGE'
-        params = {
-            'title': 'sample title',
-            'body': '<p>sample body</p>'
-        }
 
         article_draft_article_id_create = MeArticlesDraftsArticleIdCreate({}, {}, self.dynamodb)
 
