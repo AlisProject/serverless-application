@@ -338,6 +338,17 @@ Resources:
                 type: array
                 items:
                   type: string
+          PublishWithHeader:
+            type: object
+            properties:
+              topic:
+                type: string
+              tgas:
+                type: array
+                items:
+                  type: string
+              eye_catch_url:
+                type: string
           Tag:
             type: object
             properties:
@@ -945,6 +956,35 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+
+          /me/articles/{article_id}/drafts/publish_with_header:
+            put:
+              description: "指定された article_id の下書き記事を公開"
+              parameters:
+              - name: 'article_id'
+                in: 'path'
+                description: '対象記事の指定するために使用'
+                required: true
+                type: 'string'
+              - name: 'publish'
+                in: 'body'
+                description: 'publish object'
+                required: true
+                schema:
+                  $ref: '#/definitions/PublishWithHeader'
+              responses:
+                '200':
+                  description: 'successful operation'
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesDraftsPublishWithHeader.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
           /me/articles/public:
             get:
               description: '公開記事一覧情報を取得'
@@ -1105,6 +1145,34 @@ Resources:
                   default:
                     statusCode: '200'
                 uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesPublicRepublish.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /me/articles/{article_id}/public/republish_with_header:
+            put:
+              description: '指定された article_id の編集記事を公開する'
+              parameters:
+              - name: 'article_id'
+                in: 'path'
+                description: '対象記事を指定するために使用'
+                required: true
+                type: 'string'
+              - name: 'publish'
+                in: 'body'
+                description: 'publish object'
+                required: true
+                schema:
+                  $ref: '#/definitions/PublishWithHeader'
+              responses:
+                '200':
+                  description: 'successful operation'
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesPublicRepublishWithHeader.Arn}/invocations
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
@@ -2231,6 +2299,19 @@ Resources:
             Path: /me/articles/{article_id}/drafts/publish
             Method: put
             RestApiId: !Ref RestApi
+  MeArticlesDraftsPublishWithHeader:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_articles_drafts_publish_with_header.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/articles/{article_id}/drafts/publish_with_header
+            Method: put
+            RestApiId: !Ref RestApi
   MeArticlesDraftsUpdate:
       Type: AWS::Serverless::Function
       Properties:
@@ -2372,6 +2453,19 @@ Resources:
           Type: Api
           Properties:
             Path: /me/articles/{article_id}/public/republish
+            Method: put
+            RestApiId: !Ref RestApi
+  MeArticlesPublicRepublishWithHeader:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_articles_public_republish_with_header.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/articles/{article_id}/public/republish_with_header
             Method: put
             RestApiId: !Ref RestApi
   MeArticlesLikeCreate:
