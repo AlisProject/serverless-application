@@ -1,12 +1,12 @@
 import json
 import os
 from unittest import TestCase
-from me_articles_drafts_update import MeArticlesDraftsUpdate
+from me_articles_drafts_update_body import MeArticlesDraftsUpdateBody
 from unittest.mock import patch, MagicMock
 from tests_util import TestsUtil
 
 
-class TestMeArticlesDraftsUpdate(TestCase):
+class TestMeArticlesDraftsUpdateBody(TestCase):
     dynamodb = TestsUtil.get_dynamodb_client()
 
     @classmethod
@@ -25,25 +25,29 @@ class TestMeArticlesDraftsUpdate(TestCase):
                 'article_id': 'draftId00001',
                 'user_id': 'test01',
                 'status': 'draft',
-                'sort_key': 1520150272000000
+                'sort_key': 1520150272000000,
+                'version': 2
             },
             {
                 'article_id': 'publicId0001',
                 'user_id': 'test01',
                 'status': 'public',
-                'sort_key': 1520150272000000
+                'sort_key': 1520150272000000,
+                'version': 2
             },
             {
                 'article_id': 'draftId00002',
                 'user_id': 'test02',
                 'status': 'draft',
-                'sort_key': 1520150272000000
+                'sort_key': 1520150272000000,
+                'version': 2
             },
             {
                 'article_id': 'draftId00003',
                 'user_id': 'test01',
                 'status': 'draft',
-                'sort_key': 1520150272000000
+                'sort_key': 1520150272000000,
+                'version': 2
             }
         ]
 
@@ -68,8 +72,8 @@ class TestMeArticlesDraftsUpdate(TestCase):
         TestsUtil.delete_all_tables(self.dynamodb)
 
     def assert_bad_request(self, params):
-        function = MeArticlesDraftsUpdate(params, {}, self.dynamodb)
-        response = function.main()
+        me_articles_drafts_update_body = MeArticlesDraftsUpdateBody(params, {}, self.dynamodb)
+        response = me_articles_drafts_update_body.main()
 
         self.assertEqual(response['statusCode'], 400)
 
@@ -79,10 +83,7 @@ class TestMeArticlesDraftsUpdate(TestCase):
                 'article_id': 'draftId00001'
             },
             'body': {
-                'eye_catch_url': 'http://example.com/update',
-                'title': 'update title',
                 'body': '<p>update body</p>',
-                'overview': 'update overview'
             },
             'requestContext': {
                 'authorizer': {
@@ -97,31 +98,18 @@ class TestMeArticlesDraftsUpdate(TestCase):
 
         params['body'] = json.dumps(params['body'])
 
-        article_info_before = self.article_info_table.scan()['Items']
         article_content_before = self.article_content_table.scan()['Items']
 
-        me_articles_drafts_update = MeArticlesDraftsUpdate(params, {}, self.dynamodb)
+        me_articles_drafts_update_body = MeArticlesDraftsUpdateBody(params, {}, self.dynamodb)
+        response = me_articles_drafts_update_body.main()
 
-        response = me_articles_drafts_update.main()
-
-        article_info_after = self.article_info_table.scan()['Items']
         article_content_after = self.article_content_table.scan()['Items']
 
         self.assertEqual(response['statusCode'], 200)
-        self.assertEqual(len(article_info_after) - len(article_info_before), 0)
         self.assertEqual(len(article_content_after) - len(article_content_before), 0)
 
-        article_info_param_names = ['eye_catch_url', 'title', 'overview']
-        article_content_param_names = ['title', 'body']
-
-        self.assertEqual(params['requestContext']['authorizer']['claims']['cognito:username'],
-                         article_info_after[0]['user_id'])
-
-        for key in article_info_param_names:
-            self.assertEqual(json.loads(params['body'])[key], article_info_after[0][key])
-
-        for key in article_content_param_names:
-            self.assertEqual(json.loads(params['body'])[key], article_content_after[0][key])
+        for key, value in json.loads(params['body']).items():
+            self.assertEqual(value, article_content_after[0][key])
 
     def test_main_ok_with_empty_string(self):
         params = {
@@ -129,10 +117,7 @@ class TestMeArticlesDraftsUpdate(TestCase):
                 'article_id': 'draftId00001'
             },
             'body': {
-                'eye_catch_url': 'http://example.com/update',
-                'title': '',
-                'body': '',
-                'overview': ''
+                'body': ''
             },
             'requestContext': {
                 'authorizer': {
@@ -147,19 +132,12 @@ class TestMeArticlesDraftsUpdate(TestCase):
 
         params['body'] = json.dumps(params['body'])
 
-        response = MeArticlesDraftsUpdate(params, {}, self.dynamodb).main()
-        article_info = self.article_info_table.get_item(
-            Key={'article_id': params['pathParameters']['article_id']}
-        )['Item']
-
+        response = MeArticlesDraftsUpdateBody(params, {}, self.dynamodb).main()
         article_content = self.article_content_table.get_item(
             Key={'article_id': params['pathParameters']['article_id']}
         )['Item']
 
         self.assertEqual(response['statusCode'], 200)
-        self.assertEqual(article_info['title'], None)
-        self.assertEqual(article_info['overview'], None)
-        self.assertEqual(article_content['title'], None)
         self.assertEqual(article_content['body'], None)
 
     def test_main_ok_article_content_not_exists(self):
@@ -168,10 +146,7 @@ class TestMeArticlesDraftsUpdate(TestCase):
                 'article_id': 'draftId00003'
             },
             'body': {
-                'eye_catch_url': 'http://example.com/update',
-                'title': 'A' * 255,
                 'body': 'A' * 65535,
-                'overview': 'A' * 100
             },
             'requestContext': {
                 'authorizer': {
@@ -186,33 +161,19 @@ class TestMeArticlesDraftsUpdate(TestCase):
 
         params['body'] = json.dumps(params['body'])
 
-        article_info_before = self.article_info_table.scan()['Items']
         article_content_before = self.article_content_table.scan()['Items']
 
-        me_articles_drafts_update = MeArticlesDraftsUpdate(params, {}, self.dynamodb)
+        me_articles_drafts_update_body = MeArticlesDraftsUpdateBody(params, {}, self.dynamodb)
+        response = me_articles_drafts_update_body.main()
 
-        response = me_articles_drafts_update.main()
-
-        article_info_after = self.article_info_table.scan()['Items']
         article_content_after = self.article_content_table.scan()['Items']
 
         self.assertEqual(response['statusCode'], 200)
-        self.assertEqual(len(article_info_after) - len(article_info_before), 0)
         self.assertEqual(len(article_content_after) - len(article_content_before), 1)
 
-        article_info_param_names = ['eye_catch_url', 'title', 'overview']
-        article_content_param_names = ['title', 'body']
-
-        self.assertEqual(params['requestContext']['authorizer']['claims']['cognito:username'],
-                         article_info_after[0]['user_id'])
-
-        for key in article_info_param_names:
-            target = [info for info in article_info_after if info['article_id'] == 'draftId00003'][0]
-            self.assertEqual(json.loads(params['body'])[key], target[key])
-
-        for key in article_content_param_names:
+        for key, value in json.loads(params['body']).items():
             target = [content for content in article_content_after if content['article_id'] == 'draftId00003'][0]
-            self.assertEqual(json.loads(params['body'])[key], target[key])
+            self.assertEqual(value, target[key])
 
     def test_call_validate_article_existence(self):
         params = {
@@ -220,10 +181,7 @@ class TestMeArticlesDraftsUpdate(TestCase):
                 'article_id': 'draftId00001'
             },
             'body': {
-                'eye_catch_url': 'http://example.com/update',
-                'title': 'update title',
-                'body': '<p>update body</p>',
-                'overview': 'update overview'
+                'body': '<p>update body</p>'
             },
             'requestContext': {
                 'authorizer': {
@@ -239,8 +197,8 @@ class TestMeArticlesDraftsUpdate(TestCase):
         params['body'] = json.dumps(params['body'])
 
         mock_lib = MagicMock()
-        with patch('me_articles_drafts_update.DBUtil', mock_lib):
-            MeArticlesDraftsUpdate(params, {}, self.dynamodb).main()
+        with patch('me_articles_drafts_update_body.DBUtil', mock_lib):
+            MeArticlesDraftsUpdateBody(params, {}, self.dynamodb).main()
             args, kwargs = mock_lib.validate_article_existence.call_args
 
             self.assertTrue(mock_lib.validate_article_existence.called)
@@ -248,7 +206,36 @@ class TestMeArticlesDraftsUpdate(TestCase):
             self.assertTrue(args[1])
             self.assertTrue(kwargs['user_id'])
             self.assertEqual(kwargs['status'], 'draft')
-            self.assertEqual(kwargs['version'], 1)
+            self.assertEqual(kwargs['version'], 2)
+
+    def test_call_sanitize_article_body_v2(self):
+        body_str = '<p>update body</p>'
+        params = {
+            'pathParameters': {
+                'article_id': 'draftId00001'
+            },
+            'body': {
+                'body': body_str
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
+            }
+        }
+
+        params['body'] = json.dumps(params['body'])
+
+        mock_lib = MagicMock()
+        with patch('me_articles_drafts_update_body.TextSanitizer', mock_lib):
+            MeArticlesDraftsUpdateBody(params, {}, self.dynamodb).main()
+            args, kwargs = mock_lib.sanitize_article_body_v2.call_args
+            self.assertTrue(mock_lib.sanitize_article_body_v2.called)
+            self.assertEqual(args[0], body_str)
 
     def test_validation_with_no_params(self):
         params = {}
@@ -270,23 +257,9 @@ class TestMeArticlesDraftsUpdate(TestCase):
     def test_validation_with_no_path_params(self):
         params = {
             'body': {
-                'title': 'A' * 200
+                'body': 'A' * 200
             },
             'pathParameters': {}
-        }
-
-        params['body'] = json.dumps(params['body'])
-
-        self.assert_bad_request(params)
-
-    def test_validation_title_max(self):
-        params = {
-            'body': {
-                'title': 'A' * 256
-            },
-            'pathParameters': {
-                'article_id': 'A' * 12
-            }
         }
 
         params['body'] = json.dumps(params['body'])
@@ -307,55 +280,10 @@ class TestMeArticlesDraftsUpdate(TestCase):
 
         self.assert_bad_request(params)
 
-    def test_validation_eye_catch_url_max(self):
-        prefix = 'http://'
-
-        params = {
-            'body': {
-                'eye_catch_url': prefix + 'A' * (2049 - len(prefix))
-            },
-            'pathParameters': {
-                'article_id': 'A' * 12
-            }
-        }
-
-        params['body'] = json.dumps(params['body'])
-
-        self.assert_bad_request(params)
-
-    def test_validation_eye_catch_url_format(self):
-        params = {
-            'body': {
-                'eye_catch_url': 'ALIS-invalid-url',
-                'body': 'A' * 200
-            },
-            'pathParameters': {
-                'article_id': 'A' * 12
-            }
-        }
-
-        params['body'] = json.dumps(params['body'])
-
-        self.assert_bad_request(params)
-
-    def test_validation_overview_max(self):
-        params = {
-            'body': {
-                'overview': 'A' * 101
-            },
-            'pathParameters': {
-                'article_id': 'A' * 12
-            }
-        }
-
-        params['body'] = json.dumps(params['body'])
-
-        self.assert_bad_request(params)
-
     def test_validation_article_id_max(self):
         params = {
             'body': {
-                'overview': 'A' * 50
+                'body': 'A' * 50
             },
             'pathParameters': {
                 'article_id': 'A' * 13
@@ -369,7 +297,7 @@ class TestMeArticlesDraftsUpdate(TestCase):
     def test_validation_article_id_min(self):
         params = {
             'body': {
-                'overview': 'A' * 50
+                'body': 'A' * 50
             },
             'pathParameters': {
                 'article_id': 'A' * 11

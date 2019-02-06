@@ -227,3 +227,127 @@ class TestTextSanitizer(TestCase):
         result = TextSanitizer.sanitize_article_body(target_html)
 
         self.assertEqual(result, expected_html)
+
+    def test_sanitize_article_body_v2(self):
+        target_html = '''
+            <p>test</p>
+            <h2>H2</h2>
+            <h3>H3</h3>
+            <blockquote>
+              <p>引用</p>
+            </blockquote>
+            <p><strong>太字</strong></p>
+            <p><i>斜体</i></p>
+            <p><a href="https://example.com/">リンク付与</a></p>
+            <figure class="media">
+              <oembed url="https://{domain}/"></oembed>
+            </figure>
+            <figure class="image">
+              <img src="https://{domain}/test.png">
+            </figure>
+            <figure class="image image-style-align-right">
+              <img src="https://{domain}/test.png">
+            </figure>
+            <figure class="image image-style-align-left">
+              <img src="https://{domain}/test.png">
+            </figure>
+            <figure class="image image-style-align-left">
+              <img src="https://{domain}/test.png">
+              <figcaption>hoge</figcaption>
+            </figure>
+            <p>shift+enter<br>test</p>
+        '''.format(domain=os.environ['DOMAIN'])
+
+        result = TextSanitizer.sanitize_article_body_v2(target_html)
+
+        self.assertEqual(result, target_html)
+
+    def test_sanitize_article_body_v2_with_evil_img_tag(self):
+        target_html = '''
+        <h2>sample h2</h2>
+        <img src="http://{domain}/hoge.png" onerror='document.alert('evil')'>
+        '''.format(domain=os.environ['DOMAIN'])
+
+        expected_html = '''
+        <h2>sample h2</h2>
+        <img src="http://{domain}/hoge.png">
+        '''.format(domain=os.environ['DOMAIN'])
+
+        result = TextSanitizer.sanitize_article_body_v2(target_html)
+
+        self.assertEqual(result, expected_html)
+
+    def test_sanitize_article_body_v2_with_evil_other_site_url(self):
+        target_html = '''
+         <h2>sample h2</h2>
+         <img src="http://hoge.com/hoge.png">
+         '''
+
+        expected_html = '''
+         <h2>sample h2</h2>
+         <img>
+         '''
+
+        result = TextSanitizer.sanitize_article_body_v2(target_html)
+
+        self.assertEqual(result, expected_html)
+
+    def test_sanitize_article_body_v2_with_evil_a_tag(self):
+        target_html = '''
+        <h2>sample h2</h2>
+        <a href="http://example.com" onclick="document.alert('evil')">link</a>
+        '''
+
+        expected_html = '''
+        <h2>sample h2</h2>
+        <a href="http://example.com">link</a>
+        '''
+
+        result = TextSanitizer.sanitize_article_body(target_html)
+
+        self.assertEqual(result, expected_html)
+
+    def test_sanitize_article_body_with_figure_unauthorized_class(self):
+        target_html = '''
+        <h2>sample h2</h2>
+        <figure class='image hogehoge' data='aaa'></figure>
+        '''
+
+        expected_html = '''
+        <h2>sample h2</h2>
+        <figure></figure>
+        '''
+
+        result = TextSanitizer.sanitize_article_body_v2(target_html)
+
+        self.assertEqual(result, expected_html)
+
+    def test_sanitize_article_body_with_oembed_unauthorized_class(self):
+        target_html = '''
+        <h2>sample h2</h2>
+        <oembed src='hogehoge' data='aaa'></oembed>
+        '''
+
+        expected_html = '''
+        <h2>sample h2</h2>
+        <oembed></oembed>
+        '''
+
+        result = TextSanitizer.sanitize_article_body_v2(target_html)
+
+        self.assertEqual(result, expected_html)
+
+    def test_sanitize_article_body_with_a_unauthorized_class(self):
+        target_html = '''
+        <h2>sample h2</h2>
+        <a href='hogehoge' data='aaa'></a>
+        '''
+
+        expected_html = '''
+        <h2>sample h2</h2>
+        <a></a>
+        '''
+
+        result = TextSanitizer.sanitize_article_body_v2(target_html)
+
+        self.assertEqual(result, expected_html)
