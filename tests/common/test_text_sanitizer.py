@@ -340,12 +340,12 @@ class TestTextSanitizer(TestCase):
     def test_sanitize_article_body_with_a_unauthorized_class(self):
         target_html = '''
         <h2>sample h2</h2>
-        <a href='hogehoge' data='aaa'></a>
+        <a href="hogehoge" data='aaa'></a>
         '''
 
         expected_html = '''
         <h2>sample h2</h2>
-        <a></a>
+        <a href="hogehoge"></a>
         '''
 
         result = TextSanitizer.sanitize_article_body_v2(target_html)
