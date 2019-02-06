@@ -928,6 +928,27 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+          /me/articles/drafts/article_id:
+            post:
+              description: 'article_idを作成'
+              responses:
+                '200':
+                  description: '作成された記事ID'
+                  schema:
+                    type: object
+                    properties:
+                      article_id:
+                        type: 'string'
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesDraftsArticleIdCreate.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
           /me/articles/{article_id}/drafts/publish:
             put:
               description: "指定された article_id の下書き記事を公開"
@@ -2284,6 +2305,22 @@ Resources:
             Type: Api
             Properties:
               Path: /me/articles/drafts
+              Method: post
+              RestApiId: !Ref RestApi
+  MeArticlesDraftsArticleIdCreate:
+      Type: AWS::Serverless::Function
+      Properties:
+        Handler: handler.lambda_handler
+        Role: !GetAtt LambdaRole.Arn
+        CodeUri: ./deploy/me_articles_drafts_article_id_create.zip
+        Environment:
+          Variables:
+            SALT_FOR_ARTICLE_ID: !Ref SaltForArticleId
+        Events:
+          Api:
+            Type: Api
+            Properties:
+              Path: /me/articles/drafts/article_id
               Method: post
               RestApiId: !Ref RestApi
   MeArticlesDraftsPublish:
