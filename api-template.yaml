@@ -191,22 +191,22 @@ Resources:
                 type: string
               overview:
                 type: string
-          MeArticlesDraftsUpdateTitle:
+          MeArticlesDraftsTitleUpdate:
             type: object
             properties:
               title:
                 type: string
-          MeArticlesPublicUpdateTitle:
+          MeArticlesPublicTitleUpdate:
             type: object
             properties:
               title:
                 type: string
-          MeArticlesDraftsUpdateBody:
+          MeArticlesDraftsBodyUpdate:
             type: object
             properties:
               body:
                 type: string
-          MeArticlesPublicUpdateBody:
+          MeArticlesPublicBodyUpdate:
             type: object
             properties:
               body:
@@ -1615,7 +1615,7 @@ Resources:
                 description: 'title object'
                 required: true
                 schema:
-                  $ref: '#/definitions/MeArticlesDraftsUpdateTitle'
+                  $ref: '#/definitions/MeArticlesDraftsTitleUpdate'
               responses:
                 '200':
                   description: 'successful operation'
@@ -1625,7 +1625,7 @@ Resources:
                 responses:
                   default:
                     statusCode: '200'
-                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesDraftsUpdateTitle.Arn}/invocations
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesDraftsTitleUpdate.Arn}/invocations
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
@@ -1643,7 +1643,7 @@ Resources:
                 description: 'body object'
                 required: true
                 schema:
-                  $ref: '#/definitions/MeArticlesDraftsUpdateBody'
+                  $ref: '#/definitions/MeArticlesDraftsBodyUpdate'
               responses:
                 '200':
                   description: 'successful operation'
@@ -1653,7 +1653,7 @@ Resources:
                 responses:
                   default:
                     statusCode: '200'
-                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesDraftsUpdateBody.Arn}/invocations
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesDraftsBodyUpdate.Arn}/invocations
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
@@ -1671,7 +1671,7 @@ Resources:
                 description: 'title object'
                 required: true
                 schema:
-                  $ref: '#/definitions/MeArticlesPublicUpdateTitle'
+                  $ref: '#/definitions/MeArticlesPublicTitleUpdate'
               responses:
                 '200':
                   description: 'successful operation'
@@ -1681,7 +1681,7 @@ Resources:
                 responses:
                   default:
                     statusCode: '200'
-                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesPublicUpdateTitle.Arn}/invocations
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesPublicTitleUpdate.Arn}/invocations
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
@@ -1699,7 +1699,7 @@ Resources:
                 description: 'body object'
                 required: true
                 schema:
-                  $ref: '#/definitions/MeArticlesPublicUpdateBody'
+                  $ref: '#/definitions/MeArticlesPublicBodyUpdate'
               responses:
                 '200':
                   description: 'successful operation'
@@ -1709,7 +1709,7 @@ Resources:
                 responses:
                   default:
                     statusCode: '200'
-                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesPublicUpdateBody.Arn}/invocations
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesPublicBodyUpdate.Arn}/invocations
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
@@ -2244,12 +2244,12 @@ Resources:
               Path: /me/articles/{article_id}/drafts
               Method: put
               RestApiId: !Ref RestApi
-  MeArticlesDraftsUpdateTitle:
+  MeArticlesDraftsTitleUpdate:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
       Role: !GetAtt LambdaRole.Arn
-      CodeUri: ./deploy/me_articles_drafts_update_title.zip
+      CodeUri: ./deploy/me_articles_drafts_title_update.zip
       Events:
         Api:
           Type: Api
@@ -2257,12 +2257,12 @@ Resources:
             Path: /me/articles/{article_id}/drafts/title
             Method: put
             RestApiId: !Ref RestApi
-  MeArticlesDraftsUpdateBody:
+  MeArticlesDraftsBodyUpdate:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
       Role: !GetAtt LambdaRole.Arn
-      CodeUri: ./deploy/me_articles_drafts_update_body.zip
+      CodeUri: ./deploy/me_articles_drafts_body_update.zip
       Events:
         Api:
           Type: Api
@@ -2322,12 +2322,12 @@ Resources:
             Path: /me/articles/{article_id}/public
             Method: put
             RestApiId: !Ref RestApi
-  MeArticlesPublicUpdateTitle:
+  MeArticlesPublicTitleUpdate:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
       Role: !GetAtt LambdaRole.Arn
-      CodeUri: ./deploy/me_articles_public_update_title.zip
+      CodeUri: ./deploy/me_articles_public_title_update.zip
       Events:
         Api:
           Type: Api
@@ -2335,12 +2335,12 @@ Resources:
             Path: /me/articles/{article_id}/public/title
             Method: put
             RestApiId: !Ref RestApi
-  MeArticlesPublicUpdateBody:
+  MeArticlesPublicBodyUpdate:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
       Role: !GetAtt LambdaRole.Arn
-      CodeUri: ./deploy/me_articles_public_update_body.zip
+      CodeUri: ./deploy/me_articles_public_body_update.zip
       Events:
         Api:
           Type: Api

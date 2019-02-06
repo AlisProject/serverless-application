@@ -1,12 +1,12 @@
 import json
 import os
 from unittest import TestCase
-from me_articles_public_update_body import MeArticlesPublicUpdateBody
+from me_articles_public_title_update import MeArticlesPublicTitleUpdate
 from unittest.mock import patch, MagicMock
 from tests_util import TestsUtil
 
 
-class TestMeArticlesPublicUpdate(TestCase):
+class TestMeArticlesPublicTitleUpdate(TestCase):
     dynamodb = TestsUtil.get_dynamodb_client()
 
     @classmethod
@@ -73,8 +73,8 @@ class TestMeArticlesPublicUpdate(TestCase):
         TestsUtil.delete_all_tables(self.dynamodb)
 
     def assert_bad_request(self, params):
-        me_articles_public_update_body = MeArticlesPublicUpdateBody(params, {}, self.dynamodb)
-        response = me_articles_public_update_body.main()
+        me_articles_public_title_update = MeArticlesPublicTitleUpdate(params, {}, self.dynamodb)
+        response = me_articles_public_title_update.main()
 
         self.assertEqual(response['statusCode'], 400)
 
@@ -84,7 +84,7 @@ class TestMeArticlesPublicUpdate(TestCase):
                 'article_id': 'publicId0001'
             },
             'body': {
-                'body': '<p>update body</p>'
+                'title': 'title text'
             },
             'requestContext': {
                 'authorizer': {
@@ -100,7 +100,7 @@ class TestMeArticlesPublicUpdate(TestCase):
         article_content_edit_before = self.article_content_edit_table.scan()['Items']
 
         params['body'] = json.dumps(params['body'])
-        response = MeArticlesPublicUpdateBody(params, {}, self.dynamodb).main()
+        response = MeArticlesPublicTitleUpdate(params, {}, self.dynamodb).main()
 
         article_content_edit_after = self.article_content_edit_table.scan()['Items']
 
@@ -123,7 +123,7 @@ class TestMeArticlesPublicUpdate(TestCase):
                 'article_id': 'publicId0001'
             },
             'body': {
-                'body': ''
+                'title': ''
             },
             'requestContext': {
                 'authorizer': {
@@ -137,7 +137,7 @@ class TestMeArticlesPublicUpdate(TestCase):
         }
 
         params['body'] = json.dumps(params['body'])
-        response = MeArticlesPublicUpdateBody(params, {}, self.dynamodb).main()
+        response = MeArticlesPublicTitleUpdate(params, {}, self.dynamodb).main()
         article_content_edit = self.article_content_edit_table.get_item(
             Key={'article_id': params['pathParameters']['article_id']}
         )['Item']
@@ -147,12 +147,11 @@ class TestMeArticlesPublicUpdate(TestCase):
         expected_items = {
             'article_id': self.article_content_edit_items[0].get('article_id'),
             'eye_catch_url': self.article_content_edit_items[0].get('eye_catch_url'),
-            'title': self.article_content_edit_items[0].get('title'),
-            'body': None,
+            'title': None,
+            'body': self.article_content_edit_items[0].get('body'),
             'overview': self.article_content_edit_items[0].get('overview'),
             'user_id': self.article_content_edit_items[0].get('user_id'),
         }
-
         self.assertEqual(article_content_edit, expected_items)
 
     def test_main_ok_with_no_article_edit_content(self):
@@ -161,7 +160,7 @@ class TestMeArticlesPublicUpdate(TestCase):
                 'article_id': 'publicId0002'
             },
             'body': {
-                'body': 'A' * 65535
+                'title': 'A' * 255
             },
             'requestContext': {
                 'authorizer': {
@@ -177,7 +176,7 @@ class TestMeArticlesPublicUpdate(TestCase):
         article_content_edit_before = self.article_content_edit_table.scan()['Items']
 
         params['body'] = json.dumps(params['body'])
-        response = MeArticlesPublicUpdateBody(params, {}, self.dynamodb).main()
+        response = MeArticlesPublicTitleUpdate(params, {}, self.dynamodb).main()
 
         article_content_edit_after = self.article_content_edit_table.scan()['Items']
 
@@ -200,7 +199,7 @@ class TestMeArticlesPublicUpdate(TestCase):
                 'article_id': 'publicId0001'
             },
             'body': {
-                'body': '<p>update body</p>'
+                'title': 'test text'
             },
             'requestContext': {
                 'authorizer': {
@@ -216,10 +215,9 @@ class TestMeArticlesPublicUpdate(TestCase):
         params['body'] = json.dumps(params['body'])
 
         mock_lib = MagicMock()
-        with patch('me_articles_public_update_body.DBUtil', mock_lib):
-            MeArticlesPublicUpdateBody(params, {}, self.dynamodb).main()
+        with patch('me_articles_public_title_update.DBUtil', mock_lib):
+            MeArticlesPublicTitleUpdate(params, {}, self.dynamodb).main()
             args, kwargs = mock_lib.validate_article_existence.call_args
-
             self.assertTrue(mock_lib.validate_article_existence.called)
             self.assertTrue(args[0])
             self.assertTrue(args[1])
@@ -227,14 +225,14 @@ class TestMeArticlesPublicUpdate(TestCase):
             self.assertEqual(kwargs['status'], 'public')
             self.assertEqual(kwargs['version'], 2)
 
-    def test_call_sanitize_article_body_v2(self):
-        body_str = '<p>update body</p>'
+    def test_call_sanitize_text(self):
+        title_str = 'test text'
         params = {
             'pathParameters': {
                 'article_id': 'publicId0001'
             },
             'body': {
-                'body': body_str
+                'title': title_str
             },
             'requestContext': {
                 'authorizer': {
@@ -250,11 +248,11 @@ class TestMeArticlesPublicUpdate(TestCase):
         params['body'] = json.dumps(params['body'])
 
         mock_lib = MagicMock()
-        with patch('me_articles_public_update_body.TextSanitizer', mock_lib):
-            MeArticlesPublicUpdateBody(params, {}, self.dynamodb).main()
-            args, kwargs = mock_lib.sanitize_article_body_v2.call_args
-            self.assertTrue(mock_lib.sanitize_article_body_v2.called)
-            self.assertEqual(args[0], body_str)
+        with patch('me_articles_public_title_update.TextSanitizer', mock_lib):
+            MeArticlesPublicTitleUpdate(params, {}, self.dynamodb).main()
+            args, kwargs = mock_lib.sanitize_text.call_args
+            self.assertTrue(mock_lib.sanitize_text.called)
+            self.assertEqual(args[0], title_str)
 
     def test_validation_with_no_params(self):
         params = {}
@@ -276,7 +274,7 @@ class TestMeArticlesPublicUpdate(TestCase):
     def test_validation_with_no_path_params(self):
         params = {
             'body': {
-                'body': 'A' * 200
+                'title': 'A' * 200
             },
             'pathParameters': {}
         }
@@ -285,10 +283,10 @@ class TestMeArticlesPublicUpdate(TestCase):
 
         self.assert_bad_request(params)
 
-    def test_validation_body_max(self):
+    def test_validation_title_max(self):
         params = {
             'body': {
-                'body': 'A' * 65536
+                'title': 'A' * 256
             },
             'pathParameters': {
                 'article_id': 'A' * 12
@@ -302,7 +300,7 @@ class TestMeArticlesPublicUpdate(TestCase):
     def test_validation_article_id_max(self):
         params = {
             'body': {
-                'body': 'A' * 50
+                'title': 'A' * 50
             },
             'pathParameters': {
                 'article_id': 'A' * 13
@@ -316,7 +314,7 @@ class TestMeArticlesPublicUpdate(TestCase):
     def test_validation_article_id_min(self):
         params = {
             'body': {
-                'overview': 'A' * 50
+                'title': 'A' * 50
             },
             'pathParameters': {
                 'article_id': 'A' * 11
