@@ -106,14 +106,6 @@ class TextSanitizer:
         return False
 
     @staticmethod
-    def allow_a_v2(tag, name, value):
-        if name == 'href':
-            p = urlparse(value)
-            is_url = len(p.scheme) > 0 and len(p.netloc) > 0
-            return is_url
-        return False
-
-    @staticmethod
     def sanitize_article_body_v2(text):
         if text is None:
             return
@@ -122,7 +114,7 @@ class TextSanitizer:
             text=text,
             tags=settings.html_allowed_tags_v2,
             attributes={
-                'a': TextSanitizer.allow_a_v2,
+                'a': ['href'],
                 'img': TextSanitizer.allow_img_v2,
                 'figure': TextSanitizer.allow_figure_v2,
                 'oembed': TextSanitizer.allow_oembed_v2
