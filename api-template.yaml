@@ -334,7 +334,7 @@ Resources:
             properties:
               topic:
                 type: string
-              tgas:
+              tags:
                 type: array
                 items:
                   type: string
@@ -343,7 +343,7 @@ Resources:
             properties:
               topic:
                 type: string
-              tgas:
+              tags:
                 type: array
                 items:
                   type: string

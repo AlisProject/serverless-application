@@ -134,7 +134,7 @@ class TestMeArticlesDraftsArticleIdCreate(TestCase):
         'me_articles_drafts_article_id_create.MeArticlesDraftsArticleIdCreate.'
         '_MeArticlesDraftsArticleIdCreate__generate_article_id',
         MagicMock(return_value='HOGEHOGEHOGE'))
-    def test_main_with_article_id_already_exsits(self):
+    def test_main_with_article_id_already_exists(self):
         self.article_info_table.put_item(
             Item={
                 'article_id': 'HOGEHOGEHOGE',
@@ -173,7 +173,7 @@ class TestMeArticlesDraftsArticleIdCreate(TestCase):
         'me_articles_drafts_article_id_create.MeArticlesDraftsArticleIdCreate.'
         '_MeArticlesDraftsArticleIdCreate__generate_article_id',
         MagicMock(return_value='HOGEHOGEHOGE'))
-    def test_create_article_content_with_article_id_already_exsits(self):
+    def test_create_article_content_with_article_id_already_exists(self):
         self.article_content_table.put_item(
             Item={
                 'article_id': 'HOGEHOGEHOGE',
