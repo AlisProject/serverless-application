@@ -641,7 +641,7 @@ paths:
             items:
               $ref: '#/definitions/ArticleInfo'
       security:
-        - cognitoUserPool: []
+        - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -669,7 +669,7 @@ paths:
               article_id:
                 type: 'string'
       security:
-        - cognitoUserPool: []
+        - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -691,7 +691,7 @@ paths:
               article_id:
                 type: 'string'
       security:
-        - cognitoUserPool: []
+        - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -720,7 +720,7 @@ paths:
         '200':
           description: 'successful operation'
       security:
-        - cognitoUserPool: []
+        - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -749,7 +749,7 @@ paths:
         '200':
           description: 'successful operation'
       security:
-        - cognitoUserPool: []
+        - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -788,7 +788,7 @@ paths:
             items:
               $ref: '#/definitions/ArticleInfo'
       security:
-        - cognitoUserPool: []
+        - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -813,7 +813,7 @@ paths:
           schema:
             $ref: '#/definitions/ArticleContent'
       security:
-        - cognitoUserPool: []
+        - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -841,7 +841,7 @@ paths:
         '200':
           description: 'successful operation'
       security:
-        - cognitoUserPool: []
+        - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -866,7 +866,7 @@ paths:
           schema:
             $ref: '#/definitions/ArticleContent'
       security:
-        - cognitoUserPool: []
+        - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -889,7 +889,7 @@ paths:
         '200':
           description: 'successful operation'
       security:
-        - cognitoUserPool: []
+        - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -918,7 +918,7 @@ paths:
         '200':
           description: 'successful operation'
       security:
-        - cognitoUserPool: []
+        - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -947,7 +947,7 @@ paths:
         '200':
           description: 'successful operation'
       security:
-        - cognitoUserPool: []
+        - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -975,7 +975,7 @@ paths:
               liked:
                 type: boolean
       security:
-        - cognitoUserPool: []
+        - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -1003,7 +1003,7 @@ paths:
               comment_id:
                 type: 'string'
       security:
-        - cognitoUserPool: []
+        - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -1046,7 +1046,7 @@ paths:
               comment_id:
                 type: 'string'
       security:
-      - cognitoUserPool: []
+      - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -1078,7 +1078,7 @@ paths:
                   enum:
                     - "comment_id"
       security:
-        - cognitoUserPool: []
+        - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -1101,7 +1101,7 @@ paths:
         '200':
           description: 'コメント削除の完了'
       security:
-        - cognitoUserPool: []
+        - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -1124,7 +1124,7 @@ paths:
         '200':
           description: 'いいねの完了'
       security:
-        - cognitoUserPool: []
+        - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -1152,7 +1152,7 @@ paths:
         '200':
           description: '不正報告の実施成功'
       security:
-        - cognitoUserPool: []
+        - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -1193,7 +1193,7 @@ paths:
               image_url:
                 type: 'string'
       security:
-        - cognitoUserPool: []
+        - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -1237,7 +1237,7 @@ paths:
               image_url:
                 type: 'string'
       security:
-      - cognitoUserPool: []
+      - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -1256,7 +1256,7 @@ paths:
           schema:
             $ref: '#/definitions/UserInfo'
       security:
-        - cognitoUserPool: []
+        - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -1279,7 +1279,7 @@ paths:
         '200':
           description: 'ユーザ情報更新成功'
       security:
-        - cognitoUserPool: []
+        - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -1311,7 +1311,7 @@ paths:
               image_url:
                 type: 'string'
       security:
-        - cognitoUserPool: []
+        - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -1378,7 +1378,7 @@ paths:
           schema:
             $ref: '#/definitions/ArticleContent'
       security:
-        - cognitoUserPool: []
+        - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -1406,7 +1406,7 @@ paths:
         '200':
           description: 'successful operation'
       security:
-        - cognitoUserPool: []
+        - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -1435,7 +1435,7 @@ paths:
         '200':
           description: 'successful operation'
       security:
-        - cognitoUserPool: []
+        - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -1464,7 +1464,7 @@ paths:
         '200':
           description: 'successful operation'
       security:
-        - cognitoUserPool: []
+        - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -1493,7 +1493,7 @@ paths:
         '200':
           description: 'successful operation'
       security:
-      - cognitoUserPool: []
+      - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -1522,7 +1522,7 @@ paths:
         '200':
           description: 'successful operation'
       security:
-      - cognitoUserPool: []
+      - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -1564,7 +1564,7 @@ paths:
           schema:
            $ref: '#/definitions/MeWalletBalance'
       security:
-        - cognitoUserPool: []
+        - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -1583,7 +1583,7 @@ paths:
           schema:
             $ref: '#/definitions/DistributedTokens'
       security:
-        - cognitoUserPool: []
+        - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -1604,7 +1604,7 @@ paths:
             items:
               $ref: '#/definitions/Notification'
       security:
-        - cognitoUserPool: []
+        - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -1626,7 +1626,7 @@ paths:
               unread:
                 type: boolean
       security:
-        - cognitoUserPool: []
+        - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -1642,7 +1642,7 @@ paths:
         '200':
           description: 'successful operation'
       security:
-        - cognitoUserPool: []
+        - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -1689,7 +1689,7 @@ paths:
         '200':
           description: '不正報告の実施成功'
       security:
-      - cognitoUserPool: []
+      - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
