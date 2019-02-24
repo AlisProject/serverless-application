@@ -57,10 +57,13 @@ class Authorizer:
             }
         }
 
-    # TODO: 詳細が決まり次第ロジックは変更する
     def __get_required_scopes(self, http_method, resource_path):
-        # 全てのAPIcallにはread権限が必要
+        # 全てのAPIcallには最低でもread権限が必要
         scopes = [settings.AUTHLETE_SCOPE_READ]
+
+        # 未読管理の更新のみ例外としてread権限でもAPI呼び出し可能
+        if resource_path == 'me/unread_notification_managers' and http_method == 'PUT':
+            return scopes
 
         # GET以外のHTTPメソッドの場合はwriteスコープも必要
         if http_method != 'GET':

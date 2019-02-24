@@ -146,5 +146,17 @@ class TestAuthorizer(TestCase):
         self.assertEqual(resource_path, 'articles/images:batchGet')
 
     def test_get_required_scopes(self):
-        # TODO: scopeの詳細が決まり次第実装する
-        pass
+        # http_method, resource_path, expected(scope)の順でテストケースを定義
+        cases = [
+            ['GET', 'me/unread_notification_managers', ['read']],
+            ['PUT', 'me/unread_notification_managers', ['read']],
+            ['POST', 'me/unread_notification_managers', ['read', 'write']],
+            ['POST', 'me/users/fraud', ['read', 'write']]
+        ]
+
+        authorizer = Authorizer({}, {})
+
+        for case in cases:
+            with self.subTest():
+                scope = authorizer._Authorizer__get_required_scopes(case[0], case[1])
+                self.assertEqual(scope, case[2])
