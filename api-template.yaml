@@ -451,6 +451,22 @@ Resources:
               Path: /me/articles/drafts
               Method: post
               RestApiId: !Ref RestApi
+  MeArticlesDraftsArticleIdCreate:
+      Type: AWS::Serverless::Function
+      Properties:
+        Handler: handler.lambda_handler
+        Role: !GetAtt LambdaRole.Arn
+        CodeUri: ./deploy/me_articles_drafts_article_id_create.zip
+        Environment:
+          Variables:
+            SALT_FOR_ARTICLE_ID: !Ref SaltForArticleId
+        Events:
+          Api:
+            Type: Api
+            Properties:
+              Path: /me/articles/drafts/article_id
+              Method: post
+              RestApiId: !Ref RestApi
   MeArticlesDraftsPublish:
     Type: AWS::Serverless::Function
     Properties:
@@ -462,6 +478,19 @@ Resources:
           Type: Api
           Properties:
             Path: /me/articles/{article_id}/drafts/publish
+            Method: put
+            RestApiId: !Ref RestApi
+  MeArticlesDraftsPublishWithHeader:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_articles_drafts_publish_with_header.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/articles/{article_id}/drafts/publish_with_header
             Method: put
             RestApiId: !Ref RestApi
   MeArticlesDraftsUpdate:
@@ -477,6 +506,32 @@ Resources:
               Path: /me/articles/{article_id}/drafts
               Method: put
               RestApiId: !Ref RestApi
+  MeArticlesDraftsTitleUpdate:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_articles_drafts_title_update.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/articles/{article_id}/drafts/title
+            Method: put
+            RestApiId: !Ref RestApi
+  MeArticlesDraftsBodyUpdate:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_articles_drafts_body_update.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/articles/{article_id}/drafts/body
+            Method: put
+            RestApiId: !Ref RestApi
   MeArticlesPublicIndex:
     Type: AWS::Serverless::Function
     Properties:
@@ -529,6 +584,32 @@ Resources:
             Path: /me/articles/{article_id}/public
             Method: put
             RestApiId: !Ref RestApi
+  MeArticlesPublicTitleUpdate:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_articles_public_title_update.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/articles/{article_id}/public/title
+            Method: put
+            RestApiId: !Ref RestApi
+  MeArticlesPublicBodyUpdate:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_articles_public_body_update.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/articles/{article_id}/public/body
+            Method: put
+            RestApiId: !Ref RestApi
   MeArticlesPublicUnpublish:
     Type: AWS::Serverless::Function
     Properties:
@@ -553,6 +634,19 @@ Resources:
           Type: Api
           Properties:
             Path: /me/articles/{article_id}/public/republish
+            Method: put
+            RestApiId: !Ref RestApi
+  MeArticlesPublicRepublishWithHeader:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_articles_public_republish_with_header.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/articles/{article_id}/public/republish_with_header
             Method: put
             RestApiId: !Ref RestApi
   MeArticlesLikeCreate:

@@ -39,14 +39,14 @@ class CustomMessage(LambdaBase):
         if self.event['triggerSource'] == 'CustomMessage_ForgotPassword':
             self.event['response']['smsMessage'] = '{user}さんのパスワード再設定コードは {code} です。'.format(
                 user=self.event['userName'], code=self.event['request']['codeParameter'])
-            self.event['response']['emailSubject'] = 'パスワード再設定コード'
+            self.event['response']['emailSubject'] = '【ALIS】パスワードの変更：再設定コードの送付'
             self.event['response']['emailMessage'] = "{user}さんのパスワード再設定コードは {code} です".format(
                 code=self.event['request']['codeParameter'],
                 user=self.event['userName'])
         else:
-            self.event['response']['smsMessage'] = 'ALISです。\n{user}さんの検証コードは {code} です。'.format(
+            self.event['response']['smsMessage'] = 'ALISです。\n{user}さんの認証コードは {code} です。'.format(
                 user=self.event['userName'], code=self.event['request']['codeParameter'])
-            self.event['response']['emailSubject'] = 'Email確認リンク'
+            self.event['response']['emailSubject'] = '【ALIS】登録のご案内：メールアドレスの確認'
             self.event['response']['emailMessage'] = """\
 {user}様
 

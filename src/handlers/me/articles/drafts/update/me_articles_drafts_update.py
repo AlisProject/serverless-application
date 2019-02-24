@@ -37,7 +37,8 @@ class MeArticlesDraftsUpdate(LambdaBase):
             self.dynamodb,
             self.params['article_id'],
             user_id=self.event['requestContext']['authorizer']['claims']['cognito:username'],
-            status='draft'
+            status='draft',
+            version=1
         )
 
         self.__update_article_content()

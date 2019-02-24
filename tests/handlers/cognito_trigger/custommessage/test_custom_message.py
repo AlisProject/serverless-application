@@ -52,7 +52,7 @@ class TestCustomMessage(TestCase):
         custommessage = CustomMessage(event=event, context="", dynamodb=dynamodb)
         response = custommessage.main()
         self.assertRegex(response['response']['emailMessage'], '.*ALISをご利用いただきありがとうございます。.*')
-        self.assertEqual(response['response']['emailSubject'], 'Email確認リンク')
+        self.assertEqual(response['response']['emailSubject'], '【ALIS】登録のご案内：メールアドレスの確認')
 
     def test_invalid_phone_number(self):
         os.environ['DOMAIN'] = "alis.example.com"
@@ -146,7 +146,7 @@ class TestCustomMessage(TestCase):
             }
         custommessage = CustomMessage(event=event, context="", dynamodb=dynamodb)
         response = custommessage.main()
-        self.assertEqual(response['response']['emailSubject'], 'パスワード再設定コード')
+        self.assertEqual(response['response']['emailSubject'], '【ALIS】パスワードの変更：再設定コードの送付')
         self.assertEqual(response['response']['emailMessage'], 'resetuserさんのパスワード再設定コードは {####} です')
         self.assertEqual(response['response']['smsMessage'], 'resetuserさんのパスワード再設定コードは {####} です。')
 

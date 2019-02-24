@@ -50,6 +50,26 @@ definitions:
         type: string
       overview:
         type: string
+  MeArticlesDraftsTitleUpdate:
+    type: object
+    properties:
+      title:
+        type: string
+  MeArticlesPublicTitleUpdate:
+    type: object
+    properties:
+      title:
+        type: string
+  MeArticlesDraftsBodyUpdate:
+    type: object
+    properties:
+      body:
+        type: string
+  MeArticlesPublicBodyUpdate:
+    type: object
+    properties:
+      body:
+        type: string
   MeInfoUpdate:
     type: object
     properties:
@@ -173,10 +193,21 @@ definitions:
     properties:
       topic:
         type: string
-      tgas:
+      tags:
         type: array
         items:
           type: string
+  PublishWithHeader:
+    type: object
+    properties:
+      topic:
+        type: string
+      tags:
+        type: array
+        items:
+          type: string
+      eye_catch_url:
+        type: string
   Tag:
     type: object
     properties:
@@ -775,6 +806,27 @@ paths:
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
+  /me/articles/drafts/article_id:
+    post:
+      description: 'article_idを作成'
+      responses:
+        '200':
+          description: '作成された記事ID'
+          schema:
+            type: object
+            properties:
+              article_id:
+                type: 'string'
+      security:
+        - cognitoUserPool: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: '200'
+        uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesDraftsArticleIdCreate.Arn}/invocations
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
   /me/articles/{article_id}/drafts/publish:
     put:
       description: "指定された article_id の下書き記事を公開"
@@ -801,6 +853,34 @@ paths:
             statusCode: '200'
         uri:
           Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesDraftsPublish.Arn}/invocations
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /me/articles/{article_id}/drafts/publish_with_header:
+    put:
+      description: "指定された article_id の下書き記事を公開"
+      parameters:
+      - name: 'article_id'
+        in: 'path'
+        description: '対象記事の指定するために使用'
+        required: true
+        type: 'string'
+      - name: 'publish'
+        in: 'body'
+        description: 'publish object'
+        required: true
+        schema:
+          $ref: '#/definitions/PublishWithHeader'
+      responses:
+        '200':
+          description: 'successful operation'
+      security:
+        - cognitoUserPool: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: '200'
+        uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesDraftsPublishWithHeader.Arn}/invocations
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -970,6 +1050,34 @@ paths:
             statusCode: '200'
         uri:
           Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesPublicRepublish.Arn}/invocations
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /me/articles/{article_id}/public/republish_with_header:
+    put:
+      description: '指定された article_id の編集記事を公開する'
+      parameters:
+      - name: 'article_id'
+        in: 'path'
+        description: '対象記事を指定するために使用'
+        required: true
+        type: 'string'
+      - name: 'publish'
+        in: 'body'
+        description: 'publish object'
+        required: true
+        schema:
+          $ref: '#/definitions/PublishWithHeader'
+      responses:
+        '200':
+          description: 'successful operation'
+      security:
+        - cognitoUserPool: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: '200'
+        uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesPublicRepublishWithHeader.Arn}/invocations
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -1480,6 +1588,118 @@ paths:
             statusCode: '200'
         uri:
           Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesDraftsUpdate.Arn}/invocations
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /me/articles/{article_id}/drafts/title:
+    put:
+      description: '下書き記事のタイトル更新'
+      parameters:
+      - name: 'article_id'
+        in: 'path'
+        description: '対象記事を指定するために使用'
+        required: true
+        type: 'string'
+      - name: 'title'
+        in: 'body'
+        description: 'title object'
+        required: true
+        schema:
+          $ref: '#/definitions/MeArticlesDraftsTitleUpdate'
+      responses:
+        '200':
+          description: 'successful operation'
+      security:
+        - cognitoUserPool: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: '200'
+        uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesDraftsTitleUpdate.Arn}/invocations
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /me/articles/{article_id}/drafts/body:
+    put:
+      description: '下書き記事のbody更新'
+      parameters:
+      - name: 'article_id'
+        in: 'path'
+        description: '対象記事を指定するために使用'
+        required: true
+        type: 'string'
+      - name: 'body'
+        in: 'body'
+        description: 'body object'
+        required: true
+        schema:
+          $ref: '#/definitions/MeArticlesDraftsBodyUpdate'
+      responses:
+        '200':
+          description: 'successful operation'
+      security:
+        - cognitoUserPool: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: '200'
+        uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesDraftsBodyUpdate.Arn}/invocations
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /me/articles/{article_id}/public/title:
+    put:
+      description: '公開記事のタイトル更新'
+      parameters:
+      - name: 'article_id'
+        in: 'path'
+        description: '対象記事を指定するために使用'
+        required: true
+        type: 'string'
+      - name: 'title'
+        in: 'body'
+        description: 'title object'
+        required: true
+        schema:
+          $ref: '#/definitions/MeArticlesPublicTitleUpdate'
+      responses:
+        '200':
+          description: 'successful operation'
+      security:
+      - cognitoUserPool: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: '200'
+        uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesPublicTitleUpdate.Arn}/invocations
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /me/articles/{article_id}/public/body:
+    put:
+      description: '公開記事のbody更新'
+      parameters:
+      - name: 'article_id'
+        in: 'path'
+        description: '対象記事を指定するために使用'
+        required: true
+        type: 'string'
+      - name: 'body'
+        in: 'body'
+        description: 'body object'
+        required: true
+        schema:
+          $ref: '#/definitions/MeArticlesPublicBodyUpdate'
+      responses:
+        '200':
+          description: 'successful operation'
+      security:
+      - cognitoUserPool: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: '200'
+        uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesPublicBodyUpdate.Arn}/invocations
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy

@@ -76,3 +76,47 @@ class TextSanitizer:
                 'figcaption': TextSanitizer.allow_figcaption_attributes
             }
         )
+
+    @staticmethod
+    def allow_img_v2(tag, name, value):
+        if name == 'src':
+            p = urlparse(value)
+            return (not p.netloc) or p.netloc == os.environ['DOMAIN']
+        return False
+
+    @staticmethod
+    def allow_figure_v2(tag, name, value):
+        if name == 'class':
+            allow_classes = [
+                'media',
+                'image',
+                'image image-style-align-right',
+                'image image-style-align-left',
+            ]
+            if value in allow_classes:
+                return True
+        return False
+
+    @staticmethod
+    def allow_oembed_v2(tag, name, value):
+        if name == 'url':
+            p = urlparse(value)
+            is_url = len(p.scheme) > 0 and len(p.netloc) > 0
+            return is_url
+        return False
+
+    @staticmethod
+    def sanitize_article_body_v2(text):
+        if text is None:
+            return
+
+        return bleach.clean(
+            text=text,
+            tags=settings.html_allowed_tags_v2,
+            attributes={
+                'a': ['href'],
+                'img': TextSanitizer.allow_img_v2,
+                'figure': TextSanitizer.allow_figure_v2,
+                'oembed': TextSanitizer.allow_oembed_v2
+            }
+        )

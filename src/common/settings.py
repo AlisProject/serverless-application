@@ -192,6 +192,8 @@ COMMENT_ID_LENGTH = 12
 
 html_allowed_tags = ['a', 'b', 'blockquote', 'br', 'h2', 'h3', 'i', 'p', 'u', 'img', 'hr',
                      'div', 'figure', 'figcaption']
+html_allowed_tags_v2 = ['a', 'strong', 'blockquote', 'br', 'h2', 'h3', 'i', 'p', 'img', 'hr',
+                        'figure', 'figcaption', 'oembed']
 
 ng_user_name = [
     'about', 'account', 'activity', 'add', 'admin', 'all', 'alpha', 'analysis',
