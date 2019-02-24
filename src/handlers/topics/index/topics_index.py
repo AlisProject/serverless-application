@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import json
+import logging
 import os
 
 import settings
@@ -16,6 +17,8 @@ class TopicsIndex(LambdaBase):
         pass
 
     def exec_main_proc(self):
+        logging.fatal(self.event)
+        logging.fatal(self.context)
         topic_table = self.dynamodb.Table(os.environ['TOPIC_TABLE_NAME'])
 
         query_params = {

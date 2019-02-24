@@ -19,6 +19,8 @@ class Authorizer:
         scopes = self.__get_required_scopes(http_method, resource_path)
         response = self.__introspect(scopes)
 
+        logging.fatal(response)
+
         if response['action'] == 'OK':
             return self.__generate_policy(response['subject'], 'Allow', self.event['methodArn'])
         elif response['action'] in ['BAD_REQUEST', 'FORBIDDEN']:
