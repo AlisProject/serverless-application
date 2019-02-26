@@ -280,6 +280,8 @@ paths:
             type: array
             items:
               $ref: '#/definitions/ArticleInfo'
+      security:
+        - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -316,6 +318,8 @@ paths:
             type: array
             items:
               $ref: '#/definitions/UserInfo'
+      security:
+        - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -352,6 +356,8 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Tag'
+      security:
+        - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -388,6 +394,8 @@ paths:
             type: array
             items:
               $ref: '#/definitions/ArticleInfo'
+      security:
+        - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -425,6 +433,8 @@ paths:
             type: array
             items:
               $ref: '#/definitions/ArticleInfo'
+      security:
+        - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -444,6 +454,8 @@ paths:
             type: array
             items:
               $ref: '#/definitions/ArticleInfo'
+      security:
+        - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -476,6 +488,8 @@ paths:
             type: array
             items:
               $ref: '#/definitions/ArticleInfo'
+      security:
+        - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -499,6 +513,8 @@ paths:
           description: "記事内容取得"
           schema:
             $ref: '#/definitions/ArticleContent'
+      security:
+        - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -526,6 +542,8 @@ paths:
               alistoken:
                 type: "number"
                 format: "double"
+      security:
+        - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -553,6 +571,8 @@ paths:
               count:
                 type: "number"
                 format: "double"
+      security:
+        - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -576,6 +596,8 @@ paths:
           description: '対象記事のコメントの一覧'
           schema:
             $ref: '#/definitions/Comment'
+      security:
+        - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -603,6 +625,8 @@ paths:
               count:
                 type: "number"
                 format: "double"
+      security:
+        - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -1237,7 +1261,7 @@ paths:
               image_url:
                 type: 'string'
       security:
-      - CustomAuthorizer: []
+        - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -1354,6 +1378,8 @@ paths:
             type: array
             items:
               $ref: '#/definitions/ArticleInfo'
+      security:
+        - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -1546,6 +1572,8 @@ paths:
           description: '対象ユーザ情報'
           schema:
             $ref: '#/definitions/UserInfo'
+      security:
+        - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -1662,6 +1690,8 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Topic'
+      security:
+        - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -1689,7 +1719,7 @@ paths:
         '200':
           description: '不正報告の実施成功'
       security:
-      - CustomAuthorizer: []
+        - CustomAuthorizer: []
       x-amazon-apigateway-integration:
         responses:
           default:
