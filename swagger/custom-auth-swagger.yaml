@@ -1,7 +1,7 @@
 swagger: "2.0"
 info:
   title:
-    Fn::Sub: ${AWS::StackName}-with-custom-auth
+    Fn::Sub: ${AWS::StackName}
   version: 1.0.0
 basePath: /
 schemes:
@@ -287,7 +287,12 @@ paths:
           default:
             statusCode: "200"
         uri:
-          Fn::Sub:  arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ElasticSearchSearchArticles.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-ElasticSearchSearchArticles"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -325,7 +330,12 @@ paths:
           default:
             statusCode: "200"
         uri:
-          Fn::Sub:  arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ElasticSearchSearchUsers.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-ElasticSearchSearchUsers"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -363,7 +373,12 @@ paths:
           default:
             statusCode: "200"
         uri:
-          Fn::Sub:  arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ElasticSearchSearchTags.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-ElasticSearchSearchTags"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -401,7 +416,12 @@ paths:
           default:
             statusCode: "200"
         uri:
-          Fn::Sub:  arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ArticlesRecent.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-ArticlesRecent"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -440,7 +460,12 @@ paths:
           default:
             statusCode: "200"
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ArticlesPopular.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-ArticlesPopular"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -461,7 +486,12 @@ paths:
           default:
             statusCode: "200"
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ArticlesEyecatch.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-ArticlesEyecatch"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -495,7 +525,12 @@ paths:
           default:
             statusCode: "200"
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ArticlesRecommended.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-ArticlesRecommended"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -520,7 +555,12 @@ paths:
           default:
             statusCode: "200"
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ArticlesShow.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-ArticlesShow"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -549,7 +589,12 @@ paths:
           default:
             statusCode: "200"
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ArticlesAlisTokensShow.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-ArticlesAlisTokensShow"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -578,7 +623,12 @@ paths:
           default:
             statusCode: "200"
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ArticlesLikesShow.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-ArticlesLikesShow"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -603,7 +653,12 @@ paths:
           default:
             statusCode: "200"
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ArticlesCommentsIndex.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-ArticlesCommentsIndex"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -632,7 +687,12 @@ paths:
           default:
             statusCode: "200"
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CommentsLikesShow.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-CommentsLikesShow"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -671,7 +731,12 @@ paths:
           default:
             statusCode: '200'
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesDraftsIndex.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeArticlesDraftsIndex"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -699,7 +764,12 @@ paths:
           default:
             statusCode: '200'
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesDraftsCreate.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeArticlesDraftsCreate"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -721,7 +791,12 @@ paths:
           default:
             statusCode: '200'
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesDraftsArticleIdCreate.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeArticlesDraftsArticleIdCreate"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -750,7 +825,12 @@ paths:
           default:
             statusCode: '200'
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesDraftsPublish.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeArticlesDraftsPublish"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -779,7 +859,12 @@ paths:
           default:
             statusCode: '200'
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesDraftsPublishWithHeader.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeArticlesDraftsPublishWithHeader"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -818,7 +903,12 @@ paths:
           default:
             statusCode: '200'
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesPublicIndex.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeArticlesPublicIndex"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -843,7 +933,12 @@ paths:
           default:
             statusCode: '200'
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesPublicShow.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeArticlesPublicShow"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -871,7 +966,12 @@ paths:
           default:
             statusCode: '200'
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesPublicUpdate.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeArticlesPublicUpdate"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -896,7 +996,12 @@ paths:
           default:
             statusCode: '200'
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesPublicEdit.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeArticlesPublicEdit"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -919,7 +1024,12 @@ paths:
           default:
             statusCode: '200'
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesPublicUnpublish.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeArticlesPublicUnpublish"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -948,7 +1058,12 @@ paths:
           default:
             statusCode: '200'
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesPublicRepublish.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeArticlesPublicRepublish"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -977,7 +1092,12 @@ paths:
           default:
             statusCode: '200'
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesPublicRepublishWithHeader.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeArticlesPublicRepublishWithHeader"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -1005,7 +1125,12 @@ paths:
           default:
             statusCode: "200"
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesLikesShow.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeArticlesLikesShow"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -1033,7 +1158,12 @@ paths:
           default:
             statusCode: "200"
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesCommentsCreate.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeArticlesCommentsCreate"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -1076,7 +1206,12 @@ paths:
           default:
             statusCode: "200"
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesCommentsReply.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeArticlesCommentsReply"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -1108,7 +1243,12 @@ paths:
           default:
             statusCode: "200"
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesCommentsLikesIndex.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeArticlesCommentsLikesIndex"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -1131,7 +1271,12 @@ paths:
           default:
             statusCode: "200"
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeCommentsDelete.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeCommentsDelete"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -1154,7 +1299,12 @@ paths:
           default:
             statusCode: "200"
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeCommentsLikesCreate.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeCommentsLikesCreate"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -1182,7 +1332,12 @@ paths:
           default:
             statusCode: "200"
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesFraudCreate.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeArticlesFraudCreate"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -1223,7 +1378,12 @@ paths:
           default:
             statusCode: "200"
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesImagesCreate.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeArticlesImagesCreate"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -1267,7 +1427,12 @@ paths:
           default:
             statusCode: "200"
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesImageUploadUrlShow.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeArticlesImageUploadUrlShow"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -1286,7 +1451,12 @@ paths:
           default:
             statusCode: "200"
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeInfoShow.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeInfoShow"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -1309,7 +1479,12 @@ paths:
           default:
             statusCode: '200'
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeInfoUpdate.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeInfoUpdate"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -1341,7 +1516,12 @@ paths:
           default:
             statusCode: "200"
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeInfoIconCreate.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeInfoIconCreate"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -1385,7 +1565,12 @@ paths:
           default:
             statusCode: '200'
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${UsersArticlesPublic.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-UsersArticlesPublic"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -1410,7 +1595,12 @@ paths:
           default:
             statusCode: '200'
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesDraftsShow.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeArticlesDraftsShow"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -1438,7 +1628,12 @@ paths:
           default:
             statusCode: '200'
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesDraftsUpdate.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeArticlesDraftsUpdate"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -1467,7 +1662,12 @@ paths:
           default:
             statusCode: '200'
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesDraftsTitleUpdate.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeArticlesDraftsTitleUpdate"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -1496,7 +1696,12 @@ paths:
           default:
             statusCode: '200'
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesDraftsBodyUpdate.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeArticlesDraftsBodyUpdate"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -1525,7 +1730,12 @@ paths:
           default:
             statusCode: '200'
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesPublicTitleUpdate.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeArticlesPublicTitleUpdate"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -1554,7 +1764,12 @@ paths:
           default:
             statusCode: '200'
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesPublicBodyUpdate.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeArticlesPublicBodyUpdate"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -1579,7 +1794,12 @@ paths:
           default:
             statusCode: '200'
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${UsersInfo.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-UsersInfo"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -1598,7 +1818,12 @@ paths:
           default:
             statusCode: "200"
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeWalletBalance.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeWalletBalance"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -1617,7 +1842,12 @@ paths:
           default:
             statusCode: "200"
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeWalletDistributedTokensShow.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeWalletDistributedTokensShow"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -1638,7 +1868,12 @@ paths:
           default:
             statusCode: '200'
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeNotificationsIndex.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeNotificationsIndex"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -1660,7 +1895,12 @@ paths:
           default:
             statusCode: '200'
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeUnreadNotificationManagersShow.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeUnreadNotificationManagersShow"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -1676,7 +1916,12 @@ paths:
           default:
             statusCode: '200'
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeUnreadNotificationManagersUpdate.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeUnreadNotificationManagersUpdate"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -1697,7 +1942,12 @@ paths:
           default:
             statusCode: '200'
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${TopicsIndex.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-TopicsIndex"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -1725,7 +1975,12 @@ paths:
           default:
             statusCode: '200'
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeUsersFraudCreate.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeUsersFraudCreate"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -1738,6 +1993,11 @@ securityDefinitions:
     x-amazon-apigateway-authorizer:
       type: token
       authorizerUri:
-        Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${Authorizer.Arn}/invocations
+        Fn::Join:
+          - ''
+          - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+            - Fn::ImportValue:
+                Fn::Sub: "${FunctionDeployStackName}-Authorizer"
+            - "/invocations"
       authorizerCredentials:
         Fn::Sub: ${ApiGatewayAuthorizerRole.Arn}

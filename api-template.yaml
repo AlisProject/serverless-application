@@ -148,15 +148,6 @@ Resources:
           Name: AWS::Include
           Parameters:
             Location: ./swagger/swagger.yaml
-  RestApiWithCustomAuthorizer:
-    Type: AWS::Serverless::Api
-    Properties:
-      StageName: api
-      DefinitionBody:
-        Fn::Transform:
-          Name: AWS::Include
-          Parameters:
-            Location: ./swagger/custom-auth-swagger.yaml
   LambdaRole:
     Type: "AWS::IAM::Role"
     Properties:
@@ -175,29 +166,6 @@ Resources:
         - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
         - arn:aws:iam::aws:policy/AmazonS3FullAccess
         - arn:aws:iam::aws:policy/AmazonCognitoPowerUser
-  ApiGatewayAuthorizerRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: "Allow"
-            Principal:
-              Service:
-                - "apigateway.amazonaws.com"
-            Action:
-              - sts:AssumeRole
-      Policies:
-        - PolicyName: "InvokeAuthorizerFunction"
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: "Allow"
-                Action:
-                  - lambda:InvokeAsync
-                  - lambda:InvokeFunction
-                Resource:
-                  Fn::Sub: ${Authorizer.Arn}
   Authorizer:
     Type: AWS::Serverless::Function
     Properties:
@@ -221,12 +189,6 @@ Resources:
             Path: /articles/recent
             Method: get
             RestApiId: !Ref RestApi
-        ApiWithAuth:
-          Type: Api
-          Properties:
-            Path: /articles/recent
-            Method: get
-            RestApiId: !Ref RestApiWithCustomAuthorizer
   ArticlesPopular:
     Type: AWS::Serverless::Function
     Properties:
@@ -240,12 +202,6 @@ Resources:
             Path: /articles/popular
             Method: get
             RestApiId: !Ref RestApi
-        ApiWithAuth:
-          Type: Api
-          Properties:
-            Path: /articles/popular
-            Method: get
-            RestApiId: !Ref RestApiWithCustomAuthorizer
   ArticlesEyecatch:
     Type: AWS::Serverless::Function
     Properties:
@@ -259,12 +215,6 @@ Resources:
             Path: /articles/eyecatch
             Method: get
             RestApiId: !Ref RestApi
-        ApiWithAuth:
-          Type: Api
-          Properties:
-            Path: /articles/eyecatch
-            Method: get
-            RestApiId: !Ref RestApiWithCustomAuthorizer
   ArticlesRecommended:
     Type: AWS::Serverless::Function
     Properties:
@@ -278,12 +228,6 @@ Resources:
             Path: /articles/recommended
             Method: get
             RestApiId: !Ref RestApi
-        ApiWithAuth:
-          Type: Api
-          Properties:
-            Path: /articles/recommended
-            Method: get
-            RestApiId: !Ref RestApiWithCustomAuthorizer
   ArticlesShow:
     Type: AWS::Serverless::Function
     Properties:
@@ -297,12 +241,6 @@ Resources:
             Path: /articles/{article_id}
             Method: get
             RestApiId: !Ref RestApi
-        ApiWithAuth:
-          Type: Api
-          Properties:
-            Path: /articles/{article_id}
-            Method: get
-            RestApiId: !Ref RestApiWithCustomAuthorizer
   ArticlesAlisTokensShow:
     Type: AWS::Serverless::Function
     Properties:
@@ -316,12 +254,6 @@ Resources:
             Path: /articles/{article_id}/alistoken
             Method: get
             RestApiId: !Ref RestApi
-        ApiWithAuth:
-          Type: Api
-          Properties:
-            Path: /articles/{article_id}/alistoken
-            Method: get
-            RestApiId: !Ref RestApiWithCustomAuthorizer
   ArticlesLikesShow:
     Type: AWS::Serverless::Function
     Properties:
@@ -335,12 +267,6 @@ Resources:
             Path: /articles/{article_id}/likes
             Method: get
             RestApiId: !Ref RestApi
-        ApiWithAuth:
-          Type: Api
-          Properties:
-            Path: /articles/{article_id}/likes
-            Method: get
-            RestApiId: !Ref RestApiWithCustomAuthorizer
   UsersArticlesPublic:
     Type: AWS::Serverless::Function
     Properties:
@@ -354,12 +280,6 @@ Resources:
             Path: /users/{user_id}/articles/public
             Method: get
             RestApiId: !Ref RestApi
-        ApiWithAuth:
-          Type: Api
-          Properties:
-            Path: /users/{user_id}/articles/public
-            Method: get
-            RestApiId: !Ref RestApiWithCustomAuthorizer
   UsersInfo:
     Type: AWS::Serverless::Function
     Properties:
@@ -373,12 +293,6 @@ Resources:
             Path: /users/{user_id}/info
             Method: get
             RestApiId: !Ref RestApi
-        ApiWithAuth:
-          Type: Api
-          Properties:
-            Path: /users/{user_id}/info
-            Method: get
-            RestApiId: !Ref RestApiWithCustomAuthorizer
   MeArticlesDraftsIndex:
     Type: AWS::Serverless::Function
     Properties:
@@ -392,12 +306,6 @@ Resources:
             Path: /me/articles/drafts
             Method: get
             RestApiId: !Ref RestApi
-        ApiWithAuth:
-          Type: Api
-          Properties:
-            Path: /me/articles/drafts
-            Method: get
-            RestApiId: !Ref RestApiWithCustomAuthorizer
   LoginTwitter:
     Type: AWS::Serverless::Function
     Properties:
@@ -511,12 +419,6 @@ Resources:
               Path: /me/articles/drafts
               Method: post
               RestApiId: !Ref RestApi
-          ApiWithAuth:
-            Type: Api
-            Properties:
-              Path: /me/articles/drafts
-              Method: post
-              RestApiId: !Ref RestApiWithCustomAuthorizer
   MeArticlesDraftsArticleIdCreate:
       Type: AWS::Serverless::Function
       Properties:
@@ -533,12 +435,6 @@ Resources:
               Path: /me/articles/drafts/article_id
               Method: post
               RestApiId: !Ref RestApi
-          ApiWithAuth:
-            Type: Api
-            Properties:
-              Path: /me/articles/drafts/article_id
-              Method: post
-              RestApiId: !Ref RestApiWithCustomAuthorizer
   MeArticlesDraftsPublish:
     Type: AWS::Serverless::Function
     Properties:
@@ -552,12 +448,6 @@ Resources:
             Path: /me/articles/{article_id}/drafts/publish
             Method: put
             RestApiId: !Ref RestApi
-        ApiWithAuth:
-          Type: Api
-          Properties:
-            Path: /me/articles/{article_id}/drafts/publish
-            Method: put
-            RestApiId: !Ref RestApiWithCustomAuthorizer
   MeArticlesDraftsPublishWithHeader:
     Type: AWS::Serverless::Function
     Properties:
@@ -571,12 +461,6 @@ Resources:
             Path: /me/articles/{article_id}/drafts/publish_with_header
             Method: put
             RestApiId: !Ref RestApi
-        ApiWithAuth:
-          Type: Api
-          Properties:
-            Path: /me/articles/{article_id}/drafts/publish_with_header
-            Method: put
-            RestApiId: !Ref RestApiWithCustomAuthorizer
   MeArticlesDraftsUpdate:
       Type: AWS::Serverless::Function
       Properties:
@@ -590,12 +474,6 @@ Resources:
               Path: /me/articles/{article_id}/drafts
               Method: put
               RestApiId: !Ref RestApi
-          ApiWithAuth:
-            Type: Api
-            Properties:
-              Path: /me/articles/{article_id}/drafts
-              Method: put
-              RestApiId: !Ref RestApiWithCustomAuthorizer
   MeArticlesDraftsTitleUpdate:
     Type: AWS::Serverless::Function
     Properties:
@@ -609,12 +487,6 @@ Resources:
             Path: /me/articles/{article_id}/drafts/title
             Method: put
             RestApiId: !Ref RestApi
-        ApiWithAuth:
-          Type: Api
-          Properties:
-            Path: /me/articles/{article_id}/drafts/title
-            Method: put
-            RestApiId: !Ref RestApiWithCustomAuthorizer
   MeArticlesDraftsBodyUpdate:
     Type: AWS::Serverless::Function
     Properties:
@@ -628,12 +500,6 @@ Resources:
             Path: /me/articles/{article_id}/drafts/body
             Method: put
             RestApiId: !Ref RestApi
-        ApiWithAuth:
-          Type: Api
-          Properties:
-            Path: /me/articles/{article_id}/drafts/body
-            Method: put
-            RestApiId: !Ref RestApiWithCustomAuthorizer
   MeArticlesPublicIndex:
     Type: AWS::Serverless::Function
     Properties:
@@ -647,12 +513,6 @@ Resources:
             Path: /me/articles/public
             Method: get
             RestApiId: !Ref RestApi
-        ApiWithAuth:
-          Type: Api
-          Properties:
-            Path: /me/articles/public
-            Method: get
-            RestApiId: !Ref RestApiWithCustomAuthorizer
   MeArticlesPublicShow:
     Type: AWS::Serverless::Function
     Properties:
@@ -666,12 +526,6 @@ Resources:
             Path: /me/articles/{article_id}/public
             Method: get
             RestApiId: !Ref RestApi
-        ApiWithAuth:
-          Type: Api
-          Properties:
-            Path: /me/articles/{article_id}/public
-            Method: get
-            RestApiId: !Ref RestApiWithCustomAuthorizer
   MeArticlesPublicEdit:
       Type: AWS::Serverless::Function
       Properties:
@@ -685,12 +539,6 @@ Resources:
               Path: /me/articles/{article_id}/public/edit
               Method: get
               RestApiId: !Ref RestApi
-          ApiWithAuth:
-            Type: Api
-            Properties:
-              Path: /me/articles/{article_id}/public/edit
-              Method: get
-              RestApiId: !Ref RestApiWithCustomAuthorizer
   MeArticlesPublicUpdate:
     Type: AWS::Serverless::Function
     Properties:
@@ -704,12 +552,6 @@ Resources:
             Path: /me/articles/{article_id}/public
             Method: put
             RestApiId: !Ref RestApi
-        ApiWithAuth:
-          Type: Api
-          Properties:
-            Path: /me/articles/{article_id}/public
-            Method: put
-            RestApiId: !Ref RestApiWithCustomAuthorizer
   MeArticlesPublicTitleUpdate:
     Type: AWS::Serverless::Function
     Properties:
@@ -723,12 +565,6 @@ Resources:
             Path: /me/articles/{article_id}/public/title
             Method: put
             RestApiId: !Ref RestApi
-        ApiWithAuth:
-          Type: Api
-          Properties:
-            Path: /me/articles/{article_id}/public/title
-            Method: put
-            RestApiId: !Ref RestApiWithCustomAuthorizer
   MeArticlesPublicBodyUpdate:
     Type: AWS::Serverless::Function
     Properties:
@@ -742,12 +578,6 @@ Resources:
             Path: /me/articles/{article_id}/public/body
             Method: put
             RestApiId: !Ref RestApi
-        ApiWithAuth:
-          Type: Api
-          Properties:
-            Path: /me/articles/{article_id}/public/body
-            Method: put
-            RestApiId: !Ref RestApiWithCustomAuthorizer
   MeArticlesPublicUnpublish:
     Type: AWS::Serverless::Function
     Properties:
@@ -761,12 +591,6 @@ Resources:
             Path: /me/articles/{article_id}/public/unpublish
             Method: put
             RestApiId: !Ref RestApi
-        ApiWithAuth:
-          Type: Api
-          Properties:
-            Path: /me/articles/{article_id}/public/unpublish
-            Method: put
-            RestApiId: !Ref RestApiWithCustomAuthorizer
   MeArticlesPublicRepublish:
     Type: AWS::Serverless::Function
     Properties:
@@ -780,12 +604,6 @@ Resources:
             Path: /me/articles/{article_id}/public/republish
             Method: put
             RestApiId: !Ref RestApi
-        ApiWithAuth:
-          Type: Api
-          Properties:
-            Path: /me/articles/{article_id}/public/republish
-            Method: put
-            RestApiId: !Ref RestApiWithCustomAuthorizer
   MeArticlesPublicRepublishWithHeader:
     Type: AWS::Serverless::Function
     Properties:
@@ -799,12 +617,6 @@ Resources:
             Path: /me/articles/{article_id}/public/republish_with_header
             Method: put
             RestApiId: !Ref RestApi
-        ApiWithAuth:
-          Type: Api
-          Properties:
-            Path: /me/articles/{article_id}/public/republish_with_header
-            Method: put
-            RestApiId: !Ref RestApiWithCustomAuthorizer
   MeArticlesLikeCreate:
     Type: AWS::Serverless::Function
     Properties:
@@ -831,12 +643,6 @@ Resources:
             Path: /articles/{article_id}/comments
             Method: get
             RestApiId: !Ref RestApi
-        ApiWithAuth:
-          Type: Api
-          Properties:
-            Path: /articles/{article_id}/comments
-            Method: get
-            RestApiId: !Ref RestApiWithCustomAuthorizer
   MeArticlesCommentsCreate:
     Type: AWS::Serverless::Function
     Properties:
@@ -853,12 +659,6 @@ Resources:
             Path: /me/articles/{article_id}/comments
             Method: post
             RestApiId: !Ref RestApi
-        ApiWithAuth:
-          Type: Api
-          Properties:
-            Path: /me/articles/{article_id}/comments
-            Method: post
-            RestApiId: !Ref RestApiWithCustomAuthorizer
   MeArticlesCommentsReply:
     Type: AWS::Serverless::Function
     Properties:
@@ -875,12 +675,6 @@ Resources:
             Path: /me/articles/{article_id}/comments/reply
             Method: post
             RestApiId: !Ref RestApi
-        ApiWithAuth:
-          Type: Api
-          Properties:
-            Path: /me/articles/{article_id}/comments/reply
-            Method: post
-            RestApiId: !Ref RestApiWithCustomAuthorizer
   MeArticlesCommentsLikesIndex:
     Type: AWS::Serverless::Function
     Properties:
@@ -894,12 +688,6 @@ Resources:
             Path: /me/articles/{article_id}/comments/likes
             Method: get
             RestApiId: !Ref RestApi
-        ApiWithAuth:
-          Type: Api
-          Properties:
-            Path: /me/articles/{article_id}/comments/likes
-            Method: get
-            RestApiId: !Ref RestApiWithCustomAuthorizer
   CommentsLikesShow:
     Type: AWS::Serverless::Function
     Properties:
@@ -913,12 +701,6 @@ Resources:
             Path: /comments/{comment_id}/likes
             Method: get
             RestApiId: !Ref RestApi
-        ApiWithAuth:
-          Type: Api
-          Properties:
-            Path: /comments/{comment_id}/likes
-            Method: get
-            RestApiId: !Ref RestApiWithCustomAuthorizer
   MeCommentsLikesCreate:
     Type: AWS::Serverless::Function
     Properties:
@@ -932,12 +714,6 @@ Resources:
             Path: /me/comments/{comment_id}/likes
             Method: post
             RestApiId: !Ref RestApi
-        ApiWithAuth:
-          Type: Api
-          Properties:
-            Path: /me/comments/{comment_id}/likes
-            Method: post
-            RestApiId: !Ref RestApiWithCustomAuthorizer
   MeCommentsDelete:
     Type: AWS::Serverless::Function
     Properties:
@@ -951,12 +727,6 @@ Resources:
             Path: /me/comments/{comment_id}
             Method: delete
             RestApiId: !Ref RestApi
-        ApiWithAuth:
-          Type: Api
-          Properties:
-            Path: /me/comments/{comment_id}
-            Method: delete
-            RestApiId: !Ref RestApiWithCustomAuthorizer
   MeArticlesFraudCreate:
     Type: AWS::Serverless::Function
     Properties:
@@ -970,12 +740,6 @@ Resources:
             Path: /me/articles/{article_id}/fraud
             Method: post
             RestApiId: !Ref RestApi
-        ApiWithAuth:
-          Type: Api
-          Properties:
-            Path: /me/articles/{article_id}/fraud
-            Method: post
-            RestApiId: !Ref RestApiWithCustomAuthorizer
   MeArticlesImagesCreate:
       Type: AWS::Serverless::Function
       Properties:
@@ -989,12 +753,6 @@ Resources:
               Path: /me/articles/{article_id}/images
               Method: post
               RestApiId: !Ref RestApi
-          ApiWithAuth:
-            Type: Api
-            Properties:
-              Path: /me/articles/{article_id}/images
-              Method: post
-              RestApiId: !Ref RestApiWithCustomAuthorizer
   MeArticlesImageUploadUrlShow:
     Type: AWS::Serverless::Function
     Properties:
@@ -1008,12 +766,6 @@ Resources:
             Path: /me/articles/{article_id}/image_upload_url
             Method: get
             RestApiId: !Ref RestApi
-        ApiWithAuth:
-          Type: Api
-          Properties:
-            Path: /me/articles/{article_id}/image_upload_url
-            Method: get
-            RestApiId: !Ref RestApiWithCustomAuthorizer
   MeInfoIconCreate:
       Type: AWS::Serverless::Function
       Properties:
@@ -1027,12 +779,6 @@ Resources:
               Path: /me/info/icon
               Method: post
               RestApiId: !Ref RestApi
-          ApiWithAuth:
-            Type: Api
-            Properties:
-              Path: /me/info/icon
-              Method: post
-              RestApiId: !Ref RestApiWithCustomAuthorizer
   MeInfoFirstExperiencesUpdate:
     Type: AWS::Serverless::Function
     Properties:
@@ -1059,12 +805,6 @@ Resources:
             Path: /me/articles/{article_id}/like
             Method: get
             RestApiId: !Ref RestApi
-        ApiWithAuth:
-          Type: Api
-          Properties:
-            Path: /me/articles/{article_id}/like
-            Method: get
-            RestApiId: !Ref RestApiWithCustomAuthorizer
   MeArticlesDraftsShow:
     Type: AWS::Serverless::Function
     Properties:
@@ -1078,12 +818,6 @@ Resources:
             Path: /me/articles/{article_id}/drafts
             Method: get
             RestApiId: !Ref RestApi
-        ApiWithAuth:
-          Type: Api
-          Properties:
-            Path: /me/articles/{article_id}/drafts
-            Method: get
-            RestApiId: !Ref RestApiWithCustomAuthorizer
   MeArticlesPvCreate:
     Type: AWS::Serverless::Function
     Properties:
@@ -1110,12 +844,6 @@ Resources:
             Path: /me/info
             Method: put
             RestApiId: !Ref RestApi
-        ApiWithAuth:
-          Type: Api
-          Properties:
-            Path: /me/info
-            Method: put
-            RestApiId: !Ref RestApiWithCustomAuthorizer
   MeInfoShow:
     Type: AWS::Serverless::Function
     Properties:
@@ -1129,12 +857,6 @@ Resources:
             Path: /me/info
             Method: get
             RestApiId: !Ref RestApi
-        ApiWithAuth:
-          Type: Api
-          Properties:
-            Path: /me/info
-            Method: get
-            RestApiId: !Ref RestApiWithCustomAuthorizer
   MeWalletBalance:
     Type: AWS::Serverless::Function
     Properties:
@@ -1148,12 +870,6 @@ Resources:
             Path: /me/wallet/balance
             Method: get
             RestApiId: !Ref RestApi
-        ApiWithAuth:
-          Type: Api
-          Properties:
-            Path: /me/wallet/balance
-            Method: get
-            RestApiId: !Ref RestApiWithCustomAuthorizer
   MeWalletDistributedTokensShow:
     Type: AWS::Serverless::Function
     Properties:
@@ -1167,12 +883,6 @@ Resources:
             Path: /me/wallet/distributed_tokens
             Method: get
             RestApiId: !Ref RestApi
-        ApiWithAuth:
-          Type: Api
-          Properties:
-            Path: /me/wallet/distributed_tokens
-            Method: get
-            RestApiId: !Ref RestApiWithCustomAuthorizer
   MeWalletTip:
     Type: AWS::Serverless::Function
     Properties:
@@ -1202,12 +912,6 @@ Resources:
             Path: /me/notifications
             Method: get
             RestApiId: !Ref RestApi
-        ApiWithAuth:
-          Type: Api
-          Properties:
-            Path: /me/notifications
-            Method: get
-            RestApiId: !Ref RestApiWithCustomAuthorizer
   MeUnreadNotificationManagersShow:
     Type: AWS::Serverless::Function
     Properties:
@@ -1221,12 +925,6 @@ Resources:
             Path: /me/unread_notification_managers
             Method: get
             RestApiId: !Ref RestApi
-        ApiWithAuth:
-          Type: Api
-          Properties:
-            Path: /me/unread_notification_managers
-            Method: get
-            RestApiId: !Ref RestApiWithCustomAuthorizer
   MeUnreadNotificationManagersUpdate:
     Type: AWS::Serverless::Function
     Properties:
@@ -1240,12 +938,6 @@ Resources:
             Path: /me/unread_notification_managers
             Method: put
             RestApiId: !Ref RestApi
-        ApiWithAuth:
-          Type: Api
-          Properties:
-            Path: /me/unread_notification_managers
-            Method: put
-            RestApiId: !Ref RestApiWithCustomAuthorizer
   MeExternalProviderUserCreate:
     Type: AWS::Serverless::Function
     Properties:
@@ -1279,12 +971,6 @@ Resources:
             Path: /topics
             Method: get
             RestApiId: !Ref RestApi
-        ApiWithAuth:
-          Type: Api
-          Properties:
-            Path: /topics
-            Method: get
-            RestApiId: !Ref RestApiWithCustomAuthorizer
   CognitoTriggerPreAuthentication:
     Type: AWS::Serverless::Function
     Properties:
@@ -1307,12 +993,6 @@ Resources:
             Path: /search/articles
             Method: get
             RestApiId: !Ref RestApi
-        ApiWithAuth:
-          Type: Api
-          Properties:
-            Path: /search/articles
-            Method: get
-            RestApiId: !Ref RestApiWithCustomAuthorizer
   ElasticSearchSearchUsers:
     Type: AWS::Serverless::Function
     Properties:
@@ -1326,12 +1006,6 @@ Resources:
             Path: /search/users
             Method: get
             RestApiId: !Ref RestApi
-        ApiWithAuth:
-          Type: Api
-          Properties:
-            Path: /search/users
-            Method: get
-            RestApiId: !Ref RestApiWithCustomAuthorizer
   ElasticSearchSearchTags:
     Type: AWS::Serverless::Function
     Properties:
@@ -1345,12 +1019,6 @@ Resources:
             Path: /search/tags
             Method: get
             RestApiId: !Ref RestApi
-        ApiWithAuth:
-          Type: Api
-          Properties:
-            Path: /search/tags
-            Method: get
-            RestApiId: !Ref RestApiWithCustomAuthorizer
   MeUsersFraudCreate:
     Type: AWS::Serverless::Function
     Properties:
@@ -1364,12 +1032,6 @@ Resources:
             Path: /me/users/{user_id}/fraud
             Method: post
             RestApiId: !Ref RestApi
-        ApiWithAuth:
-          Type: Api
-          Properties:
-            Path: /me/users/{user_id}/fraud
-            Method: get
-            RestApiId: !Ref RestApiWithCustomAuthorizer
   ElasticSearchService:
     Type: "AWS::Elasticsearch::Domain"
     Properties:
@@ -1402,3 +1064,278 @@ Resources:
       ElasticsearchVersion: '6.2'
       SnapshotOptions:
         AutomatedSnapshotStartHour: 0
+Outputs:
+  Authorizer:
+    Value:
+      Ref: Authorizer
+    Export:
+      Name: !Sub "${AWS::StackName}-Authorizer"
+  ArticlesRecent:
+    Value:
+      Ref: ArticlesRecent
+    Export:
+      Name: !Sub "${AWS::StackName}-ArticlesRecent"
+  ArticlesPopular:
+    Value:
+      Ref: ArticlesPopular
+    Export:
+      Name: !Sub "${AWS::StackName}-ArticlesPopular"
+  ArticlesEyecatch:
+    Value:
+      Ref: ArticlesEyecatch
+    Export:
+      Name: !Sub "${AWS::StackName}-ArticlesEyecatch"
+  ArticlesRecommended:
+    Value:
+      Ref: ArticlesRecommended
+    Export:
+      Name: !Sub "${AWS::StackName}-ArticlesRecommended"
+  ArticlesShow:
+    Value:
+      Ref: ArticlesShow
+    Export:
+      Name: !Sub "${AWS::StackName}-ArticlesShow"
+  ArticlesAlisTokensShow:
+    Value:
+      Ref: ArticlesAlisTokensShow
+    Export:
+      Name: !Sub "${AWS::StackName}-ArticlesAlisTokensShow"
+  ArticlesLikesShow:
+    Value:
+      Ref: ArticlesLikesShow
+    Export:
+      Name: !Sub "${AWS::StackName}-ArticlesLikesShow"
+  UsersArticlesPublic:
+    Value:
+      Ref: UsersArticlesPublic
+    Export:
+      Name: !Sub "${AWS::StackName}-UsersArticlesPublic"
+  UsersInfo:
+    Value:
+      Ref: UsersInfo
+    Export:
+      Name: !Sub "${AWS::StackName}-UsersInfo"
+  MeArticlesDraftsIndex:
+    Value:
+      Ref: MeArticlesDraftsIndex
+    Export:
+      Name: !Sub "${AWS::StackName}-MeArticlesDraftsIndex"
+  MeArticlesDraftsCreate:
+    Value:
+      Ref: MeArticlesDraftsCreate
+    Export:
+      Name: !Sub "${AWS::StackName}-MeArticlesDraftsCreate"
+  MeArticlesDraftsArticleIdCreate:
+    Value:
+      Ref: MeArticlesDraftsArticleIdCreate
+    Export:
+      Name: !Sub "${AWS::StackName}-MeArticlesDraftsArticleIdCreate"
+  MeArticlesDraftsPublish:
+    Value:
+      Ref: MeArticlesDraftsPublish
+    Export:
+      Name: !Sub "${AWS::StackName}-MeArticlesDraftsPublish"
+  MeArticlesDraftsPublishWithHeader:
+    Value:
+      Ref: MeArticlesDraftsPublishWithHeader
+    Export:
+      Name: !Sub "${AWS::StackName}-MeArticlesDraftsPublishWithHeader"
+  MeArticlesDraftsUpdate:
+    Value:
+      Ref: MeArticlesDraftsUpdate
+    Export:
+      Name: !Sub "${AWS::StackName}-MeArticlesDraftsUpdate"
+  MeArticlesDraftsTitleUpdate:
+    Value:
+      Ref: MeArticlesDraftsTitleUpdate
+    Export:
+      Name: !Sub "${AWS::StackName}-MeArticlesDraftsTitleUpdate"
+  MeArticlesDraftsBodyUpdate:
+    Value:
+      Ref: MeArticlesDraftsBodyUpdate
+    Export:
+      Name: !Sub "${AWS::StackName}-MeArticlesDraftsBodyUpdate"
+  MeArticlesPublicIndex:
+    Value:
+      Ref: MeArticlesPublicIndex
+    Export:
+      Name: !Sub "${AWS::StackName}-MeArticlesPublicIndex"
+  MeArticlesPublicShow:
+    Value:
+      Ref: MeArticlesPublicShow
+    Export:
+      Name: !Sub "${AWS::StackName}-MeArticlesPublicShow"
+  MeArticlesPublicEdit:
+    Value:
+      Ref: MeArticlesPublicEdit
+    Export:
+      Name: !Sub "${AWS::StackName}-MeArticlesPublicEdit"
+  MeArticlesPublicUpdate:
+    Value:
+      Ref: MeArticlesPublicUpdate
+    Export:
+      Name: !Sub "${AWS::StackName}-MeArticlesPublicUpdate"
+  MeArticlesPublicTitleUpdate:
+    Value:
+      Ref: MeArticlesPublicTitleUpdate
+    Export:
+      Name: !Sub "${AWS::StackName}-MeArticlesPublicTitleUpdate"
+  MeArticlesPublicBodyUpdate:
+    Value:
+      Ref: MeArticlesPublicBodyUpdate
+    Export:
+      Name: !Sub "${AWS::StackName}-MeArticlesPublicBodyUpdate"
+  MeArticlesPublicUnpublish:
+    Value:
+      Ref: MeArticlesPublicUnpublish
+    Export:
+      Name: !Sub "${AWS::StackName}-MeArticlesPublicUnpublish"
+  MeArticlesPublicRepublish:
+    Value:
+      Ref: MeArticlesPublicRepublish
+    Export:
+      Name: !Sub "${AWS::StackName}-MeArticlesPublicRepublish"
+  MeArticlesPublicRepublishWithHeader:
+    Value:
+      Ref: MeArticlesPublicRepublishWithHeader
+    Export:
+      Name: !Sub "${AWS::StackName}-MeArticlesPublicRepublishWithHeader"
+  ArticlesCommentsIndex:
+    Value:
+      Ref: ArticlesCommentsIndex
+    Export:
+      Name: !Sub "${AWS::StackName}-ArticlesCommentsIndex"
+  MeArticlesCommentsCreate:
+    Value:
+      Ref: MeArticlesCommentsCreate
+    Export:
+      Name: !Sub "${AWS::StackName}-MeArticlesCommentsCreate"
+  MeArticlesCommentsReply:
+    Value:
+      Ref: MeArticlesCommentsReply
+    Export:
+      Name: !Sub "${AWS::StackName}-MeArticlesCommentsReply"
+  MeArticlesCommentsLikesIndex:
+    Value:
+      Ref: MeArticlesCommentsLikesIndex
+    Export:
+      Name: !Sub "${AWS::StackName}-MeArticlesCommentsLikesIndex"
+  CommentsLikesShow:
+    Value:
+      Ref: CommentsLikesShow
+    Export:
+      Name: !Sub "${AWS::StackName}-CommentsLikesShow"
+  MeCommentsLikesCreate:
+    Value:
+      Ref: MeCommentsLikesCreate
+    Export:
+      Name: !Sub "${AWS::StackName}-MeCommentsLikesCreate"
+  MeCommentsDelete:
+    Value:
+      Ref: MeCommentsDelete
+    Export:
+      Name: !Sub "${AWS::StackName}-MeCommentsDelete"
+  MeArticlesFraudCreate:
+    Value:
+      Ref: MeArticlesFraudCreate
+    Export:
+      Name: !Sub "${AWS::StackName}-MeArticlesFraudCreate"
+  MeArticlesImagesCreate:
+    Value:
+      Ref: MeArticlesImagesCreate
+    Export:
+      Name: !Sub "${AWS::StackName}-MeArticlesImagesCreate"
+  MeArticlesImageUploadUrlShow:
+    Value:
+      Ref: MeArticlesImageUploadUrlShow
+    Export:
+      Name: !Sub "${AWS::StackName}-MeArticlesImageUploadUrlShow"
+  MeInfoIconCreate:
+    Value:
+      Ref: MeInfoIconCreate
+    Export:
+      Name: !Sub "${AWS::StackName}-MeInfoIconCreate"
+  MeArticlesLikesShow:
+    Value:
+      Ref: MeArticlesLikesShow
+    Export:
+      Name: !Sub "${AWS::StackName}-MeArticlesLikesShow"
+  MeArticlesDraftsShow:
+    Value:
+      Ref: MeArticlesDraftsShow
+    Export:
+      Name: !Sub "${AWS::StackName}-MeArticlesDraftsShow"
+  MeInfoUpdate:
+    Value:
+      Ref: MeInfoUpdate
+    Export:
+      Name: !Sub "${AWS::StackName}-MeInfoUpdate"
+  MeInfoShow:
+    Value:
+      Ref: MeInfoShow
+    Export:
+      Name: !Sub "${AWS::StackName}-MeInfoShow"
+  MeWalletBalance:
+    Value:
+      Ref: MeWalletBalance
+    Export:
+      Name: !Sub "${AWS::StackName}-MeWalletBalance"
+  MeWalletDistributedTokensShow:
+    Value:
+      Ref: MeWalletDistributedTokensShow
+    Export:
+      Name: !Sub "${AWS::StackName}-MeWalletDistributedTokensShow"
+  MeNotificationsIndex:
+    Value:
+      Ref: MeNotificationsIndex
+    Export:
+      Name: !Sub "${AWS::StackName}-MeNotificationsIndex"
+  MeUnreadNotificationManagersShow:
+    Value:
+      Ref: MeUnreadNotificationManagersShow
+    Export:
+      Name: !Sub "${AWS::StackName}-MeUnreadNotificationManagersShow"
+  MeUnreadNotificationManagersUpdate:
+    Value:
+      Ref: MeUnreadNotificationManagersUpdate
+    Export:
+      Name: !Sub "${AWS::StackName}-MeUnreadNotificationManagersUpdate"
+  MeExternalProviderUserCreate:
+    Value:
+      Ref: MeExternalProviderUserCreate
+    Export:
+      Name: !Sub "${AWS::StackName}-MeExternalProviderUserCreate"
+  TopicsIndex:
+    Value:
+      Ref: TopicsIndex
+    Export:
+      Name: !Sub "${AWS::StackName}-TopicsIndex"
+  CognitoTriggerPreAuthentication:
+    Value:
+      Ref: CognitoTriggerPreAuthentication
+    Export:
+      Name: !Sub "${AWS::StackName}-CognitoTriggerPreAuthentication"
+  ElasticSearchSearchArticles:
+    Value:
+      Ref: ElasticSearchSearchArticles
+    Export:
+      Name: !Sub "${AWS::StackName}-ElasticSearchSearchArticles"
+  ElasticSearchSearchUsers:
+    Value:
+      Ref: ElasticSearchSearchUsers
+    Export:
+      Name: !Sub "${AWS::StackName}-ElasticSearchSearchUsers"
+  ElasticSearchSearchTags:
+    Value:
+      Ref: ElasticSearchSearchTags
+    Export:
+      Name: !Sub "${AWS::StackName}-ElasticSearchSearchTags"
+  MeUsersFraudCreate:
+    Value:
+      Ref: MeUsersFraudCreate
+    Export:
+      Name: !Sub "${AWS::StackName}-MeUsersFraudCreate"
+  MeUsersFraudCreateArn:
+    Value: !Sub "{MeUsersFraudCreate.Arn}"
+    Export:
+      Name: !Sub "${AWS::StackName}-MeUsersFraudCreate"
