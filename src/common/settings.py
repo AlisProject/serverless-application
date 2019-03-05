@@ -171,6 +171,15 @@ parameters = {
             'type': 'string',
             'maxLength': 400
         }
+    },
+    'user_first_experience': {
+        'type': 'string',
+        'enum': [
+            'is_liked_article',
+            'is_tipped_article',
+            'is_got_token',
+            'is_created_article'
+        ]
     }
 }
 

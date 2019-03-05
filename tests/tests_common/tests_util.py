@@ -93,7 +93,6 @@ class TestsUtil:
             {'env_name': 'TOKEN_DISTRIBUTION_TABLE_NAME', 'table_name': 'TokenDistribution'},
             {'env_name': 'USER_FIRST_EXPERIENCE_TABLE_NAME', 'table_name': 'UserFirstExperience'},
             {'env_name': 'NONCE_TABLE_NAME', 'table_name': 'Nonce'}
-            {'env_name': 'USER_FRAUD_TABLE_NAME', 'table_name': 'UserFraud'}
         ]
         if os.environ.get('IS_DYNAMODB_ENDPOINT_OF_AWS') is not None:
             for table in cls.all_tables:
