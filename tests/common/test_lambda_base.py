@@ -1,4 +1,6 @@
 import json
+import logging
+
 from tests_util import TestsUtil
 from unittest import TestCase
 from unittest.mock import MagicMock
@@ -116,3 +118,50 @@ class TestLambdaBase(TestCase):
             'test_key2': 'test2'
         }
         self.assertEqual(expected_headers, lambda_impl.headers)
+
+    def test_update_event_ok(self):
+        event = {
+            'body': {
+                'hoge': 'fuga'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'principalId': 'oauth_user_id'
+                }
+            }
+        }
+
+        lambda_impl = self.TestLambdaImpl(event, {})
+        lambda_impl.main()
+        self.assertEqual('oauth_user_id',
+                         lambda_impl.event['requestContext']['authorizer']['claims']['cognito:username'])
+
+    def test_update_event_ok_not_updated(self):
+        event = {
+            'body': {
+                'hoge': 'fuga'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test_user_id'
+                    }
+                }
+            }
+        }
+
+        lambda_impl = self.TestLambdaImpl(event, {})
+        lambda_impl.main()
+        self.assertEqual('test_user_id',
+                         lambda_impl.event['requestContext']['authorizer']['claims']['cognito:username'])
+
+    def test_update_event_ok_with_no_authorizer(self):
+        event = {
+            'body': {
+                'hoge': 'fuga'
+            }
+        }
+
+        lambda_impl = self.TestLambdaImpl(event, {})
+        lambda_impl.main()
+        self.assertFalse(lambda_impl.event.get('requestContext'))
