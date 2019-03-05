@@ -1335,7 +1335,3 @@ Outputs:
       Ref: MeUsersFraudCreate
     Export:
       Name: !Sub "${AWS::StackName}-MeUsersFraudCreate"
-  MeUsersFraudCreateArn:
-    Value: !Sub "{MeUsersFraudCreate.Arn}"
-    Export:
-      Name: !Sub "${AWS::StackName}-MeUsersFraudCreate"
