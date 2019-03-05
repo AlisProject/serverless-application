@@ -1,5 +1,4 @@
 import json
-import logging
 
 from tests_util import TestsUtil
 from unittest import TestCase
