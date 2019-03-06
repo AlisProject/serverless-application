@@ -12,7 +12,7 @@ parameters = {
     'user_id': {
         'type': 'string',
         'minLength': 3,
-        'maxLength': 30,
+        'maxLength': 50,
         'pattern': r'^(?!.*--)[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]$'
     },
     'line_id': {
@@ -180,6 +180,12 @@ parameters = {
             'is_got_token',
             'is_created_article'
         ]
+    },
+    'code': {
+        'type': 'string'
+    },
+    'state': {
+        'type': 'string'
     }
 }
 
