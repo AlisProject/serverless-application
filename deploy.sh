@@ -86,4 +86,10 @@ if [ $1 = "api" ]; then
       --stack-name ${ALIS_APP_ID}${1}-with-oauth \
       --parameter-overrides FunctionDeployStackName=${ALIS_APP_ID}${1} \
       --capabilities CAPABILITY_IAM
+
+    returnCode=$?
+
+    if [[ $returnCode = 255 ]]; then
+        exit 0
+    fi
 fi
