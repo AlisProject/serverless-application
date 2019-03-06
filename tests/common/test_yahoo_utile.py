@@ -99,8 +99,8 @@ class TestYahooUtil(TestCase):
                 'iss': 'https://auth.login.yahoo.co.jp/yconnect/v2',
                 'sub': 'user_id',
                 'aud': ['ssss-'],
-                'exp': 1543325829,
-                'iat': 1540906629,
+                'exp': 1933325829,
+                'iat': 1900906629,
                 'amr': ['pwd'],
                 'nonce': 'bbbbb',
                 'at_hash': 'hrOQHuo3oE6FR82RIiX1SA'

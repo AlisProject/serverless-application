@@ -585,6 +585,10 @@ Resources:
           AttributeType: S
       KeySchema:
         - AttributeName: article_type
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
   Nonce:
     Type: AWS::DynamoDB::Table
     Properties:
