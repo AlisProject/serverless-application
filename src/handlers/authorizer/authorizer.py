@@ -13,15 +13,18 @@ class Authorizer:
     def __init__(self, event, context):
         self.event = event
         self.context = context
+        self.logger = logging.getLogger()
 
     def main(self):
+        self.logger.setLevel(logging.INFO)
+
         http_method, resource_path = self.__extract_method_and_path(self.event['methodArn'])
         scopes = self.__get_required_scopes(http_method, resource_path)
         response = self.__introspect(scopes)
 
-        logging.fatal("http_method: " + http_method)
-        logging.fatal("resource_path: " + resource_path)
-        logging.fatal(response)
+        logging.info("http_method: " + http_method)
+        logging.info("resource_path: " + resource_path)
+        logging.info(response)
 
         if response['action'] == 'OK':
             return self.__generate_policy(response['subject'], 'Allow', self.event['methodArn'])
@@ -35,10 +38,12 @@ class Authorizer:
 
     def __introspect(self, scopes):
         try:
+            data = {'token': self.event["authorizationToken"], 'scopes': scopes}
             response = requests.post(
                 self.AUTHLETE_INTROSPECTION_ENDPOINT,
-                data={'token': self.event["authorizationToken"], 'scopes': scopes},
-                auth=(os.environ['AUTHLETE_API_KEY'], os.environ['AUTHLETE_API_SECRET'])
+                data=json.dumps(data),
+                auth=(os.environ['AUTHLETE_API_KEY'], os.environ['AUTHLETE_API_SECRET']),
+                headers={'Content-Type': 'application/json'}
             )
         except requests.exceptions.RequestException as e:
             logging.info(e)
