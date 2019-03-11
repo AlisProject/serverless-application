@@ -78,4 +78,5 @@ aws cloudformation deploy \
     FacebookAppSecret=${SSM_PARAMS_PREFIX}FacebookAppSecret \
     FacebookOauthCallbackUrl=${SSM_PARAMS_PREFIX}FacebookOauthCallbackUrl \
     FacebookAppToken=${SSM_PARAMS_PREFIX}FacebookAppToken \
+    RestApi=${SSM_PARAMS_PREFIX}RestApi \
   --capabilities CAPABILITY_IAM
