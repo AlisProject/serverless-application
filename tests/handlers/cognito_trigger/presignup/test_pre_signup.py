@@ -54,7 +54,7 @@ class TestPreSignUp(TestCase):
 
     def test_validate_ng_too_long(self):
         event = {
-            'userName': 'y2hogheogehgeoihgeoigewgheoighweoighwe',
+            'userName': 'y2hogheogehgeoihgeoigewgheoighweoighwegheogehgeoihgeoigewgheoighwe',
             'request': {
                 'validationData': None
             },

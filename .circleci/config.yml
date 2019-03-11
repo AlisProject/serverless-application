@@ -78,7 +78,7 @@ jobs:
           command: |
             if [ $ALIS_APP_ID ]; then
               . venv/bin/activate
-              ./deploy.sh api
+              ./deploy_api.sh
             fi
 
       - store_artifacts:
