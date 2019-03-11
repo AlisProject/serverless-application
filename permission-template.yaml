@@ -1,0 +1,40 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Lambda functions and API Gateway resources for the ALIS application.
+
+Parameters:
+  RestApi:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+
+Resources:
+  LoginYahooAuthorizationUrlApiGatewayInvoke:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName:
+         Fn::ImportValue: LoginYahooAuthorizationUrl
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub ${RestApi}/*/GET/login/yahoo/authorization_url
+  LoginYahooApiGatewayInvoke:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName:
+        Fn::ImportValue: LoginYahoo
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub ${RestApi}/*/POST/login/yahoo
+  LoginFacebookAuthorizationUrlApiGatewayInvoke:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName:
+        Fn::ImportValue: LoginFacebookAuthorizationUrl
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub ${RestApi}/*/GET/login/facebook/authorization_url
+  LoginFacebookApiGatewayInvoke:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName:
+        Fn::ImportValue: LoginFacebook
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub ${RestApi}/*/POST/login/facebook

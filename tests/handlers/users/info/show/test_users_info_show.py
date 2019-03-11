@@ -99,7 +99,7 @@ class TestUsersArticlesPublic(TestCase):
     def test_validation_user_id_max(self):
         params = {
             'pathParameters': {
-                'user_id': 'A' * 31
+                'user_id': 'A' * 51
             }
         }
 

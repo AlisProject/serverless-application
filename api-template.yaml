@@ -863,6 +863,156 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+          /login/yahoo:
+            post:
+              description: "Yahooログインの実施"
+              parameters:
+              - name: request
+                in: body
+                required: true
+                schema:
+                  type: object
+                  required:
+                  - code
+                  - state
+                  properties:
+                    code:
+                      type: string
+                    state:
+                      type: string
+              responses:
+                "200":
+                  description: "アクセストークンを取得"
+                  schema:
+                    type: object
+                    properties:
+                      access_token:
+                        type: string
+                      refresh_token:
+                        type: string
+                      id_token:
+                        type: string
+                      has_user_id:
+                        type: string
+                "401":
+                  description: "認証エラー"
+                  schema:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri:
+                  Fn::Join:
+                    - ''
+                    - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
+                      - !ImportValue LoginYahoo
+                      - "/invocations"
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /login/yahoo/authorization_url:
+            get:
+              description: "Yahoo認証画面のURLを取得する"
+              responses:
+                "200":
+                  description: "Yahoo認証画面のURL"
+                  schema:
+                    type: object
+                    properties:
+                      url:
+                        type: string
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri:
+                  Fn::Join:
+                    - ''
+                    - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
+                      - !ImportValue LoginYahooAuthorizationUrl
+                      - "/invocations"
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /login/facebook:
+            post:
+              description: "Facebookログインの実施"
+              parameters:
+              - name: request
+                in: body
+                required: true
+                schema:
+                  type: object
+                  required:
+                  - code
+                  - state
+                  properties:
+                    code:
+                      type: string
+                    state:
+                      type: string
+              responses:
+                "200":
+                  description: "アクセストークンを取得"
+                  schema:
+                    type: object
+                    properties:
+                      access_token:
+                        type: string
+                      refresh_token:
+                        type: string
+                      id_token:
+                        type: string
+                      has_user_id:
+                        type: string
+                "401":
+                  description: "認証エラー"
+                  schema:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri:
+                  Fn::Join:
+                    - ''
+                    - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
+                      - !ImportValue LoginFacebook
+                      - "/invocations"
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /login/facebook/authorization_url:
+            get:
+              description: "Facebook認証画面のURLを取得する"
+              responses:
+                "200":
+                  description: "Facebook認証画面のURL"
+                  schema:
+                    type: object
+                    properties:
+                      url:
+                        type: string
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri:
+                  Fn::Join:
+                    - ''
+                    - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
+                      - !ImportValue LoginFacebookAuthorizationUrl
+                      - "/invocations"
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
           /me/articles/drafts:
             get:
               description: '下書き記事一覧情報を取得'
@@ -1406,6 +1556,10 @@ Resources:
               responses:
                 '200':
                   description: '不正報告の実施成功'
+                  in: 'body'
+                  required: true
+                  schema:
+                    $ref: '#/definitions/Fraud'
               security:
                 - cognitoUserPool: []
               x-amazon-apigateway-integration:

@@ -12,10 +12,16 @@ parameters = {
     'user_id': {
         'type': 'string',
         'minLength': 3,
-        'maxLength': 30,
+        'maxLength': 50,
         'pattern': r'^(?!.*--)[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]$'
     },
     'line_id': {
+        'type': 'string'
+    },
+    'yahoo_id': {
+        'type': 'string'
+    },
+    'facebook_id': {
         'type': 'string'
     },
     'phone_number': {
@@ -174,6 +180,12 @@ parameters = {
             'is_got_token',
             'is_created_article'
         ]
+    },
+    'code': {
+        'type': 'string'
+    },
+    'state': {
+        'type': 'string'
     }
 }
 
@@ -257,6 +269,23 @@ TOPIC_INDEX_HASH_KEY = 'topic'
 
 TAG_DENIED_SYMBOL_PATTERN = '([!-,./:-@[-`{-~]|--| {2})'
 TAG_ALLOWED_SYMBOLS = ['-', ' ']
+
+
+YAHOO_API_WELL_KNOWN_URL = 'https://auth.login.yahoo.co.jp/yconnect/v2/.well-known/openid-configuration'
+YAHOO_API_PUBLIC_KEY_URL = 'https://auth.login.yahoo.co.jp/yconnect/v2/public-keys'
+YAHOO_USERNAME_PREFIX = 'Yahoo-'
+YAHOO_NONCE_EXPIRATION_MINUTES = 15
+YAHOO_LOGIN_REQUEST_SCOPE = 'openid%20email%20profile'
+YAHOO_NONCE_LENGTH = 10
+
+FACEBOOK_API_AUTHENTICATE_URL = 'https://www.facebook.com/dialog/oauth'
+FACEBOOK_API_ACCESSTOKEN_URL = 'https://graph.facebook.com/oauth/access_token'
+FACEBOOK_API_USERINFO_URL = 'https://graph.facebook.com/me'
+FACEBOOK_API_DEBUG_URL = 'https://graph.facebook.com/debug_token'
+FACEBOOK_USERNAME_PREFIX = 'Facebook-'
+FACEBOOK_NONCE_EXPIRATION_MINUTES = 15
+FACEBOOK_LOGIN_REQUEST_SCOPE = 'email'
+FACEBOOK_NONCE_LENGTH = 10
 
 TWITTER_API_REQUEST_TOKEN_URL = 'https://api.twitter.com/oauth/request_token'
 TWITTER_API_AUTHENTICATE_URL = 'https://api.twitter.com/oauth/authenticate'
