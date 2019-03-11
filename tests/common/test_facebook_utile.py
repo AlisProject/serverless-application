@@ -38,7 +38,11 @@ class TestFacebookUtil(TestCase):
             url = self.fb.get_authorization_url(
                 dynamodb=dynamodb
             )
-            self.assertEqual(url, 'https://www.facebook.com/dialog/oauth?client_id=fake_client_id&redirect_uri=http://callback&scope=email&state=xxxx')
+            self.assertEqual(
+                url,
+                'https://www.facebook.com/dialog/oauth?client_id='
+                + 'fake_client_id&redirect_uri=http://callback&scope=email&state=xxxx'
+            )
 
     def test_get_authorization_url_ng_with_clienterror(self):
         with self.assertRaises(ClientError):

@@ -1,5 +1,4 @@
 import os
-import time
 from nonce_util import NonceUtil
 from unittest import TestCase
 from unittest.mock import MagicMock
