@@ -209,3 +209,9 @@ aws cloudformation deploy \
     FacebookAppToken=${SSM_PARAMS_PREFIX}FacebookAppToken \
     RestApiArn=${SSM_PARAMS_PREFIX}RestApiArn \
   --capabilities CAPABILITY_IAM
+
+if [ "$?" -eq 255 ]
+then
+  echo "No changes to deploy."
+  true
+fi
