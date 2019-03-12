@@ -19,6 +19,7 @@ cloudformation_deploy() {
       --s3-bucket $DEPLOY_BUCKET_NAME \
       --stack-name ${ALIS_APP_ID}${1} \
       --parameter-overrides \
+        AlisAppId=${ALIS_APP_ID} \
         AlisAppDomain=${SSM_PARAMS_PREFIX}AlisAppDomain \
         PrivateChainAwsAccessKey=${SSM_PARAMS_PREFIX}PrivateChainAwsAccessKey \
         PrivateChainAwsSecretAccessKey=${SSM_PARAMS_PREFIX}PrivateChainAwsSecretAccessKey \
