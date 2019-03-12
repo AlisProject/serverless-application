@@ -275,7 +275,7 @@ YAHOO_API_WELL_KNOWN_URL = 'https://auth.login.yahoo.co.jp/yconnect/v2/.well-kno
 YAHOO_API_PUBLIC_KEY_URL = 'https://auth.login.yahoo.co.jp/yconnect/v2/public-keys'
 YAHOO_USERNAME_PREFIX = 'Yahoo-'
 YAHOO_NONCE_EXPIRATION_MINUTES = 15
-YAHOO_LOGIN_REQUEST_SCOPE = 'openid%20email%20profile'
+YAHOO_LOGIN_REQUEST_SCOPE = 'openid%20email'
 YAHOO_NONCE_LENGTH = 10
 
 FACEBOOK_API_AUTHENTICATE_URL = 'https://www.facebook.com/dialog/oauth'

@@ -28,7 +28,7 @@ class TestYahooUtil(TestCase):
             self.assertEqual(
                 url,
                 'https://auth.login.yahoo.co.jp/yconnect/v2/authorization?response_type=code&client_id=' +
-                'fake_client_id&scope=openid%20email%20profile&redirect_uri=http://callback&nonce=xxxx&state=xxxx')
+                'fake_client_id&scope=openid%20email&redirect_uri=http://callback&nonce=xxxx&state=xxxx')
 
     def test_get_authorization_url_ng_with_clienterror(self):
         with self.assertRaises(ClientError):
