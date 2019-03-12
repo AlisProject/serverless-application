@@ -3,6 +3,8 @@ Transform: AWS::Serverless-2016-10-31
 Description: Lambda functions and API Gateway resources for the ALIS application.
 
 Parameters:
+  AlisAppId:
+    Type: String
   ArticleInfoTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
   ArticleContentTableName:
@@ -909,7 +911,8 @@ Resources:
                   Fn::Join:
                     - ''
                     - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
-                      - !ImportValue LoginYahoo
+                      - Fn::ImportValue:
+                          Fn::Sub: "${AlisAppId}-LoginYahoo"
                       - "/invocations"
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
@@ -933,7 +936,8 @@ Resources:
                   Fn::Join:
                     - ''
                     - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
-                      - !ImportValue LoginYahooAuthorizationUrl
+                      - Fn::ImportValue:
+                          Fn::Sub: "${AlisAppId}-LoginYahooAuthorizationUrl"
                       - "/invocations"
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
@@ -984,7 +988,8 @@ Resources:
                   Fn::Join:
                     - ''
                     - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
-                      - !ImportValue LoginFacebook
+                      - Fn::ImportValue:
+                          Fn::Sub: "${AlisAppId}-LoginFacebook"
                       - "/invocations"
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
@@ -1008,7 +1013,8 @@ Resources:
                   Fn::Join:
                     - ''
                     - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
-                      - !ImportValue LoginFacebookAuthorizationUrl
+                      - Fn::ImportValue:
+                          Fn::Sub: "${AlisAppId}-LoginFacebookAuthorizationUrl"
                       - "/invocations"
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
