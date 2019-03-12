@@ -2,6 +2,8 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: Lambda functions and API Gateway resources for the ALIS application.
 
 Parameters:
+  AlisAppId:
+    Type: String
   ArticleInfoTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
   ArticleContentTableName:
@@ -208,16 +210,16 @@ Outputs:
   LoginYahoo:
     Value: !GetAtt LoginYahoo.Arn
     Export:
-      Name: "LoginYahoo"
+      Name: !Sub "${AlisAppId}-LoginYahoo"
   LoginYahooAuthorizationUrl:
     Value: !GetAtt LoginYahooAuthorizationUrl.Arn
     Export:
-      Name: "LoginYahooAuthorizationUrl"
+      Name: !Sub "${AlisAppId}-LoginYahooAuthorizationUrl"
   LoginFacebook:
     Value: !GetAtt LoginFacebook.Arn
     Export:
-      Name: "LoginFacebook"
+      Name: !Sub "${AlisAppId}-LoginFacebook"
   LoginFacebookAuthorizationUrl:
     Value: !GetAtt LoginFacebookAuthorizationUrl.Arn
     Export:
-      Name: "LoginFacebookAuthorizationUrl"
+      Name: !Sub "${AlisAppId}-LoginFacebookAuthorizationUrl"

@@ -24,6 +24,7 @@ aws cloudformation deploy \
   --s3-bucket $DEPLOY_BUCKET_NAME \
   --stack-name ${ALIS_APP_ID}${1} \
   --parameter-overrides \
+    AlisAppId=${ALIS_APP_ID} \
     AlisAppDomain=${SSM_PARAMS_PREFIX}AlisAppDomain \
     PrivateChainAwsAccessKey=${SSM_PARAMS_PREFIX}PrivateChainAwsAccessKey \
     PrivateChainAwsSecretAccessKey=${SSM_PARAMS_PREFIX}PrivateChainAwsSecretAccessKey \
@@ -78,5 +79,5 @@ aws cloudformation deploy \
     FacebookAppSecret=${SSM_PARAMS_PREFIX}FacebookAppSecret \
     FacebookOauthCallbackUrl=${SSM_PARAMS_PREFIX}FacebookOauthCallbackUrl \
     FacebookAppToken=${SSM_PARAMS_PREFIX}FacebookAppToken \
-    RestApi=${SSM_PARAMS_PREFIX}RestApi \
+    RestApiArn=${SSM_PARAMS_PREFIX}RestApiArn \
   --capabilities CAPABILITY_IAM

@@ -2,8 +2,10 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: Lambda functions and API Gateway resources for the ALIS application.
 
 Parameters:
-  RestApi:
+  RestApiArn:
     Type: 'AWS::SSM::Parameter::Value<String>'
+  AlisAppId:
+    Type: String
 
 Resources:
   LoginYahooAuthorizationUrlApiGatewayInvoke:
@@ -11,30 +13,34 @@ Resources:
     Properties:
       Action: "lambda:InvokeFunction"
       FunctionName:
-         Fn::ImportValue: LoginYahooAuthorizationUrl
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LoginYahooAuthorizationUrl"
       Principal: "apigateway.amazonaws.com"
-      SourceArn: !Sub ${RestApi}/*/GET/login/yahoo/authorization_url
+      SourceArn: !Sub ${RestApiArn}/*/GET/login/yahoo/authorization_url
   LoginYahooApiGatewayInvoke:
     Type: "AWS::Lambda::Permission"
     Properties:
       Action: "lambda:InvokeFunction"
       FunctionName:
-        Fn::ImportValue: LoginYahoo
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LoginYahoo"
       Principal: "apigateway.amazonaws.com"
-      SourceArn: !Sub ${RestApi}/*/POST/login/yahoo
+      SourceArn: !Sub ${RestApiArn}/*/POST/login/yahoo
   LoginFacebookAuthorizationUrlApiGatewayInvoke:
     Type: "AWS::Lambda::Permission"
     Properties:
       Action: "lambda:InvokeFunction"
       FunctionName:
-        Fn::ImportValue: LoginFacebookAuthorizationUrl
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LoginFacebookAuthorizationUrl"
       Principal: "apigateway.amazonaws.com"
-      SourceArn: !Sub ${RestApi}/*/GET/login/facebook/authorization_url
+      SourceArn: !Sub ${RestApiArn}/*/GET/login/facebook/authorization_url
   LoginFacebookApiGatewayInvoke:
     Type: "AWS::Lambda::Permission"
     Properties:
       Action: "lambda:InvokeFunction"
       FunctionName:
-        Fn::ImportValue: LoginFacebook
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LoginFacebook"
       Principal: "apigateway.amazonaws.com"
-      SourceArn: !Sub ${RestApi}/*/POST/login/facebook
+      SourceArn: !Sub ${RestApiArn}/*/POST/login/facebook
