@@ -74,7 +74,8 @@ class MeArticlesDraftsCreate(LambdaBase):
             'overview': TextSanitizer.sanitize_text(params.get('overview')),
             'eye_catch_url': params.get('eye_catch_url'),
             'sort_key': sort_key,
-            'created_at': int(time.time())
+            'created_at': int(time.time()),
+            'version': 2
         }
         DBUtil.items_values_empty_to_none(article_info)
 

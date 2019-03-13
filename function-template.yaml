@@ -1,0 +1,225 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Lambda functions and API Gateway resources for the ALIS application.
+
+Parameters:
+  AlisAppId:
+    Type: String
+  ArticleInfoTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  ArticleContentTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  ArticleHistoryTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  ArticleContentEditTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  ArticleEvaluatedManageTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  ArticleAlisTokenTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  ArticleLikedUserTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  ArticleFraudUserTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  ArticlePvUserTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  ArticleScoreTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  UsersTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  BetaUsersTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  ExternalProviderUsersTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  NotificationTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  UnreadNotificationManagerTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  CommentTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  CommentLikedUserTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  DeletedCommentTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  UserFraudTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  ScreenedArticleTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  TokenDistributionTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  UserFirstExperienceTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  ElasticSearchEndpoint:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  TopicTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  TagTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  TipTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  AlisAppDomain:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  PrivateChainAwsAccessKey:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  PrivateChainAwsSecretAccessKey:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  PrivateChainExecuteApiHost:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  BetaModeFlag:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  DistS3BucketName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  CognitoUserPoolId:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  CognitoUserPoolArn:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  CognitoUserPoolAppId:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  SaltForArticleId:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  TwitterConsumerKey:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  TwitterConsumerSecret:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  TwitterOauthCallbackUrl:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  LineChannelId:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  LineChannelSecret:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  NonceTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  ExternalProviderLoginCommonTempPassword:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  ExternalProviderLoginMark:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  LoginSalt:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  YahooClientId:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  YahooSecret:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  YahooOauthCallbackUrl:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  FacebookAppId:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  FacebookAppSecret:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  FacebookOauthCallbackUrl:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  FacebookAppToken:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+
+Resources:
+  LambdaRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Effect: "Allow"
+          Principal:
+            Service:
+            - "lambda.amazonaws.com"
+            - "cognito-idp.amazonaws.com"
+          Action:
+          - "sts:AssumeRole"
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess
+      - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
+      - arn:aws:iam::aws:policy/AmazonS3FullAccess
+      - arn:aws:iam::aws:policy/AmazonCognitoPowerUser
+
+  #  Functions
+
+  LoginYahoo:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Code: ./deploy/login_yahoo_index.zip
+      Environment:
+        Variables:
+          YAHOO_CLIENT_ID: !Ref YahooClientId
+          YAHOO_SECRET: !Ref YahooSecret
+          YAHOO_OAUTH_CALLBACK_URL: !Ref YahooOauthCallbackUrl
+          EXTERNAL_PROVIDER_LOGIN_COMMON_TEMP_PASSWORD: !Ref ExternalProviderLoginCommonTempPassword
+          COGNITO_USER_POOL_ID: !Ref CognitoUserPoolId
+          COGNITO_USER_POOL_APP_ID: !Ref CognitoUserPoolAppId
+          EXTERNAL_PROVIDER_LOGIN_MARK: !Ref ExternalProviderLoginMark
+          LOGIN_SALT: !Ref LoginSalt
+          NONCE_TABLE_NAME: !Ref NonceTableName
+          EXTERNAL_PROVIDER_USERS_TABLE_NAME: !Ref ExternalProviderUsersTableName
+      Handler: handler.lambda_handler
+      MemorySize: 3008
+      Role: !GetAtt LambdaRole.Arn
+      Runtime: python3.6
+      Timeout: 300
+  LoginFacebook:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Code: ./deploy/login_facebook_index.zip
+      Environment:
+        Variables:
+          FACEBOOK_APP_ID: !Ref FacebookAppId
+          FACEBOOK_APP_SECRET: !Ref FacebookAppSecret
+          FACEBOOK_OAUTH_CALLBACK_URL: !Ref FacebookOauthCallbackUrl
+          FACEBOOK_APP_TOKEN: !Ref FacebookAppToken
+          EXTERNAL_PROVIDER_LOGIN_COMMON_TEMP_PASSWORD: !Ref ExternalProviderLoginCommonTempPassword
+          COGNITO_USER_POOL_ID: !Ref CognitoUserPoolId
+          COGNITO_USER_POOL_APP_ID: !Ref CognitoUserPoolAppId
+          EXTERNAL_PROVIDER_LOGIN_MARK: !Ref ExternalProviderLoginMark
+          LOGIN_SALT: !Ref LoginSalt
+          NONCE_TABLE_NAME: !Ref NonceTableName
+          EXTERNAL_PROVIDER_USERS_TABLE_NAME: !Ref ExternalProviderUsersTableName
+      Handler: handler.lambda_handler
+      MemorySize: 3008
+      Role: !GetAtt LambdaRole.Arn
+      Runtime: python3.6
+      Timeout: 300
+  LoginFacebookAuthorizationUrl:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Code: ./deploy/login_facebook_authorization_url.zip
+      Environment:
+        Variables:
+          FACEBOOK_APP_ID: !Ref FacebookAppId
+          FACEBOOK_APP_SECRET: !Ref FacebookAppSecret
+          FACEBOOK_OAUTH_CALLBACK_URL: !Ref FacebookOauthCallbackUrl
+          FACEBOOK_APP_TOKEN: !Ref FacebookAppToken
+          NONCE_TABLE_NAME: !Ref NonceTableName
+      Handler: handler.lambda_handler
+      MemorySize: 3008
+      Role: !GetAtt LambdaRole.Arn
+      Runtime: python3.6
+      Timeout: 300
+  LoginYahooAuthorizationUrl:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Code: ./deploy/login_yahoo_authorization_url.zip
+      Environment:
+        Variables:
+          YAHOO_CLIENT_ID: !Ref YahooClientId
+          YAHOO_SECRET: !Ref YahooSecret
+          YAHOO_OAUTH_CALLBACK_URL: !Ref YahooOauthCallbackUrl
+          NONCE_TABLE_NAME: !Ref NonceTableName
+      Handler: handler.lambda_handler
+      MemorySize: 3008
+      Role: !GetAtt LambdaRole.Arn
+      Runtime: python3.6
+      Timeout: 300
+
+Outputs:
+  LoginYahoo:
+    Value: !GetAtt LoginYahoo.Arn
+    Export:
+      Name: !Sub "${AlisAppId}-LoginYahoo"
+  LoginYahooAuthorizationUrl:
+    Value: !GetAtt LoginYahooAuthorizationUrl.Arn
+    Export:
+      Name: !Sub "${AlisAppId}-LoginYahooAuthorizationUrl"
+  LoginFacebook:
+    Value: !GetAtt LoginFacebook.Arn
+    Export:
+      Name: !Sub "${AlisAppId}-LoginFacebook"
+  LoginFacebookAuthorizationUrl:
+    Value: !GetAtt LoginFacebookAuthorizationUrl.Arn
+    Export:
+      Name: !Sub "${AlisAppId}-LoginFacebookAuthorizationUrl"

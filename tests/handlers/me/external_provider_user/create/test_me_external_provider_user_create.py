@@ -74,6 +74,8 @@ class TestMeExternalProviderUserCreate(TestCase):
 
             user_mock.check_try_to_register_as_twitter_user.return_value = False
             user_mock.check_try_to_register_as_line_user.return_value = False
+            user_mock.check_try_to_register_as_yahoo_user.return_value = False
+            user_mock.check_try_to_register_as_facebook_user.return_value = False
             user_mock.decrypt_password.return_value = 'password'
             user_mock.create_external_provider_user.return_value = {
                 'AuthenticationResult': {
@@ -170,6 +172,44 @@ class TestMeExternalProviderUserCreate(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'LINE-U-test-user',
+                    }
+                }
+            }
+        }
+
+        event['body'] = json.dumps(event['body'])
+
+        response = MeExternalProviderUserCreate(event=event, context="", dynamodb=dynamodb).main()
+        self.assertEqual(response['statusCode'], 400)
+
+    def test_invalid_facebook_user_id(self):
+        event = {
+            'body': {
+                'user_id': 'Facebook-test',
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'Facebook-U-test-user',
+                    }
+                }
+            }
+        }
+
+        event['body'] = json.dumps(event['body'])
+
+        response = MeExternalProviderUserCreate(event=event, context="", dynamodb=dynamodb).main()
+        self.assertEqual(response['statusCode'], 400)
+
+    def test_invalid_yahoo_user_id(self):
+        event = {
+            'body': {
+                'user_id': 'Yahoo-test',
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'Yahoo-U-test-user',
                     }
                 }
             }
