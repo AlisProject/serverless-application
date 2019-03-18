@@ -398,6 +398,8 @@ Resources:
           AttributeType: S
         - AttributeName: sort_key
           AttributeType: N
+        - AttributeName: execute_at
+          AttributeType: N
       KeySchema:
         - AttributeName: notification_id
           KeyType: HASH
@@ -408,6 +410,15 @@ Resources:
               KeyType: HASH
             - AttributeName: sort_key
               KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: 1
+            WriteCapacityUnits: 1
+        - IndexName: execute_at-index
+          KeySchema:
+            - AttributeName: execute_at
+              KeyType: HASH
           Projection:
             ProjectionType: ALL
           ProvisionedThroughput:
