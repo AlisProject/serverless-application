@@ -2196,7 +2196,7 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
-          /articles/{articleId}/price:
+          /articles/{article_id}/price:
             post:
               description: "指定されたarticle_idの記事の価格の取得"
               parameters:
