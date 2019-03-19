@@ -47,7 +47,7 @@ class ArticlesPriceShow(LambdaBase):
 
         response = {
             'article_id': params['article_id'],
-            'price': params['price']
+            'price': article_info['price']
         }
 
         return {
