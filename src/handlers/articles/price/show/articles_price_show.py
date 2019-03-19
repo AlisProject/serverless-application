@@ -25,12 +25,13 @@ class ArticlesPriceShow(LambdaBase):
         if params is None:
             raise ValidationError('pathParameters is required')
 
-        validate(params, self.get_schema())
+        validate(self.params, self.get_schema())
         # relation
         DBUtil.validate_article_existence(
             self.dynamodb,
             params['article_id'],
-            status='public'
+            status='public',
+            is_purchased=True
         )
 
     def exec_main_proc(self):
@@ -43,12 +44,6 @@ class ArticlesPriceShow(LambdaBase):
             return {
                 'statusCode': 404,
                 'body': json.dumps({'message': 'Record Not Found'})
-            }
-
-        if 'price' not in article_info:
-            return {
-                'statusCode': 404,
-                'body': json.dumps({'message': 'This article is not paid article'})
             }
 
         response = {

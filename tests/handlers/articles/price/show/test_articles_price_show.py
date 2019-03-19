@@ -68,7 +68,6 @@ class TestArticlesPriceShow(TestCase):
         response = ArticlesPriceShow(params, {}, self.dynamodb).main()
 
         self.assertEqual(response['statusCode'], 404)
-        self.assertEqual(json.loads(response['body']), {'message': 'This article is not paid article'})
 
     def test_validation_with_no_params(self):
         params = {}
