@@ -41,12 +41,11 @@ class ArticlesPriceShow(LambdaBase):
 
         if article_info is None:
             return {
-               'statusCode': 404,
-               'body': json.dumps({'message': 'Record Not Found'})
+                'statusCode': 404,
+                'body': json.dumps({'message': 'Record Not Found'})
             }
 
-
-        if not 'price' in article_info:
+        if 'price' not in article_info:
             return {
                 'statusCode': 404,
                 'body': json.dumps({'message': 'This article is not paid article'})

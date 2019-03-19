@@ -1,7 +1,6 @@
 from unittest import TestCase
 from articles_price_show import ArticlesPriceShow
 from tests_util import TestsUtil
-from unittest.mock import patch, MagicMock
 import os
 import json
 
