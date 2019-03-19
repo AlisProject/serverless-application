@@ -28,12 +28,6 @@ class TestArticlesPriceShow(TestCase):
                 'status': 'public',
                 'title': 'testid000002 titile',
                 'sort_key': 1520150272000001
-            },
-            {
-                'article_id': 'testid000003',
-                'status': 'public',
-                'title': 'testid000002 titile',
-                'sort_key': 1520150272000001
             }
         ]
         TestsUtil.create_table(cls.dynamodb, os.environ['ARTICLE_INFO_TABLE_NAME'], cls.article_info_table_items)
@@ -65,8 +59,17 @@ class TestArticlesPriceShow(TestCase):
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(json.loads(response['body']), expected_item)
 
-    def test_record_not_found(self):
-        pass
+    def test_record_is_not_paid_article(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'testid000002'
+            }
+        }
+
+        response = ArticlesPriceShow(params, {}, self.dynamodb).main()
+
+        self.assertEqual(response['statusCode'], 404)
+        self.assertEqual(json.loads(response['body']), {'message': 'This article is not paid article'})
 
     def test_validation_with_no_params(self):
         params = {}

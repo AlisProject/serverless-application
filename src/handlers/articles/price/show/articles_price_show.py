@@ -45,6 +45,13 @@ class ArticlesPriceShow(LambdaBase):
                'body': json.dumps({'message': 'Record Not Found'})
             }
 
+
+        if not 'price' in article_info:
+            return {
+                'statusCode': 404,
+                'body': json.dumps({'message': 'This article is not paid article'})
+            }
+
         response = {
             'article_id': params['article_id'],
             'price': article_info['price']
