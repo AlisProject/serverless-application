@@ -1,6 +1,7 @@
 from unittest import TestCase
 from articles_price_show import ArticlesPriceShow
 from tests_util import TestsUtil
+from unittest.mock import patch, MagicMock
 import os
 import json
 
@@ -68,6 +69,24 @@ class TestArticlesPriceShow(TestCase):
         response = ArticlesPriceShow(params, {}, self.dynamodb).main()
 
         self.assertEqual(response['statusCode'], 404)
+
+    def test_call_validate_article_existence(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'testid000001'
+            }
+        }
+
+        mock_lib = MagicMock()
+        with patch('articles_price_show.DBUtil', mock_lib):
+            ArticlesPriceShow(params, {}, self.dynamodb).main()
+            args, kwargs = mock_lib.validate_article_existence.call_args
+
+            self.assertTrue(mock_lib.validate_article_existence.called)
+            self.assertTrue(args[0])
+            self.assertEqual(args[1], 'testid000001')
+            self.assertEqual(kwargs['status'], 'public')
+            self.assertEqual(kwargs['is_purchased'], True)
 
     def test_validation_with_no_params(self):
         params = {}
