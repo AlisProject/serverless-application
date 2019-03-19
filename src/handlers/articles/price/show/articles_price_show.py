@@ -4,7 +4,7 @@ import json
 import settings
 from db_util import DBUtil
 from lambda_base import LambdaBase
-from jsonschema import validate, ValidationError
+from jsonschema import validate
 from decimal_encoder import DecimalEncoder
 
 
