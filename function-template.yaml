@@ -205,6 +205,15 @@ Resources:
       Role: !GetAtt LambdaRole.Arn
       Runtime: python3.6
       Timeout: 300
+  ArticlesPriceShow:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Code: ./deploy/articles_price_show.zip
+      Handler: handler.lambda_handler
+      MemorySize: 3008
+      Role: !GetAtt LambdaRole.Arn
+      Runtime: python3.6
+      Timeout: 300
 
 Outputs:
   LoginYahoo:
@@ -223,3 +232,7 @@ Outputs:
     Value: !GetAtt LoginFacebookAuthorizationUrl.Arn
     Export:
       Name: !Sub "${AlisAppId}-LoginFacebookAuthorizationUrl"
+  ArticlesPriceShow:
+    Value: !GetAtt ArticlesPriceShow.Arn
+    Export:
+      Name: !Sub "${AlisAppId}-ArticlesPriceShow"
