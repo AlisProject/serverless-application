@@ -20,16 +20,11 @@ class ArticlesPriceShow(LambdaBase):
 
     def validate_params(self):
         # single
-        params = self.event.get('pathParameters')
-
-        if params is None:
-            raise ValidationError('pathParameters is required')
-
         validate(self.params, self.get_schema())
         # relation
         DBUtil.validate_article_existence(
             self.dynamodb,
-            params['article_id'],
+            self.params['article_id'],
             status='public',
             is_purchased=True
         )
