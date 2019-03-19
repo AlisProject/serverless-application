@@ -116,7 +116,7 @@ Specify generated Cognito User Pool ARN to SSM.
 
 
 ```bash
-./deploy.sh api
+./deploy_api.sh
 
 # Show generated IAM LambdaRole.
 aws iam list-roles | grep ${ALIS_APP_ID}api-LambdaRole | grep Arn
