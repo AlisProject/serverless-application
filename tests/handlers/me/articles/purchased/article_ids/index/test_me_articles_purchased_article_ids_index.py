@@ -1,7 +1,6 @@
 import os
 import json
 from unittest import TestCase
-from unittest.mock import MagicMock, patch
 
 from me_articles_purchased_article_ids_index import MeArticlesPurchasedArticleIdsIndex
 from tests_util import TestsUtil

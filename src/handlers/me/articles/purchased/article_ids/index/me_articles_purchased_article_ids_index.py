@@ -5,7 +5,6 @@ import os
 from boto3.dynamodb.conditions import Key
 from db_util import DBUtil
 from lambda_base import LambdaBase
-from record_not_found_error import RecordNotFoundError
 
 
 class MeArticlesPurchasedArticleIdsIndex(LambdaBase):
