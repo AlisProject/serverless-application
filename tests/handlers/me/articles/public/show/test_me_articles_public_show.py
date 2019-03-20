@@ -73,7 +73,6 @@ class TestMeArticlesPublicShow(TestCase):
             'status': 'public',
             'overview': 'sample_overview',
             'sort_key': 1520150272000000,
-            'overview': 'sample_overview',
             'eye_catch_url': 'http://example.com/eye_catch_url'
         }
 
