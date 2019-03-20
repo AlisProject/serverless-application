@@ -31,7 +31,8 @@ class TestMeArticlesPublicShow(TestCase):
             {
                 'article_id': 'publicId0001',
                 'title': 'sample_title1',
-                'body': 'sample_body1'
+                'body': 'sample_body1',
+                'paid_body': 'sample_paid_body1'
             }
         ]
 
@@ -68,6 +69,7 @@ class TestMeArticlesPublicShow(TestCase):
             'user_id': 'test01',
             'title': 'sample_title1',
             'body': 'sample_body1',
+            'paid_body': 'sample_paid_body1',
             'status': 'public',
             'overview': 'sample_overview',
             'sort_key': 1520150272000000,
