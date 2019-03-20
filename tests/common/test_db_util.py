@@ -31,6 +31,7 @@ class TestDBUtil(TestCase):
                 'status': 'draft',
                 'user_id': 'user0002',
                 'sort_key': 1520150272000000,
+                'price': 100,
                 'version': 2
             }
         ]
@@ -249,6 +250,16 @@ class TestDBUtil(TestCase):
         )
         self.assertTrue(result)
 
+    def test_validate_article_existence_ok_exists_user_and_status_and_is_purchased(self):
+        result = DBUtil.validate_article_existence(
+            self.dynamodb,
+            self.article_info_table_items[1]['article_id'],
+            user_id=self.article_info_table_items[1]['user_id'],
+            status=self.article_info_table_items[1]['status'],
+            is_purchased=True
+        )
+        self.assertTrue(result)
+
     def test_validate_article_existence_ng_not_exists_user_id(self):
         with self.assertRaises(NotAuthorizedError):
             DBUtil.validate_article_existence(
@@ -290,6 +301,15 @@ class TestDBUtil(TestCase):
                 self.article_info_table_items[0]['article_id'],
                 user_id=self.article_info_table_items[0]['user_id'],
                 version=2
+            )
+
+    def test_validate_article_existence_ng_not_exists_is_purchased(self):
+        with self.assertRaises(RecordNotFoundError):
+            DBUtil.validate_article_existence(
+                self.dynamodb,
+                self.article_info_table_items[0]['article_id'],
+                user_id=self.article_info_table_items[0]['user_id'],
+                is_purchased=True
             )
 
     def test_validate_user_existence_ok(self):

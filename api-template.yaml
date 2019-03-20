@@ -2196,6 +2196,38 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+          /articles/{article_id}/price:
+            get:
+              description: "指定されたarticle_idの記事の価格の取得"
+              parameters:
+                - name: "article_id"
+                  in: "path"
+                  description: "対象記事を指定するために使用"
+                  required: true
+                  type: "string"
+              responses:
+                "200":
+                  description: "記事の価格"
+                  schema:
+                    type: object
+                    properties:
+                      price:
+                        type: "number"
+                        format: "double"
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri:
+                  Fn::Join:
+                    - ''
+                    - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
+                      - Fn::ImportValue:
+                          Fn::Sub: "${AlisAppId}-ArticlesPriceShow"
+                      - "/invocations"
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
         securityDefinitions:
           cognitoUserPool:
             type: apiKey
