@@ -2233,7 +2233,7 @@ Resources:
                 type: aws_proxy
           /me/articles/purchased/article_ids:
             get:
-              description: "指定されたuser_idのユーザーが購入した記事のID一覧を取得"
+              description: "ユーザーが購入した記事の記事ID一覧を取得"
               responses:
                 "200":
                   description: "記事IDの一覧"
