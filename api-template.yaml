@@ -95,6 +95,8 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   LoginSalt:
     Type: 'AWS::SSM::Parameter::Value<String>'
+  ArticlesPurchasedTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
 
 Globals:
   Function:
@@ -135,6 +137,7 @@ Globals:
         BETA_MODE_FLAG: !Ref BetaModeFlag
         DIST_S3_BUCKET_NAME: !Ref DistS3BucketName
         ELASTIC_SEARCH_ENDPOINT: !Ref ElasticSearchEndpoint
+        ARTICLES_PURCHASED_TABLE_NAME: !Ref ArticlesPurchasedTableName
 
 Resources:
   RestApi:
@@ -2224,6 +2227,35 @@ Resources:
                     - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
                       - Fn::ImportValue:
                           Fn::Sub: "${AlisAppId}-ArticlesPriceShow"
+                      - "/invocations"
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /me/articles/purchased/article_ids:
+            get:
+              description: "指定されたuser_idのユーザーが購入した記事のID一覧を取得"
+              responses:
+                "200":
+                  description: "記事IDの一覧"
+                  schema:
+                    type: object
+                    properties:
+                      article_ids:
+                        type: array
+                        items:
+                          type: 'string'
+                          enum:
+                            - "article_id"
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri:
+                  Fn::Join:
+                    - ''
+                    - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
+                      - Fn::ImportValue:
+                          Fn::Sub: "${AlisAppId}-MeArticlesPurchasedArticleIdsIndex"
                       - "/invocations"
                 passthroughBehavior: when_no_templates
                 httpMethod: POST

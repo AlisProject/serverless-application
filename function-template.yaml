@@ -214,6 +214,15 @@ Resources:
       Role: !GetAtt LambdaRole.Arn
       Runtime: python3.6
       Timeout: 300
+  MeArticlesPurchasedArticleIdsIndex:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Code: ./deploy/me_articles_purchased_article_ids_index.zip
+      Handler: handler.lambda_handler
+      MemorySize: 3008
+      Role: !GetAtt LambdaRole.Arn
+      Runtime: python3.6
+      Timeout: 300
 
 Outputs:
   LoginYahoo:
@@ -236,3 +245,7 @@ Outputs:
     Value: !GetAtt ArticlesPriceShow.Arn
     Export:
       Name: !Sub "${AlisAppId}-ArticlesPriceShow"
+  MeArticlesPurchasedArticleIdsIndex:
+    Value: !GetAtt MeArticlesPurchasedArticleIdsIndex.Arn
+    Export:
+      Name: !Sub "${AlisAppId}-MeArticlesPurchasedArticleIdsIndex"
