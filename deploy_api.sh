@@ -75,6 +75,7 @@ cloudformation_deploy() {
         FacebookOauthCallbackUrl=${SSM_PARAMS_PREFIX}FacebookOauthCallbackUrl \
         FacebookAppToken=${SSM_PARAMS_PREFIX}FacebookAppToken \
         RestApiArn=${SSM_PARAMS_PREFIX}RestApiArn \
+        ArticlesPurchasedTableName=${SSM_PARAMS_PREFIX}ArticlesPurchasedTableName \
       --capabilities CAPABILITY_IAM \
       --no-fail-on-empty-changeset
 }
