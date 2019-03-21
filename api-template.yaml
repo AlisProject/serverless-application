@@ -2228,6 +2228,36 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+          /me/articles/purchased/{article_id}:
+            get:
+              description: '指定された article_id の有料記事情報を取得'
+              parameters:
+                - name: 'article_id'
+                  in: 'path'
+                  description: '対象記事の指定するために使用'
+                  required: true
+                  type: 'string'
+              responses:
+                '200':
+                  description: '有料記事内容取得'
+                  schema:
+                    $ref: '#/definitions/ArticleContent'
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri:
+                  Fn::Join:
+                    - ''
+                    - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
+                      - Fn::ImportValue:
+                          Fn::Sub: "${AlisAppId}-MeArticlesPurchasedShow"
+                      - "/invocations"
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
         securityDefinitions:
           cognitoUserPool:
             type: apiKey
