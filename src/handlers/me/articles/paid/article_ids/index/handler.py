@@ -7,5 +7,5 @@ dynamodb = boto3.resource('dynamodb')
 
 def lambda_handler(event, context):
     me_articles_paid_article_ids_index = MeArticlesPaidArticleIdsIndex(event=event, context=context,
-                                                                                 dynamodb=dynamodb)
+                                                                       dynamodb=dynamodb)
     return me_articles_paid_article_ids_index.main()
