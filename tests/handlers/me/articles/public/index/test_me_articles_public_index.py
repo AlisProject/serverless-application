@@ -30,7 +30,8 @@ class TestMeArticlesPublicIndex(TestCase):
                 'article_id': 'testid000002',
                 'user_id': 'test_user_id',
                 'status': 'public',
-                'sort_key': 1520150272000002
+                'sort_key': 1520150272000002,
+                'price': 200
             },
             {
                 'article_id': 'testid000003',
@@ -87,7 +88,8 @@ class TestMeArticlesPublicIndex(TestCase):
                 'article_id': 'testid000002',
                 'user_id': 'test_user_id',
                 'status': 'public',
-                'sort_key': 1520150272000002
+                'sort_key': 1520150272000002,
+                'price': 200
             }
         ]
 
