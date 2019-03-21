@@ -690,8 +690,6 @@ Resources:
         Enabled: true
   PaidArticles:
     Type: AWS::DynamoDB::Table
-    DependsOn:
-      - Nonce
     Properties:
       AttributeDefinitions:
         - AttributeName: article_id
