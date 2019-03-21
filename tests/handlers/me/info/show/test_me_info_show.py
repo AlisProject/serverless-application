@@ -32,6 +32,16 @@ class TestMeArticlesPublic(TestCase):
         ]
         TestsUtil.create_table(cls.dynamodb, os.environ['USERS_TABLE_NAME'], cls.users_table_items)
 
+        cls.user_first_experience_items = [
+            {
+                'user_id': 'test01',
+                'is_liked_article': True,
+                'is_tipped_article': False
+            }
+        ]
+        TestsUtil.create_table(cls.dynamodb, os.environ['USER_FIRST_EXPERIENCE_TABLE_NAME'],
+                               cls.user_first_experience_items)
+
     @classmethod
     def tearDownClass(cls):
         TestsUtil.delete_all_tables(cls.dynamodb)
@@ -57,7 +67,17 @@ class TestMeArticlesPublic(TestCase):
         response = MeInfoShow(params, {}, dynamodb=self.dynamodb).main()
 
         self.assertEqual(response['statusCode'], 200)
-        self.assertEqual(json.loads(response['body']), target_user_item)
+
+        expected = {
+            'user_id': 'test01',
+            'user_display_name': 'test_display_name01',
+            'self_introduction': 'test_introduction01',
+            'icon_image_url': 'test_icon01',
+            'is_liked_article': True,
+            'is_tipped_article': False
+        }
+        print(json.loads(response['body']))
+        self.assertEqual(json.loads(response['body']), expected)
 
     def test_main_ok_exists_none_data_item(self):
         target_user_item = self.users_table_items[1]

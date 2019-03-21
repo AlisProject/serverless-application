@@ -36,7 +36,8 @@ class MeArticlesPublicUpdate(LambdaBase):
             self.dynamodb,
             self.params['article_id'],
             user_id=self.event['requestContext']['authorizer']['claims']['cognito:username'],
-            status='public'
+            status='public',
+            version=1
         )
 
     def exec_main_proc(self):

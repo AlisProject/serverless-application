@@ -104,6 +104,9 @@ class ESUtil:
 
     @staticmethod
     def search_popular_articles(elasticsearch, params, limit, page):
+        if not elasticsearch.indices.exists(index='article_scores'):
+            return []
+
         body = {
             'query': {
                 'bool': {

@@ -6,7 +6,9 @@ import json
 from db_util import DBUtil
 from botocore.exceptions import ClientError
 from lambda_base import LambdaBase
-from jsonschema import validate, ValidationError
+from jsonschema import validate, ValidationError, FormatChecker
+
+from text_sanitizer import TextSanitizer
 from user_util import UserUtil
 
 
@@ -15,9 +17,12 @@ class MeArticlesFraudCreate(LambdaBase):
         return {
             'type': 'object',
             'properties': {
-                'article_id': settings.parameters['article_id']
+                'article_id': settings.parameters['article_id'],
+                'reason': settings.parameters['fraud']['reason'],
+                'origin_url': settings.parameters['fraud']['origin_url'],
+                'free_text': settings.parameters['fraud']['free_text']
             },
-            'required': ['article_id']
+            'required': ['article_id', 'reason']
         }
 
     def validate_params(self):
@@ -26,7 +31,13 @@ class MeArticlesFraudCreate(LambdaBase):
         # single
         if self.event.get('pathParameters') is None:
             raise ValidationError('pathParameters is required')
-        validate(self.event.get('pathParameters'), self.get_schema())
+        validate(self.params, self.get_schema(), format_checker=FormatChecker())
+
+        # 著作権侵害の場合はオリジナル記事のURLを必須とする
+        if self.params['reason'] == 'copyright_violation':
+            if not self.params['origin_url']:
+                raise ValidationError('origin url is required')
+
         # relation
         DBUtil.validate_article_existence(
             self.dynamodb,
@@ -55,8 +66,13 @@ class MeArticlesFraudCreate(LambdaBase):
         article_fraud_user = {
             'article_id': self.event['pathParameters']['article_id'],
             'user_id': self.event['requestContext']['authorizer']['claims']['cognito:username'],
+            'reason': self.params.get('reason'),
+            'origin_url': self.params.get('origin_url'),
+            'free_text': TextSanitizer.sanitize_text(self.params.get('free_text')),
             'created_at': int(time.time())
         }
+        DBUtil.items_values_empty_to_none(article_fraud_user)
+
         article_fraud_user_table.put_item(
             Item=article_fraud_user,
             ConditionExpression='attribute_not_exists(article_id)'

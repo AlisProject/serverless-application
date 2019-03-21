@@ -53,6 +53,9 @@ java -Djava.library.path=./DynamoDBLocal_lib -jar DynamoDBLocal.jar -sharedDb
 # lunch docker for localstack（for MAC OS）
 TMPDIR=/private$TMPDIR docker-compose up -d
 
+# lunch docker for elasticsearch
+docker run -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:6.2.0
+
 # exec
 python exec_test.py
 ```
@@ -113,7 +116,7 @@ Specify generated Cognito User Pool ARN to SSM.
 
 
 ```bash
-./deploy.sh api
+./deploy_api.sh
 
 # Show generated IAM LambdaRole.
 aws iam list-roles | grep ${ALIS_APP_ID}api-LambdaRole | grep Arn

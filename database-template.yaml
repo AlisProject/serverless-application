@@ -336,15 +336,15 @@ Resources:
       - Users
     Properties:
       AttributeDefinitions:
+        - AttributeName: notification_id
+          AttributeType: S
         - AttributeName: user_id
           AttributeType: S
         - AttributeName: sort_key
           AttributeType: N
       KeySchema:
-        - AttributeName: user_id
+        - AttributeName: notification_id
           KeyType: HASH
-        - AttributeName: sort_key
-          KeyType: RANGE
       GlobalSecondaryIndexes:
         - IndexName: user_id-sort_key-index
           KeySchema:
@@ -379,6 +379,8 @@ Resources:
           AttributeType: S
         - AttributeName: sort_key
           AttributeType: N
+        - AttributeName: parent_id
+          AttributeType: S
       KeySchema:
         - AttributeName: comment_id
           KeyType: HASH
@@ -386,6 +388,14 @@ Resources:
         - IndexName: article_id-sort_key-index
           KeySchema:
             - AttributeName: article_id
+              KeyType: HASH
+            - AttributeName: sort_key
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+        - IndexName: parent_id-sort_key-index
+          KeySchema:
+            - AttributeName: parent_id
               KeyType: HASH
             - AttributeName: sort_key
               KeyType: RANGE
@@ -503,6 +513,8 @@ Resources:
       BillingMode: PAY_PER_REQUEST
   UserFraud:
     Type: AWS::DynamoDB::Table
+    DependsOn:
+      - Tip
     Properties:
       AttributeDefinitions:
         - AttributeName: target_user_id

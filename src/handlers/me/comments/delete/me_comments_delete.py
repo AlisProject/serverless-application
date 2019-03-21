@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 import os
-import settings
 import time
+
+from boto3.dynamodb.conditions import Key
+
+import settings
 
 from db_util import DBUtil
 from lambda_base import LambdaBase
@@ -36,11 +39,16 @@ class MeCommentsDelete(LambdaBase):
             raise NotAuthorizedError('Forbidden')
 
         deleted_comment_table = self.dynamodb.Table(os.environ['DELETED_COMMENT_TABLE_NAME'])
+        delete_targets = self.__get_delete_targets(comment)
 
-        comment.update({"deleted_at": int(time.time())})
-        deleted_comment_table.put_item(Item=comment)
+        with deleted_comment_table.batch_writer() as batch:
+            for item in delete_targets:
+                item.update({'deleted_at': int(time.time())})
+                batch.put_item(Item=item)
 
-        comment_table.delete_item(Key={"comment_id": self.params['comment_id']})
+        with comment_table.batch_writer() as batch:
+            for item in delete_targets:
+                batch.delete_item(Key={'comment_id': item['comment_id']})
 
         return {'statusCode': 200}
 
@@ -54,3 +62,19 @@ class MeCommentsDelete(LambdaBase):
             return True
 
         return False
+
+    def __get_delete_targets(self, comment):
+        comment_table = self.dynamodb.Table(os.environ['COMMENT_TABLE_NAME'])
+
+        targets = [comment]
+
+        query_params = {
+            'IndexName': 'parent_id-sort_key-index',
+            'KeyConditionExpression': Key('parent_id').eq(comment['comment_id'])
+        }
+
+        thread_comments = comment_table.query(**query_params)['Items']
+
+        targets.extend(thread_comments)
+
+        return targets

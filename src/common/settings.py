@@ -12,10 +12,16 @@ parameters = {
     'user_id': {
         'type': 'string',
         'minLength': 3,
-        'maxLength': 30,
+        'maxLength': 50,
         'pattern': r'^(?!.*--)[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]$'
     },
     'line_id': {
+        'type': 'string'
+    },
+    'yahoo_id': {
+        'type': 'string'
+    },
+    'facebook_id': {
         'type': 'string'
     },
     'phone_number': {
@@ -54,6 +60,20 @@ parameters = {
     'article_image': {
         'type': 'string',
         'maxLength': 8388608
+    },
+    'upload_image_size': {
+        'type': 'integer',
+        'minimum': 1,
+        'maximum': 10485760
+    },
+    'upload_image_extension': {
+        'type': 'string',
+        'enum': [
+            'gif',
+            'jpg',
+            'jpeg',
+            'png'
+        ]
     },
     'eye_catch_url': {
         'type': 'string',
@@ -128,6 +148,44 @@ parameters = {
     },
     'oauth_verifier': {
         'type': 'string'
+    },
+    'fraud': {
+        'reason': {
+            'type': 'string',
+            'enum': [
+                'illegal_act',
+                'anything_contrary_to_public_order',
+                'nuisance',
+                'copyright_violation',
+                'slander',
+                'illegal_token_usage',
+                'other'
+            ]
+        },
+        'origin_url': {
+            'type': ['string', 'null'],
+            'format': 'uri',
+            'maxLength': 2048
+        },
+        'free_text': {
+            'type': 'string',
+            'maxLength': 400
+        }
+    },
+    'user_first_experience': {
+        'type': 'string',
+        'enum': [
+            'is_liked_article',
+            'is_tipped_article',
+            'is_got_token',
+            'is_created_article'
+        ]
+    },
+    'code': {
+        'type': 'string'
+    },
+    'state': {
+        'type': 'string'
     }
 }
 
@@ -139,12 +197,15 @@ USERS_ARTICLE_INDEX_DEFAULT_LIMIT = 10
 NOTIFICATION_INDEX_DEFAULT_LIMIT = 10
 COMMENT_INDEX_DEFAULT_LIMIT = 10
 TAG_SEARCH_DEFAULT_LIMIT = 100
+ARTICLES_RECOMMENDED_DEFAULT_LIMIT = 10
 
 article_id_length = 12
 COMMENT_ID_LENGTH = 12
 
 html_allowed_tags = ['a', 'b', 'blockquote', 'br', 'h2', 'h3', 'i', 'p', 'u', 'img', 'hr',
                      'div', 'figure', 'figcaption']
+html_allowed_tags_v2 = ['a', 'strong', 'blockquote', 'br', 'h2', 'h3', 'i', 'p', 'img', 'hr',
+                        'figure', 'figcaption', 'oembed']
 
 ng_user_name = [
     'about', 'account', 'activity', 'add', 'admin', 'all', 'alpha', 'analysis',
@@ -194,12 +255,37 @@ S3_INFO_ICON_PATH = 'd/api/info_icon/'
 
 LIKE_NOTIFICATION_TYPE = 'like'
 COMMENT_NOTIFICATION_TYPE = 'comment'
+COMMENT_REPLY_NOTIFICATION_TYPE = 'reply'
+COMMENT_THREAD_NOTIFICATION_TYPE = 'thread'
+
+COMMENT_NOTIFICATION_TYPES = [
+    COMMENT_NOTIFICATION_TYPE,
+    COMMENT_REPLY_NOTIFICATION_TYPE,
+    COMMENT_THREAD_NOTIFICATION_TYPE
+]
 
 ARTICLE_SCORE_INDEX_NAME = 'article_scores'
 TOPIC_INDEX_HASH_KEY = 'topic'
 
 TAG_DENIED_SYMBOL_PATTERN = '([!-,./:-@[-`{-~]|--| {2})'
 TAG_ALLOWED_SYMBOLS = ['-', ' ']
+
+
+YAHOO_API_WELL_KNOWN_URL = 'https://auth.login.yahoo.co.jp/yconnect/v2/.well-known/openid-configuration'
+YAHOO_API_PUBLIC_KEY_URL = 'https://auth.login.yahoo.co.jp/yconnect/v2/public-keys'
+YAHOO_USERNAME_PREFIX = 'Yahoo-'
+YAHOO_NONCE_EXPIRATION_MINUTES = 15
+YAHOO_LOGIN_REQUEST_SCOPE = 'openid%20email'
+YAHOO_NONCE_LENGTH = 10
+
+FACEBOOK_API_AUTHENTICATE_URL = 'https://www.facebook.com/dialog/oauth'
+FACEBOOK_API_ACCESSTOKEN_URL = 'https://graph.facebook.com/oauth/access_token'
+FACEBOOK_API_USERINFO_URL = 'https://graph.facebook.com/me'
+FACEBOOK_API_DEBUG_URL = 'https://graph.facebook.com/debug_token'
+FACEBOOK_USERNAME_PREFIX = 'Facebook-'
+FACEBOOK_NONCE_EXPIRATION_MINUTES = 15
+FACEBOOK_LOGIN_REQUEST_SCOPE = 'email'
+FACEBOOK_NONCE_LENGTH = 10
 
 TWITTER_API_REQUEST_TOKEN_URL = 'https://api.twitter.com/oauth/request_token'
 TWITTER_API_AUTHENTICATE_URL = 'https://api.twitter.com/oauth/authenticate'
@@ -217,3 +303,4 @@ LINE_REQUEST_SCOPE = '&scope=openid%20profile%20email'
 LINE_LOGIN_REQUEST_SCOPE = '&scope=openid%20profile'
 PASSWORD_LENGTH = 32
 AES_IV_BYTES = 16
+DYNAMO_BATCH_GET_MAX = 100

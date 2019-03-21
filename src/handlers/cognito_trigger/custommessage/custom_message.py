@@ -4,6 +4,7 @@ import boto3
 import settings
 from jsonschema import validate, ValidationError
 from lambda_base import LambdaBase
+from user_util import UserUtil
 
 
 class CustomMessage(LambdaBase):
@@ -17,7 +18,14 @@ class CustomMessage(LambdaBase):
 
     def validate_params(self):
         params = self.event['request']['userAttributes']
-        if params.get('phone_number', '') != '' and params.get('phone_number_verified', '') != 'true':
+        if UserUtil.check_try_to_register_as_line_user(self.event['userName']) or \
+           UserUtil.check_try_to_register_as_twitter_user(self.event['userName']) or \
+           UserUtil.check_try_to_register_as_yahoo_user(self.event['userName']) or \
+           UserUtil.check_try_to_register_as_facebook_user(self.event['userName']):
+            raise ValidationError("external provider's user can not execute")
+        if params.get('phone_number', '') != '' and \
+           params.get('phone_number_verified', '') != 'true' and \
+           self.event['triggerSource'] != 'CustomMessage_ForgotPassword':
             validate(params, self.get_schema())
             client = boto3.client('cognito-idp')
             response = client.list_users(
@@ -33,14 +41,14 @@ class CustomMessage(LambdaBase):
         if self.event['triggerSource'] == 'CustomMessage_ForgotPassword':
             self.event['response']['smsMessage'] = '{user}さんのパスワード再設定コードは {code} です。'.format(
                 user=self.event['userName'], code=self.event['request']['codeParameter'])
-            self.event['response']['emailSubject'] = 'パスワード再設定コード'
+            self.event['response']['emailSubject'] = '【ALIS】パスワードの変更：再設定コードの送付'
             self.event['response']['emailMessage'] = "{user}さんのパスワード再設定コードは {code} です".format(
                 code=self.event['request']['codeParameter'],
                 user=self.event['userName'])
         else:
-            self.event['response']['smsMessage'] = '{user}さんの検証コードは {code} です。'.format(
+            self.event['response']['smsMessage'] = 'ALISです。\n{user}さんの認証コードは {code} です。'.format(
                 user=self.event['userName'], code=self.event['request']['codeParameter'])
-            self.event['response']['emailSubject'] = 'Email確認リンク'
+            self.event['response']['emailSubject'] = '【ALIS】登録のご案内：メールアドレスの確認'
             self.event['response']['emailMessage'] = """\
 {user}様
 

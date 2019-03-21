@@ -21,7 +21,9 @@ class TestMeArticlesPublicEdit(TestCase):
                 'status': 'public',
                 'sort_key': 1520150272000000,
                 'overview': 'sample_overview',
-                'eye_catch_url': 'http://example.com/eye_catch_url'
+                'eye_catch_url': 'http://example.com/eye_catch_url',
+                'tag': ['hoge', 'fuga'],
+                'topic': 'aaa'
             },
             {
                 'article_id': 'publicId0002',
@@ -93,11 +95,15 @@ class TestMeArticlesPublicEdit(TestCase):
 
         expected_item = {
             'article_id': 'publicId0001',
-            'user_id': 'test01',
-            'title': 'sample_title1',
             'body': 'sample_body1',
+            'eye_catch_url': 'http://example.com/eye_catch_url',
             'overview': 'sample_overview',
-            'eye_catch_url': 'http://example.com/eye_catch_url'
+            'sort_key': 1520150272000000,
+            'status': 'public',
+            'tag': ['hoge', 'fuga'],
+            'title': 'sample_title1',
+            'topic': 'aaa',
+            'user_id': 'test01'
         }
 
         self.assertEqual(response['statusCode'], 200)

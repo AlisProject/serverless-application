@@ -1,5 +1,7 @@
 import os
 import boto3
+import settings
+import base64
 from user_util import UserUtil
 from not_verified_user_error import NotVerifiedUserError
 from unittest import TestCase
@@ -13,6 +15,7 @@ class TestUserUtil(TestCase):
         self.cognito = boto3.client('cognito-idp')
         self.dynamodb = TestsUtil.get_dynamodb_client()
         os.environ['COGNITO_USER_POOL_ID'] = 'cognito_user_pool'
+        os.environ['LOGIN_SALT'] = '4YGjw4llWxC46bNluUYu1bhaWQgfJjB4'
         TestsUtil.set_all_tables_name_to_env()
         TestsUtil.delete_all_tables(self.dynamodb)
 
@@ -322,6 +325,20 @@ class TestUserUtil(TestCase):
                 'external_provider_user_id'
             )
 
+    def test_check_try_to_register_as_yahoo_user_ng(self):
+        self.assertTrue(UserUtil.check_try_to_register_as_yahoo_user('Yahoo-xxxxxxx'))
+
+    def test_check_try_to_register_as_yahoo_user_ok(self):
+        self.assertFalse(UserUtil.check_try_to_register_as_yahoo_user('myuser'))
+        self.assertFalse(UserUtil.check_try_to_register_as_yahoo_user('myuser-Yahoo-xxxxxxx'))
+
+    def test_check_try_to_register_as_facebook_user_ng(self):
+        self.assertTrue(UserUtil.check_try_to_register_as_facebook_user('Facebook-xxxxxxx'))
+
+    def test_check_try_to_register_as_facebook_user_ok(self):
+        self.assertFalse(UserUtil.check_try_to_register_as_facebook_user('myuser'))
+        self.assertFalse(UserUtil.check_try_to_register_as_facebook_user('myuser-Facebook-xxxxxxx'))
+
     def test_check_try_to_register_as_twitter_user_ng(self):
         self.assertTrue(UserUtil.check_try_to_register_as_twitter_user('Twitter-xxxxxxx'))
 
@@ -387,6 +404,25 @@ class TestUserUtil(TestCase):
                 'user_id',
                 'display_name'
             )
+
+    def test_get_external_provider_password_ok(self):
+        aes_iv = os.urandom(settings.AES_IV_BYTES)
+        encrypted_password = UserUtil.encrypt_password('nNU8E9E6OSe9tRQn', aes_iv)
+        iv = base64.b64encode(aes_iv).decode()
+
+        UserUtil.add_external_provider_user_info(
+            dynamodb=self.dynamodb,
+            external_provider_user_id='user_id',
+            password=encrypted_password,
+            iv=iv,
+            email='email'
+        )
+
+        password = UserUtil.get_external_provider_password(
+            self.dynamodb,
+            'user_id'
+        )
+        self.assertEqual(password, 'nNU8E9E6OSe9tRQn')
 
 
 class PrivateChainApiFakeResponse:

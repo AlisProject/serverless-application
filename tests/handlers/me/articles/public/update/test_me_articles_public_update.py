@@ -235,6 +235,7 @@ class TestMeArticlesPublicUpdate(TestCase):
             self.assertTrue(args[1])
             self.assertTrue(kwargs['user_id'])
             self.assertEqual(kwargs['status'], 'public')
+            self.assertEqual(kwargs['version'], 1)
 
     def test_validation_with_no_params(self):
         params = {}

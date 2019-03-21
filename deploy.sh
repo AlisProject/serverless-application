@@ -24,6 +24,7 @@ aws cloudformation deploy \
   --s3-bucket $DEPLOY_BUCKET_NAME \
   --stack-name ${ALIS_APP_ID}${1} \
   --parameter-overrides \
+    AlisAppId=${ALIS_APP_ID} \
     AlisAppDomain=${SSM_PARAMS_PREFIX}AlisAppDomain \
     PrivateChainAwsAccessKey=${SSM_PARAMS_PREFIX}PrivateChainAwsAccessKey \
     PrivateChainAwsSecretAccessKey=${SSM_PARAMS_PREFIX}PrivateChainAwsSecretAccessKey \
@@ -49,9 +50,14 @@ aws cloudformation deploy \
     TopicTableName=${SSM_PARAMS_PREFIX}TopicTableName \
     TagTableName=${SSM_PARAMS_PREFIX}TagTableName \
     TipTableName=${SSM_PARAMS_PREFIX}TipTableName \
+    NonceTableName=${SSM_PARAMS_PREFIX}NonceTableName \
     CommentTableName=${SSM_PARAMS_PREFIX}CommentTableName \
     CommentLikedUserTableName=${SSM_PARAMS_PREFIX}CommentLikedUserTableName \
     DeletedCommentTableName=${SSM_PARAMS_PREFIX}DeletedCommentTableName \
+    UserFraudTableName=${SSM_PARAMS_PREFIX}UserFraudTableName \
+    ScreenedArticleTableName=${SSM_PARAMS_PREFIX}ScreenedArticleTableName \
+    TokenDistributionTableName=${SSM_PARAMS_PREFIX}TokenDistributionTableName \
+    UserFirstExperienceTableName=${SSM_PARAMS_PREFIX}UserFirstExperienceTableName \
     DistS3BucketName=${SSM_PARAMS_PREFIX}DistS3BucketName \
     ApiLambdaRole=${SSM_PARAMS_PREFIX}ApiLambdaRole \
     ElasticSearchEndpoint=${SSM_PARAMS_PREFIX}ElasticSearchEndpoint \
@@ -66,4 +72,13 @@ aws cloudformation deploy \
     TwitterConsumerKey=${SSM_PARAMS_PREFIX}TwitterConsumerKey \
     TwitterConsumerSecret=${SSM_PARAMS_PREFIX}TwitterConsumerSecret \
     TwitterOauthCallbackUrl=${SSM_PARAMS_PREFIX}TwitterOauthCallbackUrl \
+    YahooClientId=${SSM_PARAMS_PREFIX}YahooClientId \
+    YahooSecret=${SSM_PARAMS_PREFIX}YahooSecret \
+    YahooOauthCallbackUrl=${SSM_PARAMS_PREFIX}YahooOauthCallbackUrl \
+    FacebookAppId=${SSM_PARAMS_PREFIX}FacebookAppId \
+    FacebookAppSecret=${SSM_PARAMS_PREFIX}FacebookAppSecret \
+    FacebookOauthCallbackUrl=${SSM_PARAMS_PREFIX}FacebookOauthCallbackUrl \
+    FacebookAppToken=${SSM_PARAMS_PREFIX}FacebookAppToken \
+    RestApiArn=${SSM_PARAMS_PREFIX}RestApiArn \
+    PaidArticlesTableName=${SSM_PARAMS_PREFIX}PaidArticlesTableName \
   --capabilities CAPABILITY_IAM
