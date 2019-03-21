@@ -225,10 +225,10 @@ Resources:
           ARTICLE_INFO_TABLE_NAME: !Ref ArticleInfoTableName
           ARTICLE_CONTENT_TABLE_NAME: !Ref ArticleContentTableName
       Handler: handler.lambda_handler
-        MemorySize: 3008
-        Role: !GetAtt LambdaRole.Arn
-        Runtime: python3.6
-        Timeout: 300
+      MemorySize: 3008
+      Role: !GetAtt LambdaRole.Arn
+      Runtime: python3.6
+      Timeout: 300
   MeArticlesPurchasedArticleIdsIndex:
     Type: "AWS::Lambda::Function"
     Properties:
