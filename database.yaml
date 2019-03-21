@@ -652,7 +652,7 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: 1
         WriteCapacityUnits: 1
-  ArticlesPurchased:
+  PaidArticles:
     Type: AWS::DynamoDB::Table
     DependsOn:
       - Nonce

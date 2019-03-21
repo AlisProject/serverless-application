@@ -7,7 +7,7 @@ from db_util import DBUtil
 from lambda_base import LambdaBase
 
 
-class MeArticlesPurchasedArticleIdsIndex(LambdaBase):
+class MeArticlesPaidArticleIdsIndex(LambdaBase):
     def get_schema(self):
         pass
 
@@ -16,17 +16,16 @@ class MeArticlesPurchasedArticleIdsIndex(LambdaBase):
 
     def exec_main_proc(self):
         user_id = self.event['requestContext']['authorizer']['claims']['cognito:username']
-        articles_purchased_table = self.dynamodb.Table(os.environ['ARTICLES_PURCHASED_TABLE_NAME'])
+        paid_articles_table = self.dynamodb.Table(os.environ['PAID_ARTICLES_TABLE_NAME'])
 
         query_params = {
             'IndexName': 'user_id-sort_key-index',
             'KeyConditionExpression': Key('user_id').eq(user_id)
         }
 
-        result = DBUtil.query_all_items(articles_purchased_table, query_params)
+        result = DBUtil.query_all_items(paid_articles_table, query_params)
 
-        article_ids = [article_purchased['article_id'] for article_purchased in result if
-                       article_purchased['user_id'] == user_id]
+        article_ids = [paid_article['article_id'] for paid_article in result if paid_article['user_id'] == user_id]
 
         return {
             'statusCode': 200,

@@ -688,7 +688,7 @@ Resources:
       TimeToLiveSpecification:
         AttributeName: expiration_time
         Enabled: true
-  ArticlesPurchased:
+  PaidArticles:
     Type: AWS::DynamoDB::Table
     DependsOn:
       - Nonce

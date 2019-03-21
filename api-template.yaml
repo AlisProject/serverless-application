@@ -95,7 +95,7 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   LoginSalt:
     Type: 'AWS::SSM::Parameter::Value<String>'
-  ArticlesPurchasedTableName:
+  PaidArticlesTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
 
 Globals:
@@ -137,7 +137,7 @@ Globals:
         BETA_MODE_FLAG: !Ref BetaModeFlag
         DIST_S3_BUCKET_NAME: !Ref DistS3BucketName
         ELASTIC_SEARCH_ENDPOINT: !Ref ElasticSearchEndpoint
-        ARTICLES_PURCHASED_TABLE_NAME: !Ref ArticlesPurchasedTableName
+        PAID_ARTICLES_TABLE_NAME: !Ref PaidArticlesTableName
 
 Resources:
   RestApi:
@@ -2231,7 +2231,7 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
-          /me/articles/purchased/article_ids:
+          /me/articles/paid/article_ids:
             get:
               description: "ユーザーが購入した記事の記事ID一覧を取得"
               responses:

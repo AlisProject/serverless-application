@@ -2,7 +2,7 @@ import os
 import json
 from unittest import TestCase
 
-from me_articles_purchased_article_ids_index import MeArticlesPurchasedArticleIdsIndex
+from me_articles_paid_article_ids_index import MeArticlesPaidArticleIdsIndex
 from tests_util import TestsUtil
 
 
@@ -14,7 +14,7 @@ class TestMeArticlesPurchasedArticleIdsIndex(TestCase):
         TestsUtil.set_all_tables_name_to_env()
         TestsUtil.delete_all_tables(cls.dynamodb)
 
-        cls.articles_purchased_items = [
+        cls.paid_articles_items = [
             {
                 'article_id': 'publicId0001',
                 'article_user_id': 'test_article_user_01',
@@ -49,14 +49,14 @@ class TestMeArticlesPurchasedArticleIdsIndex(TestCase):
                 'price': 300
             }
         ]
-        TestsUtil.create_table(cls.dynamodb, os.environ['ARTICLES_PURCHASED_TABLE_NAME'], cls.articles_purchased_items)
+        TestsUtil.create_table(cls.dynamodb, os.environ['PAID_ARTICLES_TABLE_NAME'], cls.paid_articles_items)
 
     @classmethod
     def tearDownClass(cls):
         TestsUtil.delete_all_tables(cls.dynamodb)
 
     def assert_bad_request(self, params):
-        response = MeArticlesPurchasedArticleIdsIndex(event=params, context={}, dynamodb=self.dynamodb).main()
+        response = MeArticlesPaidArticleIdsIndex(event=params, context={}, dynamodb=self.dynamodb).main()
         self.assertEqual(response['statusCode'], 400)
 
     def test_main_ok(self):
@@ -70,9 +70,9 @@ class TestMeArticlesPurchasedArticleIdsIndex(TestCase):
             }
         }
 
-        response = MeArticlesPurchasedArticleIdsIndex(event=params, context={}, dynamodb=self.dynamodb).main()
+        response = MeArticlesPaidArticleIdsIndex(event=params, context={}, dynamodb=self.dynamodb).main()
 
-        expected_items = [self.articles_purchased_items[0]['article_id'], self.articles_purchased_items[2]['article_id']]
+        expected_items = [self.paid_articles_items[0]['article_id'], self.paid_articles_items[2]['article_id']]
 
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(sorted(json.loads(response['body'])['article_ids']), sorted(expected_items))
@@ -88,7 +88,7 @@ class TestMeArticlesPurchasedArticleIdsIndex(TestCase):
             }
         }
 
-        response = MeArticlesPurchasedArticleIdsIndex(event=params, context={}, dynamodb=self.dynamodb).main()
+        response = MeArticlesPaidArticleIdsIndex(event=params, context={}, dynamodb=self.dynamodb).main()
 
         expected_items = []
 
