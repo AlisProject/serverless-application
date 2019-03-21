@@ -2,20 +2,6 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: The databases for the ALIS application.
 
-Parameters:
-  MinDynamoReadCapacitty:
-    Type: String
-    Default: 1
-  MinDynamoWriteCapacitty:
-    Type: String
-    Default: 1
-  MaxDynamoReadCapacitty:
-    Type: String
-    Default: 50
-  MaxDynamoWriteCapacitty:
-    Type: String
-    Default: 50
-
 Resources:
   ArticleInfo:
     Type: AWS::DynamoDB::Table
@@ -43,9 +29,7 @@ Resources:
               KeyType: RANGE
           Projection:
             ProjectionType: ALL
-          ProvisionedThroughput:
-            ReadCapacityUnits: !Ref MinDynamoReadCapacitty
-            WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
+          BillingMode: PAY_PER_REQUEST
         - IndexName: user_id-sort_key-index
           KeySchema:
             - AttributeName: user_id
@@ -54,9 +38,7 @@ Resources:
               KeyType: RANGE
           Projection:
             ProjectionType: ALL
-          ProvisionedThroughput:
-            ReadCapacityUnits: !Ref MinDynamoReadCapacitty
-            WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
+          BillingMode: PAY_PER_REQUEST
         - IndexName: article_id-status_key-index
           KeySchema:
             - AttributeName: article_id
@@ -65,25 +47,19 @@ Resources:
               KeyType: RANGE
           Projection:
             ProjectionType: KEYS_ONLY
-          ProvisionedThroughput:
-            ReadCapacityUnits: !Ref MinDynamoReadCapacitty
-            WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
+          BillingMode: PAY_PER_REQUEST
         - IndexName: sync_elasticsearch-index
           KeySchema:
             - AttributeName: sync_elasticsearch
               KeyType: HASH
           Projection:
             ProjectionType: ALL
-          ProvisionedThroughput:
-            ReadCapacityUnits: !Ref MinDynamoReadCapacitty
-            WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
-      ProvisionedThroughput:
-        ReadCapacityUnits: !Ref MinDynamoReadCapacitty
-        WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
+          BillingMode: PAY_PER_REQUEST
+      BillingMode: PAY_PER_REQUEST
   ArticleContent:
     Type: AWS::DynamoDB::Table
     DependsOn:
-    - ArticleInfo
+      - ArticleInfo
     Properties:
       AttributeDefinitions:
         - AttributeName: article_id
@@ -91,13 +67,11 @@ Resources:
       KeySchema:
         - AttributeName: article_id
           KeyType: HASH
-      ProvisionedThroughput:
-        ReadCapacityUnits: !Ref MinDynamoReadCapacitty
-        WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
+      BillingMode: PAY_PER_REQUEST
   ArticleHistory:
     Type: AWS::DynamoDB::Table
     DependsOn:
-    - ArticleInfo
+      - ArticleInfo
     Properties:
       AttributeDefinitions:
         - AttributeName: article_id
@@ -109,13 +83,11 @@ Resources:
           KeyType: HASH
         - AttributeName: created_at
           KeyType: RANGE
-      ProvisionedThroughput:
-        ReadCapacityUnits: !Ref MinDynamoReadCapacitty
-        WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
+      BillingMode: PAY_PER_REQUEST
   ArticleContentEdit:
     Type: AWS::DynamoDB::Table
     DependsOn:
-    - ArticleInfo
+      - ArticleInfo
     Properties:
       AttributeDefinitions:
         - AttributeName: article_id
@@ -123,13 +95,11 @@ Resources:
       KeySchema:
         - AttributeName: article_id
           KeyType: HASH
-      ProvisionedThroughput:
-        ReadCapacityUnits: !Ref MinDynamoReadCapacitty
-        WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
+      BillingMode: PAY_PER_REQUEST
   ArticleAlisToken:
     Type: AWS::DynamoDB::Table
     DependsOn:
-    - ArticleInfo
+      - ArticleInfo
     Properties:
       AttributeDefinitions:
         - AttributeName: article_id
@@ -148,16 +118,12 @@ Resources:
               KeyType: HASH
           Projection:
             ProjectionType: ALL
-          ProvisionedThroughput:
-            ReadCapacityUnits: !Ref MinDynamoReadCapacitty
-            WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
-      ProvisionedThroughput:
-          ReadCapacityUnits: !Ref MinDynamoReadCapacitty
-          WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
+          BillingMode: PAY_PER_REQUEST
+      BillingMode: PAY_PER_REQUEST
   ArticleEvaluatedManage:
     Type: AWS::DynamoDB::Table
     DependsOn:
-    - ArticleInfo
+      - ArticleInfo
     Properties:
       AttributeDefinitions:
         - AttributeName: type
@@ -165,13 +131,11 @@ Resources:
       KeySchema:
         - AttributeName: type
           KeyType: HASH
-      ProvisionedThroughput:
-        ReadCapacityUnits: !Ref MinDynamoReadCapacitty
-        WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
+      BillingMode: PAY_PER_REQUEST
   ArticleLikedUser:
     Type: AWS::DynamoDB::Table
     DependsOn:
-    - ArticleInfo
+      - ArticleInfo
     Properties:
       AttributeDefinitions:
         - AttributeName: article_id
@@ -205,16 +169,12 @@ Resources:
               KeyType: RANGE
           Projection:
             ProjectionType: ALL
-          ProvisionedThroughput:
-            ReadCapacityUnits: !Ref MinDynamoReadCapacitty
-            WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
-      ProvisionedThroughput:
-        ReadCapacityUnits: !Ref MinDynamoReadCapacitty
-        WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
+          BillingMode: PAY_PER_REQUEST
+      BillingMode: PAY_PER_REQUEST
   ArticlePvUser:
     Type: AWS::DynamoDB::Table
     DependsOn:
-    - ArticleInfo
+      - ArticleInfo
     Properties:
       AttributeDefinitions:
         - AttributeName: article_id
@@ -248,16 +208,12 @@ Resources:
               KeyType: RANGE
           Projection:
             ProjectionType: ALL
-          ProvisionedThroughput:
-            ReadCapacityUnits: !Ref MinDynamoReadCapacitty
-            WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
-      ProvisionedThroughput:
-        ReadCapacityUnits: !Ref MinDynamoReadCapacitty
-        WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
+          BillingMode: PAY_PER_REQUEST
+      BillingMode: PAY_PER_REQUEST
   ArticleScore:
     Type: AWS::DynamoDB::Table
     DependsOn:
-    - ArticleInfo
+      - ArticleInfo
     Properties:
       AttributeDefinitions:
         - AttributeName: article_id
@@ -280,13 +236,11 @@ Resources:
               KeyType: RANGE
           Projection:
             ProjectionType: ALL
-      ProvisionedThroughput:
-        ReadCapacityUnits: !Ref MinDynamoReadCapacitty
-        WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
+      BillingMode: PAY_PER_REQUEST
   ArticleTokenAggregation:
     Type: AWS::DynamoDB::Table
     DependsOn:
-    - ArticleInfo
+      - ArticleInfo
     Properties:
       AttributeDefinitions:
         - AttributeName: evaluated_at
@@ -298,13 +252,11 @@ Resources:
           KeyType: HASH
         - AttributeName: article_id
           KeyType: RANGE
-      ProvisionedThroughput:
-        ReadCapacityUnits: !Ref MinDynamoReadCapacitty
-        WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
+      BillingMode: PAY_PER_REQUEST
   LikeTokenAggregation:
     Type: AWS::DynamoDB::Table
     DependsOn:
-    - ArticleTokenAggregation
+      - ArticleTokenAggregation
     Properties:
       AttributeDefinitions:
         - AttributeName: evaluated_at
@@ -316,13 +268,11 @@ Resources:
           KeyType: HASH
         - AttributeName: user_id
           KeyType: RANGE
-      ProvisionedThroughput:
-        ReadCapacityUnits: !Ref MinDynamoReadCapacitty
-        WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
+      BillingMode: PAY_PER_REQUEST
   ArticleFraudUser:
     Type: AWS::DynamoDB::Table
     DependsOn:
-    - ArticleInfo
+      - ArticleInfo
     Properties:
       AttributeDefinitions:
         - AttributeName: article_id
@@ -334,9 +284,7 @@ Resources:
           KeyType: HASH
         - AttributeName: user_id
           KeyType: RANGE
-      ProvisionedThroughput:
-        ReadCapacityUnits: !Ref MinDynamoReadCapacitty
-        WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
+      BillingMode: PAY_PER_REQUEST
   Users:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -355,16 +303,12 @@ Resources:
               KeyType: HASH
           Projection:
             ProjectionType: ALL
-          ProvisionedThroughput:
-            ReadCapacityUnits: !Ref MinDynamoReadCapacitty
-            WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
-      ProvisionedThroughput:
-        ReadCapacityUnits: !Ref MinDynamoReadCapacitty
-        WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
+          BillingMode: PAY_PER_REQUEST
+      BillingMode: PAY_PER_REQUEST
   BetaUsers:
     Type: AWS::DynamoDB::Table
     DependsOn:
-    - Users
+      - Users
     Properties:
       AttributeDefinitions:
         - AttributeName: email
@@ -372,39 +316,33 @@ Resources:
       KeySchema:
         - AttributeName: email
           KeyType: HASH
-      ProvisionedThroughput:
-        ReadCapacityUnits: !Ref MinDynamoReadCapacitty
-        WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
+      BillingMode: PAY_PER_REQUEST
   ExternalProviderUsers:
     Type: AWS::DynamoDB::Table
     DependsOn:
-    - Users
+      - Users
     Properties:
       AttributeDefinitions:
-      - AttributeName: external_provider_user_id
-        AttributeType: S
-      - AttributeName: user_id
-        AttributeType: S
+        - AttributeName: external_provider_user_id
+          AttributeType: S
+        - AttributeName: user_id
+          AttributeType: S
       KeySchema:
-      - AttributeName: external_provider_user_id
-        KeyType: HASH
+        - AttributeName: external_provider_user_id
+          KeyType: HASH
       GlobalSecondaryIndexes:
         - IndexName: user_id-index
           KeySchema:
-          - AttributeName: user_id
-            KeyType: HASH
+            - AttributeName: user_id
+              KeyType: HASH
           Projection:
             ProjectionType: ALL
-          ProvisionedThroughput:
-            ReadCapacityUnits: !Ref MinDynamoReadCapacitty
-            WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
-      ProvisionedThroughput:
-        ReadCapacityUnits: !Ref MinDynamoReadCapacitty
-        WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
+          BillingMode: PAY_PER_REQUEST
+      BillingMode: PAY_PER_REQUEST
   Notification:
     Type: AWS::DynamoDB::Table
     DependsOn:
-    - Users
+      - Users
     Properties:
       AttributeDefinitions:
         - AttributeName: user_id
@@ -425,16 +363,12 @@ Resources:
               KeyType: RANGE
           Projection:
             ProjectionType: ALL
-          ProvisionedThroughput:
-            ReadCapacityUnits: !Ref MinDynamoReadCapacitty
-            WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
-      ProvisionedThroughput:
-        ReadCapacityUnits: !Ref MinDynamoReadCapacitty
-        WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
+          BillingMode: PAY_PER_REQUEST
+      BillingMode: PAY_PER_REQUEST
   UnreadNotificationManager:
     Type: AWS::DynamoDB::Table
     DependsOn:
-    - Notification
+      - Notification
     Properties:
       AttributeDefinitions:
         - AttributeName: user_id
@@ -442,13 +376,11 @@ Resources:
       KeySchema:
         - AttributeName: user_id
           KeyType: HASH
-      ProvisionedThroughput:
-        ReadCapacityUnits: !Ref MinDynamoReadCapacitty
-        WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
+      BillingMode: PAY_PER_REQUEST
   Comment:
     Type: AWS::DynamoDB::Table
     DependsOn:
-    - Users
+      - Users
     Properties:
       AttributeDefinitions:
         - AttributeName: comment_id
@@ -469,16 +401,12 @@ Resources:
               KeyType: RANGE
           Projection:
             ProjectionType: ALL
-          ProvisionedThroughput:
-            ReadCapacityUnits: !Ref MinDynamoReadCapacitty
-            WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
-      ProvisionedThroughput:
-        ReadCapacityUnits: !Ref MinDynamoReadCapacitty
-        WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
+          BillingMode: PAY_PER_REQUEST
+      BillingMode: PAY_PER_REQUEST
   CommentLikedUser:
     Type: AWS::DynamoDB::Table
     DependsOn:
-    - Comment
+      - Comment
     Properties:
       AttributeDefinitions:
         - AttributeName: comment_id
@@ -499,16 +427,12 @@ Resources:
               KeyType: HASH
           Projection:
             ProjectionType: ALL
-          ProvisionedThroughput:
-            ReadCapacityUnits: !Ref MinDynamoReadCapacitty
-            WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
-      ProvisionedThroughput:
-        ReadCapacityUnits: !Ref MinDynamoReadCapacitty
-        WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
+          BillingMode: PAY_PER_REQUEST
+      BillingMode: PAY_PER_REQUEST
   DeletedComment:
     Type: AWS::DynamoDB::Table
     DependsOn:
-    - Comment
+      - Comment
     Properties:
       AttributeDefinitions:
         - AttributeName: comment_id
@@ -516,13 +440,11 @@ Resources:
       KeySchema:
         - AttributeName: comment_id
           KeyType: HASH
-      ProvisionedThroughput:
-        ReadCapacityUnits: !Ref MinDynamoReadCapacitty
-        WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
+      BillingMode: PAY_PER_REQUEST
   Topic:
     Type: AWS::DynamoDB::Table
     DependsOn:
-    - Comment
+      - Comment
     Properties:
       AttributeDefinitions:
         - AttributeName: name
@@ -543,16 +465,12 @@ Resources:
               KeyType: RANGE
           Projection:
             ProjectionType: ALL
-          ProvisionedThroughput:
-            ReadCapacityUnits: !Ref MinDynamoReadCapacitty
-            WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
-      ProvisionedThroughput:
-        ReadCapacityUnits: !Ref MinDynamoReadCapacitty
-        WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
+          BillingMode: PAY_PER_REQUEST
+      BillingMode: PAY_PER_REQUEST
   Tag:
     Type: AWS::DynamoDB::Table
     DependsOn:
-    - Comment
+      - Comment
     Properties:
       AttributeDefinitions:
         - AttributeName: name
@@ -560,13 +478,11 @@ Resources:
       KeySchema:
         - AttributeName: name
           KeyType: HASH
-      ProvisionedThroughput:
-        ReadCapacityUnits: !Ref MinDynamoReadCapacitty
-        WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
+      BillingMode: PAY_PER_REQUEST
   Tip:
     Type: AWS::DynamoDB::Table
     DependsOn:
-    - Comment
+      - Comment
     Properties:
       AttributeDefinitions:
         - AttributeName: user_id
@@ -587,12 +503,8 @@ Resources:
               KeyType: HASH
           Projection:
             ProjectionType: ALL
-          ProvisionedThroughput:
-            ReadCapacityUnits: !Ref MinDynamoReadCapacitty
-            WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
-      ProvisionedThroughput:
-        ReadCapacityUnits: !Ref MinDynamoReadCapacitty
-        WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
+          BillingMode: PAY_PER_REQUEST
+      BillingMode: PAY_PER_REQUEST
   ScreenedArticle:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -602,9 +514,7 @@ Resources:
       KeySchema:
         - AttributeName: article_type
           KeyType: HASH
-      ProvisionedThroughput:
-        ReadCapacityUnits: !Ref MinDynamoReadCapacitty
-        WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
+      BillingMode: PAY_PER_REQUEST
   UserFraud:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -618,1374 +528,4 @@ Resources:
           KeyType: HASH
         - AttributeName: user_id
           KeyType: RANGE
-      ProvisionedThroughput:
-        ReadCapacityUnits: !Ref MinDynamoReadCapacitty
-        WriteCapacityUnits: !Ref MinDynamoWriteCapacitty
-  ScalingRole:
-    Type: 'AWS::IAM::Role'
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: 'Allow'
-            Principal:
-              Service:
-                - application-autoscaling.amazonaws.com
-            Action:
-              - 'sts:AssumeRole'
-      Path: '/'
-      Policies:
-        - PolicyName: 'root'
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: 'Allow'
-                Action:
-                  - 'dynamodb:DescribeTable'
-                  - 'dynamodb:UpdateTable'
-                  - 'cloudwatch:PutMetricAlarm'
-                  - 'cloudwatch:DescribeAlarms'
-                  - 'cloudwatch:GetMetricStatistics'
-                  - 'cloudwatch:SetAlarmState'
-                  - 'cloudwatch:DeleteAlarms'
-                Resource: "*"
-  ArticleInfoTableReadCapacityScalableTarget:
-    Type: AWS::ApplicationAutoScaling::ScalableTarget
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoReadCapacitty
-      MinCapacity: !Ref MinDynamoReadCapacitty
-      ResourceId: !Join
-        - /
-        - - table
-          - !Ref ArticleInfo
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:table:ReadCapacityUnits
-      ServiceNamespace: dynamodb
-  ArticleInfoTableWriteCapacityScalableTarget:
-    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoWriteCapacitty
-      MinCapacity: !Ref MinDynamoWriteCapacitty
-      ResourceId: !Join
-        - /
-        - - table
-          - !Ref ArticleInfo
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:table:WriteCapacityUnits
-      ServiceNamespace: dynamodb
-  ArticleInfoTableReadScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: ReadAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref ArticleInfoTableReadCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBReadCapacityUtilization
-  ArticleInfoTableWriteScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: WriteAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref ArticleInfoTableWriteCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBWriteCapacityUtilization
-  ArticleInfoStatusSortKeyIndexReadCapacityScalableTarget:
-    Type: AWS::ApplicationAutoScaling::ScalableTarget
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoReadCapacitty
-      MinCapacity: !Ref MinDynamoReadCapacitty
-      ResourceId: !Sub 'table/${ArticleInfo}/index/status-sort_key-index'
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:index:ReadCapacityUnits
-      ServiceNamespace: dynamodb
-  ArticleInfoStatusSortKeyIndexWriteCapacityScalableTarget:
-    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoWriteCapacitty
-      MinCapacity: !Ref MinDynamoWriteCapacitty
-      ResourceId: !Sub 'table/${ArticleInfo}/index/status-sort_key-index'
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:index:WriteCapacityUnits
-      ServiceNamespace: dynamodb
-  ArticleInfoStatusSortKeyIndexReadScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: ReadAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref ArticleInfoStatusSortKeyIndexReadCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBReadCapacityUtilization
-  ArticleInfoStatusSortKeyIndexWriteScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: WriteAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref ArticleInfoStatusSortKeyIndexWriteCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBWriteCapacityUtilization
-  ArticleInfoUserIdSortKeyIndexReadCapacityScalableTarget:
-    Type: AWS::ApplicationAutoScaling::ScalableTarget
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoReadCapacitty
-      MinCapacity: !Ref MinDynamoReadCapacitty
-      ResourceId: !Sub 'table/${ArticleInfo}/index/user_id-sort_key-index'
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:index:ReadCapacityUnits
-      ServiceNamespace: dynamodb
-  ArticleInfoUserIdSortKeyIndexWriteCapacityScalableTarget:
-    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoWriteCapacitty
-      MinCapacity: !Ref MinDynamoWriteCapacitty
-      ResourceId: !Sub 'table/${ArticleInfo}/index/user_id-sort_key-index'
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:index:WriteCapacityUnits
-      ServiceNamespace: dynamodb
-  ArticleInfoUserIdSortKeyIndexReadScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: ReadAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref ArticleInfoUserIdSortKeyIndexReadCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBReadCapacityUtilization
-  ArticleInfoUserIdSortKeyIndexWriteScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: WriteAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref ArticleInfoUserIdSortKeyIndexWriteCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBWriteCapacityUtilization
-  ArticleInfoArticleIdStatusKeyIndexReadCapacityScalableTarget:
-    Type: AWS::ApplicationAutoScaling::ScalableTarget
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoReadCapacitty
-      MinCapacity: !Ref MinDynamoReadCapacitty
-      ResourceId: !Sub 'table/${ArticleInfo}/index/article_id-status_key-index'
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:index:ReadCapacityUnits
-      ServiceNamespace: dynamodb
-  ArticleInfoArticleIdStatusKeyIndexWriteCapacityScalableTarget:
-    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoWriteCapacitty
-      MinCapacity: !Ref MinDynamoWriteCapacitty
-      ResourceId: !Sub 'table/${ArticleInfo}/index/article_id-status_key-index'
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:index:WriteCapacityUnits
-      ServiceNamespace: dynamodb
-  ArticleInfoArticleIdStatusKeyIndexReadScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: ReadAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref ArticleInfoArticleIdStatusKeyIndexReadCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBReadCapacityUtilization
-  ArticleInfoArticleIdStatusKeyIndexWriteScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: WriteAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref ArticleInfoArticleIdStatusKeyIndexWriteCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBWriteCapacityUtilization
-  ArticleContentTableReadCapacityScalableTarget:
-    Type: AWS::ApplicationAutoScaling::ScalableTarget
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoReadCapacitty
-      MinCapacity: !Ref MinDynamoReadCapacitty
-      ResourceId: !Join
-        - /
-        - - table
-          - !Ref ArticleContent
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:table:ReadCapacityUnits
-      ServiceNamespace: dynamodb
-  ArticleContentTableWriteCapacityScalableTarget:
-    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoWriteCapacitty
-      MinCapacity: !Ref MinDynamoWriteCapacitty
-      ResourceId: !Join
-        - /
-        - - table
-          - !Ref ArticleContent
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:table:WriteCapacityUnits
-      ServiceNamespace: dynamodb
-  ArticleContentTableReadScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: ReadAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref ArticleContentTableReadCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBReadCapacityUtilization
-  ArticleHistoryTableReadCapacityScalableTarget:
-    Type: AWS::ApplicationAutoScaling::ScalableTarget
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoReadCapacitty
-      MinCapacity: !Ref MinDynamoReadCapacitty
-      ResourceId: !Join
-        - /
-        - - table
-          - !Ref ArticleHistory
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:table:ReadCapacityUnits
-      ServiceNamespace: dynamodb
-  ArticleHistoryTableWriteCapacityScalableTarget:
-    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoWriteCapacitty
-      MinCapacity: !Ref MinDynamoWriteCapacitty
-      ResourceId: !Join
-        - /
-        - - table
-          - !Ref ArticleHistory
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:table:WriteCapacityUnits
-      ServiceNamespace: dynamodb
-  ArticleHistoryTableReadScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: ReadAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref ArticleHistoryTableReadCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBReadCapacityUtilization
-  ArticleHistoryTableWriteScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: WriteAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref ArticleHistoryTableWriteCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBWriteCapacityUtilization
-  ArticleContentEditTableReadCapacityScalableTarget:
-    Type: AWS::ApplicationAutoScaling::ScalableTarget
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoReadCapacitty
-      MinCapacity: !Ref MinDynamoReadCapacitty
-      ResourceId: !Join
-        - /
-        - - table
-          - !Ref ArticleContentEdit
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:table:ReadCapacityUnits
-      ServiceNamespace: dynamodb
-  ArticleContentEditTableWriteCapacityScalableTarget:
-    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoWriteCapacitty
-      MinCapacity: !Ref MinDynamoWriteCapacitty
-      ResourceId: !Join
-        - /
-        - - table
-          - !Ref ArticleContentEdit
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:table:WriteCapacityUnits
-      ServiceNamespace: dynamodb
-  ArticleContentEditTableReadScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: ReadAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref ArticleContentEditTableReadCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBReadCapacityUtilization
-  ArticleContentEditTableWriteScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: WriteAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref ArticleContentEditTableWriteCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBWriteCapacityUtilization
-  ArticleAlisTokenTableReadCapacityScalableTarget:
-    Type: AWS::ApplicationAutoScaling::ScalableTarget
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoReadCapacitty
-      MinCapacity: !Ref MinDynamoReadCapacitty
-      ResourceId: !Join
-        - /
-        - - table
-          - !Ref ArticleAlisToken
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:table:ReadCapacityUnits
-      ServiceNamespace: dynamodb
-  ArticleAlisTokenTableWriteCapacityScalableTarget:
-    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoWriteCapacitty
-      MinCapacity: !Ref MinDynamoWriteCapacitty
-      ResourceId: !Join
-        - /
-        - - table
-          - !Ref ArticleAlisToken
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:table:WriteCapacityUnits
-      ServiceNamespace: dynamodb
-  ArticleAlisTokenTableReadScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: ReadAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref ArticleAlisTokenTableReadCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBReadCapacityUtilization
-  ArticleAlisTokenTableWriteScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: WriteAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref ArticleAlisTokenTableWriteCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBWriteCapacityUtilization
-  ArticleEvaluatedManageTableReadCapacityScalableTarget:
-    Type: AWS::ApplicationAutoScaling::ScalableTarget
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoReadCapacitty
-      MinCapacity: !Ref MinDynamoReadCapacitty
-      ResourceId: !Join
-        - /
-        - - table
-          - !Ref ArticleEvaluatedManage
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:table:ReadCapacityUnits
-      ServiceNamespace: dynamodb
-  ArticleEvaluatedManageTableWriteCapacityScalableTarget:
-    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoWriteCapacitty
-      MinCapacity: !Ref MinDynamoWriteCapacitty
-      ResourceId: !Join
-        - /
-        - - table
-          - !Ref ArticleEvaluatedManage
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:table:WriteCapacityUnits
-      ServiceNamespace: dynamodb
-  ArticleEvaluatedManageTableReadScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: ReadAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref ArticleEvaluatedManageTableReadCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBReadCapacityUtilization
-  ArticleEvaluatedManageTableWriteScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: WriteAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref ArticleEvaluatedManageTableWriteCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBWriteCapacityUtilization
-  ArticleLikedUserTableReadCapacityScalableTarget:
-    Type: AWS::ApplicationAutoScaling::ScalableTarget
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoReadCapacitty
-      MinCapacity: !Ref MinDynamoReadCapacitty
-      ResourceId: !Join
-        - /
-        - - table
-          - !Ref ArticleLikedUser
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:table:ReadCapacityUnits
-      ServiceNamespace: dynamodb
-  ArticleLikedUserTableWriteCapacityScalableTarget:
-    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoWriteCapacitty
-      MinCapacity: !Ref MinDynamoWriteCapacitty
-      ResourceId: !Join
-        - /
-        - - table
-          - !Ref ArticleLikedUser
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:table:WriteCapacityUnits
-      ServiceNamespace: dynamodb
-  ArticleLikedUserTableReadScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: ReadAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref ArticleLikedUserTableReadCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBReadCapacityUtilization
-  ArticleLikedUserTableWriteScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: WriteAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref ArticleLikedUserTableWriteCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBWriteCapacityUtilization
-  ArticleLikedUserTargetDateSortKeyIndexReadCapacityScalableTarget:
-    Type: AWS::ApplicationAutoScaling::ScalableTarget
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoReadCapacitty
-      MinCapacity: !Ref MinDynamoReadCapacitty
-      ResourceId: !Sub 'table/${ArticleLikedUser}/index/target_date-sort_key-index'
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:index:ReadCapacityUnits
-      ServiceNamespace: dynamodb
-  ArticleLikedUserTargetDateSortKeyIndexWriteCapacityScalableTarget:
-    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoWriteCapacitty
-      MinCapacity: !Ref MinDynamoWriteCapacitty
-      ResourceId: !Sub 'table/${ArticleLikedUser}/index/target_date-sort_key-index'
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:index:WriteCapacityUnits
-      ServiceNamespace: dynamodb
-  ArticleLikedUserTargetDateSortKeyIndexReadScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: ReadAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref ArticleLikedUserTargetDateSortKeyIndexReadCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBReadCapacityUtilization
-  ArticleLikedUserTargetDateSortKeyIndexWriteScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: WriteAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref ArticleLikedUserTargetDateSortKeyIndexWriteCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBWriteCapacityUtilization
-  ArticlePvUserTableReadCapacityScalableTarget:
-    Type: AWS::ApplicationAutoScaling::ScalableTarget
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoReadCapacitty
-      MinCapacity: !Ref MinDynamoReadCapacitty
-      ResourceId: !Join
-        - /
-        - - table
-          - !Ref ArticlePvUser
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:table:ReadCapacityUnits
-      ServiceNamespace: dynamodb
-  ArticlePvUserTableWriteCapacityScalableTarget:
-    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoWriteCapacitty
-      MinCapacity: !Ref MinDynamoWriteCapacitty
-      ResourceId: !Join
-        - /
-        - - table
-          - !Ref ArticlePvUser
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:table:WriteCapacityUnits
-      ServiceNamespace: dynamodb
-  ArticlePvUserTableReadScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: ReadAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref ArticlePvUserTableReadCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBReadCapacityUtilization
-  ArticlePvUserTableWriteScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: WriteAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref ArticlePvUserTableWriteCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBWriteCapacityUtilization
-  ArticlePvUserTargetDateSortKeyIndexReadCapacityScalableTarget:
-    Type: AWS::ApplicationAutoScaling::ScalableTarget
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoReadCapacitty
-      MinCapacity: !Ref MinDynamoReadCapacitty
-      ResourceId: !Sub 'table/${ArticlePvUser}/index/target_date-sort_key-index'
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:index:ReadCapacityUnits
-      ServiceNamespace: dynamodb
-  ArticlePvUserTargetDateSortKeyIndexWriteCapacityScalableTarget:
-    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoWriteCapacitty
-      MinCapacity: !Ref MinDynamoWriteCapacitty
-      ResourceId: !Sub 'table/${ArticlePvUser}/index/target_date-sort_key-index'
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:index:WriteCapacityUnits
-      ServiceNamespace: dynamodb
-  ArticlePvUserTargetDateSortKeyIndexReadScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: ReadAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref ArticlePvUserTargetDateSortKeyIndexReadCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBReadCapacityUtilization
-  ArticlePvUserTargetDateSortKeyIndexWriteScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: WriteAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref ArticlePvUserTargetDateSortKeyIndexWriteCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBWriteCapacityUtilization
-  ArticleScoreTableReadCapacityScalableTarget:
-    Type: AWS::ApplicationAutoScaling::ScalableTarget
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoReadCapacitty
-      MinCapacity: !Ref MinDynamoReadCapacitty
-      ResourceId: !Join
-        - /
-        - - table
-          - !Ref ArticleScore
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:table:ReadCapacityUnits
-      ServiceNamespace: dynamodb
-  ArticleScoreTableWriteCapacityScalableTarget:
-    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoWriteCapacitty
-      MinCapacity: !Ref MinDynamoWriteCapacitty
-      ResourceId: !Join
-        - /
-        - - table
-          - !Ref ArticleScore
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:table:WriteCapacityUnits
-      ServiceNamespace: dynamodb
-  ArticleScoreTableReadScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: ReadAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref ArticleScoreTableReadCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBReadCapacityUtilization
-  ArticleScoreTableWriteScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: WriteAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref ArticleScoreTableWriteCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBWriteCapacityUtilization
-  ArticleTokenAggregationTableReadCapacityScalableTarget:
-    Type: AWS::ApplicationAutoScaling::ScalableTarget
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoReadCapacitty
-      MinCapacity: !Ref MinDynamoReadCapacitty
-      ResourceId: !Join
-        - /
-        - - table
-          - !Ref ArticleTokenAggregation
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:table:ReadCapacityUnits
-      ServiceNamespace: dynamodb
-  ArticleTokenAggregationTableWriteCapacityScalableTarget:
-    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoWriteCapacitty
-      MinCapacity: !Ref MinDynamoWriteCapacitty
-      ResourceId: !Join
-        - /
-        - - table
-          - !Ref ArticleTokenAggregation
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:table:WriteCapacityUnits
-      ServiceNamespace: dynamodb
-  ArticleTokenAggregationTableReadScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: ReadAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref ArticleTokenAggregationTableReadCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBReadCapacityUtilization
-  ArticleTokenAggregationTableWriteScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: WriteAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref ArticleTokenAggregationTableWriteCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBWriteCapacityUtilization
-  ArticleFraudUserTableReadCapacityScalableTarget:
-    Type: AWS::ApplicationAutoScaling::ScalableTarget
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoReadCapacitty
-      MinCapacity: !Ref MinDynamoReadCapacitty
-      ResourceId: !Join
-        - /
-        - - table
-          - !Ref ArticleFraudUser
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:table:ReadCapacityUnits
-      ServiceNamespace: dynamodb
-  ArticleFraudUserTableWriteCapacityScalableTarget:
-    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoWriteCapacitty
-      MinCapacity: !Ref MinDynamoWriteCapacitty
-      ResourceId: !Join
-        - /
-        - - table
-          - !Ref ArticleFraudUser
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:table:WriteCapacityUnits
-      ServiceNamespace: dynamodb
-  ArticleFraudUserTableReadScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: ReadAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref ArticleFraudUserTableReadCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBReadCapacityUtilization
-  ArticleFraudUserTableWriteScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: WriteAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref ArticleFraudUserTableWriteCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBWriteCapacityUtilization
-  UsersTableReadCapacityScalableTarget:
-    Type: AWS::ApplicationAutoScaling::ScalableTarget
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoReadCapacitty
-      MinCapacity: !Ref MinDynamoReadCapacitty
-      ResourceId: !Join
-        - /
-        - - table
-          - !Ref Users
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:table:ReadCapacityUnits
-      ServiceNamespace: dynamodb
-  UsersTableWriteCapacityScalableTarget:
-    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoWriteCapacitty
-      MinCapacity: !Ref MinDynamoWriteCapacitty
-      ResourceId: !Join
-        - /
-        - - table
-          - !Ref Users
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:table:WriteCapacityUnits
-      ServiceNamespace: dynamodb
-  UsersTableReadScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: ReadAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref UsersTableReadCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBReadCapacityUtilization
-  UsersTableWriteScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: WriteAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref UsersTableWriteCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBWriteCapacityUtilization
-  BetaUsersTableReadCapacityScalableTarget:
-    Type: AWS::ApplicationAutoScaling::ScalableTarget
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoReadCapacitty
-      MinCapacity: !Ref MinDynamoReadCapacitty
-      ResourceId: !Join
-        - /
-        - - table
-          - !Ref BetaUsers
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:table:ReadCapacityUnits
-      ServiceNamespace: dynamodb
-  BetaUsersTableWriteCapacityScalableTarget:
-    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoWriteCapacitty
-      MinCapacity: !Ref MinDynamoWriteCapacitty
-      ResourceId: !Join
-        - /
-        - - table
-          - !Ref BetaUsers
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:table:WriteCapacityUnits
-      ServiceNamespace: dynamodb
-  BetaUsersTableReadScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: ReadAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref BetaUsersTableReadCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBReadCapacityUtilization
-  BetaUsersTableWriteScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: WriteAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref BetaUsersTableWriteCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBWriteCapacityUtilization
-  NotificationTableReadCapacityScalableTarget:
-    Type: AWS::ApplicationAutoScaling::ScalableTarget
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoWriteCapacitty
-      MinCapacity: !Ref MinDynamoWriteCapacitty
-      ResourceId: !Join
-        - /
-        - - table
-          - !Ref Notification
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:table:ReadCapacityUnits
-      ServiceNamespace: dynamodb
-  NotificationTableWriteCapacityScalableTarget:
-    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoWriteCapacitty
-      MinCapacity: !Ref MinDynamoWriteCapacitty
-      ResourceId: !Join
-        - /
-        - - table
-          - !Ref Notification
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:table:WriteCapacityUnits
-      ServiceNamespace: dynamodb
-  NotificationTableReadScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: ReadAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref NotificationTableReadCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBReadCapacityUtilization
-  NotificationTableWriteScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: WriteAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref NotificationTableWriteCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBWriteCapacityUtilization
-  UnreadNotificationManagerTableReadCapacityScalableTarget:
-    Type: AWS::ApplicationAutoScaling::ScalableTarget
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoWriteCapacitty
-      MinCapacity: !Ref MinDynamoWriteCapacitty
-      ResourceId: !Join
-        - /
-        - - table
-          - !Ref UnreadNotificationManager
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:table:ReadCapacityUnits
-      ServiceNamespace: dynamodb
-  UnreadNotificationManagerTableWriteCapacityScalableTarget:
-    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoWriteCapacitty
-      MinCapacity: !Ref MinDynamoWriteCapacitty
-      ResourceId: !Join
-        - /
-        - - table
-          - !Ref UnreadNotificationManager
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:table:WriteCapacityUnits
-      ServiceNamespace: dynamodb
-  UnreadNotificationManagerTableReadScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: ReadAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref UnreadNotificationManagerTableReadCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBReadCapacityUtilization
-  UnreadNotificationManagerTableWriteScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: WriteAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref UnreadNotificationManagerTableWriteCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBWriteCapacityUtilization
-  CommentTableReadCapacityScalableTarget:
-    Type: AWS::ApplicationAutoScaling::ScalableTarget
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoWriteCapacitty
-      MinCapacity: !Ref MinDynamoWriteCapacitty
-      ResourceId: !Join
-        - /
-        - - table
-          - !Ref Comment
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:table:ReadCapacityUnits
-      ServiceNamespace: dynamodb
-  CommentTableWriteCapacityScalableTarget:
-    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoWriteCapacitty
-      MinCapacity: !Ref MinDynamoWriteCapacitty
-      ResourceId: !Join
-        - /
-        - - table
-          - !Ref Comment
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:table:WriteCapacityUnits
-      ServiceNamespace: dynamodb
-  CommentTableReadScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: ReadAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref CommentTableReadCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBReadCapacityUtilization
-  CommentTableWriteScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: WriteAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref CommentTableWriteCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBWriteCapacityUtilization
-  CommentArticleIdSortKeyIndexReadCapacityScalableTarget:
-    Type: AWS::ApplicationAutoScaling::ScalableTarget
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoReadCapacitty
-      MinCapacity: !Ref MinDynamoReadCapacitty
-      ResourceId: !Sub 'table/${Comment}/index/article_id-sort_key-index'
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:index:ReadCapacityUnits
-      ServiceNamespace: dynamodb
-  CommentArticleIdSortKeyIndexWriteCapacityScalableTarget:
-    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoWriteCapacitty
-      MinCapacity: !Ref MinDynamoWriteCapacitty
-      ResourceId: !Sub 'table/${Comment}/index/article_id-sort_key-index'
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:index:WriteCapacityUnits
-      ServiceNamespace: dynamodb
-  CommentArticleIdSortKeyIndexReadScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: ReadAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref CommentArticleIdSortKeyIndexReadCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBReadCapacityUtilization
-  CommentArticleIdSortKeyIndexWriteScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: WriteAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref CommentArticleIdSortKeyIndexWriteCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBWriteCapacityUtilization
-  CommentLikedUserTableReadCapacityScalableTarget:
-    Type: AWS::ApplicationAutoScaling::ScalableTarget
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoWriteCapacitty
-      MinCapacity: !Ref MinDynamoWriteCapacitty
-      ResourceId: !Join
-        - /
-        - - table
-          - !Ref CommentLikedUser
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:table:ReadCapacityUnits
-      ServiceNamespace: dynamodb
-  CommentLikedUserTableWriteCapacityScalableTarget:
-    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoWriteCapacitty
-      MinCapacity: !Ref MinDynamoWriteCapacitty
-      ResourceId: !Join
-        - /
-        - - table
-          - !Ref CommentLikedUser
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:table:WriteCapacityUnits
-      ServiceNamespace: dynamodb
-  CommentLikedUserTableReadScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: ReadAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref CommentLikedUserTableReadCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBReadCapacityUtilization
-  CommentLikedUserTableWriteScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: WriteAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref CommentLikedUserTableWriteCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBWriteCapacityUtilization
-  CommentLikedUserArticleIdIndexReadCapacityScalableTarget:
-    Type: AWS::ApplicationAutoScaling::ScalableTarget
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoReadCapacitty
-      MinCapacity: !Ref MinDynamoReadCapacitty
-      ResourceId: !Sub 'table/${CommentLikedUser}/index/article_id-index'
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:index:ReadCapacityUnits
-      ServiceNamespace: dynamodb
-  CommentLikedUserArticleIdIndexWriteCapacityScalableTarget:
-    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoWriteCapacitty
-      MinCapacity: !Ref MinDynamoWriteCapacitty
-      ResourceId: !Sub 'table/${CommentLikedUser}/index/article_id-index'
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:index:WriteCapacityUnits
-      ServiceNamespace: dynamodb
-  CommentLikedUserArticleIdIndexReadScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: ReadAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref CommentLikedUserArticleIdIndexReadCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBReadCapacityUtilization
-  CommentLikedUserArticleIdIndexWriteScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: WriteAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref CommentLikedUserArticleIdIndexWriteCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBWriteCapacityUtilization
-  DeletedCommentTableReadCapacityScalableTarget:
-    Type: AWS::ApplicationAutoScaling::ScalableTarget
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoWriteCapacitty
-      MinCapacity: !Ref MinDynamoWriteCapacitty
-      ResourceId: !Join
-        - /
-        - - table
-          - !Ref DeletedComment
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:table:ReadCapacityUnits
-      ServiceNamespace: dynamodb
-  DeletedCommentTableWriteCapacityScalableTarget:
-    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoWriteCapacitty
-      MinCapacity: !Ref MinDynamoWriteCapacitty
-      ResourceId: !Join
-        - /
-        - - table
-          - !Ref DeletedComment
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:table:WriteCapacityUnits
-      ServiceNamespace: dynamodb
-  DeletedCommentTableReadScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: ReadAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref DeletedCommentTableReadCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBReadCapacityUtilization
-  DeletedCommentTableWriteScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: WriteAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref DeletedCommentTableWriteCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBWriteCapacityUtilization
-  TopicTableReadCapacityScalableTarget:
-    Type: AWS::ApplicationAutoScaling::ScalableTarget
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoWriteCapacitty
-      MinCapacity: !Ref MinDynamoWriteCapacitty
-      ResourceId: !Join
-        - /
-        - - table
-          - !Ref Topic
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:table:ReadCapacityUnits
-      ServiceNamespace: dynamodb
-  TopicTableWriteCapacityScalableTarget:
-    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoWriteCapacitty
-      MinCapacity: !Ref MinDynamoWriteCapacitty
-      ResourceId: !Join
-        - /
-        - - table
-          - !Ref Topic
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:table:WriteCapacityUnits
-      ServiceNamespace: dynamodb
-  TopicTableReadScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: ReadAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref TopicTableReadCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBReadCapacityUtilization
-  TopicTableWriteScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: WriteAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref TopicTableWriteCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBWriteCapacityUtilization
-  TopicIndexHashKeyOrderIndexReadCapacityScalableTarget:
-    Type: AWS::ApplicationAutoScaling::ScalableTarget
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoReadCapacitty
-      MinCapacity: !Ref MinDynamoReadCapacitty
-      ResourceId: !Sub 'table/${Topic}/index/index_hash_key-order-index'
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:index:ReadCapacityUnits
-      ServiceNamespace: dynamodb
-  TopicIndexHashKeyOrderIndexWriteCapacityScalableTarget:
-    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoWriteCapacitty
-      MinCapacity: !Ref MinDynamoWriteCapacitty
-      ResourceId: !Sub 'table/${Topic}/index/index_hash_key-order-index'
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:index:WriteCapacityUnits
-      ServiceNamespace: dynamodb
-  TopicIndexHashKeyOrderIndexReadScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: ReadAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref TopicIndexHashKeyOrderIndexReadCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBReadCapacityUtilization
-  TopicIndexHashKeyOrderIndexWriteScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: WriteAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref TopicIndexHashKeyOrderIndexWriteCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBWriteCapacityUtilization
-  TagTableReadCapacityScalableTarget:
-    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoWriteCapacitty
-      MinCapacity: !Ref MinDynamoWriteCapacitty
-      ResourceId: !Join
-        - /
-        - - table
-          - !Ref Tag
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:table:ReadCapacityUnits
-      ServiceNamespace: dynamodb
-  TagTableWriteCapacityScalableTarget:
-    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
-    DependsOn: ScalingRole
-    Properties:
-      MaxCapacity: !Ref MaxDynamoWriteCapacitty
-      MinCapacity: !Ref MinDynamoWriteCapacitty
-      ResourceId: !Join
-        - /
-        - - table
-          - !Ref Tag
-      RoleARN: !GetAtt ScalingRole.Arn
-      ScalableDimension: dynamodb:table:WriteCapacityUnits
-      ServiceNamespace: dynamodb
-  TagTableReadScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: ReadAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref TagTableReadCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBReadCapacityUtilization
-  TagTableWriteScalingPolicy:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-    Properties:
-      PolicyName: WriteAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref TagTableWriteCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBWriteCapacityUtilization
+      BillingMode: PAY_PER_REQUEST
