@@ -29,7 +29,6 @@ Resources:
               KeyType: RANGE
           Projection:
             ProjectionType: ALL
-          BillingMode: PAY_PER_REQUEST
         - IndexName: user_id-sort_key-index
           KeySchema:
             - AttributeName: user_id
@@ -38,7 +37,6 @@ Resources:
               KeyType: RANGE
           Projection:
             ProjectionType: ALL
-          BillingMode: PAY_PER_REQUEST
         - IndexName: article_id-status_key-index
           KeySchema:
             - AttributeName: article_id
@@ -47,14 +45,12 @@ Resources:
               KeyType: RANGE
           Projection:
             ProjectionType: KEYS_ONLY
-          BillingMode: PAY_PER_REQUEST
         - IndexName: sync_elasticsearch-index
           KeySchema:
             - AttributeName: sync_elasticsearch
               KeyType: HASH
           Projection:
             ProjectionType: ALL
-          BillingMode: PAY_PER_REQUEST
       BillingMode: PAY_PER_REQUEST
   ArticleContent:
     Type: AWS::DynamoDB::Table
@@ -118,7 +114,6 @@ Resources:
               KeyType: HASH
           Projection:
             ProjectionType: ALL
-          BillingMode: PAY_PER_REQUEST
       BillingMode: PAY_PER_REQUEST
   ArticleEvaluatedManage:
     Type: AWS::DynamoDB::Table
@@ -169,7 +164,6 @@ Resources:
               KeyType: RANGE
           Projection:
             ProjectionType: ALL
-          BillingMode: PAY_PER_REQUEST
       BillingMode: PAY_PER_REQUEST
   ArticlePvUser:
     Type: AWS::DynamoDB::Table
@@ -208,7 +202,6 @@ Resources:
               KeyType: RANGE
           Projection:
             ProjectionType: ALL
-          BillingMode: PAY_PER_REQUEST
       BillingMode: PAY_PER_REQUEST
   ArticleScore:
     Type: AWS::DynamoDB::Table
@@ -303,7 +296,6 @@ Resources:
               KeyType: HASH
           Projection:
             ProjectionType: ALL
-          BillingMode: PAY_PER_REQUEST
       BillingMode: PAY_PER_REQUEST
   BetaUsers:
     Type: AWS::DynamoDB::Table
@@ -337,7 +329,6 @@ Resources:
               KeyType: HASH
           Projection:
             ProjectionType: ALL
-          BillingMode: PAY_PER_REQUEST
       BillingMode: PAY_PER_REQUEST
   Notification:
     Type: AWS::DynamoDB::Table
@@ -363,7 +354,6 @@ Resources:
               KeyType: RANGE
           Projection:
             ProjectionType: ALL
-          BillingMode: PAY_PER_REQUEST
       BillingMode: PAY_PER_REQUEST
   UnreadNotificationManager:
     Type: AWS::DynamoDB::Table
@@ -401,7 +391,6 @@ Resources:
               KeyType: RANGE
           Projection:
             ProjectionType: ALL
-          BillingMode: PAY_PER_REQUEST
       BillingMode: PAY_PER_REQUEST
   CommentLikedUser:
     Type: AWS::DynamoDB::Table
@@ -427,7 +416,6 @@ Resources:
               KeyType: HASH
           Projection:
             ProjectionType: ALL
-          BillingMode: PAY_PER_REQUEST
       BillingMode: PAY_PER_REQUEST
   DeletedComment:
     Type: AWS::DynamoDB::Table
@@ -465,7 +453,6 @@ Resources:
               KeyType: RANGE
           Projection:
             ProjectionType: ALL
-          BillingMode: PAY_PER_REQUEST
       BillingMode: PAY_PER_REQUEST
   Tag:
     Type: AWS::DynamoDB::Table
@@ -503,7 +490,6 @@ Resources:
               KeyType: HASH
           Projection:
             ProjectionType: ALL
-          BillingMode: PAY_PER_REQUEST
       BillingMode: PAY_PER_REQUEST
   ScreenedArticle:
     Type: AWS::DynamoDB::Table
