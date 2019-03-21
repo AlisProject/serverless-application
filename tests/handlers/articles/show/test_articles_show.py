@@ -36,7 +36,8 @@ class TestArticlesShow(TestCase):
             {
                 'article_id': 'testid000001',
                 'body': 'testid000001 body',
-                'title': 'testid000001 titile'
+                'title': 'testid000001 titile',
+                'paid_body': 'testid000001 paid_body'
             },
             {
                 'article_id': 'testid000003',
