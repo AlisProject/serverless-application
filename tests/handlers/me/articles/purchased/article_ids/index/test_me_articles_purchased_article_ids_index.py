@@ -2,7 +2,7 @@ import os
 import json
 from unittest import TestCase
 
-from me_articles_paid_article_ids_index import MeArticlesPaidArticleIdsIndex
+from me_articles_purchased_article_ids_index import MeArticlesPurchasedArticleIdsIndex
 from tests_util import TestsUtil
 
 
@@ -56,7 +56,7 @@ class TestMeArticlesPurchasedArticleIdsIndex(TestCase):
         TestsUtil.delete_all_tables(cls.dynamodb)
 
     def assert_bad_request(self, params):
-        response = MeArticlesPaidArticleIdsIndex(event=params, context={}, dynamodb=self.dynamodb).main()
+        response = MeArticlesPurchasedArticleIdsIndex(event=params, context={}, dynamodb=self.dynamodb).main()
         self.assertEqual(response['statusCode'], 400)
 
     def test_main_ok(self):
@@ -70,7 +70,7 @@ class TestMeArticlesPurchasedArticleIdsIndex(TestCase):
             }
         }
 
-        response = MeArticlesPaidArticleIdsIndex(event=params, context={}, dynamodb=self.dynamodb).main()
+        response = MeArticlesPurchasedArticleIdsIndex(event=params, context={}, dynamodb=self.dynamodb).main()
 
         expected_items = [self.paid_articles_items[0]['article_id'], self.paid_articles_items[2]['article_id']]
 
@@ -88,7 +88,7 @@ class TestMeArticlesPurchasedArticleIdsIndex(TestCase):
             }
         }
 
-        response = MeArticlesPaidArticleIdsIndex(event=params, context={}, dynamodb=self.dynamodb).main()
+        response = MeArticlesPurchasedArticleIdsIndex(event=params, context={}, dynamodb=self.dynamodb).main()
 
         expected_items = []
 

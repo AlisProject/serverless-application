@@ -2231,7 +2231,7 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
-          /me/articles/paid/article_ids:
+          /me/articles/purchased/article_ids:
             get:
               description: "ユーザーが購入した記事の記事ID一覧を取得"
               responses:

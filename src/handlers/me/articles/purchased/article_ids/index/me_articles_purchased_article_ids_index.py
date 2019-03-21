@@ -7,7 +7,7 @@ from db_util import DBUtil
 from lambda_base import LambdaBase
 
 
-class MeArticlesPaidArticleIdsIndex(LambdaBase):
+class MeArticlesPurchasedArticleIdsIndex(LambdaBase):
     def get_schema(self):
         pass
 
