@@ -688,6 +688,49 @@ Resources:
       TimeToLiveSpecification:
         AttributeName: expiration_time
         Enabled: true
+  PaidArticles:
+    Type: AWS::DynamoDB::Table
+    DependsOn:
+      - Nonce
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: article_id
+          AttributeType: S
+        - AttributeName: user_id
+          AttributeType: S
+        - AttributeName: status
+          AttributeType: S
+        - AttributeName: sort_key
+          AttributeType: N
+      KeySchema:
+        - AttributeName: article_id
+          KeyType: HASH
+        - AttributeName: user_id
+          KeyType: RANGE
+      GlobalSecondaryIndexes:
+        - IndexName: status-index
+          KeySchema:
+            - AttributeName: status
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: !Ref MinDynamoReadCapacitty
+            WriteCapacityUnits: !Ref MinDynamoReadCapacitty
+        - IndexName: user_id-sort_key-index
+          KeySchema:
+            - AttributeName: user_id
+              KeyType: HASH
+            - AttributeName: sort_key
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: !Ref MinDynamoReadCapacitty
+            WriteCapacityUnits: !Ref MinDynamoReadCapacitty
+      ProvisionedThroughput:
+        ReadCapacityUnits: !Ref MinDynamoReadCapacitty
+        WriteCapacityUnits: !Ref MinDynamoReadCapacitty
   ScalingRole:
     Type: 'AWS::IAM::Role'
     Properties:
