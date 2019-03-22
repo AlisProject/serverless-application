@@ -147,7 +147,7 @@ class TestMeArticlesPurchasedShow(TestCase):
 
         response = MeArticlesPurchasedShow(params, {}, self.dynamodb).main()
 
-        self.assertEqual(response['statusCode'], 404)
+        self.assertEqual(response['statusCode'], 403)
 
     def test_validation_with_no_params(self):
         params = {

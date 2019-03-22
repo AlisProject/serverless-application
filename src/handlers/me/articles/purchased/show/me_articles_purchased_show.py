@@ -6,7 +6,7 @@ from lambda_base import LambdaBase
 from jsonschema import validate
 from decimal_encoder import DecimalEncoder
 from db_util import DBUtil
-from record_not_found_error import RecordNotFoundError
+from not_authorized_error import NotAuthorizedError
 
 
 class MeArticlesPurchasedShow(LambdaBase):
@@ -42,7 +42,7 @@ class MeArticlesPurchasedShow(LambdaBase):
         )
 
         if paid_article.get('Item') is None:
-            raise RecordNotFoundError('Record Not Found')
+            raise NotAuthorizedError('Forbidden')
 
         article_info = article_info_table.get_item(Key={'article_id': self.params['article_id']}).get('Item')
         article_content = article_content_table.get_item(Key={'article_id': self.params['article_id']}).get('Item')
