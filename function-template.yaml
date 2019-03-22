@@ -231,6 +231,19 @@ Resources:
       Role: !GetAtt LambdaRole.Arn
       Runtime: python3.6
       Timeout: 300
+  MeArticlesFirstVersionShow:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Code: ./deploy/me_articles_first_version_show.zip
+      Environment:
+        Variables:
+#          todo: 環境変数を修正
+          PAID_ARTICLES_TABLE_NAME: !Ref PaidArticlesTableName
+      Handler: handler.lambda_handler
+      MemorySize: 3008
+      Role: !GetAtt LambdaRole.Arn
+      Runtime: python3.6
+      Timeout: 300
 
 Outputs:
   LoginYahoo:
@@ -257,3 +270,7 @@ Outputs:
     Value: !GetAtt MeArticlesPurchasedArticleIdsIndex.Arn
     Export:
       Name: !Sub "${AlisAppId}-MeArticlesPurchasedArticleIdsIndex"
+  MeArticlesFirstVersionShow:
+      Value: !GetAtt MeArticlesFirstVersionShow.Arn
+      Export:
+        Name: !Sub "${AlisAppId}-MeArticlesFirstVersionShow"
