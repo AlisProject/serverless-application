@@ -190,7 +190,7 @@ parameters = {
     'price': {
         'type': 'number',
         'minimum': 1,
-        'maximum': 10 ** 24
+        'maximum': 10 ** 22
     },
 }
 
