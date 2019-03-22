@@ -38,21 +38,20 @@ class MeArticlesFirstVersionShow(LambdaBase):
                 'article_id': self.params['article_id'],
                 'user_id': self.event['requestContext']['authorizer']['claims']['cognito:username']
             }
-        )
+        ).get('Item')
 
-        paid_article_item = paid_article.get('Item')
-        if paid_article_item is None or paid_article_item['status'] != 'done':
+        if paid_article is None or paid_article['status'] != 'done':
             raise NotAuthorizedError('Forbidden')
 
         article_history_table = self.dynamodb.Table(os.environ['ARTICLE_HISTORY_TABLE_NAME'])
         first_version_article_history = article_history_table.get_item(
             Key={
                 'article_id': self.params['article_id'],
-                'created_at': paid_article_item['history_created_at']
+                'created_at': paid_article['history_created_at']
             }
-        )
-        first_version_article_history_item = first_version_article_history.get('Item')
-        if first_version_article_history_item is None:
+        ).get('Item')
+
+        if first_version_article_history is None:
             raise RecordNotFoundError('Record Not Found')
 
         article_info_table = self.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
@@ -61,18 +60,9 @@ class MeArticlesFirstVersionShow(LambdaBase):
         article_info = article_info_table.get_item(Key={'article_id': self.params['article_id']}).get('Item')
         article_content = article_content_table.get_item(Key={'article_id': self.params['article_id']}).get('Item')
 
-        if article_info is None or article_content is None:
-            return {
-                'statusCode': 404,
-                'body': json.dumps({'message': 'Record Not Found'})
-            }
-
-        article_content['body'] = first_version_article_history_item['body']
-        article_content['title'] = first_version_article_history_item['title']
-        article_content['created_at'] = first_version_article_history_item['created_at']
         article_content.pop('paid_body', None)
-
         article_info.update(article_content)
+        article_info.update(first_version_article_history)
 
         return {
             'statusCode': 200,

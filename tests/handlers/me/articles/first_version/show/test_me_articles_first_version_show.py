@@ -36,6 +36,17 @@ class TestMeArticlesFirstVersionShow(TestCase):
                 'transaction': '0x0000000000000000000000000000000000000001',
                 'status': 'doing',
                 'price': 100
+            },
+            {
+                'article_id': 'publicId0003',
+                'article_user_id': 'test_article_user_03',
+                'user_id': 'test_user_01',
+                'sort_key': 1520150272000002,
+                'history_created_at': 1520150276,
+                'created_at': 1520150273,
+                'transaction': '0x0000000000000000000000000000000000000002',
+                'status': 'done',
+                'price': 100
             }
         ]
         TestsUtil.create_table(cls.dynamodb, os.environ['PAID_ARTICLES_TABLE_NAME'], paid_articles_items)
@@ -55,7 +66,7 @@ class TestMeArticlesFirstVersionShow(TestCase):
                 'price': 100
             },
             {
-                'article_id': 'publicId0001',
+                'article_id': 'publicId0002',
                 'created_at': 1520150274,
                 'body': 'test_body_version_03',
                 'title': 'test_title_03',
@@ -82,6 +93,15 @@ class TestMeArticlesFirstVersionShow(TestCase):
                 'version': 2,
                 'price': 200,
                 'created_at': 1520150272
+            },
+            {
+                'article_id': 'publicId0003',
+                'user_id': 'test_article_user_03',
+                'status': 'draft',
+                'sort_key': 1520150272000002,
+                'version': 2,
+                'price': 200,
+                'created_at': 1520150273
             }
         ]
         TestsUtil.create_table(cls.dynamodb, os.environ['ARTICLE_INFO_TABLE_NAME'], article_info_items)
@@ -128,7 +148,7 @@ class TestMeArticlesFirstVersionShow(TestCase):
             'body': 'test_body_version_02',
             'status': 'draft',
             'sort_key': 1520150272000000,
-            'price': 200,
+            'price': 100,
             'version': 2,
             'created_at': 1520150273
         }
