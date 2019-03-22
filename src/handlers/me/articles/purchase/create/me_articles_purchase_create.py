@@ -45,7 +45,6 @@ class MeArticlesPurchaseCreate(LambdaBase):
         price = self.params['price'] / 10 ** 18
         if price.is_integer() is False:
             raise ValidationError('Decimal value is not allowed')
-
         validate(self.params, self.get_schema())
 
         # relation

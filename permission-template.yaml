@@ -79,13 +79,13 @@ Resources:
           Fn::ImportValue:
             Fn::Sub: "${AlisAppId}-MeArticlesPurchasedIndex"
         Principal: "apigateway.amazonaws.com"
-        SourceArn: !Sub ${RestApiArn}/*/GET/me/articles/purchased
+        SourceArn: !Sub ${RestApiArn}/*/GET/me/articles/purchased/{articleId}
   MeArticlesPurchaseApiGatewayInvoke:
     Type: "AWS::Lambda::Permission"
     Properties:
       Action: "lambda:InvokeFunction"
       FunctionName:
         Fn::ImportValue:
-          Fn::Sub: "${AlisAppId}-MeArticlesPurchaseCreate"
+          Fn::Sub: "${AlisAppId}-MeArticlesPurchase"
       Principal: "apigateway.amazonaws.com"
       SourceArn: !Sub ${RestApiArn}/*/POST/me/articles/*/purchase
