@@ -224,6 +224,7 @@ Resources:
         Variables:
           ARTICLE_INFO_TABLE_NAME: !Ref ArticleInfoTableName
           ARTICLE_CONTENT_TABLE_NAME: !Ref ArticleContentTableName
+          PAID_ARTICLES_TABLE_NAME: !Ref PaidArticlesTableName
       Handler: handler.lambda_handler
       MemorySize: 3008
       Role: !GetAtt LambdaRole.Arn

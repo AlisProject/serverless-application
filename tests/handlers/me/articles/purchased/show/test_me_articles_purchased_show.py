@@ -14,13 +14,6 @@ class TestMeArticlesPurchasedShow(TestCase):
         TestsUtil.set_all_tables_name_to_env()
         TestsUtil.delete_all_tables(cls.dynamodb)
 
-        users_table_items = [
-            {
-                'user_id': 'test01'
-            }
-        ]
-        TestsUtil.create_table(cls.dynamodb, os.environ['USERS_TABLE_NAME'], users_table_items)
-
         article_info_items = [
             {
                 'article_id': 'publicId0001',
@@ -57,6 +50,23 @@ class TestMeArticlesPurchasedShow(TestCase):
         ]
         TestsUtil.create_table(cls.dynamodb, os.environ['ARTICLE_CONTENT_TABLE_NAME'], article_content_items)
 
+
+        paid_articles_items = [
+            {
+                'article_id': 'publicId0001',
+                'article_user_id': 'test01',
+                'user_id': 'paid_user_id_01',
+                'history_created_at': 1520150272,
+                'created_at': 1520150272,
+                'transaction': '0x0000000000000000000000000000000000000000',
+                'status': 'done',
+                'sort_key': 1520150272000000,
+                'price': 100,
+            }
+        ]
+        TestsUtil.create_table(cls.dynamodb, os.environ['PAID_ARTICLES_TABLE_NAME'], paid_articles_items)
+
+
     @classmethod
     def tearDownClass(cls):
         TestsUtil.delete_all_tables(cls.dynamodb)
@@ -75,7 +85,7 @@ class TestMeArticlesPurchasedShow(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': 'test01'
+                        'cognito:username': 'paid_user_id_01'
                     }
                 }
             }
@@ -122,6 +132,24 @@ class TestMeArticlesPurchasedShow(TestCase):
             self.assertTrue(args[1])
             self.assertEqual(kwargs['status'], 'public')
             self.assertTrue(kwargs['is_purchased'])
+
+    def test_validation_not_paid_user(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'publicId0001'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'not_paid_user_id'
+                    }
+                }
+            }
+        }
+
+        response = MeArticlesPurchasedShow(params, {}, self.dynamodb).main()
+
+        self.assertEqual(response['statusCode'], 404)
 
     def test_validation_with_no_params(self):
         params = {
