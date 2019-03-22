@@ -186,7 +186,12 @@ parameters = {
     },
     'state': {
         'type': 'string'
-    }
+    },
+    'price': {
+        'type': 'number',
+        'minimum': 1,
+        'maximum': 10 ** 24
+    },
 }
 
 article_recent_default_limit = 20

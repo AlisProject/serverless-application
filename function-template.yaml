@@ -240,6 +240,20 @@ Resources:
       Environment:
         Variables:
           PAID_ARTICLES_TABLE_NAME: !Ref PaidArticlesTableName
+  MeArticlesPurchase:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Code: ./deploy/me_articles_purchase_create.zip
+      Environment:
+        Variables:
+          PAID_ARTICLES_TABLE_NAME: !Ref PaidArticlesTableName
+          ARTICLE_INFO_TABLE_NAME: !Ref ArticleInfoTableName
+          ARTICLE_HISTORY_TABLE_NAME: !Ref ArticleHistoryTableName
+          PRIVATE_CHAIN_AWS_ACCESS_KEY: !Ref PrivateChainAwsAccessKey
+          PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY: !Ref PrivateChainAwsSecretAccessKey
+          PRIVATE_CHAIN_EXECUTE_API_HOST: !Ref PrivateChainExecuteApiHost
+          COGNITO_USER_POOL_ID: !Ref CognitoUserPoolId
+          COGNITO_USER_POOL_APP_ID: !Ref CognitoUserPoolAppId
       Handler: handler.lambda_handler
       MemorySize: 3008
       Role: !GetAtt LambdaRole.Arn
@@ -292,3 +306,7 @@ Outputs:
     Value: !GetAtt MeArticlesPurchasedIndex.Arn
     Export:
       Name: !Sub "${AlisAppId}-MeArticlesPurchasedIndex"
+  MeArticlesPurchase:
+    Value: !GetAtt MeArticlesPurchase.Arn
+    Export:
+      Name: !Sub "${AlisAppId}-MeArticlesPurchase"

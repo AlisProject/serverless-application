@@ -42,6 +42,18 @@ class DBUtil:
         return True
 
     @classmethod
+    def validate_latest_price(cls, dynamodb, article_id, price):
+        article_info_table = dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
+        article_info = article_info_table.get_item(Key={'article_id': article_id}).get('Item')
+
+        if article_info.get('price') is None:
+            raise RecordNotFoundError('Record Not Found')
+        if price is article_info['price']:
+            raise RecordNotFoundError('Record Not Found')
+
+        return True
+
+    @classmethod
     def __validate_version(cls, article_info, version):
         # version が 1 の場合は設定されていないことを確認
         if version == 1:
