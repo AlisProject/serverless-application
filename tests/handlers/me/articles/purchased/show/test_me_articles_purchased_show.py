@@ -61,6 +61,17 @@ class TestMeArticlesPurchasedShow(TestCase):
                 'status': 'done',
                 'sort_key': 1520150272000000,
                 'price': 100,
+            },
+            {
+                'article_id': 'publicId0001',
+                'article_user_id': 'test01',
+                'user_id': 'paid_user_id_02',
+                'history_created_at': 1520150273,
+                'created_at': 1520150272,
+                'transaction': '0x0000000000000000000000000000000000000001',
+                'status': 'doing',
+                'sort_key': 1520150272000001,
+                'price': 100,
             }
         ]
         TestsUtil.create_table(cls.dynamodb, os.environ['PAID_ARTICLES_TABLE_NAME'], paid_articles_items)
@@ -140,6 +151,24 @@ class TestMeArticlesPurchasedShow(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'not_paid_user_id'
+                    }
+                }
+            }
+        }
+
+        response = MeArticlesPurchasedShow(params, {}, self.dynamodb).main()
+
+        self.assertEqual(response['statusCode'], 403)
+
+    def test_validation_status_is_not_done(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'publicId0001'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'paid_user_id_02'
                     }
                 }
             }

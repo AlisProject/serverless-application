@@ -41,7 +41,11 @@ class MeArticlesPurchasedShow(LambdaBase):
             }
         )
 
-        if paid_article.get('Item') is None:
+        paid_article_item = paid_article.get('Item')
+        if paid_article_item is None:
+            raise NotAuthorizedError('Forbidden')
+
+        if paid_article_item['status'] != 'done':
             raise NotAuthorizedError('Forbidden')
 
         article_info = article_info_table.get_item(Key={'article_id': self.params['article_id']}).get('Item')
