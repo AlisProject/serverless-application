@@ -251,8 +251,10 @@ Resources:
       Code: ./deploy/me_articles_first_version_show.zip
       Environment:
         Variables:
-#          todo: 環境変数を修正
           PAID_ARTICLES_TABLE_NAME: !Ref PaidArticlesTableName
+          ARTICLE_HISTORY_TABLE_NAME: !Ref ArticleHistoryTableName
+          ARTICLE_INFO_TABLE_NAME: !Ref ArticleInfoTableName
+          ARTICLE_CONTENT_TABLE_NAME: !Ref ArticleContentTableName
       Handler: handler.lambda_handler
       MemorySize: 3008
       Role: !GetAtt LambdaRole.Arn
