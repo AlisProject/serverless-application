@@ -50,7 +50,6 @@ class TestMeArticlesPurchasedShow(TestCase):
         ]
         TestsUtil.create_table(cls.dynamodb, os.environ['ARTICLE_CONTENT_TABLE_NAME'], article_content_items)
 
-
         paid_articles_items = [
             {
                 'article_id': 'publicId0001',
@@ -65,7 +64,6 @@ class TestMeArticlesPurchasedShow(TestCase):
             }
         ]
         TestsUtil.create_table(cls.dynamodb, os.environ['PAID_ARTICLES_TABLE_NAME'], paid_articles_items)
-
 
     @classmethod
     def tearDownClass(cls):
