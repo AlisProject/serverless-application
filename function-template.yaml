@@ -219,6 +219,20 @@ Resources:
       Role: !GetAtt LambdaRole.Arn
       Runtime: python3.6
       Timeout: 300
+  MeArticlesPurchasedShow:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Code: ./deploy/me_articles_purchased_show.zip
+      Environment:
+        Variables:
+          ARTICLE_INFO_TABLE_NAME: !Ref ArticleInfoTableName
+          ARTICLE_CONTENT_TABLE_NAME: !Ref ArticleContentTableName
+          PAID_ARTICLES_TABLE_NAME: !Ref PaidArticlesTableName
+      Handler: handler.lambda_handler
+      MemorySize: 3008
+      Role: !GetAtt LambdaRole.Arn
+      Runtime: python3.6
+      Timeout: 300
   MeArticlesPurchasedArticleIdsIndex:
     Type: "AWS::Lambda::Function"
     Properties:
@@ -253,6 +267,10 @@ Outputs:
     Value: !GetAtt ArticlesPriceShow.Arn
     Export:
       Name: !Sub "${AlisAppId}-ArticlesPriceShow"
+  MeArticlesPurchasedShow:
+    Value: !GetAtt MeArticlesPurchasedShow.Arn
+    Export:
+      Name: !Sub "${AlisAppId}-MeArticlesPurchasedShow"
   MeArticlesPurchasedArticleIdsIndex:
     Value: !GetAtt MeArticlesPurchasedArticleIdsIndex.Arn
     Export:
