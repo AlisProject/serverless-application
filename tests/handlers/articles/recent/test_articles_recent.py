@@ -45,7 +45,8 @@ class TestArticlesRecent(TestCase):
                 'article_id': 'testid000003',
                 'status': 'public',
                 'sort_key': 1520150272000003,
-                'topic': 'fashion'
+                'topic': 'fashion',
+                'price': 300
             }
         ]
 
@@ -94,7 +95,8 @@ class TestArticlesRecent(TestCase):
                 'article_id': 'testid000003',
                 'status': 'public',
                 'sort_key': 1520150272000003,
-                'topic': 'fashion'
+                'topic': 'fashion',
+                'price': 300
             }
         ]
 
