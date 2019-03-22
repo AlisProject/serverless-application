@@ -36,7 +36,7 @@ class MeArticlesPurchasedShow(LambdaBase):
 
         paid_article = paid_articles_table.get_item(
             Key={
-                'article_id': self.event['pathParameters']['article_id'],
+                'article_id': self.params['article_id'],
                 'user_id': self.event['requestContext']['authorizer']['claims']['cognito:username']
             }
         )
