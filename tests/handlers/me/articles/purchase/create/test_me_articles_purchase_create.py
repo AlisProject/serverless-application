@@ -2,6 +2,7 @@ import os
 import json
 import settings
 import time
+import re
 from decimal import Decimal
 from unittest import TestCase
 from me_articles_purchase_create import MeArticlesPurchaseCreate
@@ -257,6 +258,170 @@ class TestMeArticlesPurchaseCreate(TestCase):
             response = MeArticlesPurchaseCreate(event, {}, self.dynamodb, cognito=None).main()
             self.assertEqual(response['statusCode'], 404)
             self.assertEqual(response['body'], '{"message": "Record Not Found: private_eth_address"}')
+
+            paid_articles_table = self.dynamodb.Table(os.environ['PAID_ARTICLES_TABLE_NAME'])
+            paid_articles = paid_articles_table.scan()['Items']
+            self.assertEqual(len(paid_articles), 0)
+
+    def test_main_ng_less_than_min_value(self):
+        with patch('me_articles_purchase_create.UserUtil') as user_util_mock:
+            user_util_mock.get_cognito_user_info.return_value = {
+                'UserAttributes': [{
+                    'Name': 'custom:private_eth_address',
+                    'Value': '0x1111111111111111111111111111111111111111'
+                }]
+            }
+
+            target_article_id = self.article_info_table_items[0]['article_id']
+            price = str(1 * 10 ** 17)
+
+            event = {
+                'body': {
+                    'article_id': target_article_id,
+                    'price': price
+                },
+                'requestContext': {
+                    'authorizer': {
+                        'claims': {
+                            'cognito:username': 'act_user_01',
+                            'custom:private_eth_address': '0x5d7743a4a6f21593ff6d3d81595f270123456789',
+                            'phone_number_verified': 'true',
+                            'email_verified': 'true'
+                        }
+                    }
+                },
+                'pathParameters': {
+                    'article_id': target_article_id
+                }
+            }
+            event['body'] = json.dumps(event['body'])
+
+            response = MeArticlesPurchaseCreate(event, {}, self.dynamodb, cognito=None).main()
+            self.assertEqual(response['statusCode'], 400)
+            self.assertIsNotNone(re.match('{"message": "Invalid parameter:', response['body']))
+
+            paid_articles_table = self.dynamodb.Table(os.environ['PAID_ARTICLES_TABLE_NAME'])
+            paid_articles = paid_articles_table.scan()['Items']
+            self.assertEqual(len(paid_articles), 0)
+
+    def test_main_ng_minus_value(self):
+        with patch('me_articles_purchase_create.UserUtil') as user_util_mock:
+            user_util_mock.get_cognito_user_info.return_value = {
+                'UserAttributes': [{
+                    'Name': 'custom:private_eth_address',
+                    'Value': '0x1111111111111111111111111111111111111111'
+                }]
+            }
+
+            target_article_id = self.article_info_table_items[0]['article_id']
+            price = '-1'
+
+            event = {
+                'body': {
+                    'article_id': target_article_id,
+                    'price': price
+                },
+                'requestContext': {
+                    'authorizer': {
+                        'claims': {
+                            'cognito:username': 'act_user_01',
+                            'custom:private_eth_address': '0x5d7743a4a6f21593ff6d3d81595f270123456789',
+                            'phone_number_verified': 'true',
+                            'email_verified': 'true'
+                        }
+                    }
+                },
+                'pathParameters': {
+                    'article_id': target_article_id
+                }
+            }
+            event['body'] = json.dumps(event['body'])
+
+            response = MeArticlesPurchaseCreate(event, {}, self.dynamodb, cognito=None).main()
+            self.assertEqual(response['statusCode'], 400)
+            self.assertIsNotNone(re.match('{"message": "Invalid parameter:', response['body']))
+
+            paid_articles_table = self.dynamodb.Table(os.environ['PAID_ARTICLES_TABLE_NAME'])
+            paid_articles = paid_articles_table.scan()['Items']
+            self.assertEqual(len(paid_articles), 0)
+
+    def test_main_ng_bigger_than_max_value(self):
+        with patch('me_articles_purchase_create.UserUtil') as user_util_mock:
+            user_util_mock.get_cognito_user_info.return_value = {
+                'UserAttributes': [{
+                    'Name': 'custom:private_eth_address',
+                    'Value': '0x1111111111111111111111111111111111111111'
+                }]
+            }
+
+            target_article_id = self.article_info_table_items[0]['article_id']
+            price = str(settings.parameters['price']['maximum'] + 1)
+
+            event = {
+                'body': {
+                    'article_id': target_article_id,
+                    'price': price
+                },
+                'requestContext': {
+                    'authorizer': {
+                        'claims': {
+                            'cognito:username': 'act_user_01',
+                            'custom:private_eth_address': '0x5d7743a4a6f21593ff6d3d81595f270123456789',
+                            'phone_number_verified': 'true',
+                            'email_verified': 'true'
+                        }
+                    }
+                },
+                'pathParameters': {
+                    'article_id': target_article_id
+                }
+            }
+            event['body'] = json.dumps(event['body'])
+
+            response = MeArticlesPurchaseCreate(event, {}, self.dynamodb, cognito=None).main()
+            self.assertEqual(response['statusCode'], 400)
+            self.assertIsNotNone(re.match('{"message": "Invalid parameter:', response['body']))
+
+            paid_articles_table = self.dynamodb.Table(os.environ['PAID_ARTICLES_TABLE_NAME'])
+            paid_articles = paid_articles_table.scan()['Items']
+            self.assertEqual(len(paid_articles), 0)
+
+    def test_main_ng_not_number(self):
+        with patch('me_articles_purchase_create.UserUtil') as user_util_mock:
+            user_util_mock.get_cognito_user_info.return_value = {
+                'UserAttributes': [{
+                    'Name': 'custom:private_eth_address',
+                    'Value': '0x1111111111111111111111111111111111111111'
+                }]
+            }
+
+            target_article_id = self.article_info_table_items[0]['article_id']
+            price = 'aaaaaaaaaa'
+
+            event = {
+                'body': {
+                    'article_id': target_article_id,
+                    'price': price
+                },
+                'requestContext': {
+                    'authorizer': {
+                        'claims': {
+                            'cognito:username': 'act_user_01',
+                            'custom:private_eth_address': '0x5d7743a4a6f21593ff6d3d81595f270123456789',
+                            'phone_number_verified': 'true',
+                            'email_verified': 'true'
+                        }
+                    }
+                },
+                'pathParameters': {
+                    'article_id': target_article_id
+                }
+            }
+            event['body'] = json.dumps(event['body'])
+
+            response = MeArticlesPurchaseCreate(event, {}, self.dynamodb, cognito=None).main()
+            self.assertEqual(response['statusCode'], 400)
+            self.assertEqual(response['body'], '{"message": "Invalid parameter: Price must be numeric"}')
 
             paid_articles_table = self.dynamodb.Table(os.environ['PAID_ARTICLES_TABLE_NAME'])
             paid_articles = paid_articles_table.scan()['Items']
