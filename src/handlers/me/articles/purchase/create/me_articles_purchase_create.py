@@ -29,10 +29,18 @@ class MeArticlesPurchaseCreate(LambdaBase):
 
     def validate_params(self):
         UserUtil.verified_phone_and_email(self.event)
+
+        # check price type is integer or decimal
         try:
             self.params['price'] = int(self.params['price'])
         except ValueError:
-            raise ValidationError('Price must be numeric')
+            raise ValidationError('Price must be integer')
+
+        # check price value is not decimal
+        price = self.params['price'] / 10 ** 18
+        if price.is_integer() is False:
+            raise ValidationError('Decimal value is not allowed')
+
         # single
         if self.event.get('pathParameters') is None:
             raise ValidationError('pathParameters is required')
