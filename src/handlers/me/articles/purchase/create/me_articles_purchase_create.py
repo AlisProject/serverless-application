@@ -15,6 +15,7 @@ from exceptions import SendTransactionError
 from aws_requests_auth.aws_auth import AWSRequestsAuth
 from decimal_encoder import DecimalEncoder
 
+
 class MeArticlesPurchaseCreate(LambdaBase):
     def get_schema(self):
         return {
@@ -48,7 +49,6 @@ class MeArticlesPurchaseCreate(LambdaBase):
             self.event['pathParameters']['article_id'],
             self.params['price']
         )
-
 
     def exec_main_proc(self):
         # get article info
@@ -104,7 +104,7 @@ class MeArticlesPurchaseCreate(LambdaBase):
             raise SendTransactionError(json.loads(response.text).get('error'))
         # burn transaction
         burn_response = requests.post('https://' + os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'] +
-                                 '/production/wallet/tip', auth=auth, headers=headers, data=burn_payload)
+                                      '/production/wallet/tip', auth=auth, headers=headers, data=burn_payload)
         # exists error
         if json.loads(burn_response.text).get('error'):
             raise SendTransactionError(json.loads(burn_response.text).get('error'))

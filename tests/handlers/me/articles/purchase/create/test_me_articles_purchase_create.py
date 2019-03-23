@@ -1,7 +1,6 @@
 import os
 import json
 import settings
-import time
 import re
 from decimal import Decimal
 from unittest import TestCase
