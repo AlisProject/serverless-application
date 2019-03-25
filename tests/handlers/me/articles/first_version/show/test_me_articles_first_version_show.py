@@ -178,7 +178,6 @@ class TestMeArticlesFirstVersionShow(TestCase):
             self.assertTrue(mock_lib.validate_article_existence.called)
             self.assertTrue(args[0])
             self.assertTrue(args[1])
-            self.assertTrue(kwargs['is_purchased'])
 
     def test_paid_article_forbidden(self):
         params = {
