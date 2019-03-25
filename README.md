@@ -132,6 +132,7 @@ You have to add `RestApiArn` to SMS.
 
 Specify generated ApiLambdaRole to SSM.
 - See: https://github.com/AlisProject/environment
+  - You can use `functions-replacer.sh`
 
 #### Fix API settings via a script
 
