@@ -654,8 +654,6 @@ Resources:
         WriteCapacityUnits: 1
   PaidArticles:
     Type: AWS::DynamoDB::Table
-    DependsOn:
-      - Nonce
     Properties:
       AttributeDefinitions:
         - AttributeName: article_id
