@@ -53,6 +53,15 @@ Resources:
             Fn::Sub: "${AlisAppId}-ArticlesPriceShow"
         Principal: "apigateway.amazonaws.com"
         SourceArn: !Sub ${RestApiArn}/*/GET/articles/{articleId}/price
+  MeArticlesPurchasedArticleIdsIndexApiGatewayInvoke:
+      Type: "AWS::Lambda::Permission"
+      Properties:
+        Action: "lambda:InvokeFunction"
+        FunctionName:
+          Fn::ImportValue:
+            Fn::Sub: "${AlisAppId}-MeArticlesPurchasedArticleIdsIndex"
+        Principal: "apigateway.amazonaws.com"
+        SourceArn: !Sub ${RestApiArn}/*/GET/me/articles/purchased/article_ids
   MeArticlesFirstVersionShowApiGatewayInvoke:
       Type: "AWS::Lambda::Permission"
       Properties:
@@ -61,7 +70,7 @@ Resources:
           Fn::ImportValue:
             Fn::Sub: "${AlisAppId}-MeArticlesFirstVersionShow"
         Principal: "apigateway.amazonaws.com"
-        SourceArn: !Sub ${RestApiArn}/*/GET/me/articles/{article_id}/first_version
+        SourceArn: !Sub ${RestApiArn}/*/GET/me/articles/*/first_version
   MeArticlesPurchasedShowApiGatewayInvoke:
       Type: "AWS::Lambda::Permission"
       Properties:
