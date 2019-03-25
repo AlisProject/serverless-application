@@ -129,6 +129,12 @@ You have to add `RestApiArn` to SMS.
 ./deploy.sh permission 
 ```
 
+You have to update Cognito pre authentication trigger.
+
+```bash
+# Use this script with your Cognito User Pool ID
+./update_cognito_pre_auth.sh ap-northeast-XXXXXXXXXX
+```
 
 Specify generated ApiLambdaRole to SSM.
 - See: https://github.com/AlisProject/environment
