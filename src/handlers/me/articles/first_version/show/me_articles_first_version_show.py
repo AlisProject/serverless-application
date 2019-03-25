@@ -53,13 +53,9 @@ class MeArticlesFirstVersionShow(LambdaBase):
             raise RecordNotFoundError('Record Not Found')
 
         article_info_table = self.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
-        article_content_table = self.dynamodb.Table(os.environ['ARTICLE_CONTENT_TABLE_NAME'])
 
         article_info = article_info_table.get_item(Key={'article_id': self.params['article_id']}).get('Item')
-        article_content = article_content_table.get_item(Key={'article_id': self.params['article_id']}).get('Item')
 
-        article_content.pop('paid_body', None)
-        article_info.update(article_content)
         article_info.update(first_version_article_history)
 
         return {

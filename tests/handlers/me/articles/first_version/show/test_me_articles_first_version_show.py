@@ -106,17 +106,6 @@ class TestMeArticlesFirstVersionShow(TestCase):
         ]
         TestsUtil.create_table(cls.dynamodb, os.environ['ARTICLE_INFO_TABLE_NAME'], article_info_items)
 
-        article_content_items = [
-            {
-                'article_id': 'publicId0001',
-                'title': 'sample_title1',
-                'body': 'sample_body1',
-                'paid_body': 'sample_paid_body1',
-                'created_at': 1520150274
-            }
-        ]
-        TestsUtil.create_table(cls.dynamodb, os.environ['ARTICLE_CONTENT_TABLE_NAME'], article_content_items)
-
     @classmethod
     def tearDownClass(cls):
         TestsUtil.delete_all_tables(cls.dynamodb)
