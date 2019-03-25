@@ -5,7 +5,6 @@ import settings
 
 from jsonschema import validate
 from db_util import DBUtil
-from paid_articles_util import PaidArticlesUtil
 from decimal_encoder import DecimalEncoder
 from lambda_base import LambdaBase
 from record_not_found_error import RecordNotFoundError
@@ -28,6 +27,11 @@ class MeArticlesFirstVersionShow(LambdaBase):
             self.dynamodb,
             self.params['article_id']
         )
+        DBUtil.validate_paid_article_existence(
+            self.dynamodb,
+            self.params['article_id'],
+            self.event['requestContext']['authorizer']['claims']['cognito:username']
+        )
 
     def exec_main_proc(self):
         paid_articles_table = self.dynamodb.Table(os.environ['PAID_ARTICLES_TABLE_NAME'])
@@ -38,8 +42,6 @@ class MeArticlesFirstVersionShow(LambdaBase):
                 'user_id': self.event['requestContext']['authorizer']['claims']['cognito:username']
             }
         ).get('Item')
-
-        PaidArticlesUtil.validate_paid_article_existence(paid_article)
 
         article_history_table = self.dynamodb.Table(os.environ['ARTICLE_HISTORY_TABLE_NAME'])
         first_version_article_history = article_history_table.get_item(

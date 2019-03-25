@@ -151,3 +151,18 @@ class DBUtil:
                                   .format(replyed_user_id=replyed_user_id))
 
         return True
+
+    @staticmethod
+    def validate_paid_article_existence(dynamodb, article_id, user_id):
+        paid_articles_table = dynamodb.Table(os.environ['PAID_ARTICLES_TABLE_NAME'])
+        paid_article = paid_articles_table.get_item(
+            Key={
+                'article_id': article_id,
+                'user_id': user_id
+            }
+        ).get('Item')
+
+        if paid_article is None or paid_article['status'] != 'done':
+            raise NotAuthorizedError('Forbidden')
+
+        return True

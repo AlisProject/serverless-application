@@ -6,7 +6,6 @@ from lambda_base import LambdaBase
 from jsonschema import validate
 from decimal_encoder import DecimalEncoder
 from db_util import DBUtil
-from paid_articles_util import PaidArticlesUtil
 
 
 class MeArticlesPurchasedShow(LambdaBase):
@@ -28,20 +27,15 @@ class MeArticlesPurchasedShow(LambdaBase):
             status='public',
             is_purchased=True
         )
+        DBUtil.validate_paid_article_existence(
+            self.dynamodb,
+            self.params['article_id'],
+            self.event['requestContext']['authorizer']['claims']['cognito:username']
+        )
 
     def exec_main_proc(self):
         article_info_table = self.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
         article_content_table = self.dynamodb.Table(os.environ['ARTICLE_CONTENT_TABLE_NAME'])
-        paid_articles_table = self.dynamodb.Table(os.environ['PAID_ARTICLES_TABLE_NAME'])
-
-        paid_article = paid_articles_table.get_item(
-            Key={
-                'article_id': self.params['article_id'],
-                'user_id': self.event['requestContext']['authorizer']['claims']['cognito:username']
-            }
-        ).get('Item')
-
-        PaidArticlesUtil.validate_paid_article_existence(paid_article)
 
         article_info = article_info_table.get_item(Key={'article_id': self.params['article_id']}).get('Item')
         article_content = article_content_table.get_item(Key={'article_id': self.params['article_id']}).get('Item')
