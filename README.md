@@ -93,6 +93,7 @@ aws dynamodb list-tables |grep ${ALIS_APP_ID}database |sort |tr -d ' ",'
 
 And add all of generated table names to SSM.
 - See: https://github.com/AlisProject/environment
+  - You can use `dynamodb-table-replacer.sh`
 
 #### Master Data
 Add master data to DynamoDB.
