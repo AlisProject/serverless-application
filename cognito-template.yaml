@@ -139,6 +139,8 @@ Resources:
     Type: AWS::Cognito::UserPoolClient
     Properties:
         ClientName: JavaScriptClient
+        ExplicitAuthFlows:
+          - ADMIN_NO_SRP_AUTH
         GenerateSecret: false
         UserPoolId: !Ref UserPool
         ReadAttributes:
