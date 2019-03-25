@@ -35,7 +35,7 @@ class TestDBUtil(TestCase):
                 'version': 2
             },
             {
-                'article_id': 'testid000002',
+                'article_id': 'testid000003',
                 'status': 'public',
                 'user_id': 'user0002',
                 'sort_key': 1520150272000000,
@@ -467,13 +467,13 @@ class TestDBUtil(TestCase):
 
     def test_validate_latest_price_ok(self):
         price = 1 * (10 ** 18)
-        self.assertTrue(DBUtil.validate_latest_price(self.dynamodb, 'testid000002', price))
+        self.assertTrue(DBUtil.validate_latest_price(self.dynamodb, 'testid000003', price))
 
     def test_validate_latest_price_ng(self):
         with self.assertRaises(RecordNotFoundError):
             price = 1000 * (10 ** 18)
             DBUtil.validate_latest_price(
                 self.dynamodb,
-                'testid000002',
+                'testid000003',
                 price
             )
