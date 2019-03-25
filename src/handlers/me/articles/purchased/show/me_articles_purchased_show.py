@@ -6,7 +6,7 @@ from lambda_base import LambdaBase
 from jsonschema import validate
 from decimal_encoder import DecimalEncoder
 from db_util import DBUtil
-from not_authorized_error import NotAuthorizedError
+from paid_articles_util import PaidArticlesUtil
 
 
 class MeArticlesPurchasedShow(LambdaBase):
@@ -41,8 +41,7 @@ class MeArticlesPurchasedShow(LambdaBase):
             }
         ).get('Item')
 
-        if paid_article is None or paid_article['status'] != 'done':
-            raise NotAuthorizedError('Forbidden')
+        PaidArticlesUtil.validate_paid_article_existence(paid_article)
 
         article_info = article_info_table.get_item(Key={'article_id': self.params['article_id']}).get('Item')
         article_content = article_content_table.get_item(Key={'article_id': self.params['article_id']}).get('Item')

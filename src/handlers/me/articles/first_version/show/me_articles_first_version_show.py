@@ -5,9 +5,9 @@ import settings
 
 from jsonschema import validate
 from db_util import DBUtil
+from paid_articles_util import PaidArticlesUtil
 from decimal_encoder import DecimalEncoder
 from lambda_base import LambdaBase
-from not_authorized_error import NotAuthorizedError
 from record_not_found_error import RecordNotFoundError
 
 
@@ -39,8 +39,7 @@ class MeArticlesFirstVersionShow(LambdaBase):
             }
         ).get('Item')
 
-        if paid_article is None or paid_article['status'] != 'done':
-            raise NotAuthorizedError('Forbidden')
+        PaidArticlesUtil.validate_paid_article_existence(paid_article)
 
         article_history_table = self.dynamodb.Table(os.environ['ARTICLE_HISTORY_TABLE_NAME'])
         first_version_article_history = article_history_table.get_item(
