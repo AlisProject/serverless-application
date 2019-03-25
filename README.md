@@ -113,14 +113,22 @@ Specify generated Cognito User Pool ARN to SSM.
 
 
 ### Lambda & API Gateway
+You have to add SNS authentication params to SMS.
+- See: https://github.com/AlisProject/environment
 
 
 ```bash
-./deploy_api.sh
-
-# Show generated IAM LambdaRole.
-aws iam list-roles | grep ${ALIS_APP_ID}api-LambdaRole | grep Arn
+./deploy.sh function && ./deploy.sh api
 ```
+
+You have to add `RestApiArn` to SMS.
+- See: https://github.com/AlisProject/environment
+  - You can use `restapi-replacer.sh`
+
+```bash
+./deploy.sh permission 
+```
+
 
 Specify generated ApiLambdaRole to SSM.
 - See: https://github.com/AlisProject/environment
