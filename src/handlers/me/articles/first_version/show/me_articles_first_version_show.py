@@ -26,8 +26,7 @@ class MeArticlesFirstVersionShow(LambdaBase):
 
         DBUtil.validate_article_existence(
             self.dynamodb,
-            self.params['article_id'],
-            is_purchased=True
+            self.params['article_id']
         )
 
     def exec_main_proc(self):
