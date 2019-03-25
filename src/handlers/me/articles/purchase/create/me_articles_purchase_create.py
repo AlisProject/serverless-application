@@ -42,19 +42,17 @@ class MeArticlesPurchaseCreate(LambdaBase):
             raise ValidationError('Decimal value is not allowed')
 
         # single
-        if self.event.get('pathParameters') is None:
-            raise ValidationError('pathParameters is required')
         validate(self.params, self.get_schema())
         # relation
         DBUtil.validate_article_existence(
             self.dynamodb,
-            self.event['pathParameters']['article_id'],
+            self.params['article_id'],
             status='public'
         )
         # validate latest price
         DBUtil.validate_latest_price(
             self.dynamodb,
-            self.event['pathParameters']['article_id'],
+            self.params['article_id'],
             self.params['price']
         )
 
@@ -135,7 +133,7 @@ class MeArticlesPurchaseCreate(LambdaBase):
                 break
 
         paid_article = {
-            'article_id': self.event['pathParameters']['article_id'],
+            'article_id': self.params['article_id'],
             'user_id': self.event['requestContext']['authorizer']['claims']['cognito:username'],
             'article_user_id': article_info['user_id'],
             'created_at': int(time.time()),

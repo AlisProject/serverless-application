@@ -33,6 +33,14 @@ class TestDBUtil(TestCase):
                 'sort_key': 1520150272000000,
                 'price': 100,
                 'version': 2
+            },
+            {
+                'article_id': 'testid000002',
+                'status': 'public',
+                'user_id': 'user0002',
+                'sort_key': 1520150272000000,
+                'price': 1 * (10 ** 18),
+                'version': 2
             }
         ]
         TestsUtil.create_table(cls.dynamodb, os.environ['ARTICLE_INFO_TABLE_NAME'], cls.article_info_table_items)
@@ -456,3 +464,16 @@ class TestDBUtil(TestCase):
     def test_validate_topic_ng(self):
         with self.assertRaises(ValidationError):
             DBUtil.validate_topic(self.dynamodb, 'BTC')
+
+    def test_validate_latest_price_ok(self):
+        price = 1 * (10 ** 18)
+        self.assertTrue(DBUtil.validate_latest_price(self.dynamodb, 'testid000002', price))
+
+    def test_validate_latest_price_ng(self):
+        with self.assertRaises(RecordNotFoundError):
+            price = 1000 * (10 ** 18)
+            DBUtil.validate_latest_price(
+                self.dynamodb,
+                'testid000002',
+                price
+            )

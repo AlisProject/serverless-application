@@ -31,7 +31,7 @@ class TestMeArticlesPurchaseCreate(TestCase):
                 'status': 'public',
                 'title': 'testid000002 titile',
                 'sort_key': 1520150272000000,
-                'price': 2 * (10 ** 18)
+                'price': 10000 * (10 ** 18)
             }
         ]
 
@@ -49,6 +49,13 @@ class TestMeArticlesPurchaseCreate(TestCase):
                 'body': 'sample_body1_history',
                 'created_at': 1520150268,
                 'price': 2 * (10 ** 18)
+            },
+            {
+                'article_id': 'publicId0002',
+                'title': 'sample_title2_history',
+                'body': 'sample_body2_history',
+                'created_at': 1520150268,
+                'price': 10000 * (10 ** 18)
             }
         ]
         TestsUtil.create_table(self.dynamodb, os.environ['ARTICLE_INFO_TABLE_NAME'], self.article_info_table_items)
@@ -134,7 +141,7 @@ class TestMeArticlesPurchaseCreate(TestCase):
                 }]
             }
 
-            target_article_id = self.article_info_table_items[0]['article_id']
+            target_article_id = self.article_info_table_items[1]['article_id']
             price = str(settings.parameters['price']['maximum'])
 
             event = {
@@ -166,14 +173,14 @@ class TestMeArticlesPurchaseCreate(TestCase):
 
             expected_purchase_article = {
                 'user_id': event['requestContext']['authorizer']['claims']['cognito:username'],
-                'article_user_id': self.article_info_table_items[0]['user_id'],
-                'price': Decimal(price),
+                'article_user_id': self.article_info_table_items[1]['user_id'],
+                'price': Decimal(int(self.article_info_table_items[1]['price'])),
                 'article_id': target_article_id,
                 'status': 'doing',
                 'transaction': '0x0000000000000000000000000000000000000000',
                 'sort_key': Decimal(1520150552000003),
                 'created_at': Decimal(int(1520150552.000003)),
-                'history_created_at': Decimal(1520150270)
+                'history_created_at': Decimal(1520150268)
             }
 
             self.assertEqual(expected_purchase_article, paid_articles[0])

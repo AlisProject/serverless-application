@@ -46,9 +46,7 @@ class DBUtil:
         article_info_table = dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
         article_info = article_info_table.get_item(Key={'article_id': article_id}).get('Item')
 
-        if article_info.get('price') is None:
-            raise RecordNotFoundError('Record Not Found')
-        if price is article_info['price']:
+        if article_info.get('price') is None or price is article_info['price']:
             raise RecordNotFoundError('Record Not Found')
 
         return True
