@@ -65,6 +65,12 @@ class MeArticlesDraftsPublishWithHeader(LambdaBase):
         article_info_table = self.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
         article_info_before = article_info_table.get_item(Key={'article_id': self.params['article_id']}).get('Item')
 
+        article_content_table = self.dynamodb.Table(os.environ['ARTICLE_CONTENT_TABLE_NAME'])
+
+        # if article info has price but params has not price
+        if article_info_before.get('price') is not None and self.params.get('price') is None:
+            self.__make_article_free(article_info_table, article_content_table)
+
         info_expression_attribute_values = {
             ':article_status': 'public',
             ':one': 1,
@@ -81,17 +87,7 @@ class MeArticlesDraftsPublishWithHeader(LambdaBase):
                 ':price': self.params.get('price')
             })
             info_update_expression = info_update_expression + ', price = :price'
-
-            article_content_table = self.dynamodb.Table(os.environ['ARTICLE_CONTENT_TABLE_NAME'])
-            article_content_table.update_item(
-                Key={
-                    'article_id': self.params['article_id']
-                },
-                UpdateExpression="set paid_body=:paid_body",
-                ExpressionAttributeValues={
-                    ':paid_body': self.params.get('paid_body')
-                }
-            )
+            self.__update_paid_article_content(article_content_table)
 
         article_info_table.update_item(
             Key={
@@ -159,4 +155,30 @@ class MeArticlesDraftsPublishWithHeader(LambdaBase):
 
         article_history_table.put_item(
             Item=Item
+        )
+
+    def __update_paid_article_content(self, article_content_table):
+        article_content_table.update_item(
+            Key={
+                'article_id': self.params['article_id']
+            },
+            UpdateExpression="set paid_body=:paid_body",
+            ExpressionAttributeValues={
+                ':paid_body': self.params.get('paid_body')
+            }
+        )
+
+    def __make_article_free(self, article_info_table, article_content_table):
+        article_info_table.update_item(
+            Key={
+                'article_id': self.params['article_id'],
+            },
+            UpdateExpression='REMOVE price'
+        )
+
+        article_content_table.update_item(
+            Key={
+                'article_id': self.params['article_id'],
+            },
+            UpdateExpression='REMOVE paid_body'
         )
