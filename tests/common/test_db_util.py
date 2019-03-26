@@ -139,6 +139,32 @@ class TestDBUtil(TestCase):
         ]
         TestsUtil.create_table(cls.dynamodb, os.environ['TOPIC_TABLE_NAME'], topic_items)
 
+        cls.paid_articles_items = [
+            {
+                'article_id': 'publicId0001',
+                'article_user_id': 'test_article_user_01',
+                'user_id': 'test_user_01',
+                'sort_key': 1520150272000000,
+                'history_created_at': 1520150272,
+                'created_at': 1520150272,
+                'transaction': '0x0000000000000000000000000000000000000000',
+                'status': 'done',
+                'price': 100
+            },
+            {
+                'article_id': 'draftId00002',
+                'article_user_id': 'test_article_user_01',
+                'user_id': 'test_user_02',
+                'sort_key': 1520150272000001,
+                'history_created_at': 1520150273,
+                'created_at': 1520150273,
+                'transaction': '0x0000000000000000000000000000000000000001',
+                'status': 'doing',
+                'price': 200
+            }
+        ]
+        TestsUtil.create_table(cls.dynamodb, os.environ['PAID_ARTICLES_TABLE_NAME'], cls.paid_articles_items)
+
     @classmethod
     def tearDownClass(cls):
         TestsUtil.delete_all_tables(cls.dynamodb)
@@ -456,3 +482,27 @@ class TestDBUtil(TestCase):
     def test_validate_topic_ng(self):
         with self.assertRaises(ValidationError):
             DBUtil.validate_topic(self.dynamodb, 'BTC')
+
+    def test_validate_paid_articles_existence_ok(self):
+        result = DBUtil.validate_paid_article_existence(
+            self.dynamodb,
+            self.paid_articles_items[0]['article_id'],
+            self.paid_articles_items[0]['user_id']
+        )
+        self.assertTrue(result)
+
+    def test_validate_paid_articles_existence_ng_not_exists_article_id(self):
+        with self.assertRaises(NotAuthorizedError):
+            DBUtil.validate_paid_article_existence(
+                self.dynamodb,
+                'not_exists_article_id',
+                self.paid_articles_items[0]['user_id']
+            )
+
+    def test_validate_paid_articles_existence_ng_status_is_not_done(self):
+        with self.assertRaises(NotAuthorizedError):
+            DBUtil.validate_paid_article_existence(
+                self.dynamodb,
+                self.paid_articles_items[1]['article_id'],
+                self.paid_articles_items[1]['user_id']
+            )
