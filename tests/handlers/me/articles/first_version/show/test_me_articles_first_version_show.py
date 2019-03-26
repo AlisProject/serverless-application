@@ -168,6 +168,30 @@ class TestMeArticlesFirstVersionShow(TestCase):
             self.assertTrue(args[0])
             self.assertTrue(args[1])
 
+    def test_call_validate_paid_article_existence(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'publicId0001'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test_user_01'
+                    }
+                }
+            }
+        }
+
+        mock_lib = MagicMock()
+        with patch('me_articles_first_version_show.DBUtil', mock_lib):
+            MeArticlesFirstVersionShow(params, {}, self.dynamodb).main()
+            args, _ = mock_lib.validate_paid_article_existence.call_args
+
+            self.assertTrue(mock_lib.validate_paid_article_existence.called)
+            self.assertTrue(args[0])
+            self.assertTrue(args[1])
+            self.assertTrue(args[2])
+
     def test_paid_article_forbidden(self):
         params = {
             'pathParameters': {
