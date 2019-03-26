@@ -245,7 +245,7 @@ Resources:
       Role: !GetAtt LambdaRole.Arn
       Runtime: python3.6
       Timeout: 300
-  MeArticlesPurchase:
+  MeArticlesPurchaseCreate:
     Type: "AWS::Lambda::Function"
     Properties:
       Code: ./deploy/me_articles_purchase_create.zip
@@ -311,7 +311,7 @@ Outputs:
     Value: !GetAtt MeArticlesPurchasedIndex.Arn
     Export:
       Name: !Sub "${AlisAppId}-MeArticlesPurchasedIndex"
-  MeArticlesPurchase:
-    Value: !GetAtt MeArticlesPurchase.Arn
+  MeArticlesPurchaseCreate:
+    Value: !GetAtt MeArticlesPurchaseCreate.Arn
     Export:
-      Name: !Sub "${AlisAppId}-MeArticlesPurchase"
+      Name: !Sub "${AlisAppId}-MeArticlesPurchaseCreate"

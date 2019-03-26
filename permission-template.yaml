@@ -86,6 +86,6 @@ Resources:
       Action: "lambda:InvokeFunction"
       FunctionName:
         Fn::ImportValue:
-          Fn::Sub: "${AlisAppId}-MeArticlesPurchase"
+          Fn::Sub: "${AlisAppId}-MeArticlesPurchaseCreate"
       Principal: "apigateway.amazonaws.com"
       SourceArn: !Sub ${RestApiArn}/*/POST/me/articles/*/purchase
