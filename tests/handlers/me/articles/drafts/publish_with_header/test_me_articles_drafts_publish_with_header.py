@@ -654,3 +654,129 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
         params['body'] = json.dumps(params['body'])
 
         self.assert_bad_request(params)
+
+    @patch('time_util.TimeUtil.generate_sort_key', MagicMock(return_value=1520150552000000))
+    @patch('time.time', MagicMock(return_value=1525000000.000000))
+    def test_validation_paid_article_publish_ok(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'draftId00001',
+            },
+            'body': {
+                'topic': 'crypto',
+                'tags': ['A', 'B', 'C', 'D', 'E' * 25],
+                'eye_catch_url': 'https://example.com/test.png',
+                'paid_body': '有料記事の内容',
+                'price': 10 ** 20,
+                'article_id': 'draftId00001'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
+            }
+        }
+
+        params['body'] = json.dumps(params['body'])
+
+        article_info_before = self.article_info_table.scan()['Items']
+        article_history_before = self.article_history_table.scan()['Items']
+        article_content_edit_before = self.article_content_edit_table.scan()['Items']
+
+        response = MeArticlesDraftsPublishWithHeader(params, {}, dynamodb=self.dynamodb,
+                                                     elasticsearch=self.elasticsearch).main()
+
+        article_info_after = self.article_info_table.scan()['Items']
+        article_history_after = self.article_history_table.scan()['Items']
+        article_content_edit_after = self.article_content_edit_table.scan()['Items']
+
+        self.assertEqual(response['statusCode'], 200)
+
+        article_info = self.article_info_table.get_item(Key={'article_id': params['pathParameters']['article_id']})['Item']
+        article_content = self.article_content_table.get_item(
+            Key={'article_id': params['pathParameters']['article_id']}
+        )['Item']
+        article_history = self.article_history_table.query(
+            KeyConditionExpression=Key('article_id').eq(params['pathParameters']['article_id'])
+        )['Items'][-1]
+
+        self.assertEqual(article_info['status'], 'public')
+        self.assertEqual(article_info['sort_key'], 1520150552000000)
+        self.assertEqual(article_info['published_at'], 1525000000)
+        self.assertEqual(article_info['sync_elasticsearch'], 1)
+        self.assertEqual(article_info['topic'], 'crypto')
+        self.assertEqual(article_info['tags'], ['A', 'B', 'C', 'D', 'E' * 25])
+        self.assertEqual(article_info['eye_catch_url'], 'https://example.com/test.png')
+        self.assertEqual(article_info['price'], 10 ** 20)
+        self.assertEqual(article_content['title'], article_history['title'])
+        self.assertEqual(article_content['paid_body'], article_history['body'])
+        self.assertEqual(article_history['price'], 10 ** 20)
+        self.assertEqual(len(article_info_after) - len(article_info_before), 0)
+        self.assertEqual(len(article_history_after) - len(article_history_before), 1)
+        self.assertEqual(len(article_content_edit_after) - len(article_content_edit_before), 0)
+
+    def test_validation_paid_article_publish_without_paid_body_ng(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'draftId00001',
+            },
+            'body': {
+                'topic': 'crypto',
+                'tags': ['A', 'B', 'C', 'D', 'E' * 25],
+                'eye_catch_url': 'https://example.com/test.png',
+                'price': 10 ** 20,
+                'article_id': 'draftId00001'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
+            }
+        }
+
+        params['body'] = json.dumps(params['body'])
+
+        response = MeArticlesDraftsPublishWithHeader(params, {}, dynamodb=self.dynamodb,
+                                                     elasticsearch=self.elasticsearch).main()
+
+        self.assertEqual(response['statusCode'], 400)
+        self.assertEqual(response['body'], '{"message": "Invalid parameter: Both paid body and price are required."}')
+
+    def test_validation_paid_article_publish_without_price_ng(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'draftId00001',
+            },
+            'body': {
+                'topic': 'crypto',
+                'tags': ['A', 'B', 'C', 'D', 'E' * 25],
+                'eye_catch_url': 'https://example.com/test.png',
+                'paid_body': '有料記事のコンテンツです',
+                'article_id': 'draftId00001'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
+            }
+        }
+
+        params['body'] = json.dumps(params['body'])
+
+        response = MeArticlesDraftsPublishWithHeader(params, {}, dynamodb=self.dynamodb,
+                                                     elasticsearch=self.elasticsearch).main()
+
+        self.assertEqual(response['statusCode'], 400)
+        self.assertEqual(response['body'], '{"message": "Invalid parameter: Both paid body and price are required."}')
