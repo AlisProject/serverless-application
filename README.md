@@ -122,9 +122,9 @@ You have to add SNS authentication params to SMS.
 ./deploy.sh function && ./deploy.sh api
 ```
 
-You have to add `RestApiArn` to SMS.
+You have to add `RestApiArn`, `ApiLambdaRole` and `ElasticSearchEndpoint` to SMS.
 - See: https://github.com/AlisProject/environment
-  - You can use `restapi-replacer.sh`
+  - You can use `api-stack-replacer.sh`
 
 ```bash
 ./deploy.sh permission 
@@ -136,10 +136,6 @@ You have to update Cognito pre authentication trigger.
 # Use this script with your Cognito User Pool ID
 ./update_cognito_pre_auth.sh ap-northeast-XXXXXXXXXX
 ```
-
-Specify generated ApiLambdaRole to SSM.
-- See: https://github.com/AlisProject/environment
-  - You can use `functions-replacer.sh`
 
 #### Fix API settings via a script
 
@@ -156,6 +152,7 @@ direnv edit
 ### ElasticSearch
 
 ```bash
+# Notice: This is only for production env. Unnecessary for dev env.
 ./deploy.sh elasticsearch
 
 # show ElasticSearch Endpoint
