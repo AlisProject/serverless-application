@@ -68,10 +68,10 @@ class MeArticlesPurchaseCreate(LambdaBase):
         article_user_eth_address = self.__get_user_private_eth_address(article_info['user_id'])
         user_eth_address = self.event['requestContext']['authorizer']['claims']['custom:private_eth_address']
         price = self.params['price']
-        transaction_hash = self.__purchase_article(user_eth_address, article_user_eth_address, price)
+        transactions = self.__purchase_article(user_eth_address, article_user_eth_address, price)
 
         # create article_purchased_table
-        self.__create_paid_articles(transaction_hash, article_info)
+        self.__create_paid_articles(transactions, article_info)
 
         return {
             'statusCode': 200
@@ -111,14 +111,17 @@ class MeArticlesPurchaseCreate(LambdaBase):
         # burn transaction
         burn_response = requests.post('https://' + os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'] +
                                       '/production/wallet/tip', auth=auth, headers=headers, data=burn_payload)
+
         # exists error
         if json.loads(burn_response.text).get('error'):
             raise SendTransactionError(json.loads(burn_response.text).get('error'))
 
-        # return transaction hash
-        return json.dumps(json.loads(response.text).get('result')).replace('"', '')
+        return json.dumps({
+            'purchase_transaction_hash': json.loads(response.text).get('result').replace('"', ''),
+            'burn_transaction_hash': json.loads(burn_response.text).get('result').replace('"', '')
+        })
 
-    def __create_paid_articles(self, transaction_hash, article_info):
+    def __create_paid_articles(self, transactions, article_info):
         paid_articles_table = self.dynamodb.Table(os.environ['PAID_ARTICLES_TABLE_NAME'])
         article_history_table = self.dynamodb.Table(os.environ['ARTICLE_HISTORY_TABLE_NAME'])
         article_histories = article_history_table.query(
@@ -139,7 +142,8 @@ class MeArticlesPurchaseCreate(LambdaBase):
             'created_at': int(time.time()),
             'history_created_at': history_created_at,
             'status': 'doing',
-            'transaction': transaction_hash,
+            'purchase_transaction': json.loads(transactions).get('purchase_transaction_hash'),
+            'burn_transaction': json.loads(transactions).get('burn_transaction_hash'),
             'sort_key': TimeUtil.generate_sort_key(),
             'price': self.params['price']
         }

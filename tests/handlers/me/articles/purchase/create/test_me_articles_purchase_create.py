@@ -72,7 +72,10 @@ class TestMeArticlesPurchaseCreate(TestCase):
         self.assertEqual(response['statusCode'], 400)
 
     @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__purchase_article',
-           MagicMock(return_value='0x0000000000000000000000000000000000000000'))
+           MagicMock(return_value=json.dumps({
+               'purchase_transaction_hash': '0x0000000000000000000000000000000000000000',
+               'burn_transaction_hash': '0x0000000000000000000000000000000000000001'
+           })))
     @patch('time_util.TimeUtil.generate_sort_key', MagicMock(return_value=1520150552000003))
     @patch('time.time', MagicMock(return_value=1520150552.000003))
     def test_main_ok_min_value(self):
@@ -120,7 +123,8 @@ class TestMeArticlesPurchaseCreate(TestCase):
                 'price': Decimal(price),
                 'article_id': target_article_id,
                 'status': 'doing',
-                'transaction': '0x0000000000000000000000000000000000000000',
+                'purchase_transaction': '0x0000000000000000000000000000000000000000',
+                'burn_transaction': '0x0000000000000000000000000000000000000001',
                 'sort_key': Decimal(1520150552000003),
                 'created_at': Decimal(int(1520150552.000003)),
                 'history_created_at': Decimal(1520150270)
@@ -129,7 +133,10 @@ class TestMeArticlesPurchaseCreate(TestCase):
             self.assertEqual(expected_purchase_article, paid_articles[0])
 
     @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__purchase_article',
-           MagicMock(return_value='0x0000000000000000000000000000000000000000'))
+           MagicMock(return_value=json.dumps({
+               'purchase_transaction_hash': '0x0000000000000000000000000000000000000000',
+               'burn_transaction_hash': '0x0000000000000000000000000000000000000001'
+           })))
     @patch('time_util.TimeUtil.generate_sort_key', MagicMock(return_value=1520150552000003))
     @patch('time.time', MagicMock(return_value=1520150552.000003))
     def test_main_ok_max_price(self):
@@ -177,7 +184,8 @@ class TestMeArticlesPurchaseCreate(TestCase):
                 'price': Decimal(int(self.article_info_table_items[1]['price'])),
                 'article_id': target_article_id,
                 'status': 'doing',
-                'transaction': '0x0000000000000000000000000000000000000000',
+                'purchase_transaction': '0x0000000000000000000000000000000000000000',
+                'burn_transaction': '0x0000000000000000000000000000000000000001',
                 'sort_key': Decimal(1520150552000003),
                 'created_at': Decimal(int(1520150552.000003)),
                 'history_created_at': Decimal(1520150268)
@@ -186,7 +194,10 @@ class TestMeArticlesPurchaseCreate(TestCase):
             self.assertEqual(expected_purchase_article, paid_articles[0])
 
     @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__purchase_article',
-           MagicMock(return_value='0x0000000000000000000000000000000000000000'))
+           MagicMock(return_value=json.dumps({
+               'purchase_transaction_hash': '0x0000000000000000000000000000000000000000',
+               'burn_transaction_hash': '0x0000000000000000000000000000000000000001'
+           })))
     def test_main_ng_same_user(self):
         with patch('me_articles_purchase_create.UserUtil') as user_util_mock:
             user_util_mock.get_cognito_user_info.return_value = {
@@ -229,7 +240,10 @@ class TestMeArticlesPurchaseCreate(TestCase):
             self.assertEqual(len(paid_articles), 0)
 
     @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__purchase_article',
-           MagicMock(return_value='0x0000000000000000000000000000000000000000'))
+           MagicMock(return_value=json.dumps({
+               'purchase_transaction_hash': '0x0000000000000000000000000000000000000000',
+               'burn_transaction_hash': '0x0000000000000000000000000000000000000001'
+           })))
     def test_main_ng_not_exists_private_eth_address(self):
         with patch('me_articles_purchase_create.UserUtil') as user_util_mock:
             user_util_mock.get_cognito_user_info.return_value = {
