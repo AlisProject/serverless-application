@@ -15,6 +15,17 @@ class TestMeArticlesPurchasedIndex(TestCase):
 
         paid_articles_items = [
             {
+                'article_id': 'publicId0000',
+                'article_user_id': 'test_article_user_01',
+                'user_id': 'test_user_01',
+                'sort_key': 1520150271000000,
+                'history_created_at': 1520150271,
+                'created_at': 1520150271,
+                'transaction': '0x0000000000000000000000000000000000000009',
+                'status': 'done',
+                'price': 1
+            },
+            {
                 'article_id': 'publicId0001',
                 'article_user_id': 'test_article_user_01',
                 'user_id': 'test_user_01',
@@ -131,7 +142,7 @@ class TestMeArticlesPurchasedIndex(TestCase):
     def test_main_ok_with_evaluated_key(self):
         params = {
             'queryStringParameters': {
-                'limit': '3',
+                'limit': '1',
                 'article_id': 'draftId00001',
                 'sort_key': '1520150272000002'
             },
@@ -154,6 +165,28 @@ class TestMeArticlesPurchasedIndex(TestCase):
 
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(json.loads(response['body'])['Items'], expected_items)
+
+    def test_main_ng_with_no_article_info(self):
+        params = {
+            'queryStringParameters': {
+                'limit': '1',
+                'article_id': 'publicId0001',
+                'sort_key': '1520150272000000'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test_user_01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
+            }
+        }
+
+        response = MeArticlesPurchasedIndex(params, {}, self.dynamodb).main()
+
+        self.assertEqual(response['statusCode'], 500)
 
     def test_main_ok_with_only_sort_key(self):
         params = {
