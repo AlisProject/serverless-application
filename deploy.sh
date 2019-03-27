@@ -81,4 +81,5 @@ aws cloudformation deploy \
     FacebookAppToken=${SSM_PARAMS_PREFIX}FacebookAppToken \
     RestApiArn=${SSM_PARAMS_PREFIX}RestApiArn \
     PaidArticlesTableName=${SSM_PARAMS_PREFIX}PaidArticlesTableName \
-  --capabilities CAPABILITY_IAM
+  --capabilities CAPABILITY_IAM \
+  --no-fail-on-empty-changeset
