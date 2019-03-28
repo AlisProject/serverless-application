@@ -74,10 +74,7 @@ class MeArticlesPurchasedIndex(LambdaBase):
             article_id = response['Items'][i]['article_id']
             article_info = article_info_table.get_item(Key={'article_id': article_id}).get('Item')
             if article_info is None:
-                return {
-                    'statusCode': 500,
-                    'body': json.dumps({'message': 'Internal server error'})
-                }
+                raise Exception('Failed to get ArticleInfo. article_id: ' + article_id)
             response['Items'][i] = article_info
 
         return {
