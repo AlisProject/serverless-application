@@ -56,7 +56,8 @@ class TestMeExternalProviderUserCreate(TestCase):
         TestsUtil.delete_all_tables(dynamodb)
 
     def test_main_ok(self):
-        with patch('me_external_provider_user_create.UserUtil') as user_mock:
+        with patch('me_external_provider_user_create.UserUtil') as user_mock, \
+             patch('me_external_provider_user_create.CryptoUtil') as crypto_mock:
             event = {
                 'body': {
                     'user_id': 'username01',
@@ -76,7 +77,7 @@ class TestMeExternalProviderUserCreate(TestCase):
             user_mock.check_try_to_register_as_line_user.return_value = False
             user_mock.check_try_to_register_as_yahoo_user.return_value = False
             user_mock.check_try_to_register_as_facebook_user.return_value = False
-            user_mock.decrypt_password.return_value = 'password'
+            crypto_mock.decrypt_password.return_value = 'password'
             user_mock.create_external_provider_user.return_value = {
                 'AuthenticationResult': {
                     'AccessToken': 'aaaaa',

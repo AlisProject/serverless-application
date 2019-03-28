@@ -9,6 +9,7 @@ import json
 from lambda_base import LambdaBase
 from yahoo_util import YahooUtil
 from user_util import UserUtil
+from crypto_util import CryptoUtil
 from jsonschema import validate, ValidationError
 from botocore.exceptions import ClientError
 from exceptions import YahooOauthError
@@ -101,7 +102,7 @@ class LoginYahooIndex(LambdaBase):
                     user_id = user_info['user_id']
 
                 # パスワードの取得、デコード処理追加
-                password = UserUtil.get_external_provider_password(
+                password = CryptoUtil.get_external_provider_password(
                     dynamodb=self.dynamodb,
                     user_id=user_info['user_id']
                 )
@@ -148,7 +149,7 @@ class LoginYahooIndex(LambdaBase):
             )
 
             aes_iv = os.urandom(settings.AES_IV_BYTES)
-            encrypted_password = UserUtil.encrypt_password(backed_password, aes_iv)
+            encrypted_password = CryptoUtil.encrypt_password(backed_password, aes_iv)
             iv = base64.b64encode(aes_iv).decode()
 
             UserUtil.add_external_provider_user_info(
