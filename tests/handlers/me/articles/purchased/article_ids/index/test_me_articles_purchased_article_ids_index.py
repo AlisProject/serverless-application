@@ -47,6 +47,17 @@ class TestMeArticlesPurchasedArticleIdsIndex(TestCase):
                 'transaction': '0x0000000000000000000000000000000000000002',
                 'status': 'done',
                 'price': 300
+            },
+            {
+                'article_id': 'publicId0004',
+                'article_user_id': 'test_article_user_01',
+                'user_id': 'test_user_01',
+                'sort_key': 1520150272000003,
+                'history_created_at': 1520150275,
+                'created_at': 1520150275,
+                'transaction': '0x0000000000000000000000000000000000000003',
+                'status': 'doing',
+                'price': 400
             }
         ]
         TestsUtil.create_table(cls.dynamodb, os.environ['PAID_ARTICLES_TABLE_NAME'], cls.paid_articles_items)
