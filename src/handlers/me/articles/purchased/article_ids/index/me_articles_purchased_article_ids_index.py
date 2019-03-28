@@ -25,7 +25,8 @@ class MeArticlesPurchasedArticleIdsIndex(LambdaBase):
 
         result = DBUtil.query_all_items(paid_articles_table, query_params)
 
-        article_ids = [paid_article['article_id'] for paid_article in result if paid_article['user_id'] == user_id]
+        article_ids = [paid_article['article_id'] for paid_article in result if
+                       paid_article['user_id'] == user_id and paid_article['status'] == 'done']
 
         return {
             'statusCode': 200,
