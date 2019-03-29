@@ -2276,6 +2276,8 @@ Resources:
                           type: 'string'
                           enum:
                             - "article_id"
+              security:
+                - cognitoUserPool: []
               x-amazon-apigateway-integration:
                 responses:
                   default:
