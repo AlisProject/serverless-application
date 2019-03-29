@@ -1,0 +1,13 @@
+requests
+requests_oauthlib
+pyyaml
+jsonschema
+hashids
+bleach
+rfc3987
+jinja2
+pillow
+aws-requests-auth
+requests_aws4auth
+elasticsearch
+web3==4.4.1

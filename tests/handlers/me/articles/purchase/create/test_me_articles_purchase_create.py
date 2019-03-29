@@ -32,7 +32,15 @@ class TestMeArticlesPurchaseCreate(TestCase):
                 'title': 'testid000002 titile',
                 'sort_key': 1520150272000000,
                 'price': 10000 * (10 ** 18)
-            }
+            },
+            {
+                'article_id': 'publicId0003',
+                'user_id': 'article_user01',
+                'status': 'public',
+                'title': 'testid000001 titile',
+                'sort_key': 1520150272000000,
+                'price': 100 * (10 ** 18)
+            },
         ]
 
         self.article_history_table_items = [
@@ -56,6 +64,13 @@ class TestMeArticlesPurchaseCreate(TestCase):
                 'body': 'sample_body2_history',
                 'created_at': 1520150268,
                 'price': 10000 * (10 ** 18)
+            },
+            {
+                'article_id': 'publicId0003',
+                'title': 'sample_title2_history',
+                'body': 'sample_body2_history',
+                'created_at': 1520150270,
+                'price': 100 * (10 ** 18)
             }
         ]
         TestsUtil.create_table(self.dynamodb, os.environ['ARTICLE_INFO_TABLE_NAME'], self.article_info_table_items)
@@ -76,6 +91,70 @@ class TestMeArticlesPurchaseCreate(TestCase):
                'purchase_transaction_hash': '0x0000000000000000000000000000000000000000',
                'burn_transaction_hash': '0x0000000000000000000000000000000000000001'
            })))
+    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__check_transaction_confirmation',
+           MagicMock(return_value='doing'))
+    @patch('time_util.TimeUtil.generate_sort_key', MagicMock(return_value=1520150552000003))
+    @patch('time.time', MagicMock(return_value=1520150552.000003))
+    def test_main_ok_transaction_unconfirmed(self):
+        with patch('me_articles_purchase_create.UserUtil') as user_util_mock:
+            user_util_mock.get_cognito_user_info.return_value = {
+                'UserAttributes': [{
+                    'Name': 'custom:private_eth_address',
+                    'Value': '0x1111111111111111111111111111111111111111'
+                }]
+            }
+            target_article_id = self.article_info_table_items[2]['article_id']
+            price = str(100 * (10 ** 18))
+
+            event = {
+                'body': {
+                    'article_id': target_article_id,
+                    'price': price
+                },
+                'requestContext': {
+                    'authorizer': {
+                        'claims': {
+                            'cognito:username': 'act_user_01',
+                            'custom:private_eth_address': '0x5d7743a4a6f21593ff6d3d81595f270123456789',
+                            'phone_number_verified': 'true',
+                            'email_verified': 'true'
+                        }
+                    }
+                },
+                'pathParameters': {
+                    'article_id': 'publicId0001'
+                }
+            }
+            event['body'] = json.dumps(event['body'])
+
+            response = MeArticlesPurchaseCreate(event, {}, self.dynamodb, cognito=None).main()
+            self.assertEqual(response['statusCode'], 200)
+            paid_articles_table = self.dynamodb.Table(os.environ['PAID_ARTICLES_TABLE_NAME'])
+            paid_articles = paid_articles_table.scan()['Items']
+            self.assertEqual(len(paid_articles), 1)
+
+            expected_purchase_article = {
+                'user_id': event['requestContext']['authorizer']['claims']['cognito:username'],
+                'article_user_id': self.article_info_table_items[2]['user_id'],
+                'price': Decimal(price),
+                'article_id': target_article_id,
+                'status': 'doing',
+                'purchase_transaction': '0x0000000000000000000000000000000000000000',
+                'burn_transaction': '0x0000000000000000000000000000000000000001',
+                'sort_key': Decimal(1520150552000003),
+                'created_at': Decimal(int(1520150552.000003)),
+                'history_created_at': Decimal(1520150270)
+            }
+
+            self.assertEqual(expected_purchase_article, paid_articles[0])
+
+    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__purchase_article',
+           MagicMock(return_value=json.dumps({
+               'purchase_transaction_hash': '0x0000000000000000000000000000000000000000',
+               'burn_transaction_hash': '0x0000000000000000000000000000000000000001'
+           })))
+    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__check_transaction_confirmation',
+           MagicMock(return_value='done'))
     @patch('time_util.TimeUtil.generate_sort_key', MagicMock(return_value=1520150552000003))
     @patch('time.time', MagicMock(return_value=1520150552.000003))
     def test_main_ok_min_value(self):
@@ -86,7 +165,6 @@ class TestMeArticlesPurchaseCreate(TestCase):
                     'Value': '0x1111111111111111111111111111111111111111'
                 }]
             }
-
             target_article_id = self.article_info_table_items[0]['article_id']
             price = str(1 * (10 ** 18))
 
@@ -122,7 +200,7 @@ class TestMeArticlesPurchaseCreate(TestCase):
                 'article_user_id': self.article_info_table_items[0]['user_id'],
                 'price': Decimal(price),
                 'article_id': target_article_id,
-                'status': 'doing',
+                'status': 'done',
                 'purchase_transaction': '0x0000000000000000000000000000000000000000',
                 'burn_transaction': '0x0000000000000000000000000000000000000001',
                 'sort_key': Decimal(1520150552000003),
@@ -137,6 +215,8 @@ class TestMeArticlesPurchaseCreate(TestCase):
                'purchase_transaction_hash': '0x0000000000000000000000000000000000000000',
                'burn_transaction_hash': '0x0000000000000000000000000000000000000001'
            })))
+    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__check_transaction_confirmation',
+           MagicMock(return_value='done'))
     @patch('time_util.TimeUtil.generate_sort_key', MagicMock(return_value=1520150552000003))
     @patch('time.time', MagicMock(return_value=1520150552.000003))
     def test_main_ok_max_price(self):
@@ -147,7 +227,6 @@ class TestMeArticlesPurchaseCreate(TestCase):
                     'Value': '0x1111111111111111111111111111111111111111'
                 }]
             }
-
             target_article_id = self.article_info_table_items[1]['article_id']
             price = str(settings.parameters['price']['maximum'])
 
@@ -183,7 +262,7 @@ class TestMeArticlesPurchaseCreate(TestCase):
                 'article_user_id': self.article_info_table_items[1]['user_id'],
                 'price': Decimal(int(self.article_info_table_items[1]['price'])),
                 'article_id': target_article_id,
-                'status': 'doing',
+                'status': 'done',
                 'purchase_transaction': '0x0000000000000000000000000000000000000000',
                 'burn_transaction': '0x0000000000000000000000000000000000000001',
                 'sort_key': Decimal(1520150552000003),
@@ -198,6 +277,8 @@ class TestMeArticlesPurchaseCreate(TestCase):
                'purchase_transaction_hash': '0x0000000000000000000000000000000000000000',
                'burn_transaction_hash': '0x0000000000000000000000000000000000000001'
            })))
+    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__check_transaction_confirmation',
+           MagicMock(return_value='done'))
     def test_main_ng_same_user(self):
         with patch('me_articles_purchase_create.UserUtil') as user_util_mock:
             user_util_mock.get_cognito_user_info.return_value = {
@@ -244,6 +325,8 @@ class TestMeArticlesPurchaseCreate(TestCase):
                'purchase_transaction_hash': '0x0000000000000000000000000000000000000000',
                'burn_transaction_hash': '0x0000000000000000000000000000000000000001'
            })))
+    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__check_transaction_confirmation',
+           MagicMock(return_value='done'))
     def test_main_ng_not_exists_private_eth_address(self):
         with patch('me_articles_purchase_create.UserUtil') as user_util_mock:
             user_util_mock.get_cognito_user_info.return_value = {

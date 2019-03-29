@@ -6,14 +6,15 @@ import json
 import requests
 from boto3.dynamodb.conditions import Key
 from db_util import DBUtil
+from user_util import UserUtil
 from lambda_base import LambdaBase
 from jsonschema import validate, ValidationError
 from time_util import TimeUtil
-from user_util import UserUtil
 from record_not_found_error import RecordNotFoundError
 from exceptions import SendTransactionError
 from aws_requests_auth.aws_auth import AWSRequestsAuth
 from decimal_encoder import DecimalEncoder
+from web3 import Web3, HTTPProvider
 
 
 class MeArticlesPurchaseCreate(LambdaBase):
@@ -135,13 +136,16 @@ class MeArticlesPurchaseCreate(LambdaBase):
                 history_created_at = Item.get('created_at')
                 break
 
+        # check whether transaction is completed
+        status = self.__check_transaction_confirmation(transactions)
+
         paid_article = {
             'article_id': self.params['article_id'],
             'user_id': self.event['requestContext']['authorizer']['claims']['cognito:username'],
             'article_user_id': article_info['user_id'],
             'created_at': int(time.time()),
             'history_created_at': history_created_at,
-            'status': 'doing',
+            'status': status,
             'purchase_transaction': json.loads(transactions).get('purchase_transaction_hash'),
             'burn_transaction': json.loads(transactions).get('burn_transaction_hash'),
             'sort_key': TimeUtil.generate_sort_key(),
@@ -161,3 +165,10 @@ class MeArticlesPurchaseCreate(LambdaBase):
             raise RecordNotFoundError('Record Not Found: private_eth_address')
 
         return private_eth_address[0]['Value']
+
+    def __check_transaction_confirmation(self, transactions):
+        self.web3 = Web3(HTTPProvider(os.environ['PRIVATE_CHAIN_OPERATION_URL']))
+        receipt = self.web3.eth.getTransactionReceipt(transactions['purchase_transaction_hash'])
+        if receipt is not None and receipt['logs'][0].get('type') == 'mined':
+            return 'done'
+        return 'doing'

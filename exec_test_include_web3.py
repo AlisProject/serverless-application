@@ -1,3 +1,4 @@
+# web3.pyを用いたhandlerのテストをこのファイルで行う
 import sys
 import os
 import shutil
@@ -5,11 +6,11 @@ import subprocess
 import glob
 import re
 from distutils.dir_util import copy_tree
+from itertools import product
 
-TEST_DIR = 'tests'
+TEST_DIRS = ['tests/handlers/me/articles/purchase/create']
 TEST_TMP_DIR = './tmp_tests'
-# Web3.pyが含まれるファイルはテストから省く
-REMOVE_DIRS = ['./tmp_tests/handlers/me/articles/purchase']
+TARGET_TEST_TMP_DIRS = ['./tmp_tests/handlers/me/articles/purchase/create']
 
 
 def exec_test(target_dir):
@@ -49,12 +50,9 @@ def main():
         shutil.rmtree(TEST_TMP_DIR)
 
     # テスト実行のためのtmpディレクトリを作成し、testsをコピーする
-    os.mkdir(TEST_TMP_DIR)
-    copy_tree(TEST_DIR, TEST_TMP_DIR)
-
-    # Web3.pyが含まれるテストディレクトリを削除
-    for remove_dir in REMOVE_DIRS:
-        shutil.rmtree(remove_dir)
+    for target_test_tmp_dir, test_dir in product(TARGET_TEST_TMP_DIRS, TEST_DIRS):
+        os.makedirs(target_test_tmp_dir)
+        copy_tree(test_dir, target_test_tmp_dir)
 
     # テスト実行のための環境変数をセットする
     set_global_env_vers()

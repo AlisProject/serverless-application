@@ -1,7 +1,9 @@
 *packaged-template.yaml
 venv
+venv-sample
 deploy
 vendor-package
+vendor-package-web3
 .envrc
 _tmp_*
 src/**/__pycache__

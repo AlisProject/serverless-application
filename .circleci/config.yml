@@ -28,6 +28,7 @@ jobs:
       - restore_cache:
           keys:
           - v3-dependencies-{{ checksum "requirements.txt" }}
+          - v3-dependencies-{{ checksum "requirements_web3.txt" }}
           - v3-dependencies-
 
       - run:
@@ -63,14 +64,48 @@ jobs:
             python exec_test.py
 
       - run:
+          name: deactivate venv
+          command: |
+            # venvをdeactiveにする
+            deactivate
+
+      - run:
+          name: install dependencies including web3
+          command: |
+            python3 -m venv venv_web3
+            . venv_web3/bin/activate
+            pip install -r requirements_web3.txt
+            pip install -r requirements_test.txt
+
+      - save_cache:
+          paths:
+          - ./venv_web3
+          key: v3-dependencies-{{ checksum "requirements_web3.txt" }}
+
+      - run:
+          name: run tests including web3
+          command: |
+            . venv_web3/bin/activate
+            # web3を含んだ全テスト実行
+            python exec_test_include_web3.py
+
+      - run:
+          name: deactivate venv_web3
+          command: |
+            # venv_web3をdeactiveにする
+            deactivate
+
+      - run:
           name: make deploy package
           command: |
             if [ $ALIS_APP_ID ]; then
               docker image build --tag deploy-image .
               docker container run -it --name deploy-container deploy-image
               docker container cp deploy-container:/workdir/vendor-package .
+              docker container cp deploy-container:/workdir/vendor-package-web3 .
               . venv/bin/activate
               python make_deploy_zip.py
+              python make_deploy_web3_zip.py
             fi
 
       - run:
