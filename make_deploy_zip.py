@@ -19,6 +19,7 @@ os.makedirs(DEPLOY_PATH)
 # web3.pyが含まれているzipファイルの名前を以下配列に追加する
 NON_ZIP_TARGET_FILE_NAMES = ['me_articles_purchase_create.zip']
 
+
 # deploy 用 zip ファイルを作成
 def make_deploy_zip(zip_file_name, target_dir):
     # zip 作成（実行ファイルパス）
