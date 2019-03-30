@@ -1968,6 +1968,10 @@ paths:
       responses:
         '200':
           description: '不正報告の実施成功'
+          in: 'body'
+          required: true
+          schema:
+            $ref: '#/definitions/Fraud'
       security:
         - CustomAuthorizer: []
       x-amazon-apigateway-integration:

@@ -44,10 +44,11 @@ class ArticlesShow(LambdaBase):
 
         if article_info is None or article_content is None:
             return {
-               'statusCode': 404,
-               'body': json.dumps({'message': 'Record Not Found'})
+                'statusCode': 404,
+                'body': json.dumps({'message': 'Record Not Found'})
             }
 
+        article_content.pop('paid_body', None)
         article_info.update(article_content)
 
         return {

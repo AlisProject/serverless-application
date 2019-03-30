@@ -3,6 +3,8 @@ Transform: AWS::Serverless-2016-10-31
 Description: Lambda functions and API Gateway resources for the ALIS application.
 
 Parameters:
+  AlisAppId:
+    Type: String
   ArticleInfoTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
   ArticleContentTableName:
@@ -93,6 +95,8 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   LoginSalt:
     Type: 'AWS::SSM::Parameter::Value<String>'
+  PaidArticlesTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
   AuthleteApiKey:
     Type: 'AWS::SSM::Parameter::Value<String>'
   AuthleteApiSecret:
@@ -137,6 +141,7 @@ Globals:
         BETA_MODE_FLAG: !Ref BetaModeFlag
         DIST_S3_BUCKET_NAME: !Ref DistS3BucketName
         ELASTIC_SEARCH_ENDPOINT: !Ref ElasticSearchEndpoint
+        PAID_ARTICLES_TABLE_NAME: !Ref PaidArticlesTableName
 
 Resources:
   RestApi:

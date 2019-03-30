@@ -37,7 +37,8 @@ class TestArticlesPopular(TestCase):
                 'status': 'public',
                 'topic': 'crypto',
                 'article_score': 12,
-                'sort_key': 1520150272000001
+                'sort_key': 1520150272000001,
+                'price': 100
             },
             {
                 'article_id': 'testid000002',
@@ -119,7 +120,8 @@ class TestArticlesPopular(TestCase):
                 'status': 'public',
                 'topic': 'crypto',
                 'article_score': 12,
-                'sort_key': 1520150272000001
+                'sort_key': 1520150272000001,
+                'price': 100
             }
         ]
 
@@ -174,7 +176,8 @@ class TestArticlesPopular(TestCase):
                 'status': 'public',
                 'topic': 'crypto',
                 'article_score': 12,
-                'sort_key': 1520150272000001
+                'sort_key': 1520150272000001,
+                'price': 100
             },
             {
                 'article_id': 'testid000003',

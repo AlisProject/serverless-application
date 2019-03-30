@@ -24,6 +24,7 @@ aws cloudformation deploy \
   --s3-bucket $DEPLOY_BUCKET_NAME \
   --stack-name ${ALIS_APP_ID}${1} \
   --parameter-overrides \
+    AlisAppId=${ALIS_APP_ID} \
     AlisAppDomain=${SSM_PARAMS_PREFIX}AlisAppDomain \
     PrivateChainAwsAccessKey=${SSM_PARAMS_PREFIX}PrivateChainAwsAccessKey \
     PrivateChainAwsSecretAccessKey=${SSM_PARAMS_PREFIX}PrivateChainAwsSecretAccessKey \
@@ -49,6 +50,7 @@ aws cloudformation deploy \
     TopicTableName=${SSM_PARAMS_PREFIX}TopicTableName \
     TagTableName=${SSM_PARAMS_PREFIX}TagTableName \
     TipTableName=${SSM_PARAMS_PREFIX}TipTableName \
+    NonceTableName=${SSM_PARAMS_PREFIX}NonceTableName \
     CommentTableName=${SSM_PARAMS_PREFIX}CommentTableName \
     CommentLikedUserTableName=${SSM_PARAMS_PREFIX}CommentLikedUserTableName \
     DeletedCommentTableName=${SSM_PARAMS_PREFIX}DeletedCommentTableName \
@@ -70,9 +72,19 @@ aws cloudformation deploy \
     TwitterConsumerKey=${SSM_PARAMS_PREFIX}TwitterConsumerKey \
     TwitterConsumerSecret=${SSM_PARAMS_PREFIX}TwitterConsumerSecret \
     TwitterOauthCallbackUrl=${SSM_PARAMS_PREFIX}TwitterOauthCallbackUrl \
+    YahooClientId=${SSM_PARAMS_PREFIX}YahooClientId \
+    YahooSecret=${SSM_PARAMS_PREFIX}YahooSecret \
+    YahooOauthCallbackUrl=${SSM_PARAMS_PREFIX}YahooOauthCallbackUrl \
+    FacebookAppId=${SSM_PARAMS_PREFIX}FacebookAppId \
+    FacebookAppSecret=${SSM_PARAMS_PREFIX}FacebookAppSecret \
+    FacebookOauthCallbackUrl=${SSM_PARAMS_PREFIX}FacebookOauthCallbackUrl \
+    FacebookAppToken=${SSM_PARAMS_PREFIX}FacebookAppToken \
+    RestApiArn=${SSM_PARAMS_PREFIX}RestApiArn \
+    PaidArticlesTableName=${SSM_PARAMS_PREFIX}PaidArticlesTableName \
     AuthleteApiKey=${SSM_PARAMS_PREFIX}AuthleteApiKey \
     AuthleteApiSecret=${SSM_PARAMS_PREFIX}AuthleteApiSecret \
-  --capabilities CAPABILITY_IAM
+  --capabilities CAPABILITY_IAM \
+  --no-fail-on-empty-changeset
 
 if [ $1 = "api" ]; then
     aws cloudformation package \

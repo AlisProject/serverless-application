@@ -23,7 +23,8 @@ class DBUtil:
         return True
 
     @classmethod
-    def validate_article_existence(cls, dynamodb, article_id, user_id=None, status=None, version=None):
+    def validate_article_existence(cls, dynamodb, article_id, user_id=None, status=None, version=None,
+                                   is_purchased=None):
         article_info_table = dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
         article_info = article_info_table.get_item(Key={'article_id': article_id}).get('Item')
 
@@ -34,6 +35,8 @@ class DBUtil:
         if status is not None and article_info['status'] != status:
             raise RecordNotFoundError('Record Not Found')
         if version is not None and not cls.__validate_version(article_info, version):
+            raise RecordNotFoundError('Record Not Found')
+        if is_purchased is not None and 'price' not in article_info:
             raise RecordNotFoundError('Record Not Found')
 
         return True
