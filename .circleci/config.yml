@@ -64,6 +64,12 @@ jobs:
             python exec_test.py
 
       - run:
+          name: deactivate venv
+          command: |
+            # venvをdeactiveにする
+            deactivate
+
+      - run:
           name: install dependencies including web3
           command: |
             python3 -m venv venv_web3
@@ -82,6 +88,12 @@ jobs:
             . venv_web3/bin/activate
             # web3を含んだ全テスト実行
             python exec_test_include_web3.py
+
+      - run:
+          name: deactivate venv_web3
+          command: |
+            # venv_web3をdeactiveにする
+            deactivate
 
       - run:
           name: make deploy package
