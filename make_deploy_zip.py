@@ -16,8 +16,6 @@ if os.path.exists(DEPLOY_PATH):
     shutil.rmtree(DEPLOY_PATH)
 os.makedirs(DEPLOY_PATH)
 
-# web3.pyが含まれているzipファイルの名前を以下配列に追加する
-NON_ZIP_TARGET_FILE_NAMES = ['me_articles_purchase_create.zip']
 
 # deploy 用 zip ファイルを作成
 def make_deploy_zip(zip_file_name, target_dir):
@@ -43,8 +41,5 @@ for name in glob.iglob('src/handlers/**/handler.py', recursive=True):
     target_dir = './' + name[:name.rfind('/')]
     # zip のファイル名を取得
     zip_file_name = target_dir[len('./src/handlers/'):].replace('/', '_') + '.zip'
-
-    for non_target_file_name in NON_ZIP_TARGET_FILE_NAMES:
-        if zip_file_name != non_target_file_name:
-            # zip 作成
-            make_deploy_zip(zip_file_name, target_dir)
+    # zip 作成
+    make_deploy_zip(zip_file_name, target_dir)

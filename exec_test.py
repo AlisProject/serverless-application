@@ -8,8 +8,6 @@ from distutils.dir_util import copy_tree
 
 TEST_DIR = 'tests'
 TEST_TMP_DIR = './tmp_tests'
-# Web3.pyが含まれるファイルはテストから省く
-REMOVE_DIRS = ['./tmp_tests/handlers/me/articles/purchase']
 
 
 def exec_test(target_dir):
@@ -51,11 +49,6 @@ def main():
     # テスト実行のためのtmpディレクトリを作成し、testsをコピーする
     os.mkdir(TEST_TMP_DIR)
     copy_tree(TEST_DIR, TEST_TMP_DIR)
-
-    # Web3.pyが含まれるテストディレクトリを削除
-    for remove_dir in REMOVE_DIRS:
-        shutil.rmtree(remove_dir)
-
     # テスト実行のための環境変数をセットする
     set_global_env_vers()
 
