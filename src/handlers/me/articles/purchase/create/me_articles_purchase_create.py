@@ -14,7 +14,7 @@ from record_not_found_error import RecordNotFoundError
 from exceptions import SendTransactionError
 from aws_requests_auth.aws_auth import AWSRequestsAuth
 from decimal_encoder import DecimalEncoder
-from web3 import Web3, HTTPProvider
+from time import sleep
 
 
 class MeArticlesPurchaseCreate(LambdaBase):
@@ -69,18 +69,26 @@ class MeArticlesPurchaseCreate(LambdaBase):
         article_user_eth_address = self.__get_user_private_eth_address(article_info['user_id'])
         user_eth_address = self.event['requestContext']['authorizer']['claims']['custom:private_eth_address']
         price = self.params['price']
-        transactions = self.__purchase_article(user_eth_address, article_user_eth_address, price)
+
+        auth = AWSRequestsAuth(aws_access_key=os.environ['PRIVATE_CHAIN_AWS_ACCESS_KEY'],
+                               aws_secret_access_key=os.environ['PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY'],
+                               aws_host=os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'],
+                               aws_region='ap-northeast-1',
+                               aws_service='execute-api')
+
+        headers = {'content-type': 'application/json'}
+
+        transactions = self.__purchase_article(user_eth_address, article_user_eth_address, price, auth, headers)
 
         # create article_purchased_table
-        self.__create_paid_articles(transactions, article_info)
+        self.__create_paid_articles(transactions, article_info, auth, headers)
 
         return {
             'statusCode': 200
         }
 
     @staticmethod
-    def __purchase_article(user_eth_address, article_user_eth_address, price):
-        headers = {'content-type': 'application/json'}
+    def __purchase_article(user_eth_address, article_user_eth_address, price, auth, headers):
         purchase_price = format(int(price * 0.9), '064x')
         burn_token = format(int(price * 0.1), '064x')
         purchase_payload = json.dumps(
@@ -97,11 +105,7 @@ class MeArticlesPurchaseCreate(LambdaBase):
                 'tip_value': burn_token
             }
         )
-        auth = AWSRequestsAuth(aws_access_key=os.environ['PRIVATE_CHAIN_AWS_ACCESS_KEY'],
-                               aws_secret_access_key=os.environ['PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY'],
-                               aws_host=os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'],
-                               aws_region='ap-northeast-1',
-                               aws_service='execute-api')
+
         # purchase article transaction
         response = requests.post('https://' + os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'] +
                                  '/production/wallet/tip', auth=auth, headers=headers, data=purchase_payload)
@@ -122,7 +126,7 @@ class MeArticlesPurchaseCreate(LambdaBase):
             'burn_transaction_hash': json.loads(burn_response.text).get('result').replace('"', '')
         })
 
-    def __create_paid_articles(self, transactions, article_info):
+    def __create_paid_articles(self, transactions, article_info, auth, headers):
         paid_articles_table = self.dynamodb.Table(os.environ['PAID_ARTICLES_TABLE_NAME'])
         article_history_table = self.dynamodb.Table(os.environ['ARTICLE_HISTORY_TABLE_NAME'])
         article_histories = article_history_table.query(
@@ -136,13 +140,19 @@ class MeArticlesPurchaseCreate(LambdaBase):
                 history_created_at = Item.get('created_at')
                 break
 
-        # check whether transaction is completed
-        status = self.__check_transaction_confirmation(transactions)
+        # 初期購入ステータスは購入処理中としておく
+        status = 'doing'
+        # 3回プライベートチェーンに問い合わせるためカウントを変数として定義
+        count = 0
+
+        # 最大3回プライベートチェーンへポーリングを行う
+        status = self.__polling_to_private_chain(status, count, transactions, auth, headers)
 
         paid_article = {
             'article_id': self.params['article_id'],
             'user_id': self.event['requestContext']['authorizer']['claims']['cognito:username'],
             'article_user_id': article_info['user_id'],
+            'article_title': article_info['title'],
             'created_at': int(time.time()),
             'history_created_at': history_created_at,
             'status': status,
@@ -166,9 +176,33 @@ class MeArticlesPurchaseCreate(LambdaBase):
 
         return private_eth_address[0]['Value']
 
-    def __check_transaction_confirmation(self, transactions):
-        self.web3 = Web3(HTTPProvider(os.environ['PRIVATE_CHAIN_OPERATION_URL']))
-        receipt = self.web3.eth.getTransactionReceipt(transactions['purchase_transaction_hash'])
-        if receipt is not None and receipt['logs'][0].get('type') == 'mined':
-            return 'done'
+    @staticmethod
+    def __check_transaction_confirmation(transactions, auth, headers):
+        receipt_payload = json.dumps(
+            {
+                'transaction_hash': json.loads(transactions).get('purchase_transaction_hash')
+            }
+        )
+        response = requests.post('https://' + os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'] +
+                                 '/production/transaction/receipt', auth=auth, headers=headers, data=receipt_payload)
+        return response.text
+
+    def __polling_to_private_chain(self, status, count, transactions, auth, headers):
+        # 最大3回トランザクション詳細を問い合わせる
+        while count < 3 and status == 'doing':
+            # 1秒待機
+            sleep(1)
+            # check whether transaction is completed
+            transaction_status = self.__check_transaction_confirmation(transactions, auth, headers)
+            result = json.loads(transaction_status).get('result')
+            # exists error
+            if json.loads(transaction_status).get('error'):
+                return 'fail'
+            # receiptがnullの場合countをインクリメントしてループ処理
+            if result is None or result['logs'] == 0:
+                count += 1
+                continue
+            # transactionが承認済みであればstatusをdoneにする
+            if result['logs'][0].get('type') == 'mined':
+                return 'done'
         return 'doing'
