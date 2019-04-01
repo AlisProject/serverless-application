@@ -62,10 +62,9 @@ def main():
 
     if target_file_path:
         # tmpフォルダ上の指定されたファイルのパスを取得
-        for test_dir in TEST_DIRS:
-            exec_file = TEST_TMP_DIR + target_file_path[(target_file_path.find(test_dir) + len(test_dir)):]
-            exec_dir = exec_file[:exec_file.rfind('/')]
-            copy_required_files(exec_file)
+        exec_file = TEST_TMP_DIR + target_file_path[(target_file_path.find(TEST_DIR) + len(TEST_DIR)):]
+        exec_dir = exec_file[:exec_file.rfind('/')]
+        copy_required_files(exec_file)
     else:
         exec_dir = TEST_TMP_DIR
 

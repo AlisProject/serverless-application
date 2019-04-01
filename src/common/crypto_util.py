@@ -12,6 +12,7 @@ class CryptoUtil:
         cipher = AES.new(salt, AES.MODE_CBC, iv)
         return base64.b64encode(cipher.encrypt(plain_text_password)).decode()
 
+
     @staticmethod
     def decrypt_password(byte_hash_data, iv):
         encrypted_data = base64.b64decode(byte_hash_data)
