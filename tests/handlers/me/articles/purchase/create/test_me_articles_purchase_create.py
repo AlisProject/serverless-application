@@ -648,7 +648,8 @@ class TestMeArticlesPurchaseCreate(TestCase):
             self.assertEqual(expected_purchase_article, paid_articles[0])
 
     @patch(
-        'test_me_articles_purchase_create.TestMeArticlesPurchaseCreate._TestMeArticlesPurchaseCreate__check_transaction_confirmation',
+        'test_me_articles_purchase_create.TestMeArticlesPurchaseCreate.'
+        '_TestMeArticlesPurchaseCreate__check_transaction_confirmation',
         MagicMock(return_value=json.dumps({
             "jsonrpc": "2.0",
             "result": None,
@@ -675,7 +676,8 @@ class TestMeArticlesPurchaseCreate(TestCase):
         self.assertEqual(status, 'doing')
 
     @patch(
-        'test_me_articles_purchase_create.TestMeArticlesPurchaseCreate._TestMeArticlesPurchaseCreate__check_transaction_confirmation',
+        'test_me_articles_purchase_create.TestMeArticlesPurchaseCreate.'
+        '_TestMeArticlesPurchaseCreate__check_transaction_confirmation',
         MagicMock(return_value=json.dumps({
             "jsonrpc": "2.0",
             "error": {
@@ -705,7 +707,8 @@ class TestMeArticlesPurchaseCreate(TestCase):
         self.assertEqual(status, 'fail')
 
     @patch(
-        'test_me_articles_purchase_create.TestMeArticlesPurchaseCreate._TestMeArticlesPurchaseCreate__check_transaction_confirmation',
+        'test_me_articles_purchase_create.TestMeArticlesPurchaseCreate.'
+        '_TestMeArticlesPurchaseCreate__check_transaction_confirmation',
         MagicMock(return_value=json.dumps({
             "jsonrpc": "2.0",
             "id": 1,
@@ -733,7 +736,12 @@ class TestMeArticlesPurchaseCreate(TestCase):
                         'type': 'mined'
                     }
                 ],
-                'logsBloom': '0x00000000000000000000000000000002000000000000000000000000000000000000000000000400000000000000000000010000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000800000200010040000000000000000000000000000000400000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000020000000000000000',
+                'logsBloom': '0x00000000000000000000000000000002000000000000000000000000000000000000000000000400000000'
+                             '0000000000000100000000000000000000000000000000000000000000000000080000000000000000000000'
+                             '0000000000000000000000000000000000000000000000000000000000000000000000001000000000000000'
+                             '0000000000000000000000000000000000000800000200010040000000000000000000000000000000400000'
+                             '0000000000000000000000000000000000000000020000000000000000000000000000000000000000000000'
+                             '00000000000000000000000000000000000000000000000000000000020000000000000000',
                 'root': None, 'status': None,
                 'transactionHash': '0xa5999131185ec77a1e9f640a35149633c988b91990e4b18a506250dc2992d8fb',
                 'transactionIndex': '0x0'
