@@ -137,6 +137,18 @@ You have to update Cognito pre authentication trigger.
 ./update_cognito_pre_auth.sh ap-northeast-XXXXXXXXXX
 ```
 
+Specify generated ApiLambdaRole to SSM.
+- See: https://github.com/AlisProject/environment
+  - You can use `functions-replacer.sh`
+
+#### FYI:
+Lambda & API Gateway are bunch of CloudFormation stacks.
+You can use the script from next time.
+
+```bash
+./deploy_api.sh
+```
+
 #### Fix API settings via a script
 
 ```bash
