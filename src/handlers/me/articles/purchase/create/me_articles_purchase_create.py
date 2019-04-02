@@ -151,8 +151,6 @@ class MeArticlesPurchaseCreate(LambdaBase):
             ConditionExpression='attribute_not_exists(user_id)'
         )
 
-        return purchase_transaction
-
     @staticmethod
     def __burn_transaction(price, user_eth_address, auth, headers):
         burn_token = format(int(Decimal(price) / Decimal(10)), '064x')
