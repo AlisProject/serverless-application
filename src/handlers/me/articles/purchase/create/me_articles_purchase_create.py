@@ -82,16 +82,17 @@ class MeArticlesPurchaseCreate(LambdaBase):
         # 購入のトランザクション処理
         purchase_transaction = self.__create_purchase_transaction(auth, headers, user_eth_address,
                                                                   article_user_eth_address, price)
+        # 購入テーブルを作成
         self.__purchase_article(paid_articles_table, article_info, purchase_transaction)
-
         # バーンのトランザクション処理
         burn_transaction = self.__burn_transaction(price, user_eth_address, auth, headers)
+        # バーンのトランザクションを購入テーブルに格納
         self.__add_burn_transaction_to_paid_article(burn_transaction, paid_articles_table, article_info)
-
         # プライベートチェーンへのポーリングを行いトランザクションの承認状態を取得
         transaction_status = self.__polling_to_private_chain(purchase_transaction, auth, headers)
         # トランザクションの承認状態をpaid_artilcleに格納
         self.__add_transaction_status_to_paid_article(article_info, paid_articles_table, transaction_status)
+
         return {
             'statusCode': 200,
             'body': json.dumps({

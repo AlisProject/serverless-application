@@ -806,11 +806,11 @@ class TestMeArticlesPurchaseCreate(TestCase):
             # 1秒待機
             sleep(1)
             # check whether transaction is completed
-            transaction_status = TestMeArticlesPurchaseCreate.__check_transaction_confirmation(purchase_transaction, auth,
-                                                                                               headers)
-            result = json.loads(transaction_status).get('result')
+            transaction_info = TestMeArticlesPurchaseCreate.__check_transaction_confirmation(purchase_transaction, auth,
+                                                                                             headers)
+            result = json.loads(transaction_info).get('result')
             # exists error
-            if json.loads(transaction_status).get('error'):
+            if json.loads(transaction_info).get('error'):
                 return 'fail'
             if result is None or result['logs'] == 0:
                 continue
