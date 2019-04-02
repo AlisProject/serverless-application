@@ -15,6 +15,7 @@ from exceptions import SendTransactionError
 from aws_requests_auth.aws_auth import AWSRequestsAuth
 from decimal_encoder import DecimalEncoder
 from time import sleep
+from decimal import Decimal
 
 
 class MeArticlesPurchaseCreate(LambdaBase):
@@ -66,6 +67,7 @@ class MeArticlesPurchaseCreate(LambdaBase):
             raise ValidationError('Can not purchase own article')
 
         # purchase article
+        paid_articles_table = self.dynamodb.Table(os.environ['PAID_ARTICLES_TABLE_NAME'])
         article_user_eth_address = self.__get_user_private_eth_address(article_info['user_id'])
         user_eth_address = self.event['requestContext']['authorizer']['claims']['custom:private_eth_address']
         price = self.params['price']
@@ -78,19 +80,22 @@ class MeArticlesPurchaseCreate(LambdaBase):
 
         headers = {'content-type': 'application/json'}
 
-        transactions = self.__purchase_article(user_eth_address, article_user_eth_address, price, auth, headers)
+        purchase_transaction = self.__purchase_article(user_eth_address, article_user_eth_address,
+                                                       price, auth, headers, paid_articles_table, article_info)
+        burn_transaction = self.__create_burn_transaction(price, user_eth_address, auth, headers)
 
         # create article_purchased_table
-        self.__create_paid_articles(transactions, article_info, auth, headers)
-
+        response = self.__update_paid_articles(purchase_transaction, burn_transaction, article_info,
+                                               auth, headers, paid_articles_table)
+        print(json.dumps(response))
         return {
-            'statusCode': 200
+            'statusCode': 200,
+            'body': json.dumps(response)
         }
 
-    @staticmethod
-    def __purchase_article(user_eth_address, article_user_eth_address, price, auth, headers):
-        purchase_price = format(int(price * 0.9), '064x')
-        burn_token = format(int(price * 0.1), '064x')
+    def __purchase_article(self, user_eth_address, article_user_eth_address, price, auth, headers,
+                           paid_articles_table, article_info):
+        purchase_price = format(int(Decimal(price) * Decimal(9) / Decimal(10)), '064x')
         purchase_payload = json.dumps(
             {
                 'from_user_eth_address': user_eth_address,
@@ -98,36 +103,9 @@ class MeArticlesPurchaseCreate(LambdaBase):
                 'tip_value': purchase_price
             }
         )
-        burn_payload = json.dumps(
-            {
-                'from_user_eth_address': user_eth_address,
-                'to_user_eth_address': '0000000000000000000000000000000000000000',
-                'tip_value': burn_token
-            }
-        )
 
-        # purchase article transaction
-        response = requests.post('https://' + os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'] +
-                                 '/production/wallet/tip', auth=auth, headers=headers, data=purchase_payload)
+        purchase_transaction = self.__create_purchase_transaction(auth, headers, purchase_payload)
 
-        # exists error
-        if json.loads(response.text).get('error'):
-            raise SendTransactionError(json.loads(response.text).get('error'))
-        # burn transaction
-        burn_response = requests.post('https://' + os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'] +
-                                      '/production/wallet/tip', auth=auth, headers=headers, data=burn_payload)
-
-        # exists error
-        if json.loads(burn_response.text).get('error'):
-            raise SendTransactionError(json.loads(burn_response.text).get('error'))
-
-        return json.dumps({
-            'purchase_transaction_hash': json.loads(response.text).get('result').replace('"', ''),
-            'burn_transaction_hash': json.loads(burn_response.text).get('result').replace('"', '')
-        })
-
-    def __create_paid_articles(self, transactions, article_info, auth, headers):
-        paid_articles_table = self.dynamodb.Table(os.environ['PAID_ARTICLES_TABLE_NAME'])
         article_history_table = self.dynamodb.Table(os.environ['ARTICLE_HISTORY_TABLE_NAME'])
         article_histories = article_history_table.query(
             KeyConditionExpression=Key('article_id').eq(self.params['article_id']),
@@ -140,31 +118,78 @@ class MeArticlesPurchaseCreate(LambdaBase):
                 history_created_at = Item.get('created_at')
                 break
 
-        # 初期購入ステータスは購入処理中としておく
-        status = 'doing'
-        # 3回プライベートチェーンに問い合わせるためカウントを変数として定義
-        count = 0
-
-        # 最大3回プライベートチェーンへポーリングを行う
-        status = self.__polling_to_private_chain(status, count, transactions, auth, headers)
-
+        # burnのtransactionが失敗した場合に購入transactionを追跡するためにburn_transaction以外を保存
         paid_article = {
             'article_id': self.params['article_id'],
             'user_id': self.event['requestContext']['authorizer']['claims']['cognito:username'],
             'article_user_id': article_info['user_id'],
             'article_title': article_info['title'],
-            'created_at': int(time.time()),
-            'history_created_at': history_created_at,
-            'status': status,
-            'purchase_transaction': json.loads(transactions).get('purchase_transaction_hash'),
-            'burn_transaction': json.loads(transactions).get('burn_transaction_hash'),
+            'purchase_transaction': purchase_transaction,
             'sort_key': TimeUtil.generate_sort_key(),
-            'price': self.params['price']
+            'price': self.params['price'],
+            'history_created_at': history_created_at,
+            'created_at': int(time.time())
         }
+        # 購入時のtransactionの保存
         paid_articles_table.put_item(
             Item=paid_article,
             ConditionExpression='attribute_not_exists(user_id)'
         )
+
+        return purchase_transaction
+
+    @staticmethod
+    def __create_purchase_transaction(auth, headers, purchase_payload):
+        # purchase article transaction
+        response = requests.post('https://' + os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'] +
+                                 '/production/wallet/tip', auth=auth, headers=headers, data=purchase_payload)
+
+        # exists error
+        if json.loads(response.text).get('error'):
+            raise SendTransactionError(json.loads(response.text).get('error'))
+
+        return json.loads(response.text).get('result').replace('"', '')
+
+    @staticmethod
+    def __create_burn_transaction(price, user_eth_address, auth, headers):
+        burn_token = format(int(Decimal(price) / Decimal(10)), '064x')
+
+        burn_payload = json.dumps(
+            {
+                'from_user_eth_address': user_eth_address,
+                'to_user_eth_address': settings.ETH_ZERO_ADDRESS,
+                'tip_value': burn_token
+            }
+        )
+
+        # burn transaction
+        response = requests.post('https://' + os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'] +
+                                 '/production/wallet/tip', auth=auth, headers=headers, data=burn_payload)
+
+        # exists error
+        if json.loads(response.text).get('error'):
+            raise SendTransactionError(json.loads(response.text).get('error'))
+
+        return json.loads(response.text).get('result').replace('"', '')
+
+    def __update_paid_articles(self, purchase_transaction, burn_transaction, article_info, auth, headers, paid_articles_table):
+        status = self.__polling_to_private_chain(purchase_transaction, auth, headers)
+
+        paid_article = {
+            ':transaction_status': status,
+            ':burn_transaction': burn_transaction
+        }
+        paid_articles_table.update_item(
+            Key={
+                'article_id': article_info['article_id'],
+                'user_id': self.event['requestContext']['authorizer']['claims']['cognito:username']
+            },
+            UpdateExpression="set #attr = :transaction_status, burn_transaction = :burn_transaction",
+            ExpressionAttributeNames={'#attr': 'status'},
+            ExpressionAttributeValues=paid_article
+        )
+
+        return {'status': status}
 
     def __get_user_private_eth_address(self, user_id):
         # user_id に紐づく private_eth_address を取得
@@ -177,23 +202,24 @@ class MeArticlesPurchaseCreate(LambdaBase):
         return private_eth_address[0]['Value']
 
     @staticmethod
-    def __check_transaction_confirmation(transactions, auth, headers):
+    def __check_transaction_confirmation(purchase_transaction, auth, headers):
         receipt_payload = json.dumps(
             {
-                'transaction_hash': json.loads(transactions).get('purchase_transaction_hash')
+                'transaction_hash': purchase_transaction
             }
         )
         response = requests.post('https://' + os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'] +
                                  '/production/transaction/receipt', auth=auth, headers=headers, data=receipt_payload)
         return response.text
 
-    def __polling_to_private_chain(self, status, count, transactions, auth, headers):
+    def __polling_to_private_chain(self, purchase_transaction, auth, headers):
         # 最大3回トランザクション詳細を問い合わせる
-        while count < 3 and status == 'doing':
+        count = settings.POLLING_INITIAL_COUNT
+        while count < settings.POLLING_MAX_COUNT:
             # 1秒待機
             sleep(1)
             # check whether transaction is completed
-            transaction_status = self.__check_transaction_confirmation(transactions, auth, headers)
+            transaction_status = self.__check_transaction_confirmation(purchase_transaction, auth, headers)
             result = json.loads(transaction_status).get('result')
             # exists error
             if json.loads(transaction_status).get('error'):
@@ -205,4 +231,5 @@ class MeArticlesPurchaseCreate(LambdaBase):
             # transactionが承認済みであればstatusをdoneにする
             if result['logs'][0].get('type') == 'mined':
                 return 'done'
+            break
         return 'doing'

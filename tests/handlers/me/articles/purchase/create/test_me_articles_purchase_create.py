@@ -94,11 +94,10 @@ class TestMeArticlesPurchaseCreate(TestCase):
 
         self.assertEqual(response['statusCode'], 400)
 
-    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__purchase_article',
-           MagicMock(return_value=json.dumps({
-               'purchase_transaction_hash': '0x0000000000000000000000000000000000000000',
-               'burn_transaction_hash': '0x0000000000000000000000000000000000000001'
-           })))
+    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__create_purchase_transaction',
+           MagicMock(return_value='0x0000000000000000000000000000000000000000'))
+    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__create_burn_transaction',
+           MagicMock(return_value='0x0000000000000000000000000000000000000001'))
     @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__polling_to_private_chain',
            MagicMock(return_value='doing'))
     @patch('time_util.TimeUtil.generate_sort_key', MagicMock(return_value=1520150552000003))
@@ -137,6 +136,7 @@ class TestMeArticlesPurchaseCreate(TestCase):
 
             response = MeArticlesPurchaseCreate(event, {}, self.dynamodb, cognito=None).main()
             self.assertEqual(response['statusCode'], 200)
+            self.assertEqual(json.loads(response['body']), {"status": "doing"})
             paid_articles_table = self.dynamodb.Table(os.environ['PAID_ARTICLES_TABLE_NAME'])
             paid_articles = paid_articles_table.scan()['Items']
             self.assertEqual(len(paid_articles), 1)
@@ -157,11 +157,10 @@ class TestMeArticlesPurchaseCreate(TestCase):
 
             self.assertEqual(expected_purchase_article, paid_articles[0])
 
-    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__purchase_article',
-           MagicMock(return_value=json.dumps({
-               'purchase_transaction_hash': '0x0000000000000000000000000000000000000000',
-               'burn_transaction_hash': '0x0000000000000000000000000000000000000001'
-           })))
+    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__create_purchase_transaction',
+           MagicMock(return_value='0x0000000000000000000000000000000000000000'))
+    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__create_burn_transaction',
+           MagicMock(return_value='0x0000000000000000000000000000000000000001'))
     @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__polling_to_private_chain',
            MagicMock(return_value='done'))
     @patch('time_util.TimeUtil.generate_sort_key', MagicMock(return_value=1520150552000003))
@@ -200,6 +199,7 @@ class TestMeArticlesPurchaseCreate(TestCase):
 
             response = MeArticlesPurchaseCreate(event, {}, self.dynamodb, cognito=None).main()
             self.assertEqual(response['statusCode'], 200)
+            self.assertEqual(json.loads(response['body']), {"status": "done"})
             paid_articles_table = self.dynamodb.Table(os.environ['PAID_ARTICLES_TABLE_NAME'])
             paid_articles = paid_articles_table.scan()['Items']
             self.assertEqual(len(paid_articles), 1)
@@ -220,11 +220,10 @@ class TestMeArticlesPurchaseCreate(TestCase):
 
             self.assertEqual(expected_purchase_article, paid_articles[0])
 
-    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__purchase_article',
-           MagicMock(return_value=json.dumps({
-               'purchase_transaction_hash': '0x0000000000000000000000000000000000000000',
-               'burn_transaction_hash': '0x0000000000000000000000000000000000000001'
-           })))
+    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__create_purchase_transaction',
+           MagicMock(return_value='0x0000000000000000000000000000000000000000'))
+    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__create_burn_transaction',
+           MagicMock(return_value='0x0000000000000000000000000000000000000001'))
     @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__polling_to_private_chain',
            MagicMock(return_value='done'))
     @patch('time_util.TimeUtil.generate_sort_key', MagicMock(return_value=1520150552000003))
@@ -263,6 +262,7 @@ class TestMeArticlesPurchaseCreate(TestCase):
 
             response = MeArticlesPurchaseCreate(event, {}, self.dynamodb, cognito=None).main()
             self.assertEqual(response['statusCode'], 200)
+            self.assertEqual(json.loads(response['body']), {"status": "done"})
             paid_articles_table = self.dynamodb.Table(os.environ['PAID_ARTICLES_TABLE_NAME'])
             paid_articles = paid_articles_table.scan()['Items']
             self.assertEqual(len(paid_articles), 1)
@@ -283,11 +283,10 @@ class TestMeArticlesPurchaseCreate(TestCase):
 
             self.assertEqual(expected_purchase_article, paid_articles[0])
 
-    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__purchase_article',
-           MagicMock(return_value=json.dumps({
-               'purchase_transaction_hash': '0x0000000000000000000000000000000000000000',
-               'burn_transaction_hash': '0x0000000000000000000000000000000000000001'
-           })))
+    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__create_purchase_transaction',
+           MagicMock(return_value='0x0000000000000000000000000000000000000000'))
+    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__create_burn_transaction',
+           MagicMock(return_value='0x0000000000000000000000000000000000000001'))
     @patch(
         'me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__check_transaction_confirmation',
         MagicMock(return_value='done'))
@@ -332,11 +331,10 @@ class TestMeArticlesPurchaseCreate(TestCase):
             paid_articles = paid_articles_table.scan()['Items']
             self.assertEqual(len(paid_articles), 0)
 
-    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__purchase_article',
-           MagicMock(return_value=json.dumps({
-               'purchase_transaction_hash': '0x0000000000000000000000000000000000000000',
-               'burn_transaction_hash': '0x0000000000000000000000000000000000000001'
-           })))
+    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__create_purchase_transaction',
+           MagicMock(return_value='0x0000000000000000000000000000000000000000'))
+    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__create_burn_transaction',
+           MagicMock(return_value='0x0000000000000000000000000000000000000001'))
     @patch(
         'me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__check_transaction_confirmation',
         MagicMock(return_value='done'))
@@ -584,11 +582,10 @@ class TestMeArticlesPurchaseCreate(TestCase):
             paid_articles = paid_articles_table.scan()['Items']
             self.assertEqual(len(paid_articles), 0)
 
-    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__purchase_article',
-           MagicMock(return_value=json.dumps({
-               'purchase_transaction_hash': '0x0000000000000000000000000000000000000000',
-               'burn_transaction_hash': '0x0000000000000000000000000000000000000001'
-           })))
+    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__create_purchase_transaction',
+           MagicMock(return_value='0x0000000000000000000000000000000000000000'))
+    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__create_burn_transaction',
+           MagicMock(return_value='0x0000000000000000000000000000000000000001'))
     @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__polling_to_private_chain',
            MagicMock(return_value='fail'))
     @patch('time_util.TimeUtil.generate_sort_key', MagicMock(return_value=1520150552000003))
@@ -656,12 +653,7 @@ class TestMeArticlesPurchaseCreate(TestCase):
             "id": 1
         })))
     def test_polling_to_private_chain_tran_status_doing(self):
-        transactions = {
-            'purchase_transaction_hash': '0x0000000000000000000000000000000000000000',
-            'burn_transaction_hash': '0x0000000000000000000000000000000000000001'
-        }
-        status = 'doing'
-        count = 2
+        purchase_transaction = '0x0000000000000000000000000000000000000000',
 
         auth = AWSRequestsAuth(aws_access_key=os.environ['PRIVATE_CHAIN_AWS_ACCESS_KEY'],
                                aws_secret_access_key=os.environ['PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY'],
@@ -671,7 +663,7 @@ class TestMeArticlesPurchaseCreate(TestCase):
 
         headers = {'content-type': 'application/json'}
 
-        status = TestMeArticlesPurchaseCreate.__polling_to_private_chain(status, count, transactions, auth, headers)
+        status = TestMeArticlesPurchaseCreate.__polling_to_private_chain(purchase_transaction, auth, headers)
 
         self.assertEqual(status, 'doing')
 
@@ -687,12 +679,7 @@ class TestMeArticlesPurchaseCreate(TestCase):
             "id": None
         })))
     def test_polling_to_private_chain_tran_status_error(self):
-        transactions = {
-            'purchase_transaction_hash': '0x0000000000000000000000000000000000000000',
-            'burn_transaction_hash': '0x0000000000000000000000000000000000000001'
-        }
-        status = 'doing'
-        count = 0
+        purchase_transaction = '0x0000000000000000000000000000000000000000'
 
         auth = AWSRequestsAuth(aws_access_key=os.environ['PRIVATE_CHAIN_AWS_ACCESS_KEY'],
                                aws_secret_access_key=os.environ['PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY'],
@@ -702,7 +689,7 @@ class TestMeArticlesPurchaseCreate(TestCase):
 
         headers = {'content-type': 'application/json'}
 
-        status = TestMeArticlesPurchaseCreate.__polling_to_private_chain(status, count, transactions, auth, headers)
+        status = TestMeArticlesPurchaseCreate.__polling_to_private_chain(purchase_transaction, auth, headers)
 
         self.assertEqual(status, 'fail')
 
@@ -747,12 +734,7 @@ class TestMeArticlesPurchaseCreate(TestCase):
                 'transactionIndex': '0x0'
             }})))
     def test_polling_to_private_chain_tran_status_done(self):
-        transactions = {
-            'purchase_transaction_hash': '0x0000000000000000000000000000000000000000',
-            'burn_transaction_hash': '0x0000000000000000000000000000000000000001'
-        }
-        status = 'doing'
-        count = 1
+        purchase_transaction = '0x0000000000000000000000000000000000000000'
 
         auth = AWSRequestsAuth(aws_access_key=os.environ['PRIVATE_CHAIN_AWS_ACCESS_KEY'],
                                aws_secret_access_key=os.environ['PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY'],
@@ -762,18 +744,68 @@ class TestMeArticlesPurchaseCreate(TestCase):
 
         headers = {'content-type': 'application/json'}
 
-        status = TestMeArticlesPurchaseCreate.__polling_to_private_chain(status, count, transactions, auth, headers)
+        status = TestMeArticlesPurchaseCreate.__polling_to_private_chain(purchase_transaction, auth, headers)
 
         self.assertEqual(status, 'done')
 
+    @patch(
+        'test_me_articles_purchase_create.TestMeArticlesPurchaseCreate.'
+        '_TestMeArticlesPurchaseCreate__check_transaction_confirmation',
+        MagicMock(return_value=json.dumps({
+            "jsonrpc": "2.0",
+            "id": 1,
+            "result": {
+                'blockHash': '0xab698033e885b1ca0b4976063232df35db42eed57d9c12ad3937ab2bea33a55c',
+                'blockNumber': '0x812ad',
+                'contractAddress': None,
+                'cumulativeGasUsed': '0x8ed2',
+                'gasUsed': '0x8ed2',
+                'logs': [
+                    {
+                        'address': '0x1383b25f9ba231e3a1a1e45c0b5689d778d44ad5',
+                        'blockHash': '0xab698033e885b1ca0b4976063232df35db42eed57d9c12ad3937ab2bea33a55c',
+                        'blockNumber': '0x812ad',
+                        'data': '0x0000000000000000000000000000000000000000000000007ce66c50e2840000',
+                        'logIndex': '0x0',
+                        'topics': [
+                            '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef',
+                            '0x00000000000000000000000093f102758c661de802f7c50cc40daa03269e5d97',
+                            '0x000000000000000000000000d29881fb9805aa4fddbec9c28c818bbac1951aee'
+                        ],
+                        'transactionHash': '0xa5999131185ec77a1e9f640a35149633c988b91990e4b18a506250dc2992d8fb',
+                        'transactionIndex': '0x0',
+                        'transactionLogIndex': '0x0',
+                        # typeに予期せぬ値が来た場合で無限ループを再現
+                        'type': 'hogehoge'
+                    }
+                ],
+                'root': None, 'status': None,
+                'transactionHash': '0xa5999131185ec77a1e9f640a35149633c988b91990e4b18a506250dc2992d8fb',
+                'transactionIndex': '0x0'
+            }})))
+    def test_polling_to_private_chain_infinity_loop_break_ok(self):
+        purchase_transaction = '0x0000000000000000000000000000000000000000'
+
+        auth = AWSRequestsAuth(aws_access_key=os.environ['PRIVATE_CHAIN_AWS_ACCESS_KEY'],
+                               aws_secret_access_key=os.environ['PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY'],
+                               aws_host=os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'],
+                               aws_region='ap-northeast-1',
+                               aws_service='execute-api')
+
+        headers = {'content-type': 'application/json'}
+
+        status = TestMeArticlesPurchaseCreate.__polling_to_private_chain(purchase_transaction, auth, headers)
+
+        self.assertEqual(status, 'doing')
+
     @staticmethod
-    def __polling_to_private_chain(status, count, transactions, auth, headers):
-        # 最大3回トランザクション詳細を問い合わせる
-        while count < 3 and status == 'doing':
+    def __polling_to_private_chain(purchase_transaction, auth, headers):
+        count = settings.POLLING_INITIAL_COUNT
+        while count < settings.POLLING_MAX_COUNT:
             # 1秒待機
             sleep(1)
             # check whether transaction is completed
-            transaction_status = TestMeArticlesPurchaseCreate.__check_transaction_confirmation(transactions, auth,
+            transaction_status = TestMeArticlesPurchaseCreate.__check_transaction_confirmation(purchase_transaction, auth,
                                                                                                headers)
             result = json.loads(transaction_status).get('result')
             # exists error
@@ -784,13 +816,14 @@ class TestMeArticlesPurchaseCreate(TestCase):
                 continue
             if result['logs'][0].get('type') == 'mined':
                 return 'done'
+            break
         return 'doing'
 
     @staticmethod
-    def __check_transaction_confirmation(transactions, auth, headers):
+    def __check_transaction_confirmation(purchase_transaction, auth, headers):
         receipt_payload = json.dumps(
             {
-                'transaction_hash': json.loads(transactions).get('purchase_transaction_hash')
+                'transaction_hash': purchase_transaction
             }
         )
         response = requests.post('https://' + os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'] +
