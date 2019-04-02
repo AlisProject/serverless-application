@@ -96,7 +96,7 @@ class TestMeArticlesPurchaseCreate(TestCase):
 
     @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__create_purchase_transaction',
            MagicMock(return_value='0x0000000000000000000000000000000000000000'))
-    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__create_burn_transaction',
+    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__burn_transaction',
            MagicMock(return_value='0x0000000000000000000000000000000000000001'))
     @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__polling_to_private_chain',
            MagicMock(return_value='doing'))
@@ -159,7 +159,7 @@ class TestMeArticlesPurchaseCreate(TestCase):
 
     @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__create_purchase_transaction',
            MagicMock(return_value='0x0000000000000000000000000000000000000000'))
-    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__create_burn_transaction',
+    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__burn_transaction',
            MagicMock(return_value='0x0000000000000000000000000000000000000001'))
     @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__polling_to_private_chain',
            MagicMock(return_value='done'))
@@ -222,7 +222,7 @@ class TestMeArticlesPurchaseCreate(TestCase):
 
     @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__create_purchase_transaction',
            MagicMock(return_value='0x0000000000000000000000000000000000000000'))
-    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__create_burn_transaction',
+    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__burn_transaction',
            MagicMock(return_value='0x0000000000000000000000000000000000000001'))
     @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__polling_to_private_chain',
            MagicMock(return_value='done'))
@@ -285,7 +285,7 @@ class TestMeArticlesPurchaseCreate(TestCase):
 
     @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__create_purchase_transaction',
            MagicMock(return_value='0x0000000000000000000000000000000000000000'))
-    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__create_burn_transaction',
+    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__burn_transaction',
            MagicMock(return_value='0x0000000000000000000000000000000000000001'))
     @patch(
         'me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__check_transaction_confirmation',
@@ -333,7 +333,7 @@ class TestMeArticlesPurchaseCreate(TestCase):
 
     @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__create_purchase_transaction',
            MagicMock(return_value='0x0000000000000000000000000000000000000000'))
-    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__create_burn_transaction',
+    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__burn_transaction',
            MagicMock(return_value='0x0000000000000000000000000000000000000001'))
     @patch(
         'me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__check_transaction_confirmation',
@@ -584,7 +584,7 @@ class TestMeArticlesPurchaseCreate(TestCase):
 
     @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__create_purchase_transaction',
            MagicMock(return_value='0x0000000000000000000000000000000000000000'))
-    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__create_burn_transaction',
+    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__burn_transaction',
            MagicMock(return_value='0x0000000000000000000000000000000000000001'))
     @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__polling_to_private_chain',
            MagicMock(return_value='fail'))
@@ -802,6 +802,7 @@ class TestMeArticlesPurchaseCreate(TestCase):
     def __polling_to_private_chain(purchase_transaction, auth, headers):
         count = settings.POLLING_INITIAL_COUNT
         while count < settings.POLLING_MAX_COUNT:
+            count += 1
             # 1秒待機
             sleep(1)
             # check whether transaction is completed
@@ -812,11 +813,9 @@ class TestMeArticlesPurchaseCreate(TestCase):
             if json.loads(transaction_status).get('error'):
                 return 'fail'
             if result is None or result['logs'] == 0:
-                count += 1
                 continue
             if result['logs'][0].get('type') == 'mined':
                 return 'done'
-            break
         return 'doing'
 
     @staticmethod
