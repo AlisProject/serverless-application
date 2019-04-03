@@ -138,6 +138,49 @@ class TestDBUtil(TestCase):
                 'sort_key': 1520125200000000
             }
         ]
+
+        paid_articles_items = [
+            {
+                'user_id': 'purchaseuser001',
+                'article_user_id': 'author001',
+                'article_title': 'testtitile001',
+                'price': 100 * 10 ** 18,
+                'article_id': 'articleid001',
+                'status': 'done',
+                'purchase_transaction': '0x0000000000000000000000000000000000000000',
+                'burn_transaction': '0x0000000000000000000000000000000000000001',
+                'sort_key': 1520150552000001,
+                'created_at': 1520150552,
+                'history_created_at': 1520150270
+            },
+            {
+                'user_id': 'purchaseuser001',
+                'article_user_id': 'author001',
+                'article_title': 'testtitile001',
+                'price': 100 * 10 ** 18,
+                'article_id': 'articleid001',
+                'status': 'fail',
+                'purchase_transaction': '0x0000000000000000000000000000000000000000',
+                'burn_transaction': '0x0000000000000000000000000000000000000001',
+                'sort_key': 1520150552000002,
+                'created_at': 1520150552,
+                'history_created_at': 1520150270
+            },
+            {
+                'user_id': 'purchaseuser001',
+                'article_user_id': 'author001',
+                'article_title': 'testtitile002',
+                'price': 100 * 10 ** 18,
+                'article_id': 'articleid003',
+                'status': 'fail',
+                'purchase_transaction': '0x0000000000000000000000000000000000000000',
+                'burn_transaction': '0x0000000000000000000000000000000000000001',
+                'sort_key': 1520150552000004,
+                'created_at': 1520150552,
+                'history_created_at': 1520150270
+            }
+        ]
+        TestsUtil.create_table(cls.dynamodb, os.environ['PAID_ARTICLES_TABLE_NAME'], paid_articles_items)
         TestsUtil.create_table(cls.dynamodb, os.environ['ARTICLE_PV_USER_TABLE_NAME'], article_pv_user_items)
 
         topic_items = [
@@ -477,3 +520,24 @@ class TestDBUtil(TestCase):
                 'testid000003',
                 price
             )
+
+    # 1件でもdoneかdoingが存在すればエラーを起こす
+    def test_validate_already_purchase(self):
+        with self.assertRaises(ValidationError):
+            article_id = 'articleid001'
+            user_id = 'purchaseuser001'
+            DBUtil.validate_already_purchase(
+                self.dynamodb,
+                article_id,
+                user_id
+            )
+
+    # 購入失敗のみが存在する場合は同一のuser_id, article_idの組み合わせでも購入が可能
+    def test_validate_already_purchase_only_fail(self):
+        article_id = 'articleid003'
+        user_id = 'purchaseuser001'
+        self.assertTrue(DBUtil.validate_already_purchase(
+            self.dynamodb,
+            article_id,
+            user_id
+        ))

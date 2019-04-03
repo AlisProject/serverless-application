@@ -252,6 +252,8 @@ Resources:
       Environment:
         Variables:
           PAID_ARTICLES_TABLE_NAME: !Ref PaidArticlesTableName
+          NOTIFICATION_TABLE_NAME: !Ref NotificationTableName
+          UNREAD_NOTIFICATION_MANAGER_TABLE_NAME: !Ref UnreadNotificationManagerTableName
           ARTICLE_INFO_TABLE_NAME: !Ref ArticleInfoTableName
           ARTICLE_HISTORY_TABLE_NAME: !Ref ArticleHistoryTableName
           PRIVATE_CHAIN_AWS_ACCESS_KEY: !Ref PrivateChainAwsAccessKey
