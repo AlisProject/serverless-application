@@ -143,6 +143,7 @@ class MeArticlesPurchaseCreate(LambdaBase):
             'sort_key': TimeUtil.generate_sort_key(),
             'price': self.params['price'],
             'history_created_at': history_created_at,
+            'status': 'doing',
             'created_at': int(time.time())
         }
         # 購入時のtransactionの保存
@@ -196,8 +197,6 @@ class MeArticlesPurchaseCreate(LambdaBase):
             ExpressionAttributeNames={'#attr': 'status'},
             ExpressionAttributeValues={':transaction_status': transaction_status}
         )
-
-        return {'status': transaction_status}
 
     def __get_user_private_eth_address(self, user_id):
         # user_id に紐づく private_eth_address を取得
