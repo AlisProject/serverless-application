@@ -32,6 +32,15 @@ class TestMeArticlesPublicEdit(TestCase):
                 'sort_key': 1520150272000000,
                 'overview': 'sample_overview',
                 'eye_catch_url': 'http://example.com/eye_catch_url'
+            },
+            {
+                'article_id': 'publicId0003',
+                'user_id': 'test01',
+                'status': 'public',
+                'sort_key': 1520150272000000,
+                'overview': 'sample_overview',
+                'eye_catch_url': 'http://example.com/eye_catch_url',
+                'price': 100
             }
         ]
 
@@ -47,6 +56,12 @@ class TestMeArticlesPublicEdit(TestCase):
                 'article_id': 'publicId0002',
                 'title': 'sample_title2',
                 'body': 'sample_body2'
+            },
+            {
+                'article_id': 'publicId0003',
+                'title': 'sample_title3',
+                'body': 'sample_body3',
+                'paid_body': 'sample_paid_body3'
             }
         ]
 
@@ -136,6 +151,39 @@ class TestMeArticlesPublicEdit(TestCase):
             'eye_catch_url': 'http://example.com/eye_catch_url',
             'status': 'public',
             'sort_key': 1520150272000000
+        }
+
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(json.loads(response['body']), expected_item)
+
+    def test_main_ok_with_paid_body(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'publicId0003'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
+            }
+        }
+
+        response = MeArticlesPublicEdit(params, {}, self.dynamodb).main()
+
+        expected_item = {
+            'article_id': 'publicId0003',
+            'body': 'sample_paid_body3',
+            'eye_catch_url': 'http://example.com/eye_catch_url',
+            'overview': 'sample_overview',
+            'sort_key': 1520150272000000,
+            'status': 'public',
+            'title': 'sample_title3',
+            'user_id': 'test01',
+            'price': 100
         }
 
         self.assertEqual(response['statusCode'], 200)
