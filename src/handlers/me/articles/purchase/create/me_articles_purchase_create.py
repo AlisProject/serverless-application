@@ -4,6 +4,7 @@ import settings
 import time
 import json
 import requests
+import hashlib
 from boto3.dynamodb.conditions import Key
 from db_util import DBUtil
 from user_util import UserUtil
@@ -58,12 +59,19 @@ class MeArticlesPurchaseCreate(LambdaBase):
             self.params['price']
         )
 
+        DBUtil.validate_already_purchase(
+            self.dynamodb,
+            self.params['article_id'],
+            self.event['requestContext']['authorizer']['claims']['cognito:username']
+        )
+
     def exec_main_proc(self):
         # get article info
         article_info_table = self.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
         article_info = article_info_table.get_item(Key={'article_id': self.params['article_id']}).get('Item')
         # does not purchase same user's article
-        if article_info['user_id'] == self.event['requestContext']['authorizer']['claims']['cognito:username']:
+        user_id = self.event['requestContext']['authorizer']['claims']['cognito:username']
+        if article_info['user_id'] == user_id:
             raise ValidationError('Can not purchase own article')
 
         # purchase article
@@ -84,14 +92,26 @@ class MeArticlesPurchaseCreate(LambdaBase):
                                                                   article_user_eth_address, price)
         # 購入テーブルを作成
         self.__purchase_article(paid_articles_table, article_info, purchase_transaction)
-        # バーンのトランザクション処理
-        burn_transaction = self.__burn_transaction(price, user_eth_address, auth, headers)
-        # バーンのトランザクションを購入テーブルに格納
-        self.__add_burn_transaction_to_paid_article(burn_transaction, paid_articles_table, article_info)
         # プライベートチェーンへのポーリングを行いトランザクションの承認状態を取得
         transaction_status = self.__polling_to_private_chain(purchase_transaction, auth, headers)
         # トランザクションの承認状態をpaid_artilcleに格納
         self.__add_transaction_status_to_paid_article(article_info, paid_articles_table, transaction_status)
+
+        # 購入のトランザクションが成功した時のみバーンのトランザクションを発行する
+        if transaction_status == 'done':
+            # 購入に成功した場合、著者の未読通知フラグをTrueにする
+            self.__update_unread_notification_manager(article_info['user_id'])
+            # 著者へ通知を作成
+            self.__notify_author(article_info, user_id)
+            # バーンのトランザクション処理
+            burn_transaction = self.__burn_transaction(price, user_eth_address, auth, headers)
+            # バーンのトランザクションを購入テーブルに格納
+            self.__add_burn_transaction_to_paid_article(burn_transaction, paid_articles_table, article_info)
+
+        # 記事購入者へは購入処理中の場合以外で通知を作成
+        if transaction_status != 'doing':
+            self.__update_unread_notification_manager(user_id)
+            self.__notify_purchaser(article_info, user_id, transaction_status)
 
         return {
             'statusCode': 200,
@@ -146,10 +166,10 @@ class MeArticlesPurchaseCreate(LambdaBase):
             'status': 'doing',
             'created_at': int(time.time())
         }
+
         # 購入時のtransactionの保存
         paid_articles_table.put_item(
-            Item=paid_article,
-            ConditionExpression='attribute_not_exists(user_id)'
+            Item=paid_article
         )
 
     @staticmethod
@@ -178,25 +198,41 @@ class MeArticlesPurchaseCreate(LambdaBase):
         paid_article = {
             ':burn_transaction': burn_transaction
         }
-        paid_articles_table.update_item(
-            Key={
-                'article_id': article_info['article_id'],
-                'user_id': self.event['requestContext']['authorizer']['claims']['cognito:username']
-            },
-            UpdateExpression="set burn_transaction = :burn_transaction",
-            ExpressionAttributeValues=paid_article
-        )
+        user_id = self.event['requestContext']['authorizer']['claims']['cognito:username']
+        paid_articles = paid_articles_table.query(
+            IndexName='article_id-user_id-index',
+            KeyConditionExpression=Key('article_id').eq(article_info['article_id']) & Key('user_id').eq(user_id),
+        )['Items']
+        if len(paid_articles) != 0:
+            paid_articles_table.update_item(
+                Key={
+                    'article_id': article_info['article_id'],
+                    'sort_key': paid_articles[0]['sort_key']
+                },
+                UpdateExpression="set burn_transaction = :burn_transaction",
+                ExpressionAttributeValues=paid_article
+            )
+        else:
+            raise RecordNotFoundError('Record Not Found: paid_articles')
 
     def __add_transaction_status_to_paid_article(self, article_info, paid_articles_table, transaction_status):
-        paid_articles_table.update_item(
-            Key={
-                'article_id': article_info['article_id'],
-                'user_id': self.event['requestContext']['authorizer']['claims']['cognito:username']
-            },
-            UpdateExpression="set #attr = :transaction_status",
-            ExpressionAttributeNames={'#attr': 'status'},
-            ExpressionAttributeValues={':transaction_status': transaction_status}
-        )
+        user_id = self.event['requestContext']['authorizer']['claims']['cognito:username']
+        paid_articles = paid_articles_table.query(
+            IndexName='article_id-user_id-index',
+            KeyConditionExpression=Key('article_id').eq(article_info['article_id']) & Key('user_id').eq(user_id),
+        )['Items']
+        if len(paid_articles) != 0:
+            paid_articles_table.update_item(
+                Key={
+                    'article_id': article_info['article_id'],
+                    'sort_key': paid_articles[0]['sort_key']
+                },
+                UpdateExpression="set #attr = :transaction_status",
+                ExpressionAttributeNames={'#attr': 'status'},
+                ExpressionAttributeValues={':transaction_status': transaction_status}
+            )
+        else:
+            raise RecordNotFoundError('Record Not Found: paid_articles')
 
     def __get_user_private_eth_address(self, user_id):
         # user_id に紐づく private_eth_address を取得
@@ -220,7 +256,7 @@ class MeArticlesPurchaseCreate(LambdaBase):
         return response.text
 
     def __polling_to_private_chain(self, purchase_transaction, auth, headers):
-        # 最大3回トランザクション詳細を問い合わせる
+        # 最大10回トランザクション詳細を問い合わせる(回数については問題がある場合検討)
         count = settings.POLLING_INITIAL_COUNT
         while count < settings.POLLING_MAX_COUNT:
             count += 1
@@ -239,3 +275,47 @@ class MeArticlesPurchaseCreate(LambdaBase):
             if result['logs'][0].get('type') == 'mined':
                 return 'done'
         return 'doing'
+
+    def __update_unread_notification_manager(self, user_id):
+        unread_notification_manager_table = self.dynamodb.Table(os.environ['UNREAD_NOTIFICATION_MANAGER_TABLE_NAME'])
+        unread_notification_manager_table.update_item(
+            Key={'user_id': user_id},
+            UpdateExpression='set unread = :unread',
+            ExpressionAttributeValues={':unread': True}
+        )
+
+    def __notify_author(self, article_info, user_id):
+        notification_table = self.dynamodb.Table(os.environ['NOTIFICATION_TABLE_NAME'])
+
+        notification_table.put_item(Item={
+            'notification_id': self.__get_randomhash(),
+            'user_id': article_info['user_id'],
+            'acted_user_id': user_id,
+            'article_id': article_info['article_id'],
+            'article_user_id': article_info['user_id'],
+            'article_title': article_info['title'],
+            'sort_key': TimeUtil.generate_sort_key(),
+            'type': settings.ARTICLE_PURCHASED_TYPE,
+            'price': int(article_info['price']),
+            'created_at': int(time.time())
+        })
+
+    def __notify_purchaser(self, article_info, user_id, transaction_status):
+        notification_table = self.dynamodb.Table(os.environ['NOTIFICATION_TABLE_NAME'])
+
+        notification_table.put_item(Item={
+            'notification_id': self.__get_randomhash(),
+            'user_id': user_id,
+            'acted_user_id': user_id,
+            'article_id': article_info['article_id'],
+            'article_user_id': article_info['user_id'],
+            'article_title': article_info['title'],
+            'sort_key': TimeUtil.generate_sort_key(),
+            'type': settings.ARTICLE_PURCHASE_TYPE if transaction_status == 'done' else settings.ARTICLE_PURCHASE_ERROR_TYPE,
+            'price': int(article_info['price']),
+            'created_at': int(time.time())
+        })
+
+    @staticmethod
+    def __get_randomhash():
+        return hashlib.sha256((str(time.time()) + str(os.urandom(16))).encode('utf-8')).hexdigest()

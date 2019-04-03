@@ -48,6 +48,14 @@ class TestMeArticlesPurchaseCreate(TestCase):
                 'sort_key': 1520150272000000,
                 'price': 100 * (10 ** 18)
             },
+            {
+                'article_id': 'publicId0004',
+                'title': 'purchase001 titile',
+                'user_id': 'author001',
+                'status': 'public',
+                'sort_key': 1520150272000000,
+                'price': 100 * (10 ** 18)
+            }
         ]
 
         self.article_history_table_items = [
@@ -78,12 +86,42 @@ class TestMeArticlesPurchaseCreate(TestCase):
                 'body': 'sample_body2_history',
                 'created_at': 1520150270,
                 'price': 100 * (10 ** 18)
+            },
+            {
+                'article_id': 'publicId0004',
+                'title': 'purchase001 titile',
+                'body': 'purchase001 body',
+                'created_at': 1520150270,
+                'price': 100 * (10 ** 18)
+            }
+        ]
+
+        paid_article_items = [
+            {
+                'user_id': 'purchaseuser001',
+                'article_user_id': 'author001',
+                'article_title': 'purchase001 titile',
+                'price': 100 * (10 ** 18),
+                'article_id': 'publicId0004',
+                'status': 'fail',
+                'purchase_transaction': '0x0000000000000000000000000000000000000000',
+                'sort_key': Decimal(1520150552000003),
+                'created_at': Decimal(int(1520150552.000003)),
+                'history_created_at': Decimal(1520150270)
             }
         ]
         TestsUtil.create_table(self.dynamodb, os.environ['ARTICLE_INFO_TABLE_NAME'], self.article_info_table_items)
         TestsUtil.create_table(self.dynamodb, os.environ['ARTICLE_HISTORY_TABLE_NAME'],
                                self.article_history_table_items)
-        TestsUtil.create_table(self.dynamodb, os.environ['PAID_ARTICLES_TABLE_NAME'], {})
+        TestsUtil.create_table(self.dynamodb, os.environ['PAID_ARTICLES_TABLE_NAME'], paid_article_items)
+
+        self.unread_notification_manager_table \
+            = self.dynamodb.Table(os.environ['UNREAD_NOTIFICATION_MANAGER_TABLE_NAME'])
+        TestsUtil.create_table(self.dynamodb, os.environ['UNREAD_NOTIFICATION_MANAGER_TABLE_NAME'], [])
+
+        self.notification_table \
+            = self.dynamodb.Table(os.environ['NOTIFICATION_TABLE_NAME'])
+        TestsUtil.create_table(self.dynamodb, os.environ['NOTIFICATION_TABLE_NAME'], [])
 
     def tearDown(self):
         TestsUtil.delete_all_tables(self.dynamodb)
@@ -93,6 +131,107 @@ class TestMeArticlesPurchaseCreate(TestCase):
         response = target_function.main()
 
         self.assertEqual(response['statusCode'], 400)
+
+    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__create_purchase_transaction',
+           MagicMock(return_value='0x0000000000000000000000000000000000000000'))
+    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__burn_transaction',
+           MagicMock(return_value='0x0000000000000000000000000000000000000001'))
+    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__polling_to_private_chain',
+           MagicMock(return_value='done'))
+    @patch("me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__get_randomhash",
+           MagicMock(side_effect=[
+               "d6f09fcaa6f409b7dde72957fdc17992d570e12ad23e8e968c29ab9aaea4df3d",
+               "0e12ad23e8e968c29ab9aaea4df3dd6f09fcaa6f409b7dde72957fdc17992d57"
+           ]))
+    @patch('time_util.TimeUtil.generate_sort_key', MagicMock(return_value=1520150552000010))
+    @patch('time.time', MagicMock(return_value=1520150552.000003))
+    def test_main_ok(self):
+        with patch('me_articles_purchase_create.UserUtil') as user_util_mock:
+            user_util_mock.get_cognito_user_info.return_value = {
+                'UserAttributes': [{
+                    'Name': 'custom:private_eth_address',
+                    'Value': '0x1111111111111111111111111111111111111111'
+                }]
+            }
+            target_article_id = self.article_info_table_items[3]['article_id']
+            price = str(100 * (10 ** 18))
+
+            event = {
+                'body': {
+                    'article_id': target_article_id,
+                    'price': price
+                },
+                'requestContext': {
+                    'authorizer': {
+                        'claims': {
+                            'cognito:username': 'purchaseuser001',
+                            'custom:private_eth_address': '0x5d7743a4a6f21593ff6d3d81595f270123456789',
+                            'phone_number_verified': 'true',
+                            'email_verified': 'true'
+                        }
+                    }
+                },
+                'pathParameters': {
+                    'article_id': 'publicId0004'
+                }
+            }
+            event['body'] = json.dumps(event['body'])
+
+            response = MeArticlesPurchaseCreate(event, {}, self.dynamodb, cognito=None).main()
+            self.assertEqual(response['statusCode'], 200)
+            self.assertEqual(json.loads(response['body']), {"status": "done"})
+            paid_articles_table = self.dynamodb.Table(os.environ['PAID_ARTICLES_TABLE_NAME'])
+            paid_articles = paid_articles_table.scan()['Items']
+            self.assertEqual(len(paid_articles), 2)
+
+            expected_purchase_article = {
+                'user_id': event['requestContext']['authorizer']['claims']['cognito:username'],
+                'article_user_id': self.article_info_table_items[3]['user_id'],
+                'article_title': 'purchase001 titile',
+                'price': Decimal(price),
+                'article_id': target_article_id,
+                'status': 'done',
+                'purchase_transaction': '0x0000000000000000000000000000000000000000',
+                'burn_transaction': '0x0000000000000000000000000000000000000001',
+                'sort_key': Decimal(1520150552000010),
+                'created_at': Decimal(int(1520150552.000003)),
+                'history_created_at': Decimal(1520150270)
+            }
+
+            expect_notifications = [
+                {
+                    'notification_id': 'd6f09fcaa6f409b7dde72957fdc17992d570e12ad23e8e968c29ab9aaea4df3d',
+                    'user_id': 'author001',
+                    'acted_user_id': 'purchaseuser001',
+                    'article_id': 'publicId0004',
+                    'article_user_id': 'author001',
+                    'article_title': 'purchase001 titile',
+                    'sort_key': Decimal(1520150552000010),
+                    'type': settings.ARTICLE_PURCHASED_TYPE,
+                    'price': Decimal(100 * (10 ** 18)),
+                    'created_at': Decimal(int(1520150552.000003))
+                }, {
+                    'notification_id': '0e12ad23e8e968c29ab9aaea4df3dd6f09fcaa6f409b7dde72957fdc17992d57',
+                    'user_id': 'purchaseuser001',
+                    'acted_user_id': 'purchaseuser001',
+                    'article_id': 'publicId0004',
+                    'article_user_id': 'author001',
+                    'article_title': 'purchase001 titile',
+                    'sort_key': Decimal(1520150552000010),
+                    'type': settings.ARTICLE_PURCHASE_TYPE,
+                    'price': Decimal(100 * (10 ** 18)),
+                    'created_at': Decimal(int(1520150552.000003))
+                }
+            ]
+
+            # 記事購入に成功した場合は購入者と著者へ通知を行う
+            actual_notifications = self.notification_table.scan()['Items']
+            self.assertEqual(TestMeArticlesPurchaseCreate.__sorted_notifications(expect_notifications),
+                             TestMeArticlesPurchaseCreate.__sorted_notifications(actual_notifications))
+            # 失敗データが残っている状態で、新しい購入処理が成功すること
+            self.assertEqual(paid_articles[0]['status'], 'fail')
+            self.assertEqual(expected_purchase_article, paid_articles[1])
+            self.assertEqual(len(self.unread_notification_manager_table.scan()['Items']), 2)
 
     @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__create_purchase_transaction',
            MagicMock(return_value='0x0000000000000000000000000000000000000000'))
@@ -139,7 +278,7 @@ class TestMeArticlesPurchaseCreate(TestCase):
             self.assertEqual(json.loads(response['body']), {"status": "doing"})
             paid_articles_table = self.dynamodb.Table(os.environ['PAID_ARTICLES_TABLE_NAME'])
             paid_articles = paid_articles_table.scan()['Items']
-            self.assertEqual(len(paid_articles), 1)
+            self.assertEqual(len(paid_articles), 2)
 
             expected_purchase_article = {
                 'user_id': event['requestContext']['authorizer']['claims']['cognito:username'],
@@ -149,13 +288,13 @@ class TestMeArticlesPurchaseCreate(TestCase):
                 'article_id': target_article_id,
                 'status': 'doing',
                 'purchase_transaction': '0x0000000000000000000000000000000000000000',
-                'burn_transaction': '0x0000000000000000000000000000000000000001',
                 'sort_key': Decimal(1520150552000003),
                 'created_at': Decimal(int(1520150552.000003)),
                 'history_created_at': Decimal(1520150270)
             }
 
             self.assertEqual(expected_purchase_article, paid_articles[0])
+            self.assertEqual(len(self.unread_notification_manager_table.scan()['Items']), 0)
 
     @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__create_purchase_transaction',
            MagicMock(return_value='0x0000000000000000000000000000000000000000'))
@@ -163,7 +302,7 @@ class TestMeArticlesPurchaseCreate(TestCase):
            MagicMock(return_value='0x0000000000000000000000000000000000000001'))
     @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__polling_to_private_chain',
            MagicMock(return_value='done'))
-    @patch('time_util.TimeUtil.generate_sort_key', MagicMock(return_value=1520150552000003))
+    @patch('time_util.TimeUtil.generate_sort_key', MagicMock(return_value=1520150552000010))
     @patch('time.time', MagicMock(return_value=1520150552.000003))
     def test_main_ok_min_value(self):
         with patch('me_articles_purchase_create.UserUtil') as user_util_mock:
@@ -202,7 +341,7 @@ class TestMeArticlesPurchaseCreate(TestCase):
             self.assertEqual(json.loads(response['body']), {"status": "done"})
             paid_articles_table = self.dynamodb.Table(os.environ['PAID_ARTICLES_TABLE_NAME'])
             paid_articles = paid_articles_table.scan()['Items']
-            self.assertEqual(len(paid_articles), 1)
+            self.assertEqual(len(paid_articles), 2)
 
             expected_purchase_article = {
                 'user_id': event['requestContext']['authorizer']['claims']['cognito:username'],
@@ -213,7 +352,7 @@ class TestMeArticlesPurchaseCreate(TestCase):
                 'status': 'done',
                 'purchase_transaction': '0x0000000000000000000000000000000000000000',
                 'burn_transaction': '0x0000000000000000000000000000000000000001',
-                'sort_key': Decimal(1520150552000003),
+                'sort_key': Decimal(1520150552000010),
                 'created_at': Decimal(int(1520150552.000003)),
                 'history_created_at': Decimal(1520150270)
             }
@@ -265,7 +404,7 @@ class TestMeArticlesPurchaseCreate(TestCase):
             self.assertEqual(json.loads(response['body']), {"status": "done"})
             paid_articles_table = self.dynamodb.Table(os.environ['PAID_ARTICLES_TABLE_NAME'])
             paid_articles = paid_articles_table.scan()['Items']
-            self.assertEqual(len(paid_articles), 1)
+            self.assertEqual(len(paid_articles), 2)
 
             expected_purchase_article = {
                 'user_id': event['requestContext']['authorizer']['claims']['cognito:username'],
@@ -329,7 +468,7 @@ class TestMeArticlesPurchaseCreate(TestCase):
 
             paid_articles_table = self.dynamodb.Table(os.environ['PAID_ARTICLES_TABLE_NAME'])
             paid_articles = paid_articles_table.scan()['Items']
-            self.assertEqual(len(paid_articles), 0)
+            self.assertEqual(len(paid_articles), 1)
 
     @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__create_purchase_transaction',
            MagicMock(return_value='0x0000000000000000000000000000000000000000'))
@@ -375,7 +514,7 @@ class TestMeArticlesPurchaseCreate(TestCase):
 
             paid_articles_table = self.dynamodb.Table(os.environ['PAID_ARTICLES_TABLE_NAME'])
             paid_articles = paid_articles_table.scan()['Items']
-            self.assertEqual(len(paid_articles), 0)
+            self.assertEqual(len(paid_articles), 1)
 
     def test_main_ng_less_than_min_value(self):
         with patch('me_articles_purchase_create.UserUtil') as user_util_mock:
@@ -416,7 +555,7 @@ class TestMeArticlesPurchaseCreate(TestCase):
 
             paid_articles_table = self.dynamodb.Table(os.environ['PAID_ARTICLES_TABLE_NAME'])
             paid_articles = paid_articles_table.scan()['Items']
-            self.assertEqual(len(paid_articles), 0)
+            self.assertEqual(len(paid_articles), 1)
 
     def test_main_ng_minus_value(self):
         with patch('me_articles_purchase_create.UserUtil') as user_util_mock:
@@ -457,7 +596,7 @@ class TestMeArticlesPurchaseCreate(TestCase):
 
             paid_articles_table = self.dynamodb.Table(os.environ['PAID_ARTICLES_TABLE_NAME'])
             paid_articles = paid_articles_table.scan()['Items']
-            self.assertEqual(len(paid_articles), 0)
+            self.assertEqual(len(paid_articles), 1)
 
     def test_main_ng_bigger_than_max_value(self):
         with patch('me_articles_purchase_create.UserUtil') as user_util_mock:
@@ -498,7 +637,7 @@ class TestMeArticlesPurchaseCreate(TestCase):
 
             paid_articles_table = self.dynamodb.Table(os.environ['PAID_ARTICLES_TABLE_NAME'])
             paid_articles = paid_articles_table.scan()['Items']
-            self.assertEqual(len(paid_articles), 0)
+            self.assertEqual(len(paid_articles), 1)
 
     def test_main_ng_not_number(self):
         with patch('me_articles_purchase_create.UserUtil') as user_util_mock:
@@ -539,7 +678,7 @@ class TestMeArticlesPurchaseCreate(TestCase):
 
             paid_articles_table = self.dynamodb.Table(os.environ['PAID_ARTICLES_TABLE_NAME'])
             paid_articles = paid_articles_table.scan()['Items']
-            self.assertEqual(len(paid_articles), 0)
+            self.assertEqual(len(paid_articles), 1)
 
     def test_main_ng_price_is_decimal_value(self):
         with patch('me_articles_purchase_create.UserUtil') as user_util_mock:
@@ -580,7 +719,7 @@ class TestMeArticlesPurchaseCreate(TestCase):
 
             paid_articles_table = self.dynamodb.Table(os.environ['PAID_ARTICLES_TABLE_NAME'])
             paid_articles = paid_articles_table.scan()['Items']
-            self.assertEqual(len(paid_articles), 0)
+            self.assertEqual(len(paid_articles), 1)
 
     @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__create_purchase_transaction',
            MagicMock(return_value='0x0000000000000000000000000000000000000000'))
@@ -626,7 +765,7 @@ class TestMeArticlesPurchaseCreate(TestCase):
             self.assertEqual(response['statusCode'], 200)
             paid_articles_table = self.dynamodb.Table(os.environ['PAID_ARTICLES_TABLE_NAME'])
             paid_articles = paid_articles_table.scan()['Items']
-            self.assertEqual(len(paid_articles), 1)
+            self.assertEqual(len(paid_articles), 2)
 
             expected_purchase_article = {
                 'user_id': event['requestContext']['authorizer']['claims']['cognito:username'],
@@ -636,13 +775,13 @@ class TestMeArticlesPurchaseCreate(TestCase):
                 'article_id': target_article_id,
                 'status': 'fail',
                 'purchase_transaction': '0x0000000000000000000000000000000000000000',
-                'burn_transaction': '0x0000000000000000000000000000000000000001',
                 'sort_key': Decimal(1520150552000003),
                 'created_at': Decimal(int(1520150552.000003)),
                 'history_created_at': Decimal(1520150270)
             }
 
             self.assertEqual(expected_purchase_article, paid_articles[0])
+            self.assertEqual(len(self.unread_notification_manager_table.scan()['Items']), 1)
 
     @patch(
         'test_me_articles_purchase_create.TestMeArticlesPurchaseCreate.'
@@ -828,3 +967,11 @@ class TestMeArticlesPurchaseCreate(TestCase):
         response = requests.post('https://' + os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'] +
                                  '/production/transaction/receipt', auth=auth, headers=headers, data=receipt_payload)
         return response.text
+
+    @staticmethod
+    def __sorted_notifications(notifications):
+        result = []
+        for item in notifications:
+            result.append(sorted(item.items(), key=lambda x: x[0]))
+
+        return sorted(result)
