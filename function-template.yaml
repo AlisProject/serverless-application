@@ -240,6 +240,11 @@ Resources:
       Environment:
         Variables:
           PAID_ARTICLES_TABLE_NAME: !Ref PaidArticlesTableName
+      Handler: handler.lambda_handler
+      MemorySize: 3008
+      Role: !GetAtt LambdaRole.Arn
+      Runtime: python3.6
+      Timeout: 300
   MeArticlesPurchaseCreate:
     Type: "AWS::Lambda::Function"
     Properties:
