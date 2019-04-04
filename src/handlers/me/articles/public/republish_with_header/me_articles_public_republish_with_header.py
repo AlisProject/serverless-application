@@ -39,6 +39,7 @@ class MeArticlesPublicRepublishWithHeader(LambdaBase):
 
         # check price type is integer or decimal
         ParameterUtil.validate_price_params(self.params.get('price'))
+        self.params['price'] = int(self.params['price'])
 
         validate(self.params, self.get_schema())
 
