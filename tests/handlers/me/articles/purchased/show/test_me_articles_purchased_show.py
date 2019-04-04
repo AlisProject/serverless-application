@@ -31,6 +31,14 @@ class TestMeArticlesPurchasedShow(TestCase):
                 'sort_key': 1520150272000001,
                 'overview': 'sample_overview2',
                 'eye_catch_url': 'http://example.com/eye_catch_url',
+            },
+            {
+                'article_id': 'publicId0003',
+                'user_id': 'test03',
+                'status': 'public',
+                'sort_key': 1520150272000002,
+                'overview': 'sample_overview3',
+                'eye_catch_url': 'http://example.com/eye_catch_url',
             }
         ]
         TestsUtil.create_table(cls.dynamodb, os.environ['ARTICLE_INFO_TABLE_NAME'], article_info_items)
@@ -46,6 +54,11 @@ class TestMeArticlesPurchasedShow(TestCase):
                 'article_id': 'publicId0002',
                 'title': 'sample_title2',
                 'body': 'sample_body2',
+            },
+            {
+                'article_id': 'publicId0003',
+                'title': 'sample_title3',
+                'body': 'sample_body3',
             }
         ]
         TestsUtil.create_table(cls.dynamodb, os.environ['ARTICLE_CONTENT_TABLE_NAME'], article_content_items)
@@ -63,13 +76,13 @@ class TestMeArticlesPurchasedShow(TestCase):
                 'price': 100,
             },
             {
-                'article_id': 'publicId0001',
-                'article_user_id': 'test01',
-                'user_id': 'paid_user_id_02',
+                'article_id': 'publicId0003',
+                'article_user_id': 'test03',
+                'user_id': 'paid_user_id_03',
                 'history_created_at': 1520150273,
                 'created_at': 1520150272,
                 'transaction': '0x0000000000000000000000000000000000000001',
-                'status': 'doing',
+                'status': 'done',
                 'sort_key': 1520150272000001,
                 'price': 100,
             }
@@ -140,7 +153,36 @@ class TestMeArticlesPurchasedShow(TestCase):
             self.assertTrue(args[0])
             self.assertTrue(args[1])
             self.assertEqual(kwargs['status'], 'public')
-            self.assertTrue(kwargs['is_purchased'])
+
+    def test_main_ok_with_returned_to_free_article(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'publicId0003'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'paid_user_id_03'
+                    }
+                }
+            }
+        }
+
+        response = MeArticlesPurchasedShow(params, {}, self.dynamodb).main()
+
+        expected_item = {
+            'article_id': 'publicId0003',
+            'user_id': 'test03',
+            'title': 'sample_title3',
+            'body': 'sample_body3',
+            'status': 'public',
+            'overview': 'sample_overview3',
+            'sort_key': 1520150272000002,
+            'eye_catch_url': 'http://example.com/eye_catch_url'
+        }
+
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(json.loads(response['body']), expected_item)
 
     def test_validation_not_paid_user(self):
         params = {
@@ -188,7 +230,7 @@ class TestMeArticlesPurchasedShow(TestCase):
     def test_validation_not_article_exists(self):
         params = {
             'pathParameters': {
-                'article_id': 'publicId0003'
+                'article_id': 'publicId0004'
             }
         }
 
@@ -200,12 +242,19 @@ class TestMeArticlesPurchasedShow(TestCase):
         params = {
             'pathParameters': {
                 'article_id': 'publicId0002'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'paid_user_id_02'
+                    }
+                }
             }
         }
 
         response = MeArticlesPurchasedShow(params, {}, self.dynamodb).main()
 
-        self.assertEqual(response['statusCode'], 404)
+        self.assertEqual(response['statusCode'], 403)
 
     def test_validation_article_id_max(self):
         params = {
