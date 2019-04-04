@@ -795,7 +795,8 @@ class TestMeArticlesPurchaseCreate(TestCase):
            ]))
     @patch('time_util.TimeUtil.generate_sort_key', MagicMock(return_value=1520150552000010))
     @patch('time.time', MagicMock(return_value=1520150552.000003))
-    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__burn_transaction', MagicMock(side_effect=SendTransactionError))
+    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__burn_transaction',
+           MagicMock(side_effect=SendTransactionError))
     def test_purchase_succeeded_but_failed_to_burn(self):
         with patch('me_articles_purchase_create.UserUtil') as user_util_mock:
             user_util_mock.get_cognito_user_info.return_value = {

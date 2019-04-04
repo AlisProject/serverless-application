@@ -5,6 +5,8 @@ import time
 import json
 import requests
 import hashlib
+import logging
+import traceback
 from boto3.dynamodb.conditions import Key
 from db_util import DBUtil
 from user_util import UserUtil
@@ -108,7 +110,9 @@ class MeArticlesPurchaseCreate(LambdaBase):
                 burn_transaction = self.__burn_transaction(price, user_eth_address, auth, headers)
                 # バーンのトランザクションを購入テーブルに格納
                 self.__add_burn_transaction_to_paid_article(burn_transaction, paid_articles_table, article_info)
-        except SendTransactionError:
+        except SendTransactionError as err:
+            logging.fatal(err)
+            traceback.print_exc()
             return {
                 'statusCode': 500,
                 'message': 'Purchase succeeded but failed to burn'
