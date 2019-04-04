@@ -10,6 +10,7 @@ from unittest.mock import patch, MagicMock
 from tests_util import TestsUtil
 from time import sleep
 from aws_requests_auth.aws_auth import AWSRequestsAuth
+from exceptions import SendTransactionError
 
 
 class TestMeArticlesPurchaseCreate(TestCase):
@@ -782,6 +783,87 @@ class TestMeArticlesPurchaseCreate(TestCase):
 
             self.assertEqual(expected_purchase_article, paid_articles[0])
             self.assertEqual(len(self.unread_notification_manager_table.scan()['Items']), 1)
+
+    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__create_purchase_transaction',
+           MagicMock(return_value='0x0000000000000000000000000000000000000000'))
+    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__polling_to_private_chain',
+           MagicMock(return_value='done'))
+    @patch("me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__get_randomhash",
+           MagicMock(side_effect=[
+               "d6f09fcaa6f409b7dde72957fdc17992d570e12ad23e8e968c29ab9aaea4df3d",
+               "0e12ad23e8e968c29ab9aaea4df3dd6f09fcaa6f409b7dde72957fdc17992d57"
+           ]))
+    @patch('time_util.TimeUtil.generate_sort_key', MagicMock(return_value=1520150552000010))
+    @patch('time.time', MagicMock(return_value=1520150552.000003))
+    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__burn_transaction', MagicMock(side_effect=SendTransactionError))
+    def test_purchase_succeeded_but_failed_to_burn(self):
+        with patch('me_articles_purchase_create.UserUtil') as user_util_mock:
+            user_util_mock.get_cognito_user_info.return_value = {
+                'UserAttributes': [{
+                    'Name': 'custom:private_eth_address',
+                    'Value': '0x1111111111111111111111111111111111111111'
+                }]
+            }
+            target_article_id = self.article_info_table_items[3]['article_id']
+            price = str(100 * (10 ** 18))
+            event = {
+                'body': {
+                    'article_id': target_article_id,
+                    'price': price
+                },
+                'requestContext': {
+                    'authorizer': {
+                        'claims': {
+                            'cognito:username': 'purchaseuser001',
+                            'custom:private_eth_address': '0x5d7743a4a6f21593ff6d3d81595f270123456789',
+                            'phone_number_verified': 'true',
+                            'email_verified': 'true'
+                        }
+                    }
+                },
+                'pathParameters': {
+                    'article_id': 'publicId0004'
+                }
+            }
+            event['body'] = json.dumps(event['body'])
+
+            response = MeArticlesPurchaseCreate(event, {}, self.dynamodb, cognito=None).main()
+            # 購入は成功してるが、バーンに失敗している場合のエラー
+            self.assertEqual(response['statusCode'], 500)
+            self.assertEqual(response['message'], 'Purchase succeeded but failed to burn')
+
+            expect_notifications = [
+                {
+                    'notification_id': 'd6f09fcaa6f409b7dde72957fdc17992d570e12ad23e8e968c29ab9aaea4df3d',
+                    'user_id': 'author001',
+                    'acted_user_id': 'purchaseuser001',
+                    'article_id': 'publicId0004',
+                    'article_user_id': 'author001',
+                    'article_title': 'purchase001 titile',
+                    'sort_key': Decimal(1520150552000010),
+                    'type': settings.ARTICLE_PURCHASED_TYPE,
+                    'price': Decimal(100 * (10 ** 18)),
+                    'created_at': Decimal(int(1520150552.000003))
+                }, {
+                    'notification_id': '0e12ad23e8e968c29ab9aaea4df3dd6f09fcaa6f409b7dde72957fdc17992d57',
+                    'user_id': 'purchaseuser001',
+                    'acted_user_id': 'purchaseuser001',
+                    'article_id': 'publicId0004',
+                    'article_user_id': 'author001',
+                    'article_title': 'purchase001 titile',
+                    'sort_key': Decimal(1520150552000010),
+                    'type': settings.ARTICLE_PURCHASE_TYPE,
+                    'price': Decimal(100 * (10 ** 18)),
+                    'created_at': Decimal(int(1520150552.000003))
+                }
+            ]
+
+            # 購入者と著者へ購入通知が行われる
+            actual_notifications = self.notification_table.scan()['Items']
+            self.assertEqual(TestMeArticlesPurchaseCreate.__sorted_notifications(expect_notifications),
+                             TestMeArticlesPurchaseCreate.__sorted_notifications(actual_notifications))
+
+            self.assertEqual(len(self.unread_notification_manager_table.scan()['Items']), 2)
 
     @patch(
         'test_me_articles_purchase_create.TestMeArticlesPurchaseCreate.'

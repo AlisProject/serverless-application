@@ -97,21 +97,27 @@ class MeArticlesPurchaseCreate(LambdaBase):
         # トランザクションの承認状態をpaid_artilcleに格納
         self.__add_transaction_status_to_paid_article(article_info, paid_articles_table, transaction_status)
 
-        # 購入のトランザクションが成功した時のみバーンのトランザクションを発行する
-        if transaction_status == 'done':
-            # 購入に成功した場合、著者の未読通知フラグをTrueにする
-            self.__update_unread_notification_manager(article_info['user_id'])
-            # 著者へ通知を作成
-            self.__notify_author(article_info, user_id)
-            # バーンのトランザクション処理
-            burn_transaction = self.__burn_transaction(price, user_eth_address, auth, headers)
-            # バーンのトランザクションを購入テーブルに格納
-            self.__add_burn_transaction_to_paid_article(burn_transaction, paid_articles_table, article_info)
-
-        # 記事購入者へは購入処理中の場合以外で通知を作成
-        if transaction_status != 'doing':
-            self.__update_unread_notification_manager(user_id)
-            self.__notify_purchaser(article_info, user_id, transaction_status)
+        try:
+            # 購入のトランザクションが成功した時のみバーンのトランザクションを発行する
+            if transaction_status == 'done':
+                # 購入に成功した場合、著者の未読通知フラグをTrueにする
+                self.__update_unread_notification_manager(article_info['user_id'])
+                # 著者へ通知を作成
+                self.__notify_author(article_info, user_id)
+                # バーンのトランザクション処理
+                burn_transaction = self.__burn_transaction(price, user_eth_address, auth, headers)
+                # バーンのトランザクションを購入テーブルに格納
+                self.__add_burn_transaction_to_paid_article(burn_transaction, paid_articles_table, article_info)
+        except SendTransactionError:
+            return {
+                'statusCode': 500,
+                'message': 'Purchase succeeded but failed to burn'
+            }
+        finally:
+            # 記事購入者へは購入処理中の場合以外で通知を作成
+            if transaction_status != 'doing':
+                self.__update_unread_notification_manager(user_id)
+                self.__notify_purchaser(article_info, user_id, transaction_status)
 
         return {
             'statusCode': 200,
