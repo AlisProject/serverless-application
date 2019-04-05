@@ -178,6 +178,19 @@ class TestDBUtil(TestCase):
                 'sort_key': 1520150552000004,
                 'created_at': 1520150552,
                 'history_created_at': 1520150270
+            },
+            {
+                'user_id': 'purchaseuser003',
+                'article_user_id': 'author001',
+                'article_title': 'testtitile002',
+                'price': 100 * 10 ** 18,
+                'article_id': 'articleid003',
+                'status': 'doing',
+                'purchase_transaction': '0x0000000000000000000000000000000000000000',
+                'burn_transaction': '0x0000000000000000000000000000000000000001',
+                'sort_key': 1520150552000005,
+                'created_at': 1520150553,
+                'history_created_at': 1520150270
             }
         ]
         TestsUtil.create_table(cls.dynamodb, os.environ['PAID_ARTICLES_TABLE_NAME'], paid_articles_items)
@@ -551,3 +564,14 @@ class TestDBUtil(TestCase):
             article_id,
             user_id
         ))
+
+    # 記事のステータスがdoingの時にエラーを起こすこと
+    def test_validate_not_exist_article(self):
+        with self.assertRaises(ValidationError):
+            article_id = 'articleid003'
+            user_id = 'purchaseuser003'
+            DBUtil.validate_purchase_process(
+                self.dynamodb,
+                article_id,
+                user_id
+            )
