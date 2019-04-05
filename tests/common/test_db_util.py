@@ -566,7 +566,7 @@ class TestDBUtil(TestCase):
         ))
 
     # 記事のステータスがdoingの時にエラーを起こすこと
-    def test_validate_not_exist_article(self):
+    def test_validate_status_doing(self):
         with self.assertRaises(ValidationError):
             article_id = 'articleid003'
             user_id = 'purchaseuser003'
