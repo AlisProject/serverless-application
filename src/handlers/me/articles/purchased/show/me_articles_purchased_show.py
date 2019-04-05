@@ -46,6 +46,7 @@ class MeArticlesPurchasedShow(LambdaBase):
         article_info = article_info_table.get_item(Key={'article_id': self.params['article_id']}).get('Item')
         article_content = article_content_table.get_item(Key={'article_id': self.params['article_id']}).get('Item')
 
+        # 記事が有料から無料になるケースを考慮し、有料記事の場合のみ body の書き換えを行う
         if 'price' in article_info:
             article_content['body'] = article_content['paid_body']
             article_content.pop('paid_body', None)
