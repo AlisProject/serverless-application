@@ -774,8 +774,8 @@ class TestMeArticlesPublicRepublishWithHeader(TestCase):
 
         for key in article_content_param_names:
             self.assertEqual(expected_item[key], article_content[key])
-        # ヒストリーにpriceの項目が追加されていること
-        self.assertEqual(expected_item['paid_body'], article_history['body'])
+        # ヒストリーにpaid_bodyが追加されていること
+        self.assertEqual(expected_item['paid_body'], article_history['paid_body'])
 
         self.assertEqual(len(article_info_after) - len(article_info_before), 0)
         self.assertEqual(len(article_content_after) - len(article_content_before), 0)

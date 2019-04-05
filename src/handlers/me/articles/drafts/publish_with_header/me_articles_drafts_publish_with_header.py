@@ -176,7 +176,7 @@ class MeArticlesDraftsPublishWithHeader(LambdaBase):
         if self.params.get('price') is not None and self.params.get('paid_body') is not None:
             Item.update({
                 'price': self.params.get('price'),
-                'body': self.params.get('paid_body')
+                'paid_body': self.params.get('paid_body')
             })
 
         article_history_table.put_item(

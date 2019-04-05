@@ -74,14 +74,14 @@ class MeArticlesPublicRepublishWithHeader(LambdaBase):
         # 有料記事の場合
         if is_priced:
             self.__create_paid_article_history(article_content_edit)
-            self.__update_paid_article_info(article_content_edit)
+            self.__update_paid_article_info(article_content_edit, article_info_table)
             self.__update_paid_article_content(article_content_edit)
         # 無料記事の場合
         else:
             # 有料記事から無料記事にする場合を考慮している
             self.__remove_price_and_paid_body(article_info_table, article_content_table)
             self.__create_article_history(article_content_edit)
-            self.__update_article_info(article_content_edit)
+            self.__update_article_info(article_content_edit, article_info_table)
             self.__update_article_content(article_content_edit)
 
         article_content_edit_table.delete_item(Key={'article_id': self.params['article_id']})
@@ -96,9 +96,7 @@ class MeArticlesPublicRepublishWithHeader(LambdaBase):
             'statusCode': 200
         }
 
-    def __update_article_info(self, article_content_edit):
-        article_info_table = self.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
-
+    def __update_article_info(self, article_content_edit, article_info_table):
         article_info_table.update_item(
             Key={
                 'article_id': self.params['article_id'],
@@ -114,8 +112,7 @@ class MeArticlesPublicRepublishWithHeader(LambdaBase):
             }
         )
 
-    def __update_paid_article_info(self, article_content_edit):
-        article_info_table = self.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
+    def __update_paid_article_info(self, article_content_edit, article_info_table):
         info_expression_attribute_values = {
             ':title': article_content_edit['title'],
             ':eye_catch_url': self.params.get('eye_catch_url'),
@@ -182,7 +179,8 @@ class MeArticlesPublicRepublishWithHeader(LambdaBase):
         Item = {
             'article_id': article_content_edit['article_id'],
             'title': article_content_edit['title'],
-            'body': self.params.get('paid_body'),
+            'body': article_content_edit['body'],
+            'paid_body': self.params.get('paid_body'),
             'created_at': int(time.time()),
             'price': self.params.get('price')
         }
@@ -203,7 +201,6 @@ class MeArticlesPublicRepublishWithHeader(LambdaBase):
 
     # article_infoとarticle_contentからpriceとpaid_bodyを削除する
     def __remove_price_and_paid_body(self, article_info_table, article_content_table):
-        # ここは無料の時は常に通すように変更
         article_info_table.update_item(
             Key={
                 'article_id': self.params['article_id'],
