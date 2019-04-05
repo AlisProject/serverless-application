@@ -32,7 +32,7 @@ class MeArticlesPublicRepublishWithHeader(LambdaBase):
     def validate_params(self):
         UserUtil.verified_phone_and_email(self.event)
 
-        # check paid articles params required
+        # both price and paid_body are required
         if (self.params.get('price') is not None and self.params.get('paid_body') is None) or \
            (self.params.get('price') is None and self.params.get('paid_body') is not None):
             raise ValidationError('Both paid body and price are required.')
@@ -69,9 +69,9 @@ class MeArticlesPublicRepublishWithHeader(LambdaBase):
 
         self.__create_article_history(article_content_edit)
 
-        # when price key exists in article_info but params has no price key
+        # 有料記事だった記事を無料記事として公開する場合
         if article_info_before.get('price') is not None and self.params.get('price') is None:
-            self.__make_article_free(article_info_table, article_content_table)
+            self.__remove_price_and_paid_body(article_info_table, article_content_table)
 
         self.__update_article_info(article_content_edit)
         self.__update_article_content(article_content_edit)
@@ -101,6 +101,7 @@ class MeArticlesPublicRepublishWithHeader(LambdaBase):
         info_update_expression = 'set sync_elasticsearch = :one, topic = :topic, tags = ' \
                                  ':tags, eye_catch_url=:eye_catch_url, title = :title'
 
+        # 有料記事を公開する場合
         if self.params.get('price') is not None:
             info_expression_attribute_values.update({
                 ':price': self.params.get('price')
@@ -124,7 +125,7 @@ class MeArticlesPublicRepublishWithHeader(LambdaBase):
             ':body': article_content_edit['body']
         }
 
-        # paid article case
+        # 有料記事を公開する場合
         if self.params.get('price') is not None:
             content_update_expression = "set title = :title, body=:body, paid_body=:paid_body"
             content_expression_attribute_values.update({':paid_body': self.params['paid_body']})
@@ -140,21 +141,24 @@ class MeArticlesPublicRepublishWithHeader(LambdaBase):
     def __create_article_history(self, article_content_edit):
         article_history_table = self.dynamodb.Table(os.environ['ARTICLE_HISTORY_TABLE_NAME'])
         article_body = article_content_edit['body']
-        if self.params.get('paid_body') is not None:
-            article_body = self.params.get('paid_body')
         Item = {
             'article_id': article_content_edit['article_id'],
             'title': article_content_edit['title'],
             'body': article_body,
             'created_at': int(time.time())
         }
-        if self.params.get('price') is not None:
-            Item.update({'price': self.params.get('price')})
+        # 有料記事を公開する場合
+        if self.params.get('price') is not None and self.params.get('paid_body') is not None:
+            Item.update({
+                'price': self.params.get('price'),
+                'body': self.params.get('paid_body')
+            })
         article_history_table.put_item(
             Item=Item
         )
 
-    def __validate_article_content_edit(self, article_content_edit):
+    @staticmethod
+    def __validate_article_content_edit(article_content_edit):
         if article_content_edit is None:
             raise RecordNotFoundError('Record Not Found')
 
@@ -164,7 +168,8 @@ class MeArticlesPublicRepublishWithHeader(LambdaBase):
             if not article_content_edit[param]:
                 raise ValidationError("%s is required" % param)
 
-    def __make_article_free(self, article_info_table, article_content_table):
+    # article_infoからpriceとpaid_bodyを削除する
+    def __remove_price_and_paid_body(self, article_info_table, article_content_table):
         article_info_table.update_item(
             Key={
                 'article_id': self.params['article_id'],

@@ -682,8 +682,7 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
                 'tags': ['A', 'B', 'C', 'D', 'E' * 25],
                 'eye_catch_url': 'https://example.com/test.png',
                 'paid_body': '有料記事の内容',
-                'price': 10 ** 20,
-                'article_id': 'draftId00001'
+                'price': 10 ** 20
             },
             'requestContext': {
                 'authorizer': {
@@ -743,8 +742,7 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
                 'topic': 'crypto',
                 'tags': ['A', 'B', 'C', 'D', 'E' * 25],
                 'eye_catch_url': 'https://example.com/test.png',
-                'price': 10 ** 20,
-                'article_id': 'draftId00001'
+                'price': 10 ** 20
             },
             'requestContext': {
                 'authorizer': {
@@ -765,6 +763,7 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
         self.assertEqual(response['statusCode'], 400)
         self.assertEqual(response['body'], '{"message": "Invalid parameter: Both paid body and price are required."}')
 
+    # priceがparamsに存在しない場合
     def test_validation_paid_article_publish_without_price_ng(self):
         params = {
             'pathParameters': {
@@ -774,8 +773,7 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
                 'topic': 'crypto',
                 'tags': ['A', 'B', 'C', 'D', 'E' * 25],
                 'eye_catch_url': 'https://example.com/test.png',
-                'paid_body': '有料記事のコンテンツです',
-                'article_id': 'draftId00001'
+                'paid_body': '有料記事のコンテンツです'
             },
             'requestContext': {
                 'authorizer': {
@@ -798,6 +796,7 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
 
     @patch('time_util.TimeUtil.generate_sort_key', MagicMock(return_value=1520150552000000))
     @patch('time.time', MagicMock(return_value=1525000000.000000))
+    # 有料記事だった記事を無料記事として公開する場合
     def test_make_article_free_ok(self):
         params = {
             'pathParameters': {
@@ -806,8 +805,7 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
             'body': {
                 'topic': 'crypto',
                 'tags': ['A', 'B', 'C', 'D', 'E' * 25],
-                'eye_catch_url': 'https://example.com/test.png',
-                'article_id': 'draftId00004'
+                'eye_catch_url': 'https://example.com/test.png'
             },
             'requestContext': {
                 'authorizer': {

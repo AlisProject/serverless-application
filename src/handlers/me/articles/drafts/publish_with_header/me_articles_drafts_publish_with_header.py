@@ -34,7 +34,7 @@ class MeArticlesDraftsPublishWithHeader(LambdaBase):
     def validate_params(self):
         UserUtil.verified_phone_and_email(self.event)
 
-        # check paid articles params required
+        # both price and paid_body are required
         if (self.params.get('price') is not None and self.params.get('paid_body') is None) or \
            (self.params.get('price') is None and self.params.get('paid_body') is not None):
             raise ValidationError('Both paid body and price are required.')
@@ -69,9 +69,9 @@ class MeArticlesDraftsPublishWithHeader(LambdaBase):
 
         article_content_table = self.dynamodb.Table(os.environ['ARTICLE_CONTENT_TABLE_NAME'])
 
-        # if article info has price but params has not price
+        # 有料記事だった記事を無料記事として公開する場合
         if article_info_before.get('price') is not None and self.params.get('price') is None:
-            self.__make_article_free(article_info_table, article_content_table)
+            self.__remove_price_and_paid_body(article_info_table, article_content_table)
 
         info_expression_attribute_values = {
             ':article_status': 'public',
@@ -84,12 +84,15 @@ class MeArticlesDraftsPublishWithHeader(LambdaBase):
         info_update_expression = 'set #attr = :article_status, sync_elasticsearch = :one, topic = :topic, tags = ' \
                                  ':tags, eye_catch_url=:eye_catch_url'
 
+        # 有料記事を公開する場合
         if self.params.get('price') is not None:
+            # article_infoのupdateを行う項目にpriceを追加
             info_expression_attribute_values.update({
                 ':price': self.params.get('price')
             })
             info_update_expression = info_update_expression + ', price = :price'
-            self.__update_paid_article_content(article_content_table)
+            # paid_bodyをupdate
+            self.__update_paid_body(article_content_table)
 
         article_info_table.update_item(
             Key={
@@ -140,26 +143,25 @@ class MeArticlesDraftsPublishWithHeader(LambdaBase):
         article_content_table = self.dynamodb.Table(os.environ['ARTICLE_CONTENT_TABLE_NAME'])
         article_content = article_content_table.get_item(Key={'article_id': self.params['article_id']}).get('Item')
 
-        # check whether body is paid_body
-        article_body = article_content['body']
-        if self.params.get('paid_body') is not None:
-            article_body = self.params.get('paid_body')
-
         Item = {
             'article_id': article_content['article_id'],
             'title': article_content['title'],
-            'body': article_body,
+            'body': article_content['body'],
             'created_at': int(time.time())
         }
 
-        if self.params.get('price') is not None:
-            Item.update({'price': self.params.get('price')})
+        # 有料記事を公開する場合
+        if self.params.get('price') is not None and self.params.get('paid_body') is not None:
+            Item.update({
+                'price': self.params.get('price'),
+                'body': self.params.get('paid_body')
+            })
 
         article_history_table.put_item(
             Item=Item
         )
 
-    def __update_paid_article_content(self, article_content_table):
+    def __update_paid_body(self, article_content_table):
         article_content_table.update_item(
             Key={
                 'article_id': self.params['article_id']
@@ -170,7 +172,8 @@ class MeArticlesDraftsPublishWithHeader(LambdaBase):
             }
         )
 
-    def __make_article_free(self, article_info_table, article_content_table):
+    # article_infoからpriceとpaid_bodyを削除する
+    def __remove_price_and_paid_body(self, article_info_table, article_content_table):
         article_info_table.update_item(
             Key={
                 'article_id': self.params['article_id'],

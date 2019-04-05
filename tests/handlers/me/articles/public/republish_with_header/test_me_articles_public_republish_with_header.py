@@ -768,11 +768,13 @@ class TestMeArticlesPublicRepublishWithHeader(TestCase):
         self.assertEqual(article_info['status'], 'public')
         self.assertEqual(article_info['sync_elasticsearch'], 1)
         self.assertEqual(params['requestContext']['authorizer']['claims']['cognito:username'], article_info['user_id'])
+
         for key in article_info_param_names:
             self.assertEqual(expected_item[key], article_info[key])
 
         for key in article_content_param_names:
             self.assertEqual(expected_item[key], article_content[key])
+        # ヒストリーにpriceの項目が追加されていること
         self.assertEqual(expected_item['paid_body'], article_history['body'])
 
         self.assertEqual(len(article_info_after) - len(article_info_before), 0)
@@ -780,6 +782,7 @@ class TestMeArticlesPublicRepublishWithHeader(TestCase):
         self.assertEqual(len(article_content_edit_after) - len(article_content_edit_before), -1)
         self.assertEqual(len(article_history_after) - len(article_history_before), 1)
 
+    # 有料記事だった記事を無料記事として公開する場合
     def test_make_article_free_ok(self):
         params = {
             'pathParameters': {
@@ -840,8 +843,10 @@ class TestMeArticlesPublicRepublishWithHeader(TestCase):
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(article_info['status'], 'public')
         self.assertEqual(article_info['sync_elasticsearch'], 1)
+        # 有料記事が無料記事になっていることの確認
         self.assertEqual(article_info.get('price'), None)
         self.assertEqual(article_content.get('paid_body'), None)
+
         self.assertEqual(params['requestContext']['authorizer']['claims']['cognito:username'], article_info['user_id'])
         for key in article_info_param_names:
             self.assertEqual(expected_item[key], article_info[key])
@@ -855,6 +860,7 @@ class TestMeArticlesPublicRepublishWithHeader(TestCase):
         self.assertEqual(len(article_content_edit_after) - len(article_content_edit_before), -1)
         self.assertEqual(len(article_history_after) - len(article_history_before), 1)
 
+    # paid_bodyがparamsに存在しない場合
     def test_validation_paid_article_republish_without_paid_body_ng(self):
         params = {
             'pathParameters': {
@@ -864,8 +870,7 @@ class TestMeArticlesPublicRepublishWithHeader(TestCase):
                 'topic': 'crypto',
                 'tags': ['A', 'B', 'C', 'D', 'E' * 25],
                 'eye_catch_url': 'https://example.com/test.png',
-                'price': 10 ** 18,
-                'article_id': 'publicId0001'
+                'price': 10 ** 18
             },
             'requestContext': {
                 'authorizer': {
@@ -886,6 +891,7 @@ class TestMeArticlesPublicRepublishWithHeader(TestCase):
         self.assertEqual(response['statusCode'], 400)
         self.assertEqual(response['body'], '{"message": "Invalid parameter: Both paid body and price are required."}')
 
+    # priceがparamsに存在しない場合
     def test_validation_paid_article_republish_without_price_ng(self):
         params = {
             'pathParameters': {
@@ -895,8 +901,7 @@ class TestMeArticlesPublicRepublishWithHeader(TestCase):
                 'topic': 'crypto',
                 'tags': ['A', 'B', 'C', 'D', 'E' * 25],
                 'eye_catch_url': 'https://example.com/test.png',
-                'paid_body': '有料記事のコンテンツです',
-                'article_id': 'publicId0001'
+                'paid_body': '有料記事のコンテンツです'
             },
             'requestContext': {
                 'authorizer': {
