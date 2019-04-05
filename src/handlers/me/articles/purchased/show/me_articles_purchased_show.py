@@ -26,7 +26,6 @@ class MeArticlesPurchasedShow(LambdaBase):
             self.dynamodb,
             self.params['article_id'],
             status='public',
-            is_purchased=True
         )
 
     def exec_main_proc(self):
@@ -47,8 +46,10 @@ class MeArticlesPurchasedShow(LambdaBase):
         article_info = article_info_table.get_item(Key={'article_id': self.params['article_id']}).get('Item')
         article_content = article_content_table.get_item(Key={'article_id': self.params['article_id']}).get('Item')
 
-        article_content['body'] = article_content['paid_body']
-        article_content.pop('paid_body', None)
+        # 記事が有料から無料になるケースを考慮し、無料記事の場合は本文（body）をそのまま返却する
+        if 'price' in article_info:
+            article_content['body'] = article_content['paid_body']
+            article_content.pop('paid_body', None)
 
         article_info.update(article_content)
 
