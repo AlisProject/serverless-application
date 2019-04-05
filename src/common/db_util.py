@@ -42,6 +42,27 @@ class DBUtil:
         return True
 
     @classmethod
+    def validate_latest_price(cls, dynamodb, article_id, price):
+        article_info_table = dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
+        article_info = article_info_table.get_item(Key={'article_id': article_id}).get('Item')
+        if article_info.get('price') is None or price != article_info['price']:
+            raise RecordNotFoundError('Price was changed')
+
+        return True
+
+    # 購入済み、あるいは購入処理中のデータが1件以上存在する場合は例外発生
+    @classmethod
+    def validate_not_purchased(cls, dynamodb, article_id, user_id):
+        paid_articles_table = dynamodb.Table(os.environ['PAID_ARTICLES_TABLE_NAME'])
+        response = paid_articles_table.query(
+            IndexName='article_id-user_id-index',
+            KeyConditionExpression=Key('article_id').eq(article_id) & Key('user_id').eq(user_id)
+        )
+        if len([i for i in response['Items'] if i.get('status') == 'doing' or i.get('status') == 'done']) >= 1:
+            raise ValidationError('You have already purchased')
+        return True
+
+    @classmethod
     def __validate_version(cls, article_info, version):
         # version が 1 の場合は設定されていないことを確認
         if version == 1:

@@ -245,6 +245,27 @@ Resources:
       Role: !GetAtt LambdaRole.Arn
       Runtime: python3.6
       Timeout: 300
+  MeArticlesPurchaseCreate:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Code: ./deploy/me_articles_purchase_create.zip
+      Environment:
+        Variables:
+          PAID_ARTICLES_TABLE_NAME: !Ref PaidArticlesTableName
+          NOTIFICATION_TABLE_NAME: !Ref NotificationTableName
+          UNREAD_NOTIFICATION_MANAGER_TABLE_NAME: !Ref UnreadNotificationManagerTableName
+          ARTICLE_INFO_TABLE_NAME: !Ref ArticleInfoTableName
+          ARTICLE_HISTORY_TABLE_NAME: !Ref ArticleHistoryTableName
+          PRIVATE_CHAIN_AWS_ACCESS_KEY: !Ref PrivateChainAwsAccessKey
+          PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY: !Ref PrivateChainAwsSecretAccessKey
+          PRIVATE_CHAIN_EXECUTE_API_HOST: !Ref PrivateChainExecuteApiHost
+          COGNITO_USER_POOL_ID: !Ref CognitoUserPoolId
+          COGNITO_USER_POOL_APP_ID: !Ref CognitoUserPoolAppId
+      Handler: handler.lambda_handler
+      MemorySize: 3008
+      Role: !GetAtt LambdaRole.Arn
+      Runtime: python3.6
+      Timeout: 300
   MeArticlesPurchasedIndex:
     Type: "AWS::Lambda::Function"
     Properties:
@@ -292,3 +313,7 @@ Outputs:
     Value: !GetAtt MeArticlesPurchasedIndex.Arn
     Export:
       Name: !Sub "${AlisAppId}-MeArticlesPurchasedIndex"
+  MeArticlesPurchaseCreate:
+    Value: !GetAtt MeArticlesPurchaseCreate.Arn
+    Export:
+      Name: !Sub "${AlisAppId}-MeArticlesPurchaseCreate"
