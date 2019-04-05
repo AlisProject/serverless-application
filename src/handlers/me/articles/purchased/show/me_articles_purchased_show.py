@@ -39,9 +39,13 @@ class MeArticlesPurchasedShow(LambdaBase):
         paid_articles = paid_articles_table.query(
             IndexName='article_id-user_id-index',
             KeyConditionExpression=Key('article_id').eq(self.params['article_id']) & Key('user_id').eq(user_id),
-        )['Items']
-        if len(paid_articles) == 0 or paid_articles[0]['status'] != 'done':
+        ).get('Items')
+
+        if len(paid_articles) == 0:
             raise NotAuthorizedError('Forbidden')
+        for paid_article in paid_articles:
+            if 'status' in paid_article and paid_article['status'] != 'done':
+                raise NotAuthorizedError('Forbidden')
 
         article_info = article_info_table.get_item(Key={'article_id': self.params['article_id']}).get('Item')
         article_content = article_content_table.get_item(Key={'article_id': self.params['article_id']}).get('Item')

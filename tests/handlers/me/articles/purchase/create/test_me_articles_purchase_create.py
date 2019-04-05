@@ -10,7 +10,6 @@ from unittest.mock import patch, MagicMock
 from tests_util import TestsUtil
 from time import sleep
 from aws_requests_auth.aws_auth import AWSRequestsAuth
-from exceptions import SendTransactionError
 
 
 class TestMeArticlesPurchaseCreate(TestCase):
@@ -796,7 +795,7 @@ class TestMeArticlesPurchaseCreate(TestCase):
     @patch('time_util.TimeUtil.generate_sort_key', MagicMock(return_value=1520150552000010))
     @patch('time.time', MagicMock(return_value=1520150552.000003))
     @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__burn_transaction',
-           MagicMock(side_effect=SendTransactionError))
+           MagicMock(side_effect=Exception()))
     def test_purchase_succeeded_but_failed_to_burn(self):
         with patch('me_articles_purchase_create.UserUtil') as user_util_mock:
             user_util_mock.get_cognito_user_info.return_value = {
@@ -828,10 +827,7 @@ class TestMeArticlesPurchaseCreate(TestCase):
             }
             event['body'] = json.dumps(event['body'])
 
-            response = MeArticlesPurchaseCreate(event, {}, self.dynamodb, cognito=None).main()
-            # 購入は成功してるが、バーンに失敗している場合のエラー
-            self.assertEqual(response['statusCode'], 500)
-            self.assertEqual(response['message'], 'Purchase succeeded but failed to burn')
+            MeArticlesPurchaseCreate(event, {}, self.dynamodb, cognito=None).main()
 
             expect_notifications = [
                 {

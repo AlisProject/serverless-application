@@ -34,7 +34,7 @@ class MeArticlesPurchaseCreate(LambdaBase):
 
     def validate_params(self):
         UserUtil.verified_phone_and_email(self.event)
-
+        # single
         # check price type is integer or decimal
         try:
             self.params['price'] = int(self.params['price'])
@@ -46,21 +46,19 @@ class MeArticlesPurchaseCreate(LambdaBase):
         if price.is_integer() is False:
             raise ValidationError('Decimal value is not allowed')
 
-        # single
         validate(self.params, self.get_schema())
+
         # relation
         DBUtil.validate_article_existence(
             self.dynamodb,
             self.params['article_id'],
             status='public'
         )
-        # validate latest price
         DBUtil.validate_latest_price(
             self.dynamodb,
             self.params['article_id'],
             self.params['price']
         )
-
         DBUtil.validate_already_purchase(
             self.dynamodb,
             self.params['article_id'],
@@ -89,19 +87,21 @@ class MeArticlesPurchaseCreate(LambdaBase):
                                aws_service='execute-api')
         headers = {'content-type': 'application/json'}
 
+        sort_key = TimeUtil.generate_sort_key()
+
         # 購入のトランザクション処理
         purchase_transaction = self.__create_purchase_transaction(auth, headers, user_eth_address,
                                                                   article_user_eth_address, price)
-        # 購入テーブルを作成
-        self.__purchase_article(paid_articles_table, article_info, purchase_transaction)
+        # 購入記事データを作成
+        self.__create_paid_article(paid_articles_table, article_info, purchase_transaction, sort_key)
         # プライベートチェーンへのポーリングを行いトランザクションの承認状態を取得
         transaction_status = self.__polling_to_private_chain(purchase_transaction, auth, headers)
         # トランザクションの承認状態をpaid_artilcleに格納
-        self.__add_transaction_status_to_paid_article(article_info, paid_articles_table, transaction_status)
+        self.__update_transaction_status(article_info, paid_articles_table, transaction_status, sort_key)
 
-        try:
-            # 購入のトランザクションが成功した時のみバーンのトランザクションを発行する
-            if transaction_status == 'done':
+        # 購入のトランザクションが成功した時のみバーンのトランザクションを発行する
+        if transaction_status == 'done':
+            try:
                 # 購入に成功した場合、著者の未読通知フラグをTrueにする
                 self.__update_unread_notification_manager(article_info['user_id'])
                 # 著者へ通知を作成
@@ -109,19 +109,15 @@ class MeArticlesPurchaseCreate(LambdaBase):
                 # バーンのトランザクション処理
                 burn_transaction = self.__burn_transaction(price, user_eth_address, auth, headers)
                 # バーンのトランザクションを購入テーブルに格納
-                self.__add_burn_transaction_to_paid_article(burn_transaction, paid_articles_table, article_info)
-        except SendTransactionError as err:
-            logging.fatal(err)
-            traceback.print_exc()
-            return {
-                'statusCode': 500,
-                'message': 'Purchase succeeded but failed to burn'
-            }
-        finally:
-            # 記事購入者へは購入処理中の場合以外で通知を作成
-            if transaction_status != 'doing':
-                self.__update_unread_notification_manager(user_id)
-                self.__notify_purchaser(article_info, user_id, transaction_status)
+                self.__add_burn_transaction_to_paid_article(burn_transaction, paid_articles_table,
+                                                            article_info, sort_key)
+            except Exception as err:
+                logging.fatal(err)
+                traceback.print_exc()
+        # 記事購入者へは購入処理中の場合以外で通知を作成
+        if transaction_status == 'done' or transaction_status == 'fail':
+            self.__update_unread_notification_manager(user_id)
+            self.__notify_purchaser(article_info, user_id, transaction_status)
 
         return {
             'statusCode': 200,
@@ -143,6 +139,9 @@ class MeArticlesPurchaseCreate(LambdaBase):
         # purchase article transaction
         response = requests.post('https://' + os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'] +
                                  '/production/wallet/tip', auth=auth, headers=headers, data=purchase_payload)
+        # validate status code
+        if response.status_code != 200:
+            raise SendTransactionError('status code not 200')
 
         # exists error
         if json.loads(response.text).get('error'):
@@ -150,14 +149,14 @@ class MeArticlesPurchaseCreate(LambdaBase):
 
         return json.loads(response.text).get('result').replace('"', '')
 
-    def __purchase_article(self, paid_articles_table, article_info, purchase_transaction):
+    def __create_paid_article(self, paid_articles_table, article_info, purchase_transaction, sort_key):
         article_history_table = self.dynamodb.Table(os.environ['ARTICLE_HISTORY_TABLE_NAME'])
         article_histories = article_history_table.query(
             KeyConditionExpression=Key('article_id').eq(self.params['article_id']),
             ScanIndexForward=False
         )['Items']
-        history_created_at = ''
-        # 降順でarticle_infoの価格と同じ一番新しい記事historyデータを取得する
+        history_created_at = None
+        # 一番新しい記事historyデータを取得する
         for Item in json.loads(json.dumps(article_histories, cls=DecimalEncoder)):
             if Item.get('price') is not None and Item.get('price') == article_info['price']:
                 history_created_at = Item.get('created_at')
@@ -170,7 +169,7 @@ class MeArticlesPurchaseCreate(LambdaBase):
             'article_user_id': article_info['user_id'],
             'article_title': article_info['title'],
             'purchase_transaction': purchase_transaction,
-            'sort_key': TimeUtil.generate_sort_key(),
+            'sort_key': sort_key,
             'price': self.params['price'],
             'history_created_at': history_created_at,
             'status': 'doing',
@@ -198,51 +197,41 @@ class MeArticlesPurchaseCreate(LambdaBase):
         response = requests.post('https://' + os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'] +
                                  '/production/wallet/tip', auth=auth, headers=headers, data=burn_payload)
 
+        # validate status code
+        if response.status_code != 200:
+            raise SendTransactionError('status code not 200')
+
         # exists error
         if json.loads(response.text).get('error'):
             raise SendTransactionError(json.loads(response.text).get('error'))
 
         return json.loads(response.text).get('result').replace('"', '')
 
-    def __add_burn_transaction_to_paid_article(self, burn_transaction, paid_articles_table, article_info):
-        paid_article = {
+    @staticmethod
+    def __add_burn_transaction_to_paid_article(burn_transaction, paid_articles_table, article_info, sort_key):
+        burn_transaction = {
             ':burn_transaction': burn_transaction
         }
-        user_id = self.event['requestContext']['authorizer']['claims']['cognito:username']
-        paid_articles = paid_articles_table.query(
-            IndexName='article_id-user_id-index',
-            KeyConditionExpression=Key('article_id').eq(article_info['article_id']) & Key('user_id').eq(user_id),
-        )['Items']
-        if len(paid_articles) != 0:
-            paid_articles_table.update_item(
-                Key={
-                    'article_id': article_info['article_id'],
-                    'sort_key': paid_articles[0]['sort_key']
-                },
-                UpdateExpression="set burn_transaction = :burn_transaction",
-                ExpressionAttributeValues=paid_article
-            )
-        else:
-            raise RecordNotFoundError('Record Not Found: paid_articles')
+        paid_articles_table.update_item(
+            Key={
+                'article_id': article_info['article_id'],
+                'sort_key': sort_key
+            },
+            UpdateExpression="set burn_transaction = :burn_transaction",
+            ExpressionAttributeValues=burn_transaction
+        )
 
-    def __add_transaction_status_to_paid_article(self, article_info, paid_articles_table, transaction_status):
-        user_id = self.event['requestContext']['authorizer']['claims']['cognito:username']
-        paid_articles = paid_articles_table.query(
-            IndexName='article_id-user_id-index',
-            KeyConditionExpression=Key('article_id').eq(article_info['article_id']) & Key('user_id').eq(user_id),
-        )['Items']
-        if len(paid_articles) != 0:
-            paid_articles_table.update_item(
-                Key={
-                    'article_id': article_info['article_id'],
-                    'sort_key': paid_articles[0]['sort_key']
-                },
-                UpdateExpression="set #attr = :transaction_status",
-                ExpressionAttributeNames={'#attr': 'status'},
-                ExpressionAttributeValues={':transaction_status': transaction_status}
-            )
-        else:
-            raise RecordNotFoundError('Record Not Found: paid_articles')
+    @staticmethod
+    def __update_transaction_status(article_info, paid_articles_table, transaction_status, sort_key):
+        paid_articles_table.update_item(
+            Key={
+                'article_id': article_info['article_id'],
+                'sort_key': sort_key
+            },
+            UpdateExpression="set #attr = :transaction_status",
+            ExpressionAttributeNames={'#attr': 'status'},
+            ExpressionAttributeValues={':transaction_status': transaction_status}
+        )
 
     def __get_user_private_eth_address(self, user_id):
         # user_id に紐づく private_eth_address を取得
@@ -263,6 +252,11 @@ class MeArticlesPurchaseCreate(LambdaBase):
         )
         response = requests.post('https://' + os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'] +
                                  '/production/transaction/receipt', auth=auth, headers=headers, data=receipt_payload)
+
+        # validate status code
+        if response.status_code != 200:
+            raise SendTransactionError('status code not 200')
+
         return response.text
 
     def __polling_to_private_chain(self, purchase_transaction, auth, headers):
