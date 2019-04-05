@@ -74,8 +74,8 @@ class MeArticlesDraftsPublishWithHeader(LambdaBase):
 
         # 有料記事の場合
         if is_priced:
-            self.__update_paid_article_info(article_info_table)
             self.__update_paid_body(article_content_table)
+            self.__update_paid_article_info(article_info_table)
         # 無料記事の場合
         else:
             # 有料記事から無料記事にする場合のみを考慮している

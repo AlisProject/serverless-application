@@ -74,15 +74,15 @@ class MeArticlesPublicRepublishWithHeader(LambdaBase):
         # 有料記事の場合
         if is_priced:
             self.__create_paid_article_history(article_content_edit)
-            self.__update_paid_article_info(article_content_edit, article_info_table)
             self.__update_paid_article_content(article_content_edit)
+            self.__update_paid_article_info(article_content_edit, article_info_table)
         # 無料記事の場合
         else:
             # 有料記事から無料記事にする場合を考慮している
             self.__remove_price_and_paid_body(article_info_table, article_content_table)
             self.__create_article_history(article_content_edit)
-            self.__update_article_info(article_content_edit, article_info_table)
             self.__update_article_content(article_content_edit)
+            self.__update_article_info(article_content_edit, article_info_table)
 
         article_content_edit_table.delete_item(Key={'article_id': self.params['article_id']})
 
