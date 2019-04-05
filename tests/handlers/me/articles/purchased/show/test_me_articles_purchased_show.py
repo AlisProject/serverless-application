@@ -72,6 +72,39 @@ class TestMeArticlesPurchasedShow(TestCase):
                 'status': 'doing',
                 'sort_key': 1520150272000001,
                 'price': 100,
+            },
+            {
+                'article_id': 'publicId0001',
+                'article_user_id': 'test01',
+                'user_id': 'paid_user_id_01',
+                'history_created_at': 1520150271,
+                'created_at': 1520150271,
+                'transaction': '0x0000000000000000000000000000000000000002',
+                'status': 'fail',
+                'sort_key': 1520150271000001,
+                'price': 100
+            },
+            {
+                'article_id': 'publicId0001',
+                'article_user_id': 'test01',
+                'user_id': 'paid_user_id_03',
+                'history_created_at': 1520150271,
+                'created_at': 1520150275,
+                'transaction': '0x0000000000000000000000000000000000000002',
+                'status': 'doing',
+                'sort_key': 1520150275000001,
+                'price': 100
+            },
+            {
+                'article_id': 'publicId0001',
+                'article_user_id': 'test01',
+                'user_id': 'paid_user_id_03',
+                'history_created_at': 1520150271,
+                'created_at': 1520150276,
+                'transaction': '0x0000000000000000000000000000000000000002',
+                'status': 'fail',
+                'sort_key': 1520150276000001,
+                'price': 100
             }
         ]
         TestsUtil.create_table(cls.dynamodb, os.environ['PAID_ARTICLES_TABLE_NAME'], paid_articles_items)
@@ -169,6 +202,44 @@ class TestMeArticlesPurchasedShow(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'paid_user_id_02'
+                    }
+                }
+            }
+        }
+
+        response = MeArticlesPurchasedShow(params, {}, self.dynamodb).main()
+
+        self.assertEqual(response['statusCode'], 403)
+
+    # statusがdoneのpaid_articleが一件の場合
+    def test_validation_status_is_done(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'publicId0001'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'paid_user_id_01'
+                    }
+                }
+            }
+        }
+
+        response = MeArticlesPurchasedShow(params, {}, self.dynamodb).main()
+
+        self.assertEqual(response['statusCode'], 200)
+
+    # statusがdoneのpaidarticleが一件も存在しない場合
+    def test_all_paid_article_status_not_done(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'publicId0001'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'paid_user_id_03'
                     }
                 }
             }

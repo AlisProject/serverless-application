@@ -57,9 +57,8 @@ class DBUtil:
             IndexName='article_id-user_id-index',
             KeyConditionExpression=Key('article_id').eq(article_id) & Key('user_id').eq(user_id)
         )
-        for item in response['Items']:
-            if item['status'] == 'doing' or item['status'] == 'done':
-                raise ValidationError('You have already purchased')
+        if len([i for i in response['Items'] if i.get('status') == 'doing' or i.get('status') == 'done']) >= 1:
+            raise ValidationError('You have already purchased')
         return True
 
     @classmethod

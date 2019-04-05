@@ -541,3 +541,13 @@ class TestDBUtil(TestCase):
             article_id,
             user_id
         ))
+
+    # 存在しない記事IDの場合にも正常終了すること
+    def test_validate_not_exist_article(self):
+        article_id = 'articleidxxx'
+        user_id = 'purchaseuser001'
+        self.assertTrue(DBUtil.validate_already_purchase(
+            self.dynamodb,
+            article_id,
+            user_id
+        ))

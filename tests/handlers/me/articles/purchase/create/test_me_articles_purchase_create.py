@@ -2,14 +2,11 @@ import os
 import json
 import settings
 import re
-import requests
 from decimal import Decimal
 from unittest import TestCase
 from me_articles_purchase_create import MeArticlesPurchaseCreate
 from unittest.mock import patch, MagicMock
 from tests_util import TestsUtil
-from time import sleep
-from aws_requests_auth.aws_auth import AWSRequestsAuth
 
 
 class TestMeArticlesPurchaseCreate(TestCase):
@@ -158,7 +155,6 @@ class TestMeArticlesPurchaseCreate(TestCase):
 
             event = {
                 'body': {
-                    'article_id': target_article_id,
                     'price': price
                 },
                 'requestContext': {
@@ -254,7 +250,6 @@ class TestMeArticlesPurchaseCreate(TestCase):
 
             event = {
                 'body': {
-                    'article_id': target_article_id,
                     'price': price
                 },
                 'requestContext': {
@@ -268,7 +263,7 @@ class TestMeArticlesPurchaseCreate(TestCase):
                     }
                 },
                 'pathParameters': {
-                    'article_id': 'publicId0001'
+                    'article_id': 'publicId0003'
                 }
             }
             event['body'] = json.dumps(event['body'])
@@ -317,7 +312,6 @@ class TestMeArticlesPurchaseCreate(TestCase):
 
             event = {
                 'body': {
-                    'article_id': target_article_id,
                     'price': price
                 },
                 'requestContext': {
@@ -380,7 +374,6 @@ class TestMeArticlesPurchaseCreate(TestCase):
 
             event = {
                 'body': {
-                    'article_id': target_article_id,
                     'price': price
                 },
                 'requestContext': {
@@ -443,7 +436,6 @@ class TestMeArticlesPurchaseCreate(TestCase):
 
             event = {
                 'body': {
-                    'article_id': target_article_id,
                     'price': price
                 },
                 'requestContext': {
@@ -489,7 +481,6 @@ class TestMeArticlesPurchaseCreate(TestCase):
 
             event = {
                 'body': {
-                    'article_id': target_article_id,
                     'price': price
                 },
                 'requestContext': {
@@ -530,7 +521,6 @@ class TestMeArticlesPurchaseCreate(TestCase):
 
             event = {
                 'body': {
-                    'article_id': target_article_id,
                     'price': price
                 },
                 'requestContext': {
@@ -571,7 +561,6 @@ class TestMeArticlesPurchaseCreate(TestCase):
 
             event = {
                 'body': {
-                    'article_id': target_article_id,
                     'price': price
                 },
                 'requestContext': {
@@ -612,7 +601,6 @@ class TestMeArticlesPurchaseCreate(TestCase):
 
             event = {
                 'body': {
-                    'article_id': target_article_id,
                     'price': price
                 },
                 'requestContext': {
@@ -653,7 +641,6 @@ class TestMeArticlesPurchaseCreate(TestCase):
 
             event = {
                 'body': {
-                    'article_id': target_article_id,
                     'price': price
                 },
                 'requestContext': {
@@ -694,7 +681,6 @@ class TestMeArticlesPurchaseCreate(TestCase):
 
             event = {
                 'body': {
-                    'article_id': target_article_id,
                     'price': price
                 },
                 'requestContext': {
@@ -742,7 +728,6 @@ class TestMeArticlesPurchaseCreate(TestCase):
 
             event = {
                 'body': {
-                    'article_id': target_article_id,
                     'price': price
                 },
                 'requestContext': {
@@ -756,13 +741,14 @@ class TestMeArticlesPurchaseCreate(TestCase):
                     }
                 },
                 'pathParameters': {
-                    'article_id': 'publicId0001'
+                    'article_id': 'publicId0003'
                 }
             }
             event['body'] = json.dumps(event['body'])
 
             response = MeArticlesPurchaseCreate(event, {}, self.dynamodb, cognito=None).main()
             self.assertEqual(response['statusCode'], 200)
+            self.assertEqual(json.loads(response['body']), {"status": "fail"})
             paid_articles_table = self.dynamodb.Table(os.environ['PAID_ARTICLES_TABLE_NAME'])
             paid_articles = paid_articles_table.scan()['Items']
             self.assertEqual(len(paid_articles), 2)
@@ -804,11 +790,9 @@ class TestMeArticlesPurchaseCreate(TestCase):
                     'Value': '0x1111111111111111111111111111111111111111'
                 }]
             }
-            target_article_id = self.article_info_table_items[3]['article_id']
             price = str(100 * (10 ** 18))
             event = {
                 'body': {
-                    'article_id': target_article_id,
                     'price': price
                 },
                 'requestContext': {
@@ -827,7 +811,12 @@ class TestMeArticlesPurchaseCreate(TestCase):
             }
             event['body'] = json.dumps(event['body'])
 
-            MeArticlesPurchaseCreate(event, {}, self.dynamodb, cognito=None).main()
+            response = MeArticlesPurchaseCreate(event, {}, self.dynamodb, cognito=None).main()
+            self.assertEqual(response['statusCode'], 200)
+            self.assertEqual(json.loads(response['body']), {"status": "done"})
+            paid_articles_table = self.dynamodb.Table(os.environ['PAID_ARTICLES_TABLE_NAME'])
+            paid_articles = paid_articles_table.scan()['Items']
+            self.assertEqual(len(paid_articles), 2)
 
             expect_notifications = [
                 {
@@ -863,57 +852,101 @@ class TestMeArticlesPurchaseCreate(TestCase):
             self.assertEqual(len(self.unread_notification_manager_table.scan()['Items']), 2)
 
     @patch(
-        'test_me_articles_purchase_create.TestMeArticlesPurchaseCreate.'
-        '_TestMeArticlesPurchaseCreate__check_transaction_confirmation',
+        'me_articles_purchase_create.MeArticlesPurchaseCreate.'
+        '_MeArticlesPurchaseCreate__check_transaction_confirmation',
         MagicMock(return_value=json.dumps({
             "jsonrpc": "2.0",
             "result": None,
             "id": 1
         })))
+    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__create_purchase_transaction',
+           MagicMock(return_value='0x0000000000000000000000000000000000000000'))
+    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__burn_transaction',
+           MagicMock(return_value='0x0000000000000000000000000000000000000001'))
     def test_polling_to_private_chain_tran_status_doing(self):
-        purchase_transaction = '0x0000000000000000000000000000000000000000',
+        with patch('me_articles_purchase_create.UserUtil') as user_util_mock:
+            user_util_mock.get_cognito_user_info.return_value = {
+                'UserAttributes': [{
+                    'Name': 'custom:private_eth_address',
+                    'Value': '0x1111111111111111111111111111111111111111'
+                }]
+            }
+            price = str(100 * (10 ** 18))
+            event = {
+                'body': {
+                    'price': price
+                },
+                'requestContext': {
+                    'authorizer': {
+                        'claims': {
+                            'cognito:username': 'purchaseuser001',
+                            'custom:private_eth_address': '0x5d7743a4a6f21593ff6d3d81595f270123456789',
+                            'phone_number_verified': 'true',
+                            'email_verified': 'true'
+                        }
+                    }
+                },
+                'pathParameters': {
+                    'article_id': 'publicId0004'
+                }
+            }
+            event['body'] = json.dumps(event['body'])
 
-        auth = AWSRequestsAuth(aws_access_key=os.environ['PRIVATE_CHAIN_AWS_ACCESS_KEY'],
-                               aws_secret_access_key=os.environ['PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY'],
-                               aws_host=os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'],
-                               aws_region='ap-northeast-1',
-                               aws_service='execute-api')
+            response = MeArticlesPurchaseCreate(event, {}, self.dynamodb, cognito=None).main()
 
-        headers = {'content-type': 'application/json'}
+            self.assertEqual(response['statusCode'], 200)
+            self.assertEqual(json.loads(response['body']), {"status": "doing"})
 
-        status = TestMeArticlesPurchaseCreate.__polling_to_private_chain(purchase_transaction, auth, headers)
-
-        self.assertEqual(status, 'doing')
-
-    @patch(
-        'test_me_articles_purchase_create.TestMeArticlesPurchaseCreate.'
-        '_TestMeArticlesPurchaseCreate__check_transaction_confirmation',
-        MagicMock(return_value=json.dumps({
-            "jsonrpc": "2.0",
-            "error": {
-                "code": -32600,
-                "message": "Invalid request"
-            },
-            "id": None
-        })))
+    @patch("me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__check_transaction_confirmation",
+           MagicMock(return_value=json.dumps({
+               "jsonrpc": "2.0",
+               "error": {
+                   "code": -32600,
+                   "message": "Invalid request"
+               },
+               "id": None
+           })))
+    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__create_purchase_transaction',
+           MagicMock(return_value='0x0000000000000000000000000000000000000000'))
+    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__burn_transaction',
+           MagicMock(return_value='0x0000000000000000000000000000000000000001'))
     def test_polling_to_private_chain_tran_status_error(self):
-        purchase_transaction = '0x0000000000000000000000000000000000000000'
+        with patch('me_articles_purchase_create.UserUtil') as user_util_mock:
+            user_util_mock.get_cognito_user_info.return_value = {
+                'UserAttributes': [{
+                    'Name': 'custom:private_eth_address',
+                    'Value': '0x1111111111111111111111111111111111111111'
+                }]
+            }
+            price = str(100 * (10 ** 18))
+            event = {
+                'body': {
+                    'price': price
+                },
+                'requestContext': {
+                    'authorizer': {
+                        'claims': {
+                            'cognito:username': 'purchaseuser001',
+                            'custom:private_eth_address': '0x5d7743a4a6f21593ff6d3d81595f270123456789',
+                            'phone_number_verified': 'true',
+                            'email_verified': 'true'
+                        }
+                    }
+                },
+                'pathParameters': {
+                    'article_id': 'publicId0004'
+                }
+            }
+            event['body'] = json.dumps(event['body'])
 
-        auth = AWSRequestsAuth(aws_access_key=os.environ['PRIVATE_CHAIN_AWS_ACCESS_KEY'],
-                               aws_secret_access_key=os.environ['PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY'],
-                               aws_host=os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'],
-                               aws_region='ap-northeast-1',
-                               aws_service='execute-api')
+            response = MeArticlesPurchaseCreate(event, {}, self.dynamodb, cognito=None).main()
 
-        headers = {'content-type': 'application/json'}
-
-        status = TestMeArticlesPurchaseCreate.__polling_to_private_chain(purchase_transaction, auth, headers)
-
-        self.assertEqual(status, 'fail')
+            self.assertEqual(response['statusCode'], 200)
+            self.assertEqual(json.loads(response['body']), {"status": "fail"})
 
     @patch(
-        'test_me_articles_purchase_create.TestMeArticlesPurchaseCreate.'
-        '_TestMeArticlesPurchaseCreate__check_transaction_confirmation',
+        'me_articles_purchase_create.MeArticlesPurchaseCreate.'
+        '_MeArticlesPurchaseCreate__check_transaction_confirmation',
         MagicMock(return_value=json.dumps({
             "jsonrpc": "2.0",
             "id": 1,
@@ -951,24 +984,47 @@ class TestMeArticlesPurchaseCreate(TestCase):
                 'transactionHash': '0xa5999131185ec77a1e9f640a35149633c988b91990e4b18a506250dc2992d8fb',
                 'transactionIndex': '0x0'
             }})))
+    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__create_purchase_transaction',
+           MagicMock(return_value='0x0000000000000000000000000000000000000000'))
+    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__burn_transaction',
+           MagicMock(return_value='0x0000000000000000000000000000000000000001'))
     def test_polling_to_private_chain_tran_status_done(self):
-        purchase_transaction = '0x0000000000000000000000000000000000000000'
+        with patch('me_articles_purchase_create.UserUtil') as user_util_mock:
+            user_util_mock.get_cognito_user_info.return_value = {
+                'UserAttributes': [{
+                    'Name': 'custom:private_eth_address',
+                    'Value': '0x1111111111111111111111111111111111111111'
+                }]
+            }
+            price = str(100 * (10 ** 18))
+            event = {
+                'body': {
+                    'price': price
+                },
+                'requestContext': {
+                    'authorizer': {
+                        'claims': {
+                            'cognito:username': 'purchaseuser001',
+                            'custom:private_eth_address': '0x5d7743a4a6f21593ff6d3d81595f270123456789',
+                            'phone_number_verified': 'true',
+                            'email_verified': 'true'
+                        }
+                    }
+                },
+                'pathParameters': {
+                    'article_id': 'publicId0004'
+                }
+            }
+            event['body'] = json.dumps(event['body'])
 
-        auth = AWSRequestsAuth(aws_access_key=os.environ['PRIVATE_CHAIN_AWS_ACCESS_KEY'],
-                               aws_secret_access_key=os.environ['PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY'],
-                               aws_host=os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'],
-                               aws_region='ap-northeast-1',
-                               aws_service='execute-api')
+            response = MeArticlesPurchaseCreate(event, {}, self.dynamodb, cognito=None).main()
 
-        headers = {'content-type': 'application/json'}
-
-        status = TestMeArticlesPurchaseCreate.__polling_to_private_chain(purchase_transaction, auth, headers)
-
-        self.assertEqual(status, 'done')
+            self.assertEqual(response['statusCode'], 200)
+            self.assertEqual(json.loads(response['body']), {"status": "done"})
 
     @patch(
-        'test_me_articles_purchase_create.TestMeArticlesPurchaseCreate.'
-        '_TestMeArticlesPurchaseCreate__check_transaction_confirmation',
+        'me_articles_purchase_create.MeArticlesPurchaseCreate.'
+        '_MeArticlesPurchaseCreate__check_transaction_confirmation',
         MagicMock(return_value=json.dumps({
             "jsonrpc": "2.0",
             "id": 1,
@@ -1001,51 +1057,43 @@ class TestMeArticlesPurchaseCreate(TestCase):
                 'transactionHash': '0xa5999131185ec77a1e9f640a35149633c988b91990e4b18a506250dc2992d8fb',
                 'transactionIndex': '0x0'
             }})))
+    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__create_purchase_transaction',
+           MagicMock(return_value='0x0000000000000000000000000000000000000000'))
+    @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__burn_transaction',
+           MagicMock(return_value='0x0000000000000000000000000000000000000001'))
     def test_polling_to_private_chain_infinity_loop_break_ok(self):
-        purchase_transaction = '0x0000000000000000000000000000000000000000'
-
-        auth = AWSRequestsAuth(aws_access_key=os.environ['PRIVATE_CHAIN_AWS_ACCESS_KEY'],
-                               aws_secret_access_key=os.environ['PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY'],
-                               aws_host=os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'],
-                               aws_region='ap-northeast-1',
-                               aws_service='execute-api')
-
-        headers = {'content-type': 'application/json'}
-
-        status = TestMeArticlesPurchaseCreate.__polling_to_private_chain(purchase_transaction, auth, headers)
-
-        self.assertEqual(status, 'doing')
-
-    @staticmethod
-    def __polling_to_private_chain(purchase_transaction, auth, headers):
-        count = settings.POLLING_INITIAL_COUNT
-        while count < settings.POLLING_MAX_COUNT:
-            count += 1
-            # 1秒待機
-            sleep(1)
-            # check whether transaction is completed
-            transaction_info = TestMeArticlesPurchaseCreate.__check_transaction_confirmation(purchase_transaction, auth,
-                                                                                             headers)
-            result = json.loads(transaction_info).get('result')
-            # exists error
-            if json.loads(transaction_info).get('error'):
-                return 'fail'
-            if result is None or result['logs'] == 0:
-                continue
-            if result['logs'][0].get('type') == 'mined':
-                return 'done'
-        return 'doing'
-
-    @staticmethod
-    def __check_transaction_confirmation(purchase_transaction, auth, headers):
-        receipt_payload = json.dumps(
-            {
-                'transaction_hash': purchase_transaction
+        with patch('me_articles_purchase_create.UserUtil') as user_util_mock:
+            user_util_mock.get_cognito_user_info.return_value = {
+                'UserAttributes': [{
+                    'Name': 'custom:private_eth_address',
+                    'Value': '0x1111111111111111111111111111111111111111'
+                }]
             }
-        )
-        response = requests.post('https://' + os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'] +
-                                 '/production/transaction/receipt', auth=auth, headers=headers, data=receipt_payload)
-        return response.text
+            price = str(100 * (10 ** 18))
+            event = {
+                'body': {
+                    'price': price
+                },
+                'requestContext': {
+                    'authorizer': {
+                        'claims': {
+                            'cognito:username': 'purchaseuser001',
+                            'custom:private_eth_address': '0x5d7743a4a6f21593ff6d3d81595f270123456789',
+                            'phone_number_verified': 'true',
+                            'email_verified': 'true'
+                        }
+                    }
+                },
+                'pathParameters': {
+                    'article_id': 'publicId0004'
+                }
+            }
+            event['body'] = json.dumps(event['body'])
+
+            response = MeArticlesPurchaseCreate(event, {}, self.dynamodb, cognito=None).main()
+
+            self.assertEqual(response['statusCode'], 200)
+            self.assertEqual(json.loads(response['body']), {"status": "doing"})
 
     @staticmethod
     def __sorted_notifications(notifications):
