@@ -526,7 +526,7 @@ class TestDBUtil(TestCase):
         with self.assertRaises(ValidationError):
             article_id = 'articleid001'
             user_id = 'purchaseuser001'
-            DBUtil.validate_already_purchase(
+            DBUtil.validate_purchase_process(
                 self.dynamodb,
                 article_id,
                 user_id
@@ -536,7 +536,7 @@ class TestDBUtil(TestCase):
     def test_validate_already_purchase_only_fail(self):
         article_id = 'articleid003'
         user_id = 'purchaseuser001'
-        self.assertTrue(DBUtil.validate_already_purchase(
+        self.assertTrue(DBUtil.validate_purchase_process(
             self.dynamodb,
             article_id,
             user_id
@@ -546,7 +546,7 @@ class TestDBUtil(TestCase):
     def test_validate_not_exist_article(self):
         article_id = 'articleidxxx'
         user_id = 'purchaseuser001'
-        self.assertTrue(DBUtil.validate_already_purchase(
+        self.assertTrue(DBUtil.validate_purchase_process(
             self.dynamodb,
             article_id,
             user_id
