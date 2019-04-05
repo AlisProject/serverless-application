@@ -43,9 +43,8 @@ class MeArticlesPurchasedShow(LambdaBase):
 
         if len(paid_articles) == 0:
             raise NotAuthorizedError('Forbidden')
-        for paid_article in paid_articles:
-            if 'status' in paid_article and paid_article['status'] != 'done':
-                raise NotAuthorizedError('Forbidden')
+        if len([i for i in paid_articles if i.get('status') == 'done']) != 1:
+            raise NotAuthorizedError('Forbidden')
 
         article_info = article_info_table.get_item(Key={'article_id': self.params['article_id']}).get('Item')
         article_content = article_content_table.get_item(Key={'article_id': self.params['article_id']}).get('Item')

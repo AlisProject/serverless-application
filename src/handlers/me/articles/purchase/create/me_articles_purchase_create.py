@@ -257,6 +257,10 @@ class MeArticlesPurchaseCreate(LambdaBase):
         if response.status_code != 200:
             raise SendTransactionError('status code not 200')
 
+        # exists error
+        if json.loads(response.text).get('error'):
+            raise SendTransactionError(json.loads(response.text).get('error'))
+
         return response.text
 
     def __polling_to_private_chain(self, purchase_transaction, auth, headers):
