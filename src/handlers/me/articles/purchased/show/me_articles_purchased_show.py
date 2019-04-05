@@ -41,8 +41,6 @@ class MeArticlesPurchasedShow(LambdaBase):
             KeyConditionExpression=Key('article_id').eq(self.params['article_id']) & Key('user_id').eq(user_id),
         ).get('Items')
 
-        if len(paid_articles) == 0:
-            raise NotAuthorizedError('Forbidden')
         if len([i for i in paid_articles if i.get('status') == 'done']) != 1:
             raise NotAuthorizedError('Forbidden')
 
