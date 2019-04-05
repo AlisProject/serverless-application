@@ -59,7 +59,7 @@ class MeArticlesPurchaseCreate(LambdaBase):
             self.params['article_id'],
             self.params['price']
         )
-        DBUtil.validate_purchase_process(
+        DBUtil.validate_not_purchased(
             self.dynamodb,
             self.params['article_id'],
             self.event['requestContext']['authorizer']['claims']['cognito:username']

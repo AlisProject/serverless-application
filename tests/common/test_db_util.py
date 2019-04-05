@@ -191,6 +191,32 @@ class TestDBUtil(TestCase):
                 'sort_key': 1520150552000005,
                 'created_at': 1520150553,
                 'history_created_at': 1520150270
+            },
+            {
+                'user_id': 'purchaseuser004',
+                'article_user_id': 'author001',
+                'article_title': 'testtitile002',
+                'price': 100 * 10 ** 18,
+                'article_id': 'articleid003',
+                'status': 'done',
+                'purchase_transaction': '0x0000000000000000000000000000000000000000',
+                'burn_transaction': '0x0000000000000000000000000000000000000001',
+                'sort_key': 1520150552000006,
+                'created_at': 1520150552,
+                'history_created_at': 1520150270
+            },
+            {
+                'user_id': 'purchaseuser004',
+                'article_user_id': 'author001',
+                'article_title': 'testtitile002',
+                'price': 100 * 10 ** 18,
+                'article_id': 'articleid003',
+                'status': 'doing',
+                'purchase_transaction': '0x0000000000000000000000000000000000000000',
+                'burn_transaction': '0x0000000000000000000000000000000000000001',
+                'sort_key': 1520150552000007,
+                'created_at': 1520150553,
+                'history_created_at': 1520150270
             }
         ]
         TestsUtil.create_table(cls.dynamodb, os.environ['PAID_ARTICLES_TABLE_NAME'], paid_articles_items)
@@ -535,21 +561,21 @@ class TestDBUtil(TestCase):
             )
 
     # 1件でもdoneかdoingが存在すればエラーを起こす
-    def test_validate_already_purchase(self):
+    def test_validate_not_purchased(self):
         with self.assertRaises(ValidationError):
             article_id = 'articleid001'
             user_id = 'purchaseuser001'
-            DBUtil.validate_purchase_process(
+            DBUtil.validate_not_purchased(
                 self.dynamodb,
                 article_id,
                 user_id
             )
 
     # 購入失敗のみが存在する場合は同一のuser_id, article_idの組み合わせでも購入が可能
-    def test_validate_already_purchase_only_fail(self):
+    def test_validate_not_purchased_only_fail(self):
         article_id = 'articleid003'
         user_id = 'purchaseuser001'
-        self.assertTrue(DBUtil.validate_purchase_process(
+        self.assertTrue(DBUtil.validate_not_purchased(
             self.dynamodb,
             article_id,
             user_id
@@ -559,7 +585,7 @@ class TestDBUtil(TestCase):
     def test_validate_not_exist_article(self):
         article_id = 'articleidxxx'
         user_id = 'purchaseuser001'
-        self.assertTrue(DBUtil.validate_purchase_process(
+        self.assertTrue(DBUtil.validate_not_purchased(
             self.dynamodb,
             article_id,
             user_id
@@ -570,7 +596,18 @@ class TestDBUtil(TestCase):
         with self.assertRaises(ValidationError):
             article_id = 'articleid003'
             user_id = 'purchaseuser003'
-            DBUtil.validate_purchase_process(
+            DBUtil.validate_not_purchased(
+                self.dynamodb,
+                article_id,
+                user_id
+            )
+
+    # doneあるいはdoingの購入データが2件存在する場合は例外
+    def test_validate_status_doing_or_done_2_cases(self):
+        with self.assertRaises(ValidationError):
+            article_id = 'articleid003'
+            user_id = 'purchaseuser004'
+            DBUtil.validate_not_purchased(
                 self.dynamodb,
                 article_id,
                 user_id

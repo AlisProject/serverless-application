@@ -50,15 +50,15 @@ class DBUtil:
 
         return True
 
-    # 購入処理中の状態であるか、または購入済みかのチェックを行う
+    # 購入済み、あるいは購入処理中のデータが1件以上存在する場合は例外発生
     @classmethod
-    def validate_purchase_process(cls, dynamodb, article_id, user_id):
+    def validate_not_purchased(cls, dynamodb, article_id, user_id):
         paid_articles_table = dynamodb.Table(os.environ['PAID_ARTICLES_TABLE_NAME'])
         response = paid_articles_table.query(
             IndexName='article_id-user_id-index',
             KeyConditionExpression=Key('article_id').eq(article_id) & Key('user_id').eq(user_id)
         )
-        if len([i for i in response['Items'] if i.get('status') == 'doing' or i.get('status') == 'done']) == 1:
+        if len([i for i in response['Items'] if i.get('status') == 'doing' or i.get('status') == 'done']) >= 1:
             raise ValidationError('You have already purchased')
         return True
 
