@@ -88,6 +88,8 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   NonceTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
+  TokenSendTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
   ExternalProviderLoginCommonTempPassword:
     Type: 'AWS::SSM::Parameter::Value<String>'
   ExternalProviderLoginMark:
@@ -107,6 +109,8 @@ Parameters:
   FacebookOauthCallbackUrl:
     Type: 'AWS::SSM::Parameter::Value<String>'
   FacebookAppToken:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  PrivateChainBridgeAddress:
     Type: 'AWS::SSM::Parameter::Value<String>'
   PaidArticlesTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
@@ -258,6 +262,22 @@ Resources:
       Role: !GetAtt LambdaRole.Arn
       Runtime: python3.6
       Timeout: 300
+  MeWalletTokenSend:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Code: ./deploy/me_wallet_token_send.zip
+      Environment:
+        Variables:
+          PRIVATE_CHAIN_BRIDGE_ADDRESS: !Ref PrivateChainBridgeAddress
+          PRIVATE_CHAIN_AWS_ACCESS_KEY: !Ref PrivateChainAwsAccessKey
+          PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY: !Ref PrivateChainAwsSecretAccessKey
+          PRIVATE_CHAIN_EXECUTE_API_HOST: !Ref PrivateChainExecuteApiHost
+          TOKEN_SEND_TABLE_NAME: !Ref TokenSendTableName
+      Handler: handler.lambda_handler
+      MemorySize: 3008
+      Role: !GetAtt LambdaRole.Arn
+      Runtime: python3.6
+      Timeout: 300
 
 Outputs:
   LoginYahoo:
@@ -292,3 +312,7 @@ Outputs:
     Value: !GetAtt MeArticlesPurchasedIndex.Arn
     Export:
       Name: !Sub "${AlisAppId}-MeArticlesPurchasedIndex"
+  MeWalletTokenSend:
+    Value: !GetAtt MeWalletTokenSend.Arn
+    Export:
+      Name: !Sub "${AlisAppId}-MeWalletTokenSend"

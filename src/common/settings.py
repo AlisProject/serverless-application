@@ -143,6 +143,11 @@ parameters = {
         'minimum': 1,
         'maximum': 10 ** 24
     },
+    'token_send_value': {
+        'type': 'number',
+        'minimum': 10 ** 18,
+        'maximum': 10 ** 24
+    },
     'oauth_token': {
         'type': 'string'
     },
@@ -186,6 +191,10 @@ parameters = {
     },
     'state': {
         'type': 'string'
+    },
+    'eth_address': {
+        'type': 'string',
+        'pattern': r'^0x[a-fA-F0-9]{40}$'
     }
 }
 
