@@ -192,6 +192,10 @@ parameters = {
         'minimum': 10 ** 18,
         'maximum': 10 ** 22
     },
+    'paid_body': {
+        'type': 'string',
+        'maxLength': 65535
+    }
 }
 
 article_recent_default_limit = 20
