@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 import os
-
-import self as self
 import settings
 import time
 import json
