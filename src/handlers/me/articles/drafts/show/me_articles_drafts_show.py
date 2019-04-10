@@ -42,6 +42,10 @@ class MeArticlesDraftsShow(LambdaBase):
             status='draft'
         )
 
+        if 'price' in article_info:
+            article_content['body'] = article_content['paid_body']
+            article_content.pop('paid_body', None)
+
         if article_content is not None:
             article_info.update(article_content)
 
