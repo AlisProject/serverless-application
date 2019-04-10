@@ -16,3 +16,11 @@ tests/**/__pycache__
 
 # for mac os
 .DS_Store
+
+# DynamoDBLocal
+DynamoDBLocal*
+third_party_licenses
+dynamodb_local*
+shared-local-instance.db
+LICENSE.txt
+README.txt
