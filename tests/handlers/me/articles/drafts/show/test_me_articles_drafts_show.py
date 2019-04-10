@@ -33,6 +33,13 @@ class TestMeArticlesDraftsShow(TestCase):
                 'status': 'draft',
                 'sort_key': 1520150272000000
             },
+            {
+                'article_id': 'draftId00003',
+                'user_id': 'test01',
+                'status': 'draft',
+                'sort_key': 1520150272000000,
+                'price': 100
+            }
         ]
 
         TestsUtil.create_table(cls.dynamodb, os.environ['ARTICLE_INFO_TABLE_NAME'], article_info_items)
@@ -47,6 +54,12 @@ class TestMeArticlesDraftsShow(TestCase):
                 'article_id': 'publicId0002',
                 'title': 'sample_title2',
                 'body': 'sample_body2'
+            },
+            {
+                'article_id': 'draftId00003',
+                'title': 'sample_title3',
+                'body': 'sample_body3',
+                'paid_body': 'sample_paid_body3',
             }
         ]
 
@@ -142,6 +155,37 @@ class TestMeArticlesDraftsShow(TestCase):
             'user_id': 'test01',
             'status': 'draft',
             'sort_key': 1520150272000000
+        }
+
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(json.loads(response['body']), expected_item)
+
+    def test_main_ok_with_paid_body(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'draftId00003'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
+            }
+        }
+
+        response = MeArticlesDraftsShow(params, {}, self.dynamodb).main()
+
+        expected_item = {
+            'article_id': 'draftId00003',
+            'body': 'sample_paid_body3',
+            'sort_key': 1520150272000000,
+            'status': 'draft',
+            'title': 'sample_title3',
+            'user_id': 'test01',
+            'price': 100
         }
 
         self.assertEqual(response['statusCode'], 200)
