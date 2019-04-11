@@ -109,7 +109,8 @@ class TestLoginTwitterIndex(TestCase):
 
     def test_main_ok_with_existing_user_and_user_id(self):
         with patch('login_twitter_index.TwitterUtil') as twitter_mock, \
-         patch('login_twitter_index.UserUtil') as user_mock:
+         patch('login_twitter_index.UserUtil') as user_mock, \
+         patch('login_twitter_index.CryptoUtil') as crypto_mock:
             twitter_mock.return_value.get_user_info.return_value = {
                 'user_id': 'Twitter-12345',
                 'email': 'Twitter-1234@example.com',
@@ -117,7 +118,7 @@ class TestLoginTwitterIndex(TestCase):
             }
             user_mock.exists_user.return_value = True
             user_mock.has_user_id.return_value = True
-            user_mock.decrypt_password.return_value = 'password'
+            crypto_mock.decrypt_password.return_value = 'password'
             user_mock.get_user_id.return_value = 'user_id'
             user_mock.external_provider_login.return_value = {
                 'AuthenticationResult': {
@@ -157,7 +158,7 @@ class TestLoginTwitterIndex(TestCase):
 
     def test_main_ok_with_existing_user_and_no_user_id(self):
         with patch('login_twitter_index.TwitterUtil') as twitter_mock, \
-         patch('login_twitter_index.UserUtil') as user_mock:
+         patch('login_twitter_index.UserUtil') as user_mock, patch('login_twitter_index.CryptoUtil') as crypto_mock:
             twitter_mock.return_value.get_user_info.return_value = {
                 'user_id': 'Twitter-1234',
                 'email': 'Twitter-1234@example.com',
@@ -165,7 +166,7 @@ class TestLoginTwitterIndex(TestCase):
             }
             user_mock.exists_user.return_value = True
             user_mock.has_user_id.return_value = False
-            user_mock.decrypt_password.return_value = 'password'
+            crypto_mock.decrypt_password.return_value = 'password'
             user_mock.external_provider_login.return_value = {
                 'AuthenticationResult': {
                     'AccessToken': 'aaaaa',

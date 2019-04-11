@@ -11,8 +11,6 @@ from aws_requests_auth.aws_auth import AWSRequestsAuth
 from botocore.exceptions import ClientError
 from record_not_found_error import RecordNotFoundError
 from not_verified_user_error import NotVerifiedUserError
-from Crypto.Cipher import AES
-import base64
 
 
 class UserUtil:
@@ -209,20 +207,6 @@ class UserUtil:
         return ''.join(secrets.choice(alphabet) for i in range(settings.PASSWORD_LENGTH))
 
     @staticmethod
-    def get_external_provider_password(dynamodb, user_id):
-        try:
-            external_provider_user = dynamodb.Table(
-                os.environ['EXTERNAL_PROVIDER_USERS_TABLE_NAME']).get_item(Key={
-                    'external_provider_user_id': user_id
-                }).get('Item')
-            return UserUtil.decrypt_password(
-                external_provider_user['password'].encode(),
-                external_provider_user['iv'].encode()
-            )
-        except ClientError as e:
-            raise e
-
-    @staticmethod
     def wallet_initialization(cognito, user_pool_id, user_id):
         try:
             address = UserUtil.__create_new_account_on_private_chain()
@@ -261,20 +245,6 @@ class UserUtil:
         seeds = string.ascii_letters + string.digits
         password = ''.join(secrets.choice(seeds) for i in range(32))
         return password
-
-    @staticmethod
-    def encrypt_password(plain_text_password, iv):
-        salt = os.environ['LOGIN_SALT']
-        cipher = AES.new(salt, AES.MODE_CBC, iv)
-        return base64.b64encode(cipher.encrypt(plain_text_password)).decode()
-
-    @staticmethod
-    def decrypt_password(byte_hash_data, iv):
-        encrypted_data = base64.b64decode(byte_hash_data)
-        aes_iv = base64.b64decode(iv)
-        salt = os.environ['LOGIN_SALT']
-        cipher = AES.new(salt, AES.MODE_CBC, aes_iv)
-        return cipher.decrypt(encrypted_data).decode()
 
     @staticmethod
     def delete_external_provider_id_cognito_user(cognito, user_id):

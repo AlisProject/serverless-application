@@ -73,7 +73,8 @@ class TestLoginFacebookIndex(TestCase):
 
     def test_main_ok_with_creating_new_user(self):
         with patch('login_facebook_index.FacebookUtil') as facebook_mock, \
-         patch('login_facebook_index.UserUtil') as user_mock:
+         patch('login_facebook_index.UserUtil') as user_mock, \
+         patch('login_facebook_index.CryptoUtil') as crypto_mock:
             facebook_mock.return_value.get_user_info.return_value = {
                 'user_id': 'Facebook-1234',
                 'email': 'Facebook-1234@example.com',
@@ -82,6 +83,7 @@ class TestLoginFacebookIndex(TestCase):
                 'access_token': 'access_token',
                 'id_token': 'id_token'
             }
+            crypto_mock.encrypt_password.return_value = '&yjgFwFeOpd0{0=&y566'
             facebook_mock.return_value.verify_state_nonce.return_value = True
             user_mock.exists_user.return_value = False
             user_mock.create_external_provider_user.return_value = {
@@ -115,7 +117,7 @@ class TestLoginFacebookIndex(TestCase):
 
     def test_main_ok_with_existing_user_and_user_id(self):
         with patch('login_facebook_index.FacebookUtil') as facebook_mock, \
-         patch('login_facebook_index.UserUtil') as user_mock:
+         patch('login_facebook_index.UserUtil') as user_mock, patch('login_facebook_index.CryptoUtil') as crypto_mock:
             facebook_mock.return_value.get_user_info.return_value = {
                 'user_id': 'Facebook-12345',
                 'email': 'Facebook-1234@example.com',
@@ -127,7 +129,7 @@ class TestLoginFacebookIndex(TestCase):
             }
             facebook_mock.return_value.verify_state_nonce.return_value = True
 
-            user_mock.get_external_provider_password.return_value = 'password'
+            crypto_mock.get_external_provider_password.return_value = 'password'
             user_mock.exists_user.return_value = True
             user_mock.has_user_id.return_value = True
             user_mock.get_user_id.return_value = 'user_id'
@@ -169,7 +171,7 @@ class TestLoginFacebookIndex(TestCase):
 
     def test_main_ok_with_existing_user_and_no_user_id(self):
         with patch('login_facebook_index.FacebookUtil') as facebook_mock, \
-         patch('login_facebook_index.UserUtil') as user_mock:
+         patch('login_facebook_index.UserUtil') as user_mock, patch('login_facebook_index.CryptoUtil') as crypto_mock:
             facebook_mock.return_value.get_user_info.return_value = {
                 'user_id': 'Facebook-1234',
                 'email': 'Facebook-1234@example.com',
@@ -181,10 +183,10 @@ class TestLoginFacebookIndex(TestCase):
             }
             facebook_mock.return_value.verify_state_nonce.return_value = True
 
-            user_mock.get_external_provider_password.return_value = 'password'
+            crypto_mock.get_external_provider_password.return_value = 'password'
             user_mock.exists_user.return_value = True
             user_mock.has_user_id.return_value = False
-            user_mock.decrypt_password.return_value = 'password'
+            crypto_mock.decrypt_password.return_value = 'password'
             user_mock.external_provider_login.return_value = {
                 'AuthenticationResult': {
                     'AccessToken': 'aaaaa',
@@ -269,7 +271,7 @@ class TestLoginFacebookIndex(TestCase):
 
     def test_main_ng_with_invalid_state_and_existing_user(self):
         with patch('login_facebook_index.FacebookUtil') as facebook_mock, \
-         patch('login_facebook_index.UserUtil') as user_mock:
+         patch('login_facebook_index.UserUtil') as user_mock, patch('login_facebook_index.CryptoUtil') as crypto_mock:
             facebook_mock.return_value.get_user_info.return_value = {
                 'user_id': 'facebook-1234',
                 'email': 'facebook-1234@example.com',
@@ -281,7 +283,7 @@ class TestLoginFacebookIndex(TestCase):
             }
             facebook_mock.return_value.verify_state_nonce.return_value = False
 
-            user_mock.get_external_provider_password.return_value = 'password'
+            crypto_mock.get_external_provider_password.return_value = 'password'
             user_mock.exists_user.return_value = True
             user_mock.has_user_id.return_value = True
             user_mock.external_provider_login.side_effect = ClientError(
@@ -336,7 +338,7 @@ class TestLoginFacebookIndex(TestCase):
 
     def test_main_ng_with_awsexception_and_new_user(self):
         with patch('login_facebook_index.FacebookUtil') as facebook_mock, \
-         patch('login_facebook_index.UserUtil') as user_mock:
+         patch('login_facebook_index.UserUtil') as user_mock, patch('login_facebook_index.CryptoUtil') as crypto_mock:
             facebook_mock.return_value.get_user_info.return_value = {
                 'user_id': 'facebook-1234',
                 'email': 'facebook-1234@example.com',
@@ -348,7 +350,7 @@ class TestLoginFacebookIndex(TestCase):
             }
             facebook_mock.return_value.verify_state_nonce.return_value = True
 
-            user_mock.get_external_provider_password.return_value = 'password'
+            crypto_mock.get_external_provider_password.return_value = 'password'
             user_mock.exists_user.return_value = False
             user_mock.create_external_provider_user.return_value = ClientError(
                 {'Error': {'Code': 'xxxxxx'}},

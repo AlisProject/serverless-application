@@ -95,6 +95,8 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   LoginSalt:
     Type: 'AWS::SSM::Parameter::Value<String>'
+  PaidArticlesTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
 
 Globals:
   Function:
@@ -135,6 +137,7 @@ Globals:
         BETA_MODE_FLAG: !Ref BetaModeFlag
         DIST_S3_BUCKET_NAME: !Ref DistS3BucketName
         ELASTIC_SEARCH_ENDPOINT: !Ref ElasticSearchEndpoint
+        PAID_ARTICLES_TABLE_NAME: !Ref PaidArticlesTableName
 
 Resources:
   RestApi:
@@ -389,6 +392,13 @@ Resources:
               tip:
                 type: integer
               bonus:
+                type: integer
+          MeArticlesPurchase:
+            type: object
+            properties:
+              article_id:
+                type: string
+              price:
                 type: integer
         paths:
           /search/articles:
@@ -2193,6 +2203,176 @@ Resources:
                   default:
                     statusCode: '200'
                 uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeUsersFraudCreate.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /articles/{article_id}/price:
+            get:
+              description: "指定されたarticle_idの記事の価格の取得"
+              parameters:
+                - name: "article_id"
+                  in: "path"
+                  description: "対象記事を指定するために使用"
+                  required: true
+                  type: "string"
+              responses:
+                "200":
+                  description: "記事の価格"
+                  schema:
+                    type: object
+                    properties:
+                      price:
+                        type: "number"
+                        format: "double"
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri:
+                  Fn::Join:
+                    - ''
+                    - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
+                      - Fn::ImportValue:
+                          Fn::Sub: "${AlisAppId}-ArticlesPriceShow"
+                      - "/invocations"
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /me/articles/purchased/{article_id}:
+            get:
+              description: '指定された article_id の有料記事情報を取得'
+              parameters:
+                - name: 'article_id'
+                  in: 'path'
+                  description: '対象記事の指定するために使用'
+                  required: true
+                  type: 'string'
+              responses:
+                '200':
+                  description: '有料記事内容取得'
+                  schema:
+                    $ref: '#/definitions/ArticleContent'
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri:
+                  Fn::Join:
+                    - ''
+                    - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
+                      - Fn::ImportValue:
+                          Fn::Sub: "${AlisAppId}-MeArticlesPurchasedShow"
+                      - "/invocations"
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /me/articles/purchased/article_ids:
+            get:
+              description: "ユーザーが購入した記事の記事ID一覧を取得"
+              responses:
+                "200":
+                  description: "記事IDの一覧"
+                  schema:
+                    type: object
+                    properties:
+                      article_ids:
+                        type: array
+                        items:
+                          type: 'string'
+                          enum:
+                            - "article_id"
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri:
+                  Fn::Join:
+                    - ''
+                    - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
+                      - Fn::ImportValue:
+                          Fn::Sub: "${AlisAppId}-MeArticlesPurchasedArticleIdsIndex"
+                      - "/invocations"
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /me/articles/purchased:
+            get:
+              description: '購入した記事一覧情報を取得'
+              parameters:
+                - name: 'limit'
+                  in: 'query'
+                  description: '取得件数'
+                  required: false
+                  type: 'integer'
+                  minimum: 1
+                - name: 'article_id'
+                  in: 'query'
+                  description: 'ページング処理における、現在のページの最後の記事のID'
+                  required: false
+                  type: 'string'
+                - name: 'sort_key'
+                  in: 'query'
+                  description: 'ページング処理における、現在のページの最後の記事のソートキー'
+                  required: false
+                  type: 'integer'
+                  minimum: 1
+              responses:
+                '200':
+                  description: '購入した記事一覧'
+                  schema:
+                    type: array
+                    items:
+                      $ref: '#/definitions/ArticleInfo'
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri:
+                  Fn::Join:
+                    - ''
+                    - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
+                      - Fn::ImportValue:
+                          Fn::Sub: "${AlisAppId}-MeArticlesPurchasedIndex"
+                      - "/invocations"
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /me/articles/{article_id}/purchase:
+            post:
+              description: '対象記事を購入する'
+              parameters:
+              - name: 'article_id'
+                in: 'path'
+                description: '対象記事の指定するために使用'
+                required: true
+                type: 'string'
+              - name: 'price'
+                in: 'body'
+                required: true
+                schema:
+                  $ref: '#/definitions/MeArticlesPurchase'
+              responses:
+                '200':
+                  description: '記事購入成功'
+              security:
+              - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri:
+                  Fn::Join:
+                    - ''
+                    - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
+                      - Fn::ImportValue:
+                          Fn::Sub: "${AlisAppId}-MeArticlesPurchaseCreate"
+                      - "/invocations"
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy

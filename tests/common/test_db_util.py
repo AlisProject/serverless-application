@@ -31,6 +31,15 @@ class TestDBUtil(TestCase):
                 'status': 'draft',
                 'user_id': 'user0002',
                 'sort_key': 1520150272000000,
+                'price': 100,
+                'version': 2
+            },
+            {
+                'article_id': 'testid000003',
+                'status': 'public',
+                'user_id': 'user0002',
+                'sort_key': 1520150272000000,
+                'price': 1 * (10 ** 18),
                 'version': 2
             }
         ]
@@ -129,6 +138,88 @@ class TestDBUtil(TestCase):
                 'sort_key': 1520125200000000
             }
         ]
+
+        paid_articles_items = [
+            {
+                'user_id': 'purchaseuser001',
+                'article_user_id': 'author001',
+                'article_title': 'testtitile001',
+                'price': 100 * 10 ** 18,
+                'article_id': 'articleid001',
+                'status': 'done',
+                'purchase_transaction': '0x0000000000000000000000000000000000000000',
+                'burn_transaction': '0x0000000000000000000000000000000000000001',
+                'sort_key': 1520150552000001,
+                'created_at': 1520150552,
+                'history_created_at': 1520150270
+            },
+            {
+                'user_id': 'purchaseuser001',
+                'article_user_id': 'author001',
+                'article_title': 'testtitile001',
+                'price': 100 * 10 ** 18,
+                'article_id': 'articleid001',
+                'status': 'fail',
+                'purchase_transaction': '0x0000000000000000000000000000000000000000',
+                'burn_transaction': '0x0000000000000000000000000000000000000001',
+                'sort_key': 1520150552000002,
+                'created_at': 1520150552,
+                'history_created_at': 1520150270
+            },
+            {
+                'user_id': 'purchaseuser001',
+                'article_user_id': 'author001',
+                'article_title': 'testtitile002',
+                'price': 100 * 10 ** 18,
+                'article_id': 'articleid003',
+                'status': 'fail',
+                'purchase_transaction': '0x0000000000000000000000000000000000000000',
+                'burn_transaction': '0x0000000000000000000000000000000000000001',
+                'sort_key': 1520150552000004,
+                'created_at': 1520150552,
+                'history_created_at': 1520150270
+            },
+            {
+                'user_id': 'purchaseuser003',
+                'article_user_id': 'author001',
+                'article_title': 'testtitile002',
+                'price': 100 * 10 ** 18,
+                'article_id': 'articleid003',
+                'status': 'doing',
+                'purchase_transaction': '0x0000000000000000000000000000000000000000',
+                'burn_transaction': '0x0000000000000000000000000000000000000001',
+                'sort_key': 1520150552000005,
+                'created_at': 1520150553,
+                'history_created_at': 1520150270
+            },
+            {
+                'user_id': 'purchaseuser004',
+                'article_user_id': 'author001',
+                'article_title': 'testtitile002',
+                'price': 100 * 10 ** 18,
+                'article_id': 'articleid003',
+                'status': 'done',
+                'purchase_transaction': '0x0000000000000000000000000000000000000000',
+                'burn_transaction': '0x0000000000000000000000000000000000000001',
+                'sort_key': 1520150552000006,
+                'created_at': 1520150552,
+                'history_created_at': 1520150270
+            },
+            {
+                'user_id': 'purchaseuser004',
+                'article_user_id': 'author001',
+                'article_title': 'testtitile002',
+                'price': 100 * 10 ** 18,
+                'article_id': 'articleid003',
+                'status': 'doing',
+                'purchase_transaction': '0x0000000000000000000000000000000000000000',
+                'burn_transaction': '0x0000000000000000000000000000000000000001',
+                'sort_key': 1520150552000007,
+                'created_at': 1520150553,
+                'history_created_at': 1520150270
+            }
+        ]
+        TestsUtil.create_table(cls.dynamodb, os.environ['PAID_ARTICLES_TABLE_NAME'], paid_articles_items)
         TestsUtil.create_table(cls.dynamodb, os.environ['ARTICLE_PV_USER_TABLE_NAME'], article_pv_user_items)
 
         topic_items = [
@@ -249,6 +340,16 @@ class TestDBUtil(TestCase):
         )
         self.assertTrue(result)
 
+    def test_validate_article_existence_ok_exists_user_and_status_and_is_purchased(self):
+        result = DBUtil.validate_article_existence(
+            self.dynamodb,
+            self.article_info_table_items[1]['article_id'],
+            user_id=self.article_info_table_items[1]['user_id'],
+            status=self.article_info_table_items[1]['status'],
+            is_purchased=True
+        )
+        self.assertTrue(result)
+
     def test_validate_article_existence_ng_not_exists_user_id(self):
         with self.assertRaises(NotAuthorizedError):
             DBUtil.validate_article_existence(
@@ -290,6 +391,15 @@ class TestDBUtil(TestCase):
                 self.article_info_table_items[0]['article_id'],
                 user_id=self.article_info_table_items[0]['user_id'],
                 version=2
+            )
+
+    def test_validate_article_existence_ng_not_exists_is_purchased(self):
+        with self.assertRaises(RecordNotFoundError):
+            DBUtil.validate_article_existence(
+                self.dynamodb,
+                self.article_info_table_items[0]['article_id'],
+                user_id=self.article_info_table_items[0]['user_id'],
+                is_purchased=True
             )
 
     def test_validate_user_existence_ok(self):
@@ -436,3 +546,69 @@ class TestDBUtil(TestCase):
     def test_validate_topic_ng(self):
         with self.assertRaises(ValidationError):
             DBUtil.validate_topic(self.dynamodb, 'BTC')
+
+    def test_validate_latest_price_ok(self):
+        price = 1 * (10 ** 18)
+        self.assertTrue(DBUtil.validate_latest_price(self.dynamodb, 'testid000003', price))
+
+    def test_validate_latest_price_ng(self):
+        with self.assertRaises(RecordNotFoundError):
+            price = 1000 * (10 ** 18)
+            DBUtil.validate_latest_price(
+                self.dynamodb,
+                'testid000003',
+                price
+            )
+
+    # 1件でもdoneかdoingが存在すればエラーを起こす
+    def test_validate_not_purchased(self):
+        with self.assertRaises(ValidationError):
+            article_id = 'articleid001'
+            user_id = 'purchaseuser001'
+            DBUtil.validate_not_purchased(
+                self.dynamodb,
+                article_id,
+                user_id
+            )
+
+    # 購入失敗のみが存在する場合は同一のuser_id, article_idの組み合わせでも購入が可能
+    def test_validate_not_purchased_only_fail(self):
+        article_id = 'articleid003'
+        user_id = 'purchaseuser001'
+        self.assertTrue(DBUtil.validate_not_purchased(
+            self.dynamodb,
+            article_id,
+            user_id
+        ))
+
+    # 存在しない記事IDの場合にも正常終了すること
+    def test_validate_not_exist_article(self):
+        article_id = 'articleidxxx'
+        user_id = 'purchaseuser001'
+        self.assertTrue(DBUtil.validate_not_purchased(
+            self.dynamodb,
+            article_id,
+            user_id
+        ))
+
+    # 記事のステータスがdoingの時にエラーを起こすこと
+    def test_validate_status_doing(self):
+        with self.assertRaises(ValidationError):
+            article_id = 'articleid003'
+            user_id = 'purchaseuser003'
+            DBUtil.validate_not_purchased(
+                self.dynamodb,
+                article_id,
+                user_id
+            )
+
+    # doneあるいはdoingの購入データが2件存在する場合は例外
+    def test_validate_status_doing_or_done_2_cases(self):
+        with self.assertRaises(ValidationError):
+            article_id = 'articleid003'
+            user_id = 'purchaseuser004'
+            DBUtil.validate_not_purchased(
+                self.dynamodb,
+                article_id,
+                user_id
+            )
