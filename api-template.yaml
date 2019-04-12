@@ -97,6 +97,8 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   PaidArticlesTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
+  PaidStatusTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
 
 Globals:
   Function:
@@ -138,6 +140,7 @@ Globals:
         DIST_S3_BUCKET_NAME: !Ref DistS3BucketName
         ELASTIC_SEARCH_ENDPOINT: !Ref ElasticSearchEndpoint
         PAID_ARTICLES_TABLE_NAME: !Ref PaidArticlesTableName
+        PAID_STATUS_TABLE_NAME: !Ref PaidStatusTableName
 
 Resources:
   RestApi:
