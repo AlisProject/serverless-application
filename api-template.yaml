@@ -400,6 +400,13 @@ Resources:
                 type: integer
               bonus:
                 type: integer
+          MeArticlesPurchase:
+            type: object
+            properties:
+              article_id:
+                type: string
+              price:
+                type: integer
         paths:
           /search/articles:
             get:
@@ -2368,6 +2375,39 @@ Resources:
                     - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
                       - Fn::ImportValue:
                           Fn::Sub: "${AlisAppId}-MeArticlesPurchasedIndex"
+                      - "/invocations"
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /me/articles/{article_id}/purchase:
+            post:
+              description: '対象記事を購入する'
+              parameters:
+              - name: 'article_id'
+                in: 'path'
+                description: '対象記事の指定するために使用'
+                required: true
+                type: 'string'
+              - name: 'price'
+                in: 'body'
+                required: true
+                schema:
+                  $ref: '#/definitions/MeArticlesPurchase'
+              responses:
+                '200':
+                  description: '記事購入成功'
+              security:
+              - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri:
+                  Fn::Join:
+                    - ''
+                    - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
+                      - Fn::ImportValue:
+                          Fn::Sub: "${AlisAppId}-MeArticlesPurchaseCreate"
                       - "/invocations"
                 passthroughBehavior: when_no_templates
                 httpMethod: POST

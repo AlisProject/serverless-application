@@ -1,7 +1,5 @@
 import os
 import boto3
-import settings
-import base64
 from user_util import UserUtil
 from not_verified_user_error import NotVerifiedUserError
 from unittest import TestCase
@@ -404,25 +402,6 @@ class TestUserUtil(TestCase):
                 'user_id',
                 'display_name'
             )
-
-    def test_get_external_provider_password_ok(self):
-        aes_iv = os.urandom(settings.AES_IV_BYTES)
-        encrypted_password = UserUtil.encrypt_password('nNU8E9E6OSe9tRQn', aes_iv)
-        iv = base64.b64encode(aes_iv).decode()
-
-        UserUtil.add_external_provider_user_info(
-            dynamodb=self.dynamodb,
-            external_provider_user_id='user_id',
-            password=encrypted_password,
-            iv=iv,
-            email='email'
-        )
-
-        password = UserUtil.get_external_provider_password(
-            self.dynamodb,
-            'user_id'
-        )
-        self.assertEqual(password, 'nNU8E9E6OSe9tRQn')
 
 
 class PrivateChainApiFakeResponse:

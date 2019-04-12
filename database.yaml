@@ -667,13 +667,24 @@ Resources:
       KeySchema:
         - AttributeName: article_id
           KeyType: HASH
-        - AttributeName: user_id
+        - AttributeName: sort_key
           KeyType: RANGE
       GlobalSecondaryIndexes:
         - IndexName: status-index
           KeySchema:
             - AttributeName: status
               KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: 1
+            WriteCapacityUnits: 1
+        - IndexName: article_id-user_id-index
+          KeySchema:
+            - AttributeName: article_id
+              KeyType: HASH
+            - AttributeName: user_id
+              KeyType: RANGE
           Projection:
             ProjectionType: ALL
           ProvisionedThroughput:

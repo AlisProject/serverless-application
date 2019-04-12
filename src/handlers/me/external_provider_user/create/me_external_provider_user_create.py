@@ -7,6 +7,7 @@ from lambda_base import LambdaBase
 from jsonschema import validate, ValidationError
 from botocore.exceptions import ClientError
 from user_util import UserUtil
+from crypto_util import CryptoUtil
 
 
 class MeExternalProviderUserCreate(LambdaBase):
@@ -55,7 +56,7 @@ class MeExternalProviderUserCreate(LambdaBase):
                     byte_hash_data = hash_data.encode()
                     decoded_iv = external_provider_user['iv']
                     iv = decoded_iv.encode()
-                    backed_password = UserUtil.decrypt_password(byte_hash_data, iv)
+                    backed_password = CryptoUtil.decrypt_password(byte_hash_data, iv)
 
                     backed_temp_password = os.environ['EXTERNAL_PROVIDER_LOGIN_COMMON_TEMP_PASSWORD']
                     provider = os.environ['EXTERNAL_PROVIDER_LOGIN_MARK']
