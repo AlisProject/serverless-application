@@ -382,4 +382,3 @@ class MeArticlesPurchaseCreate(LambdaBase):
                 raise ValidationError('You have already purchased')
             else:
                 raise e
-

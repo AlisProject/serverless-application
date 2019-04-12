@@ -1216,7 +1216,6 @@ class TestMeArticlesPurchaseCreate(TestCase):
             self.assertEqual(paid_status.get('status'), 'done')
             self.assertEqual(len(paid_status_table.scan()['Items']), 3)
 
-
     @staticmethod
     def __sorted_notifications(notifications):
         result = []
