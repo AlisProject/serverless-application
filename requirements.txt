@@ -7,7 +7,7 @@ jinja2
 pillow
 aws-requests-auth
 requests_aws4auth
-elasticsearch
+elasticsearch==6.2.0
 pyjwt
 pycrypto
 requests
