@@ -59,11 +59,11 @@ class MeArticlesPurchaseCreate(LambdaBase):
             self.params['article_id'],
             self.params['price']
         )
-        # DBUtil.validate_not_purchased(
-        #     self.dynamodb,
-        #     self.params['article_id'],
-        #     self.event['requestContext']['authorizer']['claims']['cognito:username']
-        # )
+        DBUtil.validate_not_purchased(
+            self.dynamodb,
+            self.params['article_id'],
+            self.event['requestContext']['authorizer']['claims']['cognito:username']
+        )
 
     def exec_main_proc(self):
         # get article info
