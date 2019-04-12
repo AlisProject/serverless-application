@@ -107,6 +107,25 @@ class TestMeArticlesPurchaseCreate(TestCase):
                 'history_created_at': Decimal(1520150270)
             }
         ]
+
+        paid_status = [
+            {
+                'user_id': 'doublerequest001',
+                'article_id': 'publicId0001',
+                'status': 'doing'
+            },
+            {
+                'user_id': 'purchaseuser001',
+                'article_id': 'publicId0004',
+                'status': 'fail'
+            },
+            {
+                'user_id': 'doublerequest002',
+                'article_id': 'publicId0001',
+                'status': 'done'
+            }
+        ]
+
         TestsUtil.create_table(self.dynamodb, os.environ['ARTICLE_INFO_TABLE_NAME'], self.article_info_table_items)
         TestsUtil.create_table(self.dynamodb, os.environ['ARTICLE_HISTORY_TABLE_NAME'],
                                self.article_history_table_items)
@@ -119,6 +138,8 @@ class TestMeArticlesPurchaseCreate(TestCase):
         self.notification_table \
             = self.dynamodb.Table(os.environ['NOTIFICATION_TABLE_NAME'])
         TestsUtil.create_table(self.dynamodb, os.environ['NOTIFICATION_TABLE_NAME'], [])
+
+        self.paid_status_table = TestsUtil.create_table(self.dynamodb, os.environ['PAID_STATUS_TABLE_NAME'], paid_status)
 
     def tearDown(self):
         TestsUtil.delete_all_tables(self.dynamodb)
@@ -228,6 +249,14 @@ class TestMeArticlesPurchaseCreate(TestCase):
             self.assertEqual(paid_articles[0]['status'], 'fail')
             self.assertEqual(expected_purchase_article, paid_articles[1])
             self.assertEqual(len(self.unread_notification_manager_table.scan()['Items']), 2)
+            # paid_statusがfailからdoneになること。paid_statusの件数が3件のままであること
+            paid_status_table = self.dynamodb.Table(os.environ['PAID_STATUS_TABLE_NAME'])
+            paid_status = paid_status_table.get_item(Key={
+                'user_id': 'purchaseuser001',
+                'article_id': 'publicId0004'
+            }).get('Item')
+            self.assertEqual(paid_status.get('status'), 'done')
+            self.assertEqual(len(paid_status_table.scan()['Items']), 3)
 
     @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__create_purchase_transaction',
            MagicMock(return_value='0x0000000000000000000000000000000000000000'))
@@ -352,6 +381,14 @@ class TestMeArticlesPurchaseCreate(TestCase):
             }
 
             self.assertEqual(expected_purchase_article, paid_articles[0])
+            # paid_statusが4件になること。生成したpaid_statusのstatusがdoneであること
+            paid_status_table = self.dynamodb.Table(os.environ['PAID_STATUS_TABLE_NAME'])
+            paid_status = paid_status_table.get_item(Key={
+                'user_id': 'act_user_01',
+                'article_id': 'publicId0001'
+            }).get('Item')
+            self.assertEqual(paid_status.get('status'), 'done')
+            self.assertEqual(len(paid_status_table.scan()['Items']), 4)
 
     @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__create_purchase_transaction',
            MagicMock(return_value='0x0000000000000000000000000000000000000000'))
@@ -1094,6 +1131,91 @@ class TestMeArticlesPurchaseCreate(TestCase):
 
             self.assertEqual(response['statusCode'], 200)
             self.assertEqual(json.loads(response['body']), {"status": "doing"})
+
+    # 連続APIリクエストに対応するテスト(statusがdoingの場合)
+    def test_double_request_doing_ng(self):
+        with patch('me_articles_purchase_create.UserUtil') as user_util_mock:
+            user_util_mock.get_cognito_user_info.return_value = {
+                'UserAttributes': [{
+                    'Name': 'custom:private_eth_address',
+                    'Value': '0x1111111111111111111111111111111111111111'
+                }]
+            }
+            price = str(1 * (10 ** 18))
+            event = {
+                'body': {
+                    'price': price
+                },
+                'requestContext': {
+                    'authorizer': {
+                        'claims': {
+                            'cognito:username': 'doublerequest001',
+                            'custom:private_eth_address': '0x5d7743a4a6f21593ff6d3d81595f270123456789',
+                            'phone_number_verified': 'true',
+                            'email_verified': 'true'
+                        }
+                    }
+                },
+                'pathParameters': {
+                    'article_id': 'publicId0001'
+                }
+            }
+            event['body'] = json.dumps(event['body'])
+
+            response = MeArticlesPurchaseCreate(event, {}, self.dynamodb, cognito=None).main()
+            # 400が返されること
+            self.assertEqual(response['statusCode'], 400)
+            # paid statusの件数が3件から変更されていないこと。statusがdoingのままであること
+            paid_status_table = self.dynamodb.Table(os.environ['PAID_STATUS_TABLE_NAME'])
+            paid_status = paid_status_table.get_item(Key={
+                'user_id': 'doublerequest001',
+                'article_id': 'publicId0001'
+            }).get('Item')
+            self.assertEqual(paid_status.get('status'), 'doing')
+            self.assertEqual(len(paid_status_table.scan()['Items']), 3)
+
+    # 連続APIリクエストに対応するテスト(statusがdoneの場合)
+    def test_double_request_done_ng(self):
+        with patch('me_articles_purchase_create.UserUtil') as user_util_mock:
+            user_util_mock.get_cognito_user_info.return_value = {
+                'UserAttributes': [{
+                    'Name': 'custom:private_eth_address',
+                    'Value': '0x1111111111111111111111111111111111111111'
+                }]
+            }
+            price = str(1 * (10 ** 18))
+            event = {
+                'body': {
+                    'price': price
+                },
+                'requestContext': {
+                    'authorizer': {
+                        'claims': {
+                            'cognito:username': 'doublerequest002',
+                            'custom:private_eth_address': '0x5d7743a4a6f21593ff6d3d81595f270123456789',
+                            'phone_number_verified': 'true',
+                            'email_verified': 'true'
+                        }
+                    }
+                },
+                'pathParameters': {
+                    'article_id': 'publicId0001'
+                }
+            }
+            event['body'] = json.dumps(event['body'])
+
+            response = MeArticlesPurchaseCreate(event, {}, self.dynamodb, cognito=None).main()
+            # 400が返されること
+            self.assertEqual(response['statusCode'], 400)
+            # paid statusの件数が3件から変更されていないこと。statusがdoneのままであること
+            paid_status_table = self.dynamodb.Table(os.environ['PAID_STATUS_TABLE_NAME'])
+            paid_status = paid_status_table.get_item(Key={
+                'user_id': 'doublerequest002',
+                'article_id': 'publicId0001'
+            }).get('Item')
+            self.assertEqual(paid_status.get('status'), 'done')
+            self.assertEqual(len(paid_status_table.scan()['Items']), 3)
+
 
     @staticmethod
     def __sorted_notifications(notifications):
