@@ -75,8 +75,8 @@ class MeArticlesPurchaseCreate(LambdaBase):
             raise ValidationError('Can not purchase own article')
 
         # purchase article
-        paid_status_table = self.dynamodb.Table(os.environ['PAID_STATUS_TABLE_NAME'])
         paid_articles_table = self.dynamodb.Table(os.environ['PAID_ARTICLES_TABLE_NAME'])
+        paid_status_table = self.dynamodb.Table(os.environ['PAID_STATUS_TABLE_NAME'])
         article_user_eth_address = self.__get_user_private_eth_address(article_info['user_id'])
         user_eth_address = self.event['requestContext']['authorizer']['claims']['custom:private_eth_address']
         price = self.params['price']
@@ -90,16 +90,13 @@ class MeArticlesPurchaseCreate(LambdaBase):
 
         sort_key = TimeUtil.generate_sort_key()
 
-        # 購入記事データを作成
+        # 多重リクエストによる不必要なレコード生成を防ぐためにpaid_statusレコードを生成
         self.__create_paid_status(paid_status_table, user_id)
-        self.__create_paid_article(paid_articles_table, article_info, sort_key)
         # 購入のトランザクション処理
         purchase_transaction = self.__create_purchase_transaction(auth, headers, user_eth_address,
                                                                   article_user_eth_address, price)
-        # 購入のトランザクション処理を記事購入データに格納
-        self.__add_purchase_transaction_to_paid_article(purchase_transaction, paid_articles_table, article_info,
-                                                        sort_key)
-
+        # 購入記事データを作成
+        self.__create_paid_article(paid_articles_table, article_info, purchase_transaction, sort_key)
         # プライベートチェーンへのポーリングを行いトランザクションの承認状態を取得
         transaction_status = self.__polling_to_private_chain(purchase_transaction, auth, headers)
         # トランザクションの承認状態をpaid_artilcleとpaid_statusに格納
@@ -156,7 +153,7 @@ class MeArticlesPurchaseCreate(LambdaBase):
 
         return json.loads(response.text).get('result').replace('"', '')
 
-    def __create_paid_article(self, paid_articles_table, article_info, sort_key):
+    def __create_paid_article(self, paid_articles_table, article_info, purchase_transaction, sort_key):
         article_history_table = self.dynamodb.Table(os.environ['ARTICLE_HISTORY_TABLE_NAME'])
         article_histories = article_history_table.query(
             KeyConditionExpression=Key('article_id').eq(self.params['article_id']),
@@ -175,29 +172,17 @@ class MeArticlesPurchaseCreate(LambdaBase):
             'user_id': self.event['requestContext']['authorizer']['claims']['cognito:username'],
             'article_user_id': article_info['user_id'],
             'article_title': article_info['title'],
+            'purchase_transaction': purchase_transaction,
             'sort_key': sort_key,
             'price': self.params['price'],
             'history_created_at': history_created_at,
             'status': 'doing',
             'created_at': int(time.time())
         }
-        # 購入レコードの保存
+
+        # 購入時のtransactionの保存
         paid_articles_table.put_item(
             Item=paid_article
-        )
-
-    @staticmethod
-    def __add_purchase_transaction_to_paid_article(purchase_transaction, paid_articles_table, article_info, sort_key):
-        purchase_transaction = {
-            ':purchase_transaction': purchase_transaction
-        }
-        paid_articles_table.update_item(
-            Key={
-                'article_id': article_info['article_id'],
-                'sort_key': sort_key
-            },
-            UpdateExpression="set purchase_transaction = :purchase_transaction",
-            ExpressionAttributeValues=purchase_transaction
         )
 
     @staticmethod
@@ -241,8 +226,8 @@ class MeArticlesPurchaseCreate(LambdaBase):
         )
 
     @staticmethod
-    def __update_transaction_status(article_info, paid_articles_table, transaction_status,
-                                    sort_key, paid_status_table, user_id):
+    def __update_transaction_status(article_info, paid_articles_table, transaction_status, sort_key,
+                                    paid_status_table, user_id):
         paid_articles_table.update_item(
             Key={
                 'article_id': article_info['article_id'],
