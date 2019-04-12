@@ -99,7 +99,7 @@ class MeArticlesPurchaseCreate(LambdaBase):
         self.__create_paid_article(paid_articles_table, article_info, purchase_transaction, sort_key)
         # プライベートチェーンへのポーリングを行いトランザクションの承認状態を取得
         transaction_status = self.__polling_to_private_chain(purchase_transaction, auth, headers)
-        # トランザクションの承認状態をpaid_artilcleに格納
+        # トランザクションの承認状態をpaid_artilcleとpaid_statusに格納
         self.__update_transaction_status(article_info, paid_articles_table, transaction_status, sort_key,
                                          paid_status_table, user_id)
 
