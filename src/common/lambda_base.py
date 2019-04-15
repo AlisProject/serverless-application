@@ -35,6 +35,8 @@ class LambdaBase(metaclass=ABCMeta):
         logger = logging.getLogger()
         logger.setLevel(logging.INFO)
 
+        self.__update_event()
+
         try:
             # init params
             self.params = self.__get_params()
@@ -120,3 +122,16 @@ class LambdaBase(metaclass=ABCMeta):
         if self.event.get('headers') is not None:
             result.update(self.event.get('headers'))
         return result
+
+    # TODO: cognito:usernameの上書きではなく、user_idなどのフィールドで管理したい。
+    def __update_event(self):
+        # authorizerが指定されてなかったら何もしない
+        if not self.event.get('requestContext') or not self.event['requestContext'].get('authorizer'):
+            return
+
+        # {"requestContext": {"authorizer": {"principalId": "XXX"}}} が存在する場合はCustomAuthorizer経由
+        principal_id = self.event['requestContext']['authorizer'].get('principalId')
+
+        if principal_id:
+            # cognito:username にuser_idが入っていることを期待している関数のためにcognito:usernameにprincipal_idをセットする
+            self.event['requestContext']['authorizer']['claims'] = {'cognito:username': principal_id}
