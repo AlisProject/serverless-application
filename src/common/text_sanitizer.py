@@ -2,6 +2,7 @@ import settings
 import bleach
 import os
 from urllib.parse import urlparse
+from jsonschema import ValidationError
 
 
 class TextSanitizer:
@@ -120,3 +121,10 @@ class TextSanitizer:
                 'oembed': TextSanitizer.allow_oembed_v2
             }
         )
+
+    @staticmethod
+    def validate_img_url(src):
+        p = urlparse(src)
+        if p.netloc and p.netloc != os.environ['DOMAIN']:
+            raise ValidationError('Not support url for img.')
+        return True

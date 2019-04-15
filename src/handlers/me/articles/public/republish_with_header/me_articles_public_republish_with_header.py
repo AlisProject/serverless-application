@@ -12,6 +12,7 @@ from parameter_util import ParameterUtil
 from record_not_found_error import RecordNotFoundError
 from tag_util import TagUtil
 from user_util import UserUtil
+from text_sanitizer import TextSanitizer
 
 
 class MeArticlesPublicRepublishWithHeader(LambdaBase):
@@ -39,6 +40,9 @@ class MeArticlesPublicRepublishWithHeader(LambdaBase):
 
         validate(self.params, self.get_schema())
 
+        if self.params.get('eye_catch_url'):
+            TextSanitizer.validate_img_url(self.params.get('eye_catch_url'))
+
         if self.params.get('tags'):
             ParameterUtil.validate_array_unique(self.params['tags'], 'tags', case_insensitive=True)
             TagUtil.validate_format(self.params['tags'])
@@ -52,6 +56,8 @@ class MeArticlesPublicRepublishWithHeader(LambdaBase):
         )
 
         DBUtil.validate_topic(self.dynamodb, self.params['topic'])
+
+        DBUtil.validate_exists_title_and_body(self.dynamodb, self.params['article_id'])
 
     def exec_main_proc(self):
         # 公開する記事が有料設定か無料設定かの判定

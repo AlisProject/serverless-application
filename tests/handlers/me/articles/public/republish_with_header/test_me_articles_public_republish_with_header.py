@@ -2,17 +2,14 @@ import json
 import os
 import boto3
 import time
-
+import settings
 from elasticsearch import Elasticsearch
 from tests_es_util import TestsEsUtil
-
-import settings
 from boto3.dynamodb.conditions import Key
 from unittest import TestCase
 from me_articles_public_republish_with_header import MeArticlesPublicRepublishWithHeader
 from unittest.mock import patch, MagicMock
 from tests_util import TestsUtil
-
 from tag_util import TagUtil
 
 
@@ -25,6 +22,7 @@ class TestMeArticlesPublicRepublishWithHeader(TestCase):
     @classmethod
     def setUpClass(cls):
         TestsUtil.set_all_tables_name_to_env()
+        os.environ['DOMAIN'] = 'example.com'
 
         cls.article_info_table = cls.dynamodb.Table('ArticleInfo')
         cls.article_content_table = cls.dynamodb.Table('ArticleContent')
@@ -144,7 +142,7 @@ class TestMeArticlesPublicRepublishWithHeader(TestCase):
             'body': {
                 'topic': 'crypto',
                 'tags': ['A', 'B', 'C', 'D', 'E' * 25],
-                'eye_catch_url': 'https://example.com/00001.png'
+                'eye_catch_url': 'https://' + os.environ['DOMAIN'] + '/00001.png'
             },
             'requestContext': {
                 'authorizer': {
@@ -184,7 +182,7 @@ class TestMeArticlesPublicRepublishWithHeader(TestCase):
             'user_id': 'test01',
             'title': 'edit_title1_edit',
             'body': 'edit_body1_edit',
-            'eye_catch_url': 'https://example.com/00001.png',
+            'eye_catch_url': 'https://' + os.environ['DOMAIN'] + '/00001.png',
             'topic': 'crypto',
             'tags': ['a', 'B', 'C', 'D', 'E' * 25]
         }
@@ -346,7 +344,7 @@ class TestMeArticlesPublicRepublishWithHeader(TestCase):
             'body': {
                 'topic': 'crypto',
                 'tags': ['A'],
-                'eye_catch_url': 'https://example.com/00001.png'
+                'eye_catch_url': 'https://' + os.environ['DOMAIN'] + '/00001.png'
             },
             'requestContext': {
                 'authorizer': {
@@ -373,7 +371,7 @@ class TestMeArticlesPublicRepublishWithHeader(TestCase):
             'body': {
                 'topic': 'crypto',
                 'tags': ['A'],
-                'eye_catch_url': 'https://example.com/00001.png'
+                'eye_catch_url': 'https://' + os.environ['DOMAIN'] + '/00001.png'
             },
             'requestContext': {
                 'authorizer': {
@@ -478,6 +476,67 @@ class TestMeArticlesPublicRepublishWithHeader(TestCase):
             args, kwargs = mock_lib.validate_topic.call_args
             self.assertTrue(args[0])
             self.assertEqual(args[1], 'crypto')
+
+            self.assertTrue(mock_lib.validate_exists_title_and_body.called)
+            args, kwargs = mock_lib.validate_exists_title_and_body.call_args
+            self.assertTrue(args[0])
+            self.assertEqual(args[1], 'publicId0001')
+
+    def test_call_validate_img_url(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'draftId00001',
+                'eye_catch_url': 'https://' + os.environ['DOMAIN'] + '/test.png'
+            },
+            'body': {
+                'topic': 'crypto'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
+            }
+        }
+        params['body'] = json.dumps(params['body'])
+
+        mock_lib = MagicMock()
+        with patch('me_articles_public_republish_with_header.TextSanitizer', mock_lib):
+            MeArticlesPublicRepublishWithHeader(params, {}, dynamodb=self.dynamodb,
+                                                elasticsearch=self.elasticsearch).main()
+
+            self.assertTrue(mock_lib.validate_img_url.called)
+            args, kwargs = mock_lib.validate_img_url.call_args
+            self.assertEqual(args[0], 'https://' + os.environ['DOMAIN'] + '/test.png')
+
+    def test_not_call_validate_img_url(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'draftId00001'
+            },
+            'body': {
+                'topic': 'crypto'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
+            }
+        }
+        params['body'] = json.dumps(params['body'])
+
+        mock_lib = MagicMock()
+        with patch('me_articles_public_republish_with_header.TextSanitizer', mock_lib):
+            MeArticlesPublicRepublishWithHeader(params, {}, dynamodb=self.dynamodb,
+                                                elasticsearch=self.elasticsearch).main()
+            self.assertEqual(mock_lib.validate_img_url.call_count, 0)
 
     def test_validation_with_no_article_id(self):
         params = {
@@ -712,7 +771,7 @@ class TestMeArticlesPublicRepublishWithHeader(TestCase):
             'body': {
                 'topic': 'crypto',
                 'tags': ['A', 'B', 'C', 'D', 'E' * 25],
-                'eye_catch_url': 'https://example.com/00001.png',
+                'eye_catch_url': 'https://' + os.environ['DOMAIN'] + '/00001.png',
                 'price': 1 * (10 ** 18),
                 'paid_body': '有料記事コンテンツです'
             },
@@ -754,7 +813,7 @@ class TestMeArticlesPublicRepublishWithHeader(TestCase):
             'user_id': 'test01',
             'title': 'edit_title1_edit',
             'body': 'edit_body1_edit',
-            'eye_catch_url': 'https://example.com/00001.png',
+            'eye_catch_url': 'https://' + os.environ['DOMAIN'] + '/00001.png',
             'topic': 'crypto',
             'tags': ['a', 'B', 'C', 'D', 'E' * 25],
             'price': 1 * (10 ** 18),
@@ -791,7 +850,7 @@ class TestMeArticlesPublicRepublishWithHeader(TestCase):
             'body': {
                 'topic': 'crypto',
                 'tags': ['A', 'B', 'C', 'D', 'E' * 25],
-                'eye_catch_url': 'https://example.com/00001.png'
+                'eye_catch_url': 'https://' + os.environ['DOMAIN'] + '/00001.png'
             },
             'requestContext': {
                 'authorizer': {
@@ -832,7 +891,7 @@ class TestMeArticlesPublicRepublishWithHeader(TestCase):
             'user_id': 'test01',
             'title': 'edit_title3_edit',
             'body': 'edit_body3_edit',
-            'eye_catch_url': 'https://example.com/00001.png',
+            'eye_catch_url': 'https://' + os.environ['DOMAIN'] + '/00001.png',
             'topic': 'crypto',
             'tags': ['a', 'B', 'C', 'D', 'E' * 25],
         }
@@ -869,7 +928,7 @@ class TestMeArticlesPublicRepublishWithHeader(TestCase):
             'body': {
                 'topic': 'crypto',
                 'tags': ['A', 'B', 'C', 'D', 'E' * 25],
-                'eye_catch_url': 'https://example.com/test.png',
+                'eye_catch_url': 'https://' + os.environ['DOMAIN'] + '/test.png',
                 'price': 10 ** 18
             },
             'requestContext': {
@@ -900,7 +959,7 @@ class TestMeArticlesPublicRepublishWithHeader(TestCase):
             'body': {
                 'topic': 'crypto',
                 'tags': ['A', 'B', 'C', 'D', 'E' * 25],
-                'eye_catch_url': 'https://example.com/test.png',
+                'eye_catch_url': 'https://' + os.environ['DOMAIN'] + '/test.png',
                 'paid_body': '有料記事のコンテンツです'
             },
             'requestContext': {

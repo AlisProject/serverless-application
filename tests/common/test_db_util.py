@@ -45,6 +45,30 @@ class TestDBUtil(TestCase):
         ]
         TestsUtil.create_table(cls.dynamodb, os.environ['ARTICLE_INFO_TABLE_NAME'], cls.article_info_table_items)
 
+        # create article_content_table
+        cls.article_content_table_items = [
+            {
+                'article_id': 'testid000001',
+                'title': 'test_title',
+                'body': 'test_body',
+                'user_id': 'user0001',
+                'sort_key': 1520150272000000
+            },
+            {
+                'article_id': 'testid000002',
+                'body': 'test_body',
+                'user_id': 'user0002',
+                'sort_key': 1520150272000000
+            },
+            {
+                'article_id': 'testid000003',
+                'title': 'test_title',
+                'user_id': 'user0003',
+                'sort_key': 1520150272000000
+            }
+        ]
+        TestsUtil.create_table(cls.dynamodb, os.environ['ARTICLE_CONTENT_TABLE_NAME'], cls.article_content_table_items)
+
         # create users_table
         cls.users_table_items = [
             {
@@ -611,4 +635,25 @@ class TestDBUtil(TestCase):
                 self.dynamodb,
                 article_id,
                 user_id
+            )
+
+    def test_validate_exists_title_and_body_ok(self):
+        result = DBUtil.validate_exists_title_and_body(
+            self.dynamodb,
+            'testid000001'
+        )
+        self.assertTrue(result)
+
+    def test_validate_exists_title_and_body_ok_ng_not_exists_title(self):
+        with self.assertRaises(ValidationError):
+            DBUtil.validate_exists_title_and_body(
+                self.dynamodb,
+                'testid000002'
+            )
+
+    def test_validate_exists_title_and_body_ok_ng_not_exists_body(self):
+        with self.assertRaises(ValidationError):
+            DBUtil.validate_exists_title_and_body(
+                self.dynamodb,
+                'testid000003'
             )

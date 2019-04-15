@@ -2,17 +2,14 @@ import json
 import os
 import boto3
 import time
-
+import settings
 from elasticsearch import Elasticsearch
 from tests_es_util import TestsEsUtil
-
-import settings
 from boto3.dynamodb.conditions import Key
 from unittest import TestCase
 from me_articles_drafts_publish_with_header import MeArticlesDraftsPublishWithHeader
 from unittest.mock import patch, MagicMock
 from tests_util import TestsUtil
-
 from tag_util import TagUtil
 
 
@@ -25,6 +22,7 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
     @classmethod
     def setUpClass(cls):
         TestsUtil.set_all_tables_name_to_env()
+        os.environ['DOMAIN'] = 'example.com'
 
         cls.article_info_table = cls.dynamodb.Table('ArticleInfo')
         cls.article_content_table = cls.dynamodb.Table('ArticleContent')
@@ -41,7 +39,7 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
                 'user_id': 'test01',
                 'status': 'draft',
                 'tags': ['a', 'b', 'c'],
-                'eye_catch_url': 'https://example.com/00001.png',
+                'eye_catch_url': 'https://' + os.environ['DOMAIN'] + '/00001.png',
                 'sort_key': 1520150272000000,
                 'version': 2
             },
@@ -104,7 +102,7 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
                 'title': 'sample_title2_edit',
                 'body': 'sample_body2_edit',
                 'overview': 'sample_overview3_edit',
-                'eye_catch_url': 'http://example.com/eye_catch_url3_edit'
+                'eye_catch_url': 'http://' + os.environ['DOMAIN'] + '/eye_catch_url3_edit'
             }
         ]
         TestsUtil.create_table(self.dynamodb, os.environ['ARTICLE_CONTENT_EDIT_TABLE_NAME'], article_content_edit_items)
@@ -155,7 +153,7 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
             'body': {
                 'topic': 'crypto',
                 'tags': ['A', 'B', 'C', 'D', 'E' * 25],
-                'eye_catch_url': 'https://example.com/test.png'
+                'eye_catch_url': 'https://' + os.environ['DOMAIN'] + '/test.png'
             },
             'requestContext': {
                 'authorizer': {
@@ -196,7 +194,7 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
         self.assertEqual(article_info['sync_elasticsearch'], 1)
         self.assertEqual(article_info['topic'], 'crypto')
         self.assertEqual(article_info['tags'], ['a', 'B', 'C', 'D', 'E' * 25])
-        self.assertEqual(article_info['eye_catch_url'], 'https://example.com/test.png')
+        self.assertEqual(article_info['eye_catch_url'], 'https://' + os.environ['DOMAIN'] + '/test.png')
         self.assertEqual(article_content['title'], article_history['title'])
         self.assertEqual(article_content['body'], article_history['body'])
         self.assertEqual(len(article_info_after) - len(article_info_before), 0)
@@ -409,7 +407,7 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
     def test_call_validate_methods(self):
         params = {
             'pathParameters': {
-                'article_id': 'draftId00001'
+                'article_id': 'draftId00001',
             },
             'body': {
                 'topic': 'crypto'
@@ -443,6 +441,67 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
             args, kwargs = mock_lib.validate_topic.call_args
             self.assertTrue(args[0])
             self.assertEqual(args[1], 'crypto')
+
+            self.assertTrue(mock_lib.validate_exists_title_and_body.called)
+            args, kwargs = mock_lib.validate_exists_title_and_body.call_args
+            self.assertTrue(args[0])
+            self.assertEqual(args[1], 'draftId00001')
+
+    def test_call_validate_img_url(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'draftId00001',
+                'eye_catch_url': 'https://' + os.environ['DOMAIN'] + '/test.png'
+            },
+            'body': {
+                'topic': 'crypto'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
+            }
+        }
+        params['body'] = json.dumps(params['body'])
+
+        mock_lib = MagicMock()
+        with patch('me_articles_drafts_publish_with_header.TextSanitizer', mock_lib):
+            MeArticlesDraftsPublishWithHeader(params, {}, dynamodb=self.dynamodb,
+                                              elasticsearch=self.elasticsearch).main()
+
+            self.assertTrue(mock_lib.validate_img_url.called)
+            args, kwargs = mock_lib.validate_img_url.call_args
+            self.assertEqual(args[0], 'https://' + os.environ['DOMAIN'] + '/test.png')
+
+    def test_not_call_validate_img_url(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'draftId00001'
+            },
+            'body': {
+                'topic': 'crypto'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
+            }
+        }
+        params['body'] = json.dumps(params['body'])
+
+        mock_lib = MagicMock()
+        with patch('me_articles_drafts_publish_with_header.TextSanitizer', mock_lib):
+            MeArticlesDraftsPublishWithHeader(params, {}, dynamodb=self.dynamodb,
+                                              elasticsearch=self.elasticsearch).main()
+            self.assertEqual(mock_lib.validate_img_url.call_count, 0)
 
     def test_validation_with_no_article_id(self):
         params = {
@@ -680,7 +739,7 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
             'body': {
                 'topic': 'crypto',
                 'tags': ['A', 'B', 'C', 'D', 'E' * 25],
-                'eye_catch_url': 'https://example.com/test.png',
+                'eye_catch_url': 'https://' + os.environ['DOMAIN'] + '/test.png',
                 'paid_body': '有料記事の内容',
                 'price': 10 ** 20
             },
@@ -724,7 +783,7 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
         self.assertEqual(article_info['sync_elasticsearch'], 1)
         self.assertEqual(article_info['topic'], 'crypto')
         self.assertEqual(article_info['tags'], ['A', 'B', 'C', 'D', 'E' * 25])
-        self.assertEqual(article_info['eye_catch_url'], 'https://example.com/test.png')
+        self.assertEqual(article_info['eye_catch_url'], 'https://' + os.environ['DOMAIN'] + '/test.png')
         self.assertEqual(article_info['price'], 10 ** 20)
         self.assertEqual(article_content['title'], article_history['title'])
         self.assertEqual(article_content['body'], article_history['body'])
@@ -742,7 +801,7 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
             'body': {
                 'topic': 'crypto',
                 'tags': ['A', 'B', 'C', 'D', 'E' * 25],
-                'eye_catch_url': 'https://example.com/test.png',
+                'eye_catch_url': 'https://' + os.environ['DOMAIN'] + '/test.png',
                 'price': 10 ** 20
             },
             'requestContext': {
@@ -773,7 +832,7 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
             'body': {
                 'topic': 'crypto',
                 'tags': ['A', 'B', 'C', 'D', 'E' * 25],
-                'eye_catch_url': 'https://example.com/test.png',
+                'eye_catch_url': 'https://' + os.environ['DOMAIN'] + '/test.png',
                 'paid_body': '有料記事のコンテンツです'
             },
             'requestContext': {
@@ -806,7 +865,7 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
             'body': {
                 'topic': 'crypto',
                 'tags': ['A', 'B', 'C', 'D', 'E' * 25],
-                'eye_catch_url': 'https://example.com/test.png'
+                'eye_catch_url': 'https://' + os.environ['DOMAIN'] + '/test.png'
             },
             'requestContext': {
                 'authorizer': {
@@ -847,7 +906,7 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
         self.assertEqual(article_info['sync_elasticsearch'], 1)
         self.assertEqual(article_info['topic'], 'crypto')
         self.assertEqual(article_info['tags'], ['A', 'B', 'C', 'D', 'E' * 25])
-        self.assertEqual(article_info['eye_catch_url'], 'https://example.com/test.png')
+        self.assertEqual(article_info['eye_catch_url'], 'https://' + os.environ['DOMAIN'] + '/test.png')
         self.assertEqual(article_info.get('price'), None)
         self.assertEqual(article_content['title'], article_history['title'])
         self.assertEqual(article_content.get('paid_body'), None)
