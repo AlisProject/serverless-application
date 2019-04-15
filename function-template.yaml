@@ -114,6 +114,8 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   PaidArticlesTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
+  PaidStatusTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
 
 Resources:
   LambdaRole:
@@ -265,6 +267,7 @@ Resources:
           PRIVATE_CHAIN_EXECUTE_API_HOST: !Ref PrivateChainExecuteApiHost
           COGNITO_USER_POOL_ID: !Ref CognitoUserPoolId
           COGNITO_USER_POOL_APP_ID: !Ref CognitoUserPoolAppId
+          PAID_STATUS_TABLE_NAME: !Ref PaidStatusTableName
       Handler: handler.lambda_handler
       MemorySize: 3008
       Role: !GetAtt LambdaRole.Arn

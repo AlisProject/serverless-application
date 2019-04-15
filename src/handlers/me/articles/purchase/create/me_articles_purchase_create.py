@@ -19,6 +19,7 @@ from aws_requests_auth.aws_auth import AWSRequestsAuth
 from decimal_encoder import DecimalEncoder
 from time import sleep
 from decimal import Decimal
+from botocore.exceptions import ClientError
 
 
 class MeArticlesPurchaseCreate(LambdaBase):
@@ -75,6 +76,7 @@ class MeArticlesPurchaseCreate(LambdaBase):
 
         # purchase article
         paid_articles_table = self.dynamodb.Table(os.environ['PAID_ARTICLES_TABLE_NAME'])
+        paid_status_table = self.dynamodb.Table(os.environ['PAID_STATUS_TABLE_NAME'])
         article_user_eth_address = self.__get_user_private_eth_address(article_info['user_id'])
         user_eth_address = self.event['requestContext']['authorizer']['claims']['custom:private_eth_address']
         price = self.params['price']
@@ -88,6 +90,8 @@ class MeArticlesPurchaseCreate(LambdaBase):
 
         sort_key = TimeUtil.generate_sort_key()
 
+        # 多重リクエストによる不必要なレコード生成を防ぐためにpaid_statusレコードを生成
+        self.__create_paid_status(paid_status_table, user_id)
         # 購入のトランザクション処理
         purchase_transaction = self.__create_purchase_transaction(auth, headers, user_eth_address,
                                                                   article_user_eth_address, price)
@@ -95,8 +99,9 @@ class MeArticlesPurchaseCreate(LambdaBase):
         self.__create_paid_article(paid_articles_table, article_info, purchase_transaction, sort_key)
         # プライベートチェーンへのポーリングを行いトランザクションの承認状態を取得
         transaction_status = self.__polling_to_private_chain(purchase_transaction, auth, headers)
-        # トランザクションの承認状態をpaid_artilcleに格納
-        self.__update_transaction_status(article_info, paid_articles_table, transaction_status, sort_key)
+        # トランザクションの承認状態をpaid_artilcleとpaid_statusに格納
+        self.__update_transaction_status(article_info, paid_articles_table, transaction_status, sort_key,
+                                         paid_status_table, user_id)
 
         # 購入のトランザクションが成功した時のみバーンのトランザクションを発行する
         if transaction_status == 'done':
@@ -221,11 +226,23 @@ class MeArticlesPurchaseCreate(LambdaBase):
         )
 
     @staticmethod
-    def __update_transaction_status(article_info, paid_articles_table, transaction_status, sort_key):
+    def __update_transaction_status(article_info, paid_articles_table, transaction_status, sort_key,
+                                    paid_status_table, user_id):
         paid_articles_table.update_item(
             Key={
                 'article_id': article_info['article_id'],
                 'sort_key': sort_key
+            },
+            UpdateExpression="set #attr = :transaction_status",
+            ExpressionAttributeNames={'#attr': 'status'},
+            ExpressionAttributeValues={':transaction_status': transaction_status}
+        )
+
+        # lock用のpaid_statusの:statusを更新
+        paid_status_table.update_item(
+            Key={
+                'article_id': article_info['article_id'],
+                'user_id': user_id
             },
             UpdateExpression="set #attr = :transaction_status",
             ExpressionAttributeNames={'#attr': 'status'},
@@ -276,7 +293,7 @@ class MeArticlesPurchaseCreate(LambdaBase):
             if json.loads(transaction_info).get('error'):
                 return 'fail'
             # receiptがnullの場合countをインクリメントしてループ処理
-            if result is None or result['logs'] == 0:
+            if result is None or len(result['logs']) == 0:
                 continue
             # transactionが承認済みであればstatusをdoneにする
             if result['logs'][0].get('type') == 'mined':
@@ -326,3 +343,27 @@ class MeArticlesPurchaseCreate(LambdaBase):
     @staticmethod
     def __get_randomhash():
         return hashlib.sha256((str(time.time()) + str(os.urandom(16))).encode('utf-8')).hexdigest()
+
+    def __create_paid_status(self, paid_status_table, user_id):
+        item = {
+            'article_id': self.params['article_id'],
+            'user_id': user_id,
+            'status': 'doing'
+        }
+        try:
+            paid_status_table.put_item(
+                Item=item,
+                ConditionExpression='#st <> :status1 and #st <> :status2',
+                ExpressionAttributeValues={
+                    ':status1': 'done',
+                    ':status2': 'doing',
+                },
+                ExpressionAttributeNames={
+                    '#st': 'status'
+                }
+            )
+        except ClientError as e:
+            if e.response['Error']['Code'] == 'ConditionalCheckFailedException':
+                raise ValidationError('You have already purchased')
+            else:
+                raise e

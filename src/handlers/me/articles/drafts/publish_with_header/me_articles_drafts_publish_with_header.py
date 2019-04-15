@@ -9,6 +9,7 @@ import time
 from boto3.dynamodb.conditions import Key
 from lambda_base import LambdaBase
 from jsonschema import validate, ValidationError
+from text_sanitizer import TextSanitizer
 from db_util import DBUtil
 from parameter_util import ParameterUtil
 from tag_util import TagUtil
@@ -41,6 +42,9 @@ class MeArticlesDraftsPublishWithHeader(LambdaBase):
 
         validate(self.params, self.get_schema())
 
+        if self.params.get('eye_catch_url'):
+            TextSanitizer.validate_img_url(self.params.get('eye_catch_url'))
+
         if self.params.get('tags'):
             ParameterUtil.validate_array_unique(self.params['tags'], 'tags', case_insensitive=True)
             TagUtil.validate_format(self.params['tags'])
@@ -54,6 +58,8 @@ class MeArticlesDraftsPublishWithHeader(LambdaBase):
         )
 
         DBUtil.validate_topic(self.dynamodb, self.params['topic'])
+
+        DBUtil.validate_exists_title_and_body(self.dynamodb, self.params['article_id'])
 
     def exec_main_proc(self):
         # 公開する記事が有料設定か無料設定かの判定
