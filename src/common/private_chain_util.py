@@ -1,0 +1,67 @@
+import os
+import json
+import requests
+import settings
+import time
+from aws_requests_auth.aws_auth import AWSRequestsAuth
+from exceptions import SendTransactionError
+
+
+class PrivateChainUtil:
+    auth = None
+
+    @classmethod
+    def __set_aws_requests_auth(cls):
+        if cls.auth is None:
+            cls.auth = AWSRequestsAuth(
+                aws_access_key=os.environ['PRIVATE_CHAIN_AWS_ACCESS_KEY'],
+                aws_secret_access_key=os.environ['PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY'],
+                aws_host=os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'],
+                aws_region='ap-northeast-1',
+                aws_service='execute-api'
+            )
+
+    @classmethod
+    def send_transaction(cls, request_url, payload_dict=None):
+        cls.__set_aws_requests_auth()
+        headers = {"content-type": "application/json"}
+
+        # send transaction
+        if payload_dict is None:
+            response = requests.post(request_url, auth=cls.auth, headers=headers)
+        else:
+            response = requests.post(request_url, auth=cls.auth, headers=headers, data=json.dumps(payload_dict))
+
+        # validate status code
+        if response.status_code != 200:
+            raise SendTransactionError('status code not 200')
+
+        # validate exists error
+        if json.loads(response.text).get('error'):
+            raise SendTransactionError(json.loads(response.text).get('error'))
+
+        # return result
+        return json.loads(response.text).get('result')
+
+    @classmethod
+    def validate_transaction_completed(cls, transaction):
+        count = 0
+        is_completed = False
+        while count < settings.TRANSACTION_CONFIRM_COUNT:
+            count += 1
+            # get receipt of target transaction
+            payload = {'transaction_hash': transaction}
+            request_url = 'https://' + os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'] + '/production/transaction/receipt'
+            result = cls.send_transaction(request_url=request_url, payload_dict=payload)
+
+            # transaction が完了している場合は True を返却
+            if result is not None and result.get('logs') is not None and result['logs'][0].get('type') == 'mined':
+                is_completed = True
+                break
+
+            # 完了が確認できなかった場合は 1 秒待機後に再実施
+            time.sleep(1)
+
+        if not is_completed:
+            raise SendTransactionError('validate_transaction_completed retry limit. transaction: ' + transaction)
+        return is_completed

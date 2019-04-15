@@ -1,15 +1,12 @@
 # -*- coding: utf-8 -*-
 import os
 import settings
-import json
-import requests
 import time
+from private_chain_util import PrivateChainUtil
 from time_util import TimeUtil
-from aws_requests_auth.aws_auth import AWSRequestsAuth
 from jsonschema import validate
 from lambda_base import LambdaBase
 from jsonschema import ValidationError
-from exceptions import SendTransactionError
 from user_util import UserUtil
 
 
@@ -42,74 +39,80 @@ class MeWalletTokenSend(LambdaBase):
         sort_key = TimeUtil.generate_sort_key()
         user_id = self.event['requestContext']['authorizer']['claims']['cognito:username']
 
-        # approve
-        approve_transaction_hash = self.__approve(from_user_eth_address, send_value)
+        # allowance を取得
+        allowance = self.__get_allowance(from_user_eth_address)
+        # transaction_count を取得
+        transaction_count = self.__get_transaction_count(from_user_eth_address)
+        # 既に approve されている場合（allowance の戻り値が "0x0" ではない場合）、該当の approve を削除する（0 で更新）
+        if allowance != '0x0':
+            self.__approve(from_user_eth_address, 0, transaction_count)
+            transaction_count = self.__increment_transaction_count(transaction_count)
+
+        # approve 実施
+        approve_transaction_hash = self.__approve(from_user_eth_address, send_value, transaction_count)
+        transaction_count = self.__increment_transaction_count(transaction_count)
         self.__create_send_info_with_approve_transaction_hash(sort_key, user_id, approve_transaction_hash)
-        # withdraw
-        withdraw_transaction_hash = self.__withdraw(from_user_eth_address, recipient_eth_address, send_value)
-        self.__update_send_info_with_withdraw_transaction_hash(sort_key, user_id, withdraw_transaction_hash)
+
+        # relay 実施
+        relay_transaction_hash = self.__relay(from_user_eth_address, recipient_eth_address, send_value,
+                                              transaction_count)
+        self.__update_send_info_with_relay_transaction_hash(sort_key, user_id, relay_transaction_hash)
 
         return {
             'statusCode': 200
         }
 
     @staticmethod
-    def __approve(from_user_eth_address, send_value):
-        headers = {'content-type': 'application/json'}
-        payload = json.dumps(
-            {
-                'from_user_eth_address': from_user_eth_address,
-                'spender_eth_address': os.environ['PRIVATE_CHAIN_BRIDGE_ADDRESS'][2:],
-                'value': format(send_value, '064x')
-            }
-        )
-        auth = AWSRequestsAuth(aws_access_key=os.environ['PRIVATE_CHAIN_AWS_ACCESS_KEY'],
-                               aws_secret_access_key=os.environ['PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY'],
-                               aws_host=os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'],
-                               aws_region='ap-northeast-1',
-                               aws_service='execute-api')
-        response = requests.post('https://' + os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'] +
-                                 '/production/wallet/approve', auth=auth, headers=headers, data=payload)
-
-        # validate status code
-        if response.status_code != 200:
-            raise SendTransactionError('status code not 200')
-
-        # exists error
-        if json.loads(response.text).get('error'):
-            raise SendTransactionError(json.loads(response.text).get('error'))
-
-        # return transaction hash
-        return json.dumps(json.loads(response.text).get('result')).replace('"', '')
+    def __get_allowance(from_user_eth_address):
+        payload = {
+            'from_user_eth_address': from_user_eth_address,
+            'owner_eth_address': from_user_eth_address[2:],
+            'spender_eth_address': os.environ['PRIVATE_CHAIN_BRIDGE_ADDRESS'][2:]
+        }
+        url = 'https://' + os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'] + '/production/wallet/allowance'
+        return PrivateChainUtil.send_transaction(request_url=url, payload_dict=payload)
 
     @staticmethod
-    def __withdraw(from_user_eth_address, recipient_eth_address, send_value):
-        headers = {'content-type': 'application/json'}
-        payload = json.dumps(
-            {
-                'from_user_eth_address': from_user_eth_address,
-                'recipient_eth_address': recipient_eth_address[2:],
-                'amount': format(send_value, '064x')
-            }
-        )
-        auth = AWSRequestsAuth(aws_access_key=os.environ['PRIVATE_CHAIN_AWS_ACCESS_KEY'],
-                               aws_secret_access_key=os.environ['PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY'],
-                               aws_host=os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'],
-                               aws_region='ap-northeast-1',
-                               aws_service='execute-api')
-        response = requests.post('https://' + os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'] +
-                                 '/production/wallet/withdraw', auth=auth, headers=headers, data=payload)
+    def __get_transaction_count(from_user_eth_address):
+        payload = {
+            'from_user_eth_address': from_user_eth_address
+        }
+        url = 'https://' + os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'] + '/production/eth/get_transaction_count'
+        return PrivateChainUtil.send_transaction(request_url=url, payload_dict=payload)
 
-        # validate status code
-        if response.status_code != 200:
-            raise SendTransactionError('status code not 200')
+    @staticmethod
+    def __increment_transaction_count(hex_str):
+        return str(hex(int(hex_str, 16) + 1))
 
-        # exists error
-        if json.loads(response.text).get('error'):
-            raise SendTransactionError(json.loads(response.text).get('error'))
+    @staticmethod
+    def __approve(from_user_eth_address, send_value, nonce):
+        payload = {
+            'from_user_eth_address': from_user_eth_address,
+            'spender_eth_address': os.environ['PRIVATE_CHAIN_BRIDGE_ADDRESS'][2:],
+            'nonce': nonce,
+            'value': format(send_value, '064x')
+        }
+        url = 'https://' + os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'] + '/production/wallet/approve'
+        # approve 実施
+        result = PrivateChainUtil.send_transaction(request_url=url, payload_dict=payload)
+        # transaction の完了を確認
+        PrivateChainUtil.validate_transaction_completed(result)
+        return result
 
-        # return transaction hash
-        return json.dumps(json.loads(response.text).get('result')).replace('"', '')
+    @staticmethod
+    def __relay(from_user_eth_address, recipient_eth_address, send_value, nonce):
+        payload = {
+            'from_user_eth_address': from_user_eth_address,
+            'recipient_eth_address': recipient_eth_address[2:],
+            'nonce': nonce,
+            'amount': format(send_value, '064x')
+        }
+        url = 'https://' + os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'] + '/production/wallet/relay'
+        # relay 実施
+        result = PrivateChainUtil.send_transaction(request_url=url, payload_dict=payload)
+        # transaction の完了を確認
+        PrivateChainUtil.validate_transaction_completed(result)
+        return result
 
     def __create_send_info_with_approve_transaction_hash(self, sort_key, user_id, approve_transaction_hash):
         token_send_table = self.dynamodb.Table(os.environ['TOKEN_SEND_TABLE_NAME'])
@@ -127,15 +130,15 @@ class MeWalletTokenSend(LambdaBase):
             ConditionExpression='attribute_not_exists(user_id)'
         )
 
-    def __update_send_info_with_withdraw_transaction_hash(self, sort_key, user_id, withdraw_transaction_hash):
+    def __update_send_info_with_relay_transaction_hash(self, sort_key, user_id, relay_transaction_hash):
         token_send_table = self.dynamodb.Table(os.environ['TOKEN_SEND_TABLE_NAME'])
         token_send_table.update_item(
             Key={
                 'user_id': user_id,
                 'sort_key': sort_key
             },
-            UpdateExpression='set withdraw_transaction_hash=:withdraw_transaction_hash',
+            UpdateExpression='set relay_transaction_hash=:relay_transaction_hash',
             ExpressionAttributeValues={
-                ':withdraw_transaction_hash': withdraw_transaction_hash,
+                ':relay_transaction_hash': relay_transaction_hash,
             }
         )
