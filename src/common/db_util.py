@@ -52,8 +52,8 @@ class DBUtil:
 
     @classmethod
     def validate_exists_title_and_body(cls, dynamodb, article_id):
-        article_content_table_name = dynamodb.Table(os.environ['ARTICLE_CONTENT_TABLE_NAME'])
-        article_content = article_content_table_name.get_item(Key={'article_id': article_id}).get('Item')
+        article_content_table = dynamodb.Table(os.environ['ARTICLE_CONTENT_TABLE_NAME'])
+        article_content = article_content_table.get_item(Key={'article_id': article_id}).get('Item')
         if article_content.get('title') is None or article_content.get('body') is None:
             raise ValidationError('Title and body is required')
 
