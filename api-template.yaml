@@ -2116,6 +2116,35 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+          /wallet/token/histories:
+            get:
+              description: "トークン入出金履歴の取得"
+              responses:
+                "200":
+                  description: "トークン入出金履歴情報"
+                  schema:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: "string"
+                      relay_events:
+                        type: "string"
+                      apply_relay_events:
+                        type: "string"
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri:
+                  Fn::Join:
+                    - ''
+                    - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
+                      - Fn::ImportValue:
+                          Fn::Sub: "${AlisAppId}-MeWalletTokenHistoriesIndex"
+                      - "/invocations"
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
           /me/notifications:
             get:
               description: ログインユーザーの通知の一覧を取得
