@@ -97,4 +97,4 @@ Resources:
         Fn::ImportValue:
           Fn::Sub: "${AlisAppId}-WalletBridgeInformationShow"
       Principal: "apigateway.amazonaws.com"
-      SourceArn: !Sub ${RestApiArn}/*/POST/wallet/bridge_information
+      SourceArn: !Sub ${RestApiArn}/*/GET/wallet/bridge_information
