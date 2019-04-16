@@ -2415,6 +2415,37 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+          /wallet/bridge_information:
+            get:
+              description: "Bridge情報の取得"
+              responses:
+                "200":
+                  description: "Bridge情報"
+                  schema:
+                    type: object
+                    properties:
+                      max_single_relay_amount:
+                        type: "string"
+                      min_single_relay_amount:
+                        type: "string"
+                      relay_paused:
+                        type: "string"
+                      relay_fee:
+                        type: "string"
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri:
+                  Fn::Join:
+                    - ''
+                    - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
+                      - Fn::ImportValue:
+                          Fn::Sub: "${AlisAppId}-WalletBridgeInformationShow"
+                      - "/invocations"
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
         securityDefinitions:
           cognitoUserPool:
             type: apiKey
