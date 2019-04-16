@@ -270,6 +270,13 @@ Resources:
                 type: string
               tip_value:
                 type: string
+          MeWalletTokenSend:
+            type: object
+            properties:
+              recipient_eth_address:
+                type: string
+              send_value:
+                type: string
           MeExternalProviderUserCreate:
             type: object
             properties:
@@ -2077,6 +2084,35 @@ Resources:
                   default:
                     statusCode: "200"
                 uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeWalletTip.Arn}/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /me/wallet/token/send:
+            post:
+              description: 'トークンを指定のアドレス（パブリック）に送信する'
+              parameters:
+                - name: 'token send'
+                  in: 'body'
+                  description: 'token send object'
+                  required: true
+                  schema:
+                    $ref: '#/definitions/MeWalletTokenSend'
+              responses:
+                '200':
+                  description: 'トークン送信結果'
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri:
+                  Fn::Join:
+                    - ''
+                    - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
+                      - Fn::ImportValue:
+                          Fn::Sub: "${AlisAppId}-MeWalletTokenSend"
+                      - "/invocations"
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy

@@ -636,3 +636,26 @@ Resources:
         - AttributeName: user_id
           KeyType: RANGE
       BillingMode: PAY_PER_REQUEST
+  TokenSend:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: user_id
+          AttributeType: S
+        - AttributeName: sort_key
+          AttributeType: N
+        - AttributeName: uncompleted
+          AttributeType: N
+      KeySchema:
+        - AttributeName: user_id
+          KeyType: HASH
+        - AttributeName: sort_key
+          KeyType: RANGE
+      GlobalSecondaryIndexes:
+        - IndexName: uncompleted-index
+          KeySchema:
+            - AttributeName: uncompleted
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+      BillingMode: PAY_PER_REQUEST
