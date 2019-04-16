@@ -2131,6 +2131,8 @@ Resources:
                         type: "string"
                       apply_relay_events:
                         type: "string"
+              security:
+                - cognitoUserPool: []
               x-amazon-apigateway-integration:
                 responses:
                   default:
