@@ -2116,7 +2116,7 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
-          /wallet/token/histories:
+          /me/wallet/token/histories:
             get:
               description: "トークン入出金履歴の取得"
               responses:
