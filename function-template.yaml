@@ -316,6 +316,21 @@ Resources:
       Role: !GetAtt LambdaRole.Arn
       Runtime: python3.6
       Timeout: 300
+  MeWalletTokenHistoriesIndex:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Code: ./deploy/me_wallet_token_histories_index.zip
+      Environment:
+        Variables:
+          PRIVATE_CHAIN_BRIDGE_ADDRESS: !Ref PrivateChainBridgeAddress
+          PRIVATE_CHAIN_AWS_ACCESS_KEY: !Ref PrivateChainAwsAccessKey
+          PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY: !Ref PrivateChainAwsSecretAccessKey
+          PRIVATE_CHAIN_EXECUTE_API_HOST: !Ref PrivateChainExecuteApiHost
+      Handler: handler.lambda_handler
+      MemorySize: 3008
+      Role: !GetAtt LambdaRole.Arn
+      Runtime: python3.6
+      Timeout: 300
 
 Outputs:
   LoginYahoo:
@@ -362,3 +377,7 @@ Outputs:
     Value: !GetAtt WalletBridgeInformationShow.Arn
     Export:
       Name: !Sub "${AlisAppId}-WalletBridgeInformationShow"
+  MeWalletTokenHistoriesIndex:
+    Value: !GetAtt MeWalletTokenHistoriesIndex.Arn
+    Export:
+      Name: !Sub "${AlisAppId}-MeWalletTokenHistoriesIndex"
