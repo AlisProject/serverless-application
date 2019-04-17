@@ -135,9 +135,8 @@ class TestMeWalletTokenSend(TestCase):
             }
             self.assertEqual(mock_send_transaction.call_args_list[3][1], args_relay)
             # validate_transaction_completed
-            self.assertEqual(len(mock_validate_transaction_completed.call_args_list), 2)
-            self.assertEqual(mock_validate_transaction_completed.call_args_list[0][0], (return_approve,))
-            self.assertEqual(mock_validate_transaction_completed.call_args_list[1][0], (return_relay,))
+            self.assertEqual(len(mock_validate_transaction_completed.call_args_list), 1)
+            self.assertEqual(mock_validate_transaction_completed.call_args_list[0][0], (return_relay,))
 
     @patch('time_util.TimeUtil.generate_sort_key', MagicMock(return_value=1520150552000003))
     @patch('time.time', MagicMock(return_value=1520150552.000003))
@@ -257,10 +256,8 @@ class TestMeWalletTokenSend(TestCase):
             }
             self.assertEqual(mock_send_transaction.call_args_list[4][1], args_relay)
             # validate_transaction_completed
-            self.assertEqual(len(mock_validate_transaction_completed.call_args_list), 3)
-            self.assertEqual(mock_validate_transaction_completed.call_args_list[0][0], (return_approve_zero,))
-            self.assertEqual(mock_validate_transaction_completed.call_args_list[1][0], (return_approve,))
-            self.assertEqual(mock_validate_transaction_completed.call_args_list[2][0], (return_relay,))
+            self.assertEqual(len(mock_validate_transaction_completed.call_args_list), 1)
+            self.assertEqual(mock_validate_transaction_completed.call_args_list[0][0], (return_relay,))
 
     def test_main_ng_less_than_min_value(self):
         target_token_send_value = str(settings.parameters['token_send_value']['minimum'] - 1)
