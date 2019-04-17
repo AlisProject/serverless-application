@@ -95,8 +95,6 @@ class MeWalletTokenSend(LambdaBase):
         url = 'https://' + os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'] + '/production/wallet/approve'
         # approve 実施
         result = PrivateChainUtil.send_transaction(request_url=url, payload_dict=payload)
-        # transaction の完了を確認
-        PrivateChainUtil.validate_transaction_completed(result)
         return result
 
     @staticmethod
