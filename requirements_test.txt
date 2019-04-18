@@ -4,3 +4,4 @@ pyflakes == 2.0.0
 green
 awscli
 six
+responses

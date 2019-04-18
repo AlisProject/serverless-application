@@ -1,3 +1,5 @@
+import sys
+
 parameters = {
     'limit': {
         'type': 'integer',
@@ -181,12 +183,44 @@ parameters = {
             'is_created_article'
         ]
     },
+    'oauth_client': {
+        'client_id': {
+            'type': 'integer',
+            'minimum': 1,
+            'maximum': sys.maxsize
+        },
+        'name': {
+            'type': 'string',
+            'maxLength': 80
+        },
+        'description': {
+            'type': 'string',
+            'maxLength': 180
+        },
+        'application_type': {
+            'type': 'string',
+            'enum': [
+                'WEB',
+                'NATIVE'
+            ]
+        },
+        'redirect_urls': {
+            'type': 'array',
+            'items': {
+                'type': 'string',
+                'format': 'uri',
+                'maxLength': 200
+            },
+            'maxItems': 5
+        }
+    },
     'code': {
         'type': 'string'
     },
     'state': {
         'type': 'string'
     }
+
 }
 
 article_recent_default_limit = 20
@@ -305,6 +339,6 @@ PASSWORD_LENGTH = 32
 AES_IV_BYTES = 16
 DYNAMO_BATCH_GET_MAX = 100
 
-
+AUTHLETE_CLIENT_ENDPOINT = 'https://api.authlete.com/api/client'
 AUTHLETE_SCOPE_READ = 'read'
 AUTHLETE_SCOPE_WRITE = 'write'
