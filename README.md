@@ -53,6 +53,9 @@ java -Djava.library.path=./DynamoDBLocal_lib -jar DynamoDBLocal.jar -sharedDb
 # lunch docker for localstack（for MAC OS）
 TMPDIR=/private$TMPDIR docker-compose up -d
 
+# lunch docker for elasticsearch
+docker run -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:6.2.0
+
 # exec
 python exec_test.py
 ```
@@ -90,6 +93,7 @@ aws dynamodb list-tables |grep ${ALIS_APP_ID}database |sort |tr -d ' ",'
 
 And add all of generated table names to SSM.
 - See: https://github.com/AlisProject/environment
+  - You can use `dynamodb-table-replacer.sh`
 
 #### Master Data
 Add master data to DynamoDB.
@@ -110,17 +114,40 @@ Specify generated Cognito User Pool ARN to SSM.
 
 
 ### Lambda & API Gateway
+You have to add SNS authentication params to SMS.
+- See: https://github.com/AlisProject/environment
 
 
 ```bash
-./deploy.sh api
+./deploy.sh function && ./deploy.sh api
+```
 
-# Show generated IAM LambdaRole.
-aws iam list-roles | grep ${ALIS_APP_ID}api-LambdaRole | grep Arn
+You have to add `RestApiArn`, `ApiLambdaRole` and `ElasticSearchEndpoint` to SMS.
+- See: https://github.com/AlisProject/environment
+  - You can use `api-stack-replacer.sh`
+
+```bash
+./deploy.sh permission 
+```
+
+You have to update Cognito pre authentication trigger.
+
+```bash
+# Use this script with your Cognito User Pool ID
+./update_cognito_pre_auth.sh ap-northeast-XXXXXXXXXX
 ```
 
 Specify generated ApiLambdaRole to SSM.
 - See: https://github.com/AlisProject/environment
+  - You can use `functions-replacer.sh`
+
+#### FYI:
+Lambda & API Gateway are bunch of CloudFormation stacks.
+You can use the script from next time.
+
+```bash
+./deploy_api.sh
+```
 
 #### Fix API settings via a script
 
@@ -137,6 +164,7 @@ direnv edit
 ### ElasticSearch
 
 ```bash
+# Notice: This is only for production env. Unnecessary for dev env.
 ./deploy.sh elasticsearch
 
 # show ElasticSearch Endpoint

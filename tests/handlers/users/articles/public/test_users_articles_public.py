@@ -30,7 +30,8 @@ class TestUsersArticlesPublic(TestCase):
                 'article_id': 'testid000002',
                 'user_id': 'TST',
                 'status': 'public',
-                'sort_key': 1520150272000002
+                'sort_key': 1520150272000002,
+                'price': 200
             },
             {
                 'article_id': 'testid000003',
@@ -81,7 +82,8 @@ class TestUsersArticlesPublic(TestCase):
                 'article_id': 'testid000002',
                 'user_id': 'TST',
                 'status': 'public',
-                'sort_key': 1520150272000002
+                'sort_key': 1520150272000002,
+                'price': 200
             }
         ]
 
@@ -256,7 +258,7 @@ class TestUsersArticlesPublic(TestCase):
     def test_validation_user_id_min(self):
         params = {
             'pathParameters': {
-                'user_id': 'A' * 31
+                'user_id': 'A' * 51
             }
         }
 

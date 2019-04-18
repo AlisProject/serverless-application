@@ -204,6 +204,25 @@ class UserUtil:
             raise e
 
     @staticmethod
+    def generate_backend_password():
+        alphabet = string.ascii_letters + string.digits
+        return ''.join(secrets.choice(alphabet) for i in range(settings.PASSWORD_LENGTH))
+
+    @staticmethod
+    def get_external_provider_password(dynamodb, user_id):
+        try:
+            external_provider_user = dynamodb.Table(
+                os.environ['EXTERNAL_PROVIDER_USERS_TABLE_NAME']).get_item(Key={
+                    'external_provider_user_id': user_id
+                }).get('Item')
+            return UserUtil.decrypt_password(
+                external_provider_user['password'].encode(),
+                external_provider_user['iv'].encode()
+            )
+        except ClientError as e:
+            raise e
+
+    @staticmethod
     def wallet_initialization(cognito, user_pool_id, user_id):
         try:
             address = UserUtil.__create_new_account_on_private_chain()
@@ -315,5 +334,17 @@ class UserUtil:
     @staticmethod
     def check_try_to_register_as_line_user(requested_user_id):
         if re.match(settings.LINE_USERNAME_PREFIX, requested_user_id):
+            return True
+        return False
+
+    @staticmethod
+    def check_try_to_register_as_yahoo_user(requested_user_id):
+        if re.match(settings.YAHOO_USERNAME_PREFIX, requested_user_id):
+            return True
+        return False
+
+    @staticmethod
+    def check_try_to_register_as_facebook_user(requested_user_id):
+        if re.match(settings.FACEBOOK_USERNAME_PREFIX, requested_user_id):
             return True
         return False

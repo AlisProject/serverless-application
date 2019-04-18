@@ -680,7 +680,7 @@ class TestMeArticlesCommentsReply(TestCase):
             'body': {
                 'text': 'A',
                 'parent_id': 'comment00001',
-                'replyed_user_id': 'A' * 31
+                'replyed_user_id': 'A' * 51
             },
             'requestContext': {
                 'authorizer': {

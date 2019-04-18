@@ -14,10 +14,16 @@ parameters = {
     'user_id': {
         'type': 'string',
         'minLength': 3,
-        'maxLength': 30,
+        'maxLength': 50,
         'pattern': r'^(?!.*--)[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]$'
     },
     'line_id': {
+        'type': 'string'
+    },
+    'yahoo_id': {
+        'type': 'string'
+    },
+    'facebook_id': {
         'type': 'string'
     },
     'phone_number': {
@@ -207,6 +213,12 @@ parameters = {
             },
             'maxItems': 5
         }
+    },
+    'code': {
+        'type': 'string'
+    },
+    'state': {
+        'type': 'string'
     }
 
 }
@@ -226,6 +238,8 @@ COMMENT_ID_LENGTH = 12
 
 html_allowed_tags = ['a', 'b', 'blockquote', 'br', 'h2', 'h3', 'i', 'p', 'u', 'img', 'hr',
                      'div', 'figure', 'figcaption']
+html_allowed_tags_v2 = ['a', 'strong', 'blockquote', 'br', 'h2', 'h3', 'i', 'p', 'img', 'hr',
+                        'figure', 'figcaption', 'oembed']
 
 ng_user_name = [
     'about', 'account', 'activity', 'add', 'admin', 'all', 'alpha', 'analysis',
@@ -290,6 +304,23 @@ TOPIC_INDEX_HASH_KEY = 'topic'
 TAG_DENIED_SYMBOL_PATTERN = '([!-,./:-@[-`{-~]|--| {2})'
 TAG_ALLOWED_SYMBOLS = ['-', ' ']
 
+
+YAHOO_API_WELL_KNOWN_URL = 'https://auth.login.yahoo.co.jp/yconnect/v2/.well-known/openid-configuration'
+YAHOO_API_PUBLIC_KEY_URL = 'https://auth.login.yahoo.co.jp/yconnect/v2/public-keys'
+YAHOO_USERNAME_PREFIX = 'Yahoo-'
+YAHOO_NONCE_EXPIRATION_MINUTES = 15
+YAHOO_LOGIN_REQUEST_SCOPE = 'openid%20email'
+YAHOO_NONCE_LENGTH = 10
+
+FACEBOOK_API_AUTHENTICATE_URL = 'https://www.facebook.com/dialog/oauth'
+FACEBOOK_API_ACCESSTOKEN_URL = 'https://graph.facebook.com/oauth/access_token'
+FACEBOOK_API_USERINFO_URL = 'https://graph.facebook.com/me'
+FACEBOOK_API_DEBUG_URL = 'https://graph.facebook.com/debug_token'
+FACEBOOK_USERNAME_PREFIX = 'Facebook-'
+FACEBOOK_NONCE_EXPIRATION_MINUTES = 15
+FACEBOOK_LOGIN_REQUEST_SCOPE = 'email'
+FACEBOOK_NONCE_LENGTH = 10
+
 TWITTER_API_REQUEST_TOKEN_URL = 'https://api.twitter.com/oauth/request_token'
 TWITTER_API_AUTHENTICATE_URL = 'https://api.twitter.com/oauth/authenticate'
 TWITTER_API_ACCESS_TOKEN_URL = 'https://api.twitter.com/oauth/access_token'
@@ -309,3 +340,5 @@ AES_IV_BYTES = 16
 DYNAMO_BATCH_GET_MAX = 100
 
 AUTHLETE_CLIENT_ENDPOINT = 'https://api.authlete.com/api/client'
+AUTHLETE_SCOPE_READ = 'read'
+AUTHLETE_SCOPE_WRITE = 'write'

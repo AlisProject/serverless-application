@@ -20,8 +20,17 @@ class TestMeArticlesPublicShow(TestCase):
                 'user_id': 'test01',
                 'status': 'public',
                 'sort_key': 1520150272000000,
-                'overview': 'sample_overview',
+                'overview': 'sample_overview1',
                 'eye_catch_url': 'http://example.com/eye_catch_url'
+            },
+            {
+                'article_id': 'publicId0002',
+                'user_id': 'test02',
+                'status': 'public',
+                'sort_key': 1520150272000001,
+                'overview': 'sample_overview2',
+                'eye_catch_url': 'http://example.com/eye_catch_url',
+                'price': 100
             }
         ]
 
@@ -32,6 +41,12 @@ class TestMeArticlesPublicShow(TestCase):
                 'article_id': 'publicId0001',
                 'title': 'sample_title1',
                 'body': 'sample_body1'
+            },
+            {
+                'article_id': 'publicId0002',
+                'title': 'sample_title2',
+                'body': 'sample_body2',
+                'paid_body': 'sample_paid_body2'
             }
         ]
 
@@ -69,10 +84,40 @@ class TestMeArticlesPublicShow(TestCase):
             'title': 'sample_title1',
             'body': 'sample_body1',
             'status': 'public',
-            'overview': 'sample_overview',
+            'overview': 'sample_overview1',
             'sort_key': 1520150272000000,
-            'overview': 'sample_overview',
             'eye_catch_url': 'http://example.com/eye_catch_url'
+        }
+
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(json.loads(response['body']), expected_item)
+
+    def test_paid_article(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'publicId0002'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test02'
+                    }
+                }
+            }
+        }
+
+        response = MeArticlesPublicShow(params, {}, self.dynamodb).main()
+
+        expected_item = {
+            'article_id': 'publicId0002',
+            'user_id': 'test02',
+            'title': 'sample_title2',
+            'body': 'sample_paid_body2',
+            'status': 'public',
+            'overview': 'sample_overview2',
+            'sort_key': 1520150272000001,
+            'eye_catch_url': 'http://example.com/eye_catch_url',
+            'price': 100
         }
 
         self.assertEqual(response['statusCode'], 200)

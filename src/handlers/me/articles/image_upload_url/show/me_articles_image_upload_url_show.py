@@ -45,14 +45,20 @@ class MeArticlesImageUploadUrlShow(LambdaBase):
 
         content_length = self.params['upload_image_size']
 
-        url = s3_cli.generate_presigned_url(
+        upload_url = s3_cli.generate_presigned_url(
             ClientMethod='put_object',
             Params={'Bucket': bucket, 'Key': key, 'ContentLength': content_length},
             ExpiresIn=300,
             HttpMethod='PUT'
         )
 
+        show_url = 'https://' + os.environ['DOMAIN'] +\
+            '/d/api/articles_images/' + user_id + '/' + self.params['article_id'] + '/' + file_name
+
         return {
             'statusCode': 200,
-            'body': json.dumps({'url': url})
+            'body': json.dumps({
+                'show_url': show_url,
+                'upload_url': upload_url
+            })
         }
