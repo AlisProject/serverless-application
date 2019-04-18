@@ -50,6 +50,15 @@ class DBUtil:
 
         return True
 
+    @classmethod
+    def validate_exists_title_and_body(cls, dynamodb, article_id):
+        article_content_table = dynamodb.Table(os.environ['ARTICLE_CONTENT_TABLE_NAME'])
+        article_content = article_content_table.get_item(Key={'article_id': article_id}).get('Item')
+        if article_content.get('title') is None or article_content.get('body') is None:
+            raise ValidationError('Title and body is required')
+
+        return True
+
     # 購入済み、あるいは購入処理中のデータが1件以上存在する場合は例外発生
     @classmethod
     def validate_not_purchased(cls, dynamodb, article_id, user_id):

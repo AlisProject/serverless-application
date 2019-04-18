@@ -1,5 +1,6 @@
 from unittest import TestCase
 from text_sanitizer import TextSanitizer
+from jsonschema import ValidationError
 import os
 
 
@@ -351,3 +352,20 @@ class TestTextSanitizer(TestCase):
         result = TextSanitizer.sanitize_article_body_v2(target_html)
 
         self.assertEqual(result, expected_html)
+
+    def test_validate_img_url_ok(self):
+        img_url = 'https://' + os.environ['DOMAIN'] + '/img/test.jpg'
+        result = TextSanitizer.validate_img_url(img_url)
+
+        self.assertEqual(result, True)
+
+    def test_validate_img_url_ok_root_path(self):
+        img_url = 'img/test.jpg'
+        result = TextSanitizer.validate_img_url(img_url)
+
+        self.assertEqual(result, True)
+
+    def test_validate_img_url_ng_not_domain(self):
+        with self.assertRaises(ValidationError):
+            img_url = 'https://test.to/test.jpg'
+            TextSanitizer.validate_img_url(img_url)
