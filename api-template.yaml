@@ -95,11 +95,8 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   LoginSalt:
     Type: 'AWS::SSM::Parameter::Value<String>'
-<<<<<<< HEAD
-=======
   PaidArticlesTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
->>>>>>> 6bf693ffcf46586fc1351b244bdb2f14db9fe088
   AuthleteApiKey:
     Type: 'AWS::SSM::Parameter::Value<String>'
   AuthleteApiSecret:
