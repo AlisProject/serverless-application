@@ -57,6 +57,8 @@ class MeWalletTokenSend(LambdaBase):
         relay_transaction_hash = self.__relay(from_user_eth_address, recipient_eth_address, send_value,
                                               transaction_count)
         self.__update_send_info_with_relay_transaction_hash(sort_key, user_id, relay_transaction_hash)
+        # transaction の完了を確認
+        PrivateChainUtil.validate_transaction_completed(relay_transaction_hash)
 
         return {
             'statusCode': 200
@@ -108,8 +110,6 @@ class MeWalletTokenSend(LambdaBase):
         url = 'https://' + os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'] + '/production/wallet/relay'
         # relay 実施
         result = PrivateChainUtil.send_transaction(request_url=url, payload_dict=payload)
-        # transaction の完了を確認
-        PrivateChainUtil.validate_transaction_completed(result)
         return result
 
     def __create_send_info_with_approve_transaction_hash(self, sort_key, user_id, approve_transaction_hash):
