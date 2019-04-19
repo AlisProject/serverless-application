@@ -53,15 +53,22 @@ class PrivateChainUtil:
             payload = {'transaction_hash': transaction}
             request_url = 'https://' + os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'] + '/production/transaction/receipt'
             result = cls.send_transaction(request_url=request_url, payload_dict=payload)
-
-            # transaction が完了している場合は True を返却
-            if result is not None and result.get('logs') is not None and result['logs'][0].get('type') == 'mined':
+            # 完了しているかを確認
+            if PrivateChainUtil.__is_completed_receipt_result(result):
                 is_completed = True
                 break
-
             # 完了が確認できなかった場合は 1 秒待機後に再実施
             time.sleep(1)
 
         if not is_completed:
             raise SendTransactionError('validate_transaction_completed retry limit. transaction: ' + transaction)
         return is_completed
+
+    @classmethod
+    def __is_completed_receipt_result(cls, result):
+        # 全ての log が完了となっていることを確認
+        if result is not None and result.get('logs') is not None and len(result['logs']) > 0:
+            mined_logs = [log for log in result['logs'] if log.get('type') == 'mined']
+            if len(mined_logs) == len(result['logs']):
+                return True
+        return False
