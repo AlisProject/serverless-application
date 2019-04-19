@@ -81,6 +81,22 @@ class TestPrivateChainUtil(TestCase):
 
     @patch('aws_requests_auth.aws_auth.AWSRequestsAuth', MagicMock(return_value='dummy'))
     @patch('time.sleep', MagicMock(return_value=''))
+    def test_validate_transaction_completed_ok_multiple_logs(self):
+        with patch('requests.post') as mock_post:
+            mock_post.side_effect = [
+                FakeResponse(status_code=200, text='{}'),
+                FakeResponse(status_code=200, text='{}'),
+                FakeResponse(status_code=200, text='{}'),
+                FakeResponse(status_code=200, text='{}'),
+                FakeResponse(status_code=200, text='{"result": {"logs": [{"type": "mined"}, {"type": "mined"}]}}')
+            ]
+            tran = '0x1234567890123456789012345678901234567890'
+            response = PrivateChainUtil.validate_transaction_completed(transaction=tran)
+            self.assertEqual(response, True)
+            self.assertEqual(mock_post.call_count, settings.TRANSACTION_CONFIRM_COUNT)
+
+    @patch('aws_requests_auth.aws_auth.AWSRequestsAuth', MagicMock(return_value='dummy'))
+    @patch('time.sleep', MagicMock(return_value=''))
     def test_validate_transaction_completed_ng_count_over(self):
         with self.assertRaises(SendTransactionError), patch('requests.post') as mock_post:
             mock_post.side_effect = [
@@ -90,6 +106,20 @@ class TestPrivateChainUtil(TestCase):
                 FakeResponse(status_code=200, text='{}'),
                 FakeResponse(status_code=200, text='{}'),
                 FakeResponse(status_code=200, text='{"result": {"logs": [{"type": "mined"}]}}')
+            ]
+            tran = '0x1234567890123456789012345678901234567890'
+            PrivateChainUtil.validate_transaction_completed(transaction=tran)
+
+    @patch('aws_requests_auth.aws_auth.AWSRequestsAuth', MagicMock(return_value='dummy'))
+    @patch('time.sleep', MagicMock(return_value=''))
+    def test_validate_transaction_completed_ng_multiple_ng_pattern(self):
+        with self.assertRaises(SendTransactionError), patch('requests.post') as mock_post:
+            mock_post.side_effect = [
+                FakeResponse(status_code=200, text='{"hoge": {"fuga": []}}'),
+                FakeResponse(status_code=200, text='{"result": {"hoge": []}}'),
+                FakeResponse(status_code=200, text='{"result": {"logs": []}}'),
+                FakeResponse(status_code=200, text='{"result": {"logs": [{"hoge": "fuga"}]}}'),
+                FakeResponse(status_code=200, text='{"result": {"logs": [{"type": "mined"},{"hoge": "fuga"}]}}'),
             ]
             tran = '0x1234567890123456789012345678901234567890'
             PrivateChainUtil.validate_transaction_completed(transaction=tran)
