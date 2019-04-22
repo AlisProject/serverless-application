@@ -44,7 +44,7 @@ class PrivateChainUtil:
         return json.loads(response.text).get('result')
 
     @classmethod
-    def validate_transaction_completed(cls, transaction):
+    def is_transaction_completed(cls, transaction):
         count = 0
         is_completed = False
         while count < settings.TRANSACTION_CONFIRM_COUNT:
@@ -59,9 +59,6 @@ class PrivateChainUtil:
                 break
             # 完了が確認できなかった場合は 1 秒待機後に再実施
             time.sleep(1)
-
-        if not is_completed:
-            raise SendTransactionError('validate_transaction_completed retry limit. transaction: ' + transaction)
         return is_completed
 
     @classmethod

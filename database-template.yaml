@@ -644,18 +644,20 @@ Resources:
           AttributeType: S
         - AttributeName: sort_key
           AttributeType: N
-        - AttributeName: uncompleted
-          AttributeType: N
+        - AttributeName: target_date
+          AttributeType: S
       KeySchema:
         - AttributeName: user_id
           KeyType: HASH
         - AttributeName: sort_key
           KeyType: RANGE
       GlobalSecondaryIndexes:
-        - IndexName: uncompleted-index
+        - IndexName: target_date-user_id-index
           KeySchema:
-            - AttributeName: uncompleted
+            - AttributeName: target_date
               KeyType: HASH
+            - AttributeName: user_id
+              KeyType: RANGE
           Projection:
             ProjectionType: ALL
       BillingMode: PAY_PER_REQUEST
