@@ -2323,28 +2323,36 @@ paths:
   /me/applications:
     get:
       description: '管理アプリケーションの一覧を取得する'
-      schema:
-        type: object
-        properties:
-          clients:
-            type: array
-            items:
-              $ref: '#/definitions/AuthleteClient'
-          developer:
-            type: string
-          start:
-            type: integer
-          end:
-            type: integer
-          totalCount:
-            type: integer
+      responses:
+        '200':
+          schema:
+            type: object
+            properties:
+              clients:
+                type: array
+                items:
+                  $ref: '#/definitions/AuthleteClient'
+              developer:
+                type: string
+              start:
+                type: integer
+              end:
+                type: integer
+              totalCount:
+                type: integer
       security:
         - cognitoUserPool: []
       x-amazon-apigateway-integration:
         responses:
           default:
             statusCode: '200'
-        uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeApplicationsIndex.Arn}/invocations
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
+              - Fn::ImportValue:
+                  Fn::Sub: "${AlisAppId}-MeApplicationsIndex"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -2362,7 +2370,13 @@ paths:
         responses:
           default:
             statusCode: '200'
-        uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeApplicationsCreate.Arn}/invocations
+        uri: 
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
+              - Fn::ImportValue:
+                  Fn::Sub: "${AlisAppId}-MeApplicationsCreate"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -2383,7 +2397,13 @@ paths:
         responses:
           default:
             statusCode: '200'
-        uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeApplicationsShow.Arn}/invocations
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
+              - Fn::ImportValue:
+                  Fn::Sub: "${AlisAppId}-MeApplicationsShow"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -2406,7 +2426,13 @@ paths:
         responses:
           default:
             statusCode: '200'
-        uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeApplicationsUpdate.Arn}/invocations
+        uri: 
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
+              - Fn::ImportValue:
+                  Fn::Sub: "${AlisAppId}-MeApplicationsUpdate"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
@@ -2424,7 +2450,13 @@ paths:
         responses:
           default:
             statusCode: '200'
-        uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeApplicationsDelete.Arn}/invocations
+        uri: 
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
+              - Fn::ImportValue:
+                  Fn::Sub: "${AlisAppId}-MeApplicationsDelete"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
