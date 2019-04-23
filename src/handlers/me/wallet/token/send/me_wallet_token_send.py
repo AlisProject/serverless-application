@@ -2,6 +2,7 @@
 import os
 import settings
 import time
+import json
 from decimal import Decimal
 from db_util import DBUtil
 from boto3.dynamodb.conditions import Key
@@ -80,8 +81,8 @@ class MeWalletTokenSend(LambdaBase):
             self.__update_send_info_with_send_status(sort_key, user_id, 'done')
 
         return {
-            'is_completed': is_completed,
-            'statusCode': 200
+            'statusCode': 200,
+            'body': json.dumps({'is_completed': is_completed})
         }
 
     def __get_token_send_value_today(self, user_id):

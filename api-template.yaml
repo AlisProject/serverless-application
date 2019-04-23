@@ -2100,6 +2100,11 @@ Resources:
               responses:
                 '200':
                   description: 'トークン送信結果'
+                  schema:
+                    type: object
+                    properties:
+                      is_completed:
+                        type: 'boolean'
               security:
                 - cognitoUserPool: []
               x-amazon-apigateway-integration:

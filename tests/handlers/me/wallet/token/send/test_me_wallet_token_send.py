@@ -77,7 +77,7 @@ class TestMeWalletTokenSend(TestCase):
 
             # ステータス確認
             self.assertEqual(response['statusCode'], 200)
-            self.assertEqual(response['is_completed'], True)
+            self.assertEqual(json.loads(response['body']), {'is_completed': True})
 
             # DB 確認
             token_send_table_name = self.dynamodb.Table(os.environ['TOKEN_SEND_TABLE_NAME'])
@@ -189,7 +189,7 @@ class TestMeWalletTokenSend(TestCase):
 
             # ステータス確認
             self.assertEqual(response['statusCode'], 200)
-            self.assertEqual(response['is_completed'], False)
+            self.assertEqual(json.loads(response['body']), {'is_completed': False})
 
             # DB 確認
             token_send_table_name = self.dynamodb.Table(os.environ['TOKEN_SEND_TABLE_NAME'])
@@ -383,7 +383,7 @@ class TestMeWalletTokenSend(TestCase):
 
             # ステータス確認
             self.assertEqual(response['statusCode'], 200)
-            self.assertEqual(response['is_completed'], True)
+            self.assertEqual(json.loads(response['body']), {'is_completed': True})
 
             # DB 確認
             token_send_table_name = self.dynamodb.Table(os.environ['TOKEN_SEND_TABLE_NAME'])
