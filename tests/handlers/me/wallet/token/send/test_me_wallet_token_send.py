@@ -21,6 +21,7 @@ class TestMeWalletTokenSend(TestCase):
         TestsUtil.set_all_tables_name_to_env()
         TestsUtil.delete_all_tables(self.dynamodb)
         TestsUtil.create_table(self.dynamodb, os.environ['TOKEN_SEND_TABLE_NAME'], [])
+        os.environ['DAILY_LIMIT_TOKEN_SEND_VALUE'] = '10000000000000000000000'
 
     def tearDown(self):
         TestsUtil.delete_all_tables(self.dynamodb)
@@ -164,7 +165,7 @@ class TestMeWalletTokenSend(TestCase):
             mock_is_transaction_completed.return_value = False
 
             # テスト対象実施
-            target_token_send_value = str(settings.DAILY_LIMIT_TOKEN_SEND_VALUE)
+            target_token_send_value = str(os.environ['DAILY_LIMIT_TOKEN_SEND_VALUE'])
             private_eth_address = '0x3000000000000000000000000000000000000000'
             recipient_eth_address = '0x2000000000000000000000000000000000000000'
             event = {
@@ -272,7 +273,7 @@ class TestMeWalletTokenSend(TestCase):
         items = [
             {
                 'user_id': user_id,
-                'send_value': Decimal(settings.DAILY_LIMIT_TOKEN_SEND_VALUE) / 5,
+                'send_value': Decimal(os.environ['DAILY_LIMIT_TOKEN_SEND_VALUE']) / 5,
                 'approve_transaction': '0x1100000000000000000000000000000000000000',
                 'relay_transaction_hash': '0x2200000000000000000000000000000000000000',
                 'send_status': 'done',
@@ -282,7 +283,7 @@ class TestMeWalletTokenSend(TestCase):
             },
             {
                 'user_id': user_id,
-                'send_value': Decimal(settings.DAILY_LIMIT_TOKEN_SEND_VALUE) / 5,
+                'send_value': Decimal(os.environ['DAILY_LIMIT_TOKEN_SEND_VALUE']) / 5,
                 'approve_transaction': '0x3300000000000000000000000000000000000000',
                 'relay_transaction_hash': '0x4400000000000000000000000000000000000000',
                 'send_status': 'done',
@@ -292,7 +293,7 @@ class TestMeWalletTokenSend(TestCase):
             },
             {
                 'user_id': user_id,
-                'send_value': Decimal(settings.DAILY_LIMIT_TOKEN_SEND_VALUE) / 5,
+                'send_value': Decimal(os.environ['DAILY_LIMIT_TOKEN_SEND_VALUE']) / 5,
                 'approve_transaction': '0x5500000000000000000000000000000000000000',
                 'relay_transaction_hash': '0x6600000000000000000000000000000000000000',
                 'send_status': 'doing',
@@ -302,7 +303,7 @@ class TestMeWalletTokenSend(TestCase):
             },
             {
                 'user_id': user_id,
-                'send_value': Decimal(settings.DAILY_LIMIT_TOKEN_SEND_VALUE) / 5,
+                'send_value': Decimal(os.environ['DAILY_LIMIT_TOKEN_SEND_VALUE']) / 5,
                 'approve_transaction': '0x7700000000000000000000000000000000000000',
                 'relay_transaction_hash': '0x8800000000000000000000000000000000000000',
                 'send_status': 'doing',
@@ -313,7 +314,7 @@ class TestMeWalletTokenSend(TestCase):
             # status が fail
             {
                 'user_id': user_id,
-                'send_value': Decimal(settings.DAILY_LIMIT_TOKEN_SEND_VALUE) / 5,
+                'send_value': Decimal(os.environ['DAILY_LIMIT_TOKEN_SEND_VALUE']) / 5,
                 'approve_transaction': '0x9900000000000000000000000000000000000000',
                 'relay_transaction_hash': '0xaa00000000000000000000000000000000000000',
                 'send_status': 'fail',
@@ -324,7 +325,7 @@ class TestMeWalletTokenSend(TestCase):
             # 異なる日付
             {
                 'user_id': user_id,
-                'send_value': Decimal(settings.DAILY_LIMIT_TOKEN_SEND_VALUE) / 5,
+                'send_value': Decimal(os.environ['DAILY_LIMIT_TOKEN_SEND_VALUE']) / 5,
                 'approve_transaction': '0x9900000000000000000000000000000000000000',
                 'relay_transaction_hash': '0xaa00000000000000000000000000000000000000',
                 'send_status': 'fail',
@@ -358,7 +359,7 @@ class TestMeWalletTokenSend(TestCase):
 
             # テスト対象実施
             # DBデータと合わせ、合計で丁度日次の限度額になるように調整
-            target_token_send_value = str(Decimal(settings.DAILY_LIMIT_TOKEN_SEND_VALUE) / 5)
+            target_token_send_value = str(Decimal(os.environ['DAILY_LIMIT_TOKEN_SEND_VALUE']) / 5)
             private_eth_address = '0x3000000000000000000000000000000000000000'
             recipient_eth_address = '0x2000000000000000000000000000000000000000'
             event = {
@@ -467,7 +468,7 @@ class TestMeWalletTokenSend(TestCase):
         items = [
             {
                 'user_id': user_id,
-                'send_value': Decimal(settings.DAILY_LIMIT_TOKEN_SEND_VALUE) / 5,
+                'send_value': Decimal(os.environ['DAILY_LIMIT_TOKEN_SEND_VALUE']) / 5,
                 'approve_transaction': '0x1100000000000000000000000000000000000000',
                 'relay_transaction_hash': '0x2200000000000000000000000000000000000000',
                 'send_status': 'done',
@@ -477,7 +478,7 @@ class TestMeWalletTokenSend(TestCase):
             },
             {
                 'user_id': user_id,
-                'send_value': Decimal(settings.DAILY_LIMIT_TOKEN_SEND_VALUE) / 5,
+                'send_value': Decimal(os.environ['DAILY_LIMIT_TOKEN_SEND_VALUE']) / 5,
                 'approve_transaction': '0x3300000000000000000000000000000000000000',
                 'relay_transaction_hash': '0x4400000000000000000000000000000000000000',
                 'send_status': 'done',
@@ -487,7 +488,7 @@ class TestMeWalletTokenSend(TestCase):
             },
             {
                 'user_id': user_id,
-                'send_value': Decimal(settings.DAILY_LIMIT_TOKEN_SEND_VALUE) / 5,
+                'send_value': Decimal(os.environ['DAILY_LIMIT_TOKEN_SEND_VALUE']) / 5,
                 'approve_transaction': '0x5500000000000000000000000000000000000000',
                 'relay_transaction_hash': '0x6600000000000000000000000000000000000000',
                 'send_status': 'doing',
@@ -497,7 +498,7 @@ class TestMeWalletTokenSend(TestCase):
             },
             {
                 'user_id': user_id,
-                'send_value': Decimal(settings.DAILY_LIMIT_TOKEN_SEND_VALUE) / 5,
+                'send_value': Decimal(os.environ['DAILY_LIMIT_TOKEN_SEND_VALUE']) / 5,
                 'approve_transaction': '0x7700000000000000000000000000000000000000',
                 'relay_transaction_hash': '0x8800000000000000000000000000000000000000',
                 'send_status': 'doing',
@@ -508,7 +509,7 @@ class TestMeWalletTokenSend(TestCase):
             # 日次の制限にとの境界値テストを実施するため minimum 分を引いた値を設定。
             {
                 'user_id': user_id,
-                'send_value': Decimal(settings.DAILY_LIMIT_TOKEN_SEND_VALUE) / 5 - Decimal(
+                'send_value': Decimal(os.environ['DAILY_LIMIT_TOKEN_SEND_VALUE']) / 5 - Decimal(
                     settings.parameters['token_send_value']['minimum']),
                 'approve_transaction': '0x9900000000000000000000000000000000000000',
                 'relay_transaction_hash': '0xaa00000000000000000000000000000000000000',

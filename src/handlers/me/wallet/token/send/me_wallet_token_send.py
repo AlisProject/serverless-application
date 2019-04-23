@@ -45,7 +45,7 @@ class MeWalletTokenSend(LambdaBase):
 
         # 日次の限度額を超えていた場合は例外
         sum_price = self.__get_token_send_value_today(user_id)
-        if Decimal(settings.DAILY_LIMIT_TOKEN_SEND_VALUE) < sum_price + Decimal(send_value):
+        if Decimal(os.environ['DAILY_LIMIT_TOKEN_SEND_VALUE']) < sum_price + Decimal(send_value):
             raise ValidationError('Token withdrawal limit has been exceeded.')
 
         # allowance を取得
