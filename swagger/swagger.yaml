@@ -2460,6 +2460,25 @@ paths:
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
+  /me/allowed_app:
+    get:
+      description: '許可したoauthアプリ'
+      security:
+        - cognitoUserPool: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: '200'
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
+              - Fn::ImportValue:
+                  Fn::Sub: "${AlisAppId}-MeAllowdAppIndex"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
 securityDefinitions:
   cognitoUserPool:
     type: apiKey
