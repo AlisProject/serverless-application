@@ -12,7 +12,7 @@ from jsonschema import validate
 from lambda_base import LambdaBase
 from jsonschema import ValidationError
 from user_util import UserUtil
-from exceptions import SendTransactionError
+from exceptions import SendTransactionError, ReceiptError
 
 
 class MeWalletTokenSend(LambdaBase):
@@ -75,6 +75,12 @@ class MeWalletTokenSend(LambdaBase):
             # ステータスを fail に更新し中断
             self.__update_send_info_with_send_status(sort_key, user_id, 'fail')
             raise e
+        except ReceiptError:
+            # send_value の値が残高を超えた場合や、処理最小・最大値の範囲に収まっていない場合に ReceiptError が発生するため
+            # ValidationError として処理を中断する
+            # ステータスを fail に更新
+            self.__update_send_info_with_send_status(sort_key, user_id, 'fail')
+            raise ValidationError('send_value')
 
         # transaction が完了していた場合、ステータスを done に更新
         if is_completed:
