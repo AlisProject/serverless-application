@@ -7,7 +7,7 @@ from unittest import TestCase
 from me_wallet_token_send import MeWalletTokenSend
 from unittest.mock import patch, MagicMock
 from tests_util import TestsUtil
-from exceptions import SendTransactionError
+from exceptions import SendTransactionError, ReceiptError
 
 
 class TestMeWalletTokenSend(TestCase):
@@ -551,7 +551,7 @@ class TestMeWalletTokenSend(TestCase):
 
     @patch('time_util.TimeUtil.generate_sort_key', MagicMock(return_value=1520150552000003))
     @patch('time.time', MagicMock(return_value=1520150552.000003))
-    def test_main_ng_with_status_fail(self):
+    def test_main_ng_with_status_fail_at_SendTransactionError(self):
         with patch('private_chain_util.PrivateChainUtil.send_transaction') \
             as mock_send_transaction, \
             patch('private_chain_util.PrivateChainUtil.is_transaction_completed') \
@@ -593,6 +593,67 @@ class TestMeWalletTokenSend(TestCase):
 
             # ステータス確認
             self.assertEqual(response['statusCode'], 500)
+
+            # DB 確認
+            token_send_table_name = self.dynamodb.Table(os.environ['TOKEN_SEND_TABLE_NAME'])
+            token_send_itmes = token_send_table_name.scan()['Items']
+            self.assertEqual(len(token_send_itmes), 1)
+            expected_token_send = {
+                'user_id': event['requestContext']['authorizer']['claims']['cognito:username'],
+                'send_value': Decimal(target_token_send_value),
+                'approve_transaction': return_approve,
+                'relay_transaction_hash': return_relay,
+                'send_status': 'fail',
+                'target_date': '2018-03-04',
+                'sort_key': Decimal(1520150552000003),
+                'created_at': Decimal(int(1520150552.000003))
+            }
+            self.assertEqual(expected_token_send, token_send_itmes[0])
+
+    @patch('time_util.TimeUtil.generate_sort_key', MagicMock(return_value=1520150552000003))
+    @patch('time.time', MagicMock(return_value=1520150552.000003))
+    def test_main_ng_with_status_fail_at_ReceiptError(self):
+        with patch('private_chain_util.PrivateChainUtil.send_transaction') \
+            as mock_send_transaction, \
+            patch('private_chain_util.PrivateChainUtil.is_transaction_completed') \
+                as mock_is_transaction_completed:
+            # mock の初期化
+            return_allowance = "0x0"
+            return_get_transaction_count = "0x0"
+            return_approve = "0x1111000000000000000000000000000000000000"
+            return_relay = "0x2222000000000000000000000000000000000000"
+            mock_send_transaction.side_effect = [
+                return_allowance,
+                return_get_transaction_count,
+                return_approve,
+                return_relay
+            ]
+            mock_is_transaction_completed.side_effect = ReceiptError()
+
+            # テスト対象実施
+            target_token_send_value = str(settings.parameters['token_send_value']['minimum'])
+            private_eth_address = '0x3000000000000000000000000000000000000000'
+            event = {
+                'body': {
+                    'recipient_eth_address': '0x2000000000000000000000000000000000000000',
+                    'send_value': target_token_send_value
+                },
+                'requestContext': {
+                    'authorizer': {
+                        'claims': {
+                            'cognito:username': 'user_01',
+                            'custom:private_eth_address': private_eth_address,
+                            'phone_number_verified': 'true',
+                            'email_verified': 'true'
+                        }
+                    }
+                }
+            }
+            event['body'] = json.dumps(event['body'])
+            response = MeWalletTokenSend(event, {}, self.dynamodb, cognito=None).main()
+
+            # ステータス確認
+            self.assertEqual(response['statusCode'], 400)
 
             # DB 確認
             token_send_table_name = self.dynamodb.Table(os.environ['TOKEN_SEND_TABLE_NAME'])

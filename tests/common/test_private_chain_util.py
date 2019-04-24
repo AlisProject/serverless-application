@@ -3,7 +3,7 @@ from tests_util import TestsUtil
 from private_chain_util import PrivateChainUtil
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
-from exceptions import SendTransactionError
+from exceptions import SendTransactionError, ReceiptError
 
 
 class FakeResponse:
@@ -112,22 +112,6 @@ class TestPrivateChainUtil(TestCase):
             self.assertEqual(response, False)
             self.assertEqual(mock_post.call_count, settings.TRANSACTION_CONFIRM_COUNT)
 
-    @patch('aws_requests_auth.aws_auth.AWSRequestsAuth', MagicMock(return_value='dummy'))
-    @patch('time.sleep', MagicMock(return_value=''))
-    def test_is_transaction_completed_ng_multiple_ng_pattern(self):
-        with patch('requests.post') as mock_post:
-            mock_post.side_effect = [
-                FakeResponse(status_code=200, text='{"hoge": {"fuga": []}}'),
-                FakeResponse(status_code=200, text='{"result": {"hoge": []}}'),
-                FakeResponse(status_code=200, text='{"result": {"logs": []}}'),
-                FakeResponse(status_code=200, text='{"result": {"logs": [{"hoge": "fuga"}]}}'),
-                FakeResponse(status_code=200, text='{"result": {"logs": [{"type": "mined"},{"hoge": "fuga"}]}}'),
-            ]
-            tran = '0x1234567890123456789012345678901234567890'
-            response = PrivateChainUtil.is_transaction_completed(transaction=tran)
-            self.assertEqual(response, False)
-            self.assertEqual(mock_post.call_count, settings.TRANSACTION_CONFIRM_COUNT)
-
     @patch('requests.post',
            MagicMock(return_value=FakeResponse(status_code=200, text='{"test": ""}')))
     @patch('aws_requests_auth.aws_auth.AWSRequestsAuth', MagicMock(return_value='dummy'))
@@ -138,19 +122,37 @@ class TestPrivateChainUtil(TestCase):
         self.assertEqual(response, False)
 
     @patch('requests.post',
+           MagicMock(return_value=FakeResponse(status_code=200, text='{"result": {}}')))
+    @patch('aws_requests_auth.aws_auth.AWSRequestsAuth', MagicMock(return_value='dummy'))
+    @patch('time.sleep', MagicMock(return_value=''))
+    def test_is_transaction_completed_ng_not_exists_result_value(self):
+        with self.assertRaises(ReceiptError):
+            tran = '0x1234567890123456789012345678901234567890'
+            PrivateChainUtil.is_transaction_completed(transaction=tran)
+
+    @patch('requests.post',
            MagicMock(return_value=FakeResponse(status_code=200, text='{"result": {"test": [{"type": "mined"}]}}')))
     @patch('aws_requests_auth.aws_auth.AWSRequestsAuth', MagicMock(return_value='dummy'))
     @patch('time.sleep', MagicMock(return_value=''))
     def test_is_transaction_completed_ng_not_exists_logs(self):
-        tran = '0x1234567890123456789012345678901234567890'
-        response = PrivateChainUtil.is_transaction_completed(transaction=tran)
-        self.assertEqual(response, False)
+        with self.assertRaises(ReceiptError):
+            tran = '0x1234567890123456789012345678901234567890'
+            PrivateChainUtil.is_transaction_completed(transaction=tran)
 
     @patch('requests.post',
            MagicMock(return_value=FakeResponse(status_code=200, text='{"result": {"logs": [{"type": "dummy"}]}}')))
     @patch('aws_requests_auth.aws_auth.AWSRequestsAuth', MagicMock(return_value='dummy'))
     @patch('time.sleep', MagicMock(return_value=''))
     def test_is_transaction_completed_ng_not_exists_mined_type(self):
-        tran = '0x1234567890123456789012345678901234567890'
-        response = PrivateChainUtil.is_transaction_completed(transaction=tran)
-        self.assertEqual(response, False)
+        with self.assertRaises(ReceiptError):
+            tran = '0x1234567890123456789012345678901234567890'
+            PrivateChainUtil.is_transaction_completed(transaction=tran)
+
+    @patch('requests.post', MagicMock(return_value=FakeResponse(
+        status_code=200, text='{"result": {"logs": [{"type": "mined"}, {"type": "dummy"}]}}')))
+    @patch('aws_requests_auth.aws_auth.AWSRequestsAuth', MagicMock(return_value='dummy'))
+    @patch('time.sleep', MagicMock(return_value=''))
+    def test_is_transaction_completed_ng_exists_not_mined_type(self):
+        with self.assertRaises(ReceiptError):
+            tran = '0x1234567890123456789012345678901234567890'
+            PrivateChainUtil.is_transaction_completed(transaction=tran)

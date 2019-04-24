@@ -4,7 +4,7 @@ import requests
 import settings
 import time
 from aws_requests_auth.aws_auth import AWSRequestsAuth
-from exceptions import SendTransactionError
+from exceptions import SendTransactionError, ReceiptError
 
 
 class PrivateChainUtil:
@@ -64,8 +64,12 @@ class PrivateChainUtil:
     @classmethod
     def __is_completed_receipt_result(cls, result):
         # 全ての log が完了となっていることを確認
-        if result is not None and result.get('logs') is not None and len(result['logs']) > 0:
-            mined_logs = [log for log in result['logs'] if log.get('type') == 'mined']
-            if len(mined_logs) == len(result['logs']):
-                return True
+        if result is not None:
+            if result.get('logs') is not None and len(result['logs']) > 0:
+                mined_logs = [log for log in result['logs'] if log.get('type') == 'mined']
+                if len(mined_logs) == len(result['logs']):
+                    return True
+            # receipt が存在している状態で、mined ログが確認できない場合は想定外のため例外
+            raise ReceiptError('Receipt exists, but Not exists mined logs.')
+
         return False
