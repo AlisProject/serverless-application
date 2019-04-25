@@ -134,3 +134,12 @@ Resources:
             Fn::Sub: "${AlisAppId}-MeAllowdAppIndex"
         Principal: "apigateway.amazonaws.com"
         SourceArn: !Sub ${RestApiArn}/*/GET/me/allowed_app
+  MeAllowdAppDeleteApiGatewayInvoke:
+      Type: "AWS::Lambda::Permission"
+      Properties:
+        Action: "lambda:InvokeFunction"
+        FunctionName:
+          Fn::ImportValue:
+            Fn::Sub: "${AlisAppId}-MeAllowdAppDelete"
+        Principal: "apigateway.amazonaws.com"
+        SourceArn: !Sub ${RestApiArn}/*/DELETE/me/allowed_app

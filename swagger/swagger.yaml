@@ -2479,6 +2479,30 @@ paths:
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
+    delete:
+      description: '許可したoauthアプリを削除'
+      parameters:
+        - name: 'client_id'
+          in: 'body'
+          description: '対象アプリケーションの指定するために使用'
+          required: true
+          type: integer
+      security:
+        - cognitoUserPool: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: '200'
+        uri: 
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
+              - Fn::ImportValue:
+                  Fn::Sub: "${AlisAppId}-MeAllowdAppDelete"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
 securityDefinitions:
   cognitoUserPool:
     type: apiKey

@@ -340,6 +340,19 @@ Resources:
       MemorySize: 3008
       Runtime: python3.6
       Timeout: 300
+  MeAllowdAppDelete:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      Code: ./deploy/me_allowed_app_delete.zip
+      Environment:
+        Variables:
+          AUTHLETE_API_KEY: !Ref AuthleteApiKey
+          AUTHLETE_API_SECRET: !Ref AuthleteApiSecret
+      MemorySize: 3008
+      Runtime: python3.6
+      Timeout: 300
 
 Outputs:
   LoginYahoo:
@@ -398,3 +411,7 @@ Outputs:
     Value: !GetAtt MeAllowdAppIndex.Arn
     Export:
       Name: !Sub "${AlisAppId}-MeAllowdAppIndex"
+  MeAllowdAppDelete:
+    Value: !GetAtt MeAllowdAppDelete.Arn
+    Export:
+      Name: !Sub "${AlisAppId}-MeAllowdAppDelete"
