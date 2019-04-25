@@ -84,5 +84,6 @@ aws cloudformation deploy \
     RestApiArn=${SSM_PARAMS_PREFIX}RestApiArn \
     PaidArticlesTableName=${SSM_PARAMS_PREFIX}PaidArticlesTableName \
     PaidStatusTableName=${SSM_PARAMS_PREFIX}PaidStatusTableName \
+    DailyLimitTokenSendValue=${SSM_PARAMS_PREFIX}DailyLimitTokenSendValue \
   --capabilities CAPABILITY_IAM \
   --no-fail-on-empty-changeset
