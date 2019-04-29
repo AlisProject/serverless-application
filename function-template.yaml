@@ -88,6 +88,8 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   NonceTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
+  TokenSendTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
   ExternalProviderLoginCommonTempPassword:
     Type: 'AWS::SSM::Parameter::Value<String>'
   ExternalProviderLoginMark:
@@ -108,9 +110,13 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   FacebookAppToken:
     Type: 'AWS::SSM::Parameter::Value<String>'
+  PrivateChainBridgeAddress:
+    Type: 'AWS::SSM::Parameter::Value<String>'
   PaidArticlesTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
   PaidStatusTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  DailyLimitTokenSendValue:
     Type: 'AWS::SSM::Parameter::Value<String>'
 
 Resources:
@@ -282,6 +288,52 @@ Resources:
       Role: !GetAtt LambdaRole.Arn
       Runtime: python3.6
       Timeout: 300
+  MeWalletTokenSend:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Code: ./deploy/me_wallet_token_send.zip
+      Environment:
+        Variables:
+          PRIVATE_CHAIN_BRIDGE_ADDRESS: !Ref PrivateChainBridgeAddress
+          PRIVATE_CHAIN_AWS_ACCESS_KEY: !Ref PrivateChainAwsAccessKey
+          PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY: !Ref PrivateChainAwsSecretAccessKey
+          PRIVATE_CHAIN_EXECUTE_API_HOST: !Ref PrivateChainExecuteApiHost
+          TOKEN_SEND_TABLE_NAME: !Ref TokenSendTableName
+          DAILY_LIMIT_TOKEN_SEND_VALUE: !Ref DailyLimitTokenSendValue
+      Handler: handler.lambda_handler
+      MemorySize: 3008
+      Role: !GetAtt LambdaRole.Arn
+      Runtime: python3.6
+      Timeout: 300
+  WalletBridgeInformationShow:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Code: ./deploy/wallet_bridge_information_show.zip
+      Environment:
+        Variables:
+          PRIVATE_CHAIN_AWS_ACCESS_KEY: !Ref PrivateChainAwsAccessKey
+          PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY: !Ref PrivateChainAwsSecretAccessKey
+          PRIVATE_CHAIN_EXECUTE_API_HOST: !Ref PrivateChainExecuteApiHost
+      Handler: handler.lambda_handler
+      MemorySize: 3008
+      Role: !GetAtt LambdaRole.Arn
+      Runtime: python3.6
+      Timeout: 300
+  MeWalletTokenHistoriesIndex:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Code: ./deploy/me_wallet_token_histories_index.zip
+      Environment:
+        Variables:
+          PRIVATE_CHAIN_BRIDGE_ADDRESS: !Ref PrivateChainBridgeAddress
+          PRIVATE_CHAIN_AWS_ACCESS_KEY: !Ref PrivateChainAwsAccessKey
+          PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY: !Ref PrivateChainAwsSecretAccessKey
+          PRIVATE_CHAIN_EXECUTE_API_HOST: !Ref PrivateChainExecuteApiHost
+      Handler: handler.lambda_handler
+      MemorySize: 3008
+      Role: !GetAtt LambdaRole.Arn
+      Runtime: python3.6
+      Timeout: 300
 
 Outputs:
   LoginYahoo:
@@ -316,7 +368,19 @@ Outputs:
     Value: !GetAtt MeArticlesPurchasedIndex.Arn
     Export:
       Name: !Sub "${AlisAppId}-MeArticlesPurchasedIndex"
+  MeWalletTokenSend:
+    Value: !GetAtt MeWalletTokenSend.Arn
+    Export:
+      Name: !Sub "${AlisAppId}-MeWalletTokenSend"
   MeArticlesPurchaseCreate:
     Value: !GetAtt MeArticlesPurchaseCreate.Arn
     Export:
       Name: !Sub "${AlisAppId}-MeArticlesPurchaseCreate"
+  WalletBridgeInformationShow:
+    Value: !GetAtt WalletBridgeInformationShow.Arn
+    Export:
+      Name: !Sub "${AlisAppId}-WalletBridgeInformationShow"
+  MeWalletTokenHistoriesIndex:
+    Value: !GetAtt MeWalletTokenHistoriesIndex.Arn
+    Export:
+      Name: !Sub "${AlisAppId}-MeWalletTokenHistoriesIndex"

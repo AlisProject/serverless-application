@@ -49,6 +49,13 @@ class TestsUtil:
             os.environ[s3_bucket['env_name']] = s3_bucket['bucket_name']
 
     @classmethod
+    def set_aws_auth_to_env(cls):
+        os.environ['PRIVATE_CHAIN_AWS_ACCESS_KEY'] = 'dummy'
+        os.environ['PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY'] = 'dummy'
+        os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'] = 'dummy'
+        os.environ['PRIVATE_CHAIN_BRIDGE_ADDRESS'] = '0x9999000000000000000000000000000000000000'
+
+    @classmethod
     def get_all_s3_buckets(cls):
         return [
             {'env_name': 'DIST_S3_BUCKET_NAME', 'bucket_name': 'dist'}
@@ -94,7 +101,8 @@ class TestsUtil:
             {'env_name': 'USER_FIRST_EXPERIENCE_TABLE_NAME', 'table_name': 'UserFirstExperience'},
             {'env_name': 'NONCE_TABLE_NAME', 'table_name': 'Nonce'},
             {'env_name': 'PAID_ARTICLES_TABLE_NAME', 'table_name': 'PaidArticles'},
-            {'env_name': 'PAID_STATUS_TABLE_NAME', 'table_name': 'PaidStatus'}
+            {'env_name': 'PAID_STATUS_TABLE_NAME', 'table_name': 'PaidStatus'},
+            {'env_name': 'TOKEN_SEND_TABLE_NAME', 'table_name': 'TokenSend'}
         ]
         if os.environ.get('IS_DYNAMODB_ENDPOINT_OF_AWS') is not None:
             for table in cls.all_tables:

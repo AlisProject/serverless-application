@@ -143,6 +143,11 @@ parameters = {
         'minimum': 1,
         'maximum': 10 ** 24
     },
+    'token_send_value': {
+        'type': 'number',
+        'minimum': 10 ** 18,
+        'maximum': 10 ** 24
+    },
     'oauth_token': {
         'type': 'string'
     },
@@ -195,6 +200,10 @@ parameters = {
     'paid_body': {
         'type': 'string',
         'maxLength': 65535
+    },
+    'eth_address': {
+        'type': 'string',
+        'pattern': r'^0x[a-fA-F0-9]{40}$'
     }
 }
 
@@ -320,3 +329,8 @@ ETH_ZERO_ADDRESS = '0000000000000000000000000000000000000000'
 ARTICLE_PURCHASE_TYPE = 'purchase'
 ARTICLE_PURCHASED_TYPE = 'purchased'
 ARTICLE_PURCHASE_ERROR_TYPE = 'purchase_error'
+
+# Private chain
+HISTORY_RANGE_DAYS = 30
+AVERAGE_BLOCK_TIME = 30
+TRANSACTION_CONFIRM_COUNT = 5
