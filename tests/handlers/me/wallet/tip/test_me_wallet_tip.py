@@ -1,6 +1,9 @@
 import os
 import json
 import re
+
+from boto3.dynamodb.conditions import Key
+
 import settings
 from decimal import Decimal
 from unittest import TestCase
@@ -9,7 +12,7 @@ from unittest.mock import patch, MagicMock
 from tests_util import TestsUtil
 
 
-class TestMeArticlesCommentsCreate(TestCase):
+class TestMeWalletTip(TestCase):
     dynamodb = TestsUtil.get_dynamodb_client()
 
     def setUp(self):
@@ -93,6 +96,8 @@ class TestMeArticlesCommentsCreate(TestCase):
                 'transaction': '0x0000000000000000000000000000000000000000',
                 'uncompleted': Decimal(1),
                 'sort_key': Decimal(1520150552000003),
+                'past_data_exclusion_key': Decimal(1520150552000003),
+                'target_date': '2018-03-04',
                 'created_at': Decimal(int(1520150552.000003))
             }
 
@@ -147,6 +152,8 @@ class TestMeArticlesCommentsCreate(TestCase):
                 'transaction': '0x0000000000000000000000000000000000000000',
                 'uncompleted': Decimal(1),
                 'sort_key': 1520150552000003,
+                'past_data_exclusion_key': Decimal(1520150552000003),
+                'target_date': '2018-03-04',
                 'created_at': Decimal(int(1520150552.000003))
             }
 
