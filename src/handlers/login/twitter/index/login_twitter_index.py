@@ -8,6 +8,7 @@ import base64
 from lambda_base import LambdaBase
 from twitter_util import TwitterUtil
 from user_util import UserUtil
+from crypto_util import CryptoUtil
 from jsonschema import validate, ValidationError
 from botocore.exceptions import ClientError
 from exceptions import TwitterOauthError
@@ -77,7 +78,7 @@ class LoginTwitterIndex(LambdaBase):
                 byte_hash_data = hash_data.encode()
                 decoded_iv = external_provider_user['iv']
                 iv = decoded_iv.encode()
-                password = UserUtil.decrypt_password(byte_hash_data, iv)
+                password = CryptoUtil.decrypt_password(byte_hash_data, iv)
 
                 response = UserUtil.external_provider_login(
                     cognito=self.cognito,
@@ -123,7 +124,7 @@ class LoginTwitterIndex(LambdaBase):
             )
 
             aes_iv = os.urandom(settings.AES_IV_BYTES)
-            encrypted_password = UserUtil.encrypt_password(backed_password, aes_iv)
+            encrypted_password = CryptoUtil.encrypt_password(backed_password, aes_iv)
             iv = base64.b64encode(aes_iv).decode()
 
             UserUtil.add_external_provider_user_info(

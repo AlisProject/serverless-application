@@ -10,6 +10,7 @@ import base64
 from lambda_base import LambdaBase
 from botocore.exceptions import ClientError
 from user_util import UserUtil
+from crypto_util import CryptoUtil
 from response_builder import ResponseBuilder
 from exceptions import LineOauthError
 
@@ -54,7 +55,7 @@ class LoginLineAuthorizeRequest(LambdaBase):
                 byte_hash_data = hash_data.encode()
                 decoded_iv = external_provider_user['iv']
                 iv = decoded_iv.encode()
-                password = UserUtil.decrypt_password(byte_hash_data, iv)
+                password = CryptoUtil.decrypt_password(byte_hash_data, iv)
 
                 has_user_id = UserUtil.has_user_id(self.dynamodb, user_id)
                 if external_provider_user is not None and 'user_id' in external_provider_user:
@@ -114,7 +115,7 @@ class LoginLineAuthorizeRequest(LambdaBase):
                 )
 
                 aes_iv = os.urandom(settings.AES_IV_BYTES)
-                encrypted_password = UserUtil.encrypt_password(backed_password, aes_iv)
+                encrypted_password = CryptoUtil.encrypt_password(backed_password, aes_iv)
                 iv = base64.b64encode(aes_iv).decode()
 
                 UserUtil.add_external_provider_user_info(

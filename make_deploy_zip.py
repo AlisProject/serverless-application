@@ -17,7 +17,7 @@ if os.path.exists(DEPLOY_PATH):
 os.makedirs(DEPLOY_PATH)
 
 
-# depoy 用 zip ファイルを作成
+# deploy 用 zip ファイルを作成
 def make_deploy_zip(zip_file_name, target_dir):
     # zip 作成（実行ファイルパス）
     exec_zip(zip_file_name, target_dir)

@@ -2,17 +2,14 @@ import json
 import os
 import boto3
 import time
-
+import settings
 from elasticsearch import Elasticsearch
 from tests_es_util import TestsEsUtil
-
-import settings
 from boto3.dynamodb.conditions import Key
 from unittest import TestCase
 from me_articles_drafts_publish_with_header import MeArticlesDraftsPublishWithHeader
 from unittest.mock import patch, MagicMock
 from tests_util import TestsUtil
-
 from tag_util import TagUtil
 
 
@@ -25,6 +22,7 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
     @classmethod
     def setUpClass(cls):
         TestsUtil.set_all_tables_name_to_env()
+        os.environ['DOMAIN'] = 'example.com'
 
         cls.article_info_table = cls.dynamodb.Table('ArticleInfo')
         cls.article_content_table = cls.dynamodb.Table('ArticleContent')
@@ -41,7 +39,7 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
                 'user_id': 'test01',
                 'status': 'draft',
                 'tags': ['a', 'b', 'c'],
-                'eye_catch_url': 'https://example.com/00001.png',
+                'eye_catch_url': 'https://' + os.environ['DOMAIN'] + '/00001.png',
                 'sort_key': 1520150272000000,
                 'version': 2
             },
@@ -59,6 +57,15 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
                 'sort_key': 1520150272000000,
                 'published_at': 1520150000,
                 'version': 2
+            },
+            {
+                'article_id': 'draftId00004',
+                'user_id': 'test01',
+                'status': 'draft',
+                'sort_key': 1520150272000000,
+                'published_at': 1520150000,
+                'version': 2,
+                'price': 10 ** 18
             }
         ]
         TestsUtil.create_table(self.dynamodb, os.environ['ARTICLE_INFO_TABLE_NAME'], article_info_items)
@@ -78,6 +85,12 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
                 'article_id': 'draftId00003',
                 'title': 'sample_title3',
                 'body': 'sample_body3'
+            },
+            {
+                'article_id': 'draftId00004',
+                'title': 'sample_title4',
+                'body': 'sample_body4',
+                'paid_body': 'paid body'
             }
         ]
         TestsUtil.create_table(self.dynamodb, os.environ['ARTICLE_CONTENT_TABLE_NAME'], article_content_items)
@@ -89,7 +102,7 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
                 'title': 'sample_title2_edit',
                 'body': 'sample_body2_edit',
                 'overview': 'sample_overview3_edit',
-                'eye_catch_url': 'http://example.com/eye_catch_url3_edit'
+                'eye_catch_url': 'http://' + os.environ['DOMAIN'] + '/eye_catch_url3_edit'
             }
         ]
         TestsUtil.create_table(self.dynamodb, os.environ['ARTICLE_CONTENT_EDIT_TABLE_NAME'], article_content_edit_items)
@@ -140,7 +153,7 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
             'body': {
                 'topic': 'crypto',
                 'tags': ['A', 'B', 'C', 'D', 'E' * 25],
-                'eye_catch_url': 'https://example.com/test.png'
+                'eye_catch_url': 'https://' + os.environ['DOMAIN'] + '/test.png'
             },
             'requestContext': {
                 'authorizer': {
@@ -181,7 +194,7 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
         self.assertEqual(article_info['sync_elasticsearch'], 1)
         self.assertEqual(article_info['topic'], 'crypto')
         self.assertEqual(article_info['tags'], ['a', 'B', 'C', 'D', 'E' * 25])
-        self.assertEqual(article_info['eye_catch_url'], 'https://example.com/test.png')
+        self.assertEqual(article_info['eye_catch_url'], 'https://' + os.environ['DOMAIN'] + '/test.png')
         self.assertEqual(article_content['title'], article_history['title'])
         self.assertEqual(article_content['body'], article_history['body'])
         self.assertEqual(len(article_info_after) - len(article_info_before), 0)
@@ -394,7 +407,7 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
     def test_call_validate_methods(self):
         params = {
             'pathParameters': {
-                'article_id': 'draftId00001'
+                'article_id': 'draftId00001',
             },
             'body': {
                 'topic': 'crypto'
@@ -428,6 +441,67 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
             args, kwargs = mock_lib.validate_topic.call_args
             self.assertTrue(args[0])
             self.assertEqual(args[1], 'crypto')
+
+            self.assertTrue(mock_lib.validate_exists_title_and_body.called)
+            args, kwargs = mock_lib.validate_exists_title_and_body.call_args
+            self.assertTrue(args[0])
+            self.assertEqual(args[1], 'draftId00001')
+
+    def test_call_validate_img_url(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'draftId00001',
+                'eye_catch_url': 'https://' + os.environ['DOMAIN'] + '/test.png'
+            },
+            'body': {
+                'topic': 'crypto'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
+            }
+        }
+        params['body'] = json.dumps(params['body'])
+
+        mock_lib = MagicMock()
+        with patch('me_articles_drafts_publish_with_header.TextSanitizer', mock_lib):
+            MeArticlesDraftsPublishWithHeader(params, {}, dynamodb=self.dynamodb,
+                                              elasticsearch=self.elasticsearch).main()
+
+            self.assertTrue(mock_lib.validate_img_url.called)
+            args, kwargs = mock_lib.validate_img_url.call_args
+            self.assertEqual(args[0], 'https://' + os.environ['DOMAIN'] + '/test.png')
+
+    def test_not_call_validate_img_url(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'draftId00001'
+            },
+            'body': {
+                'topic': 'crypto'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
+            }
+        }
+        params['body'] = json.dumps(params['body'])
+
+        mock_lib = MagicMock()
+        with patch('me_articles_drafts_publish_with_header.TextSanitizer', mock_lib):
+            MeArticlesDraftsPublishWithHeader(params, {}, dynamodb=self.dynamodb,
+                                              elasticsearch=self.elasticsearch).main()
+            self.assertEqual(mock_lib.validate_img_url.call_count, 0)
 
     def test_validation_with_no_article_id(self):
         params = {
@@ -654,3 +728,188 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
         params['body'] = json.dumps(params['body'])
 
         self.assert_bad_request(params)
+
+    @patch('time_util.TimeUtil.generate_sort_key', MagicMock(return_value=1520150552000000))
+    @patch('time.time', MagicMock(return_value=1525000000.000000))
+    def test_validation_paid_article_publish_ok(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'draftId00001',
+            },
+            'body': {
+                'topic': 'crypto',
+                'tags': ['A', 'B', 'C', 'D', 'E' * 25],
+                'eye_catch_url': 'https://' + os.environ['DOMAIN'] + '/test.png',
+                'paid_body': '有料記事の内容',
+                'price': 10 ** 20
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
+            }
+        }
+
+        params['body'] = json.dumps(params['body'])
+
+        article_info_before = self.article_info_table.scan()['Items']
+        article_history_before = self.article_history_table.scan()['Items']
+        article_content_edit_before = self.article_content_edit_table.scan()['Items']
+
+        response = MeArticlesDraftsPublishWithHeader(params, {}, dynamodb=self.dynamodb,
+                                                     elasticsearch=self.elasticsearch).main()
+
+        article_info_after = self.article_info_table.scan()['Items']
+        article_history_after = self.article_history_table.scan()['Items']
+        article_content_edit_after = self.article_content_edit_table.scan()['Items']
+
+        self.assertEqual(response['statusCode'], 200)
+
+        article_info = self.article_info_table.get_item(Key={'article_id': params['pathParameters']['article_id']})['Item']
+        article_content = self.article_content_table.get_item(
+            Key={'article_id': params['pathParameters']['article_id']}
+        )['Item']
+        article_history = self.article_history_table.query(
+            KeyConditionExpression=Key('article_id').eq(params['pathParameters']['article_id'])
+        )['Items'][-1]
+
+        self.assertEqual(article_info['status'], 'public')
+        self.assertEqual(article_info['sort_key'], 1520150552000000)
+        self.assertEqual(article_info['published_at'], 1525000000)
+        self.assertEqual(article_info['sync_elasticsearch'], 1)
+        self.assertEqual(article_info['topic'], 'crypto')
+        self.assertEqual(article_info['tags'], ['A', 'B', 'C', 'D', 'E' * 25])
+        self.assertEqual(article_info['eye_catch_url'], 'https://' + os.environ['DOMAIN'] + '/test.png')
+        self.assertEqual(article_info['price'], 10 ** 20)
+        self.assertEqual(article_content['title'], article_history['title'])
+        self.assertEqual(article_content['body'], article_history['body'])
+        self.assertEqual(article_content['paid_body'], article_history['paid_body'])
+        self.assertEqual(article_history['price'], 10 ** 20)
+        self.assertEqual(len(article_info_after) - len(article_info_before), 0)
+        self.assertEqual(len(article_history_after) - len(article_history_before), 1)
+        self.assertEqual(len(article_content_edit_after) - len(article_content_edit_before), 0)
+
+    def test_validation_paid_article_publish_without_paid_body_ng(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'draftId00001',
+            },
+            'body': {
+                'topic': 'crypto',
+                'tags': ['A', 'B', 'C', 'D', 'E' * 25],
+                'eye_catch_url': 'https://' + os.environ['DOMAIN'] + '/test.png',
+                'price': 10 ** 20
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
+            }
+        }
+
+        params['body'] = json.dumps(params['body'])
+
+        response = MeArticlesDraftsPublishWithHeader(params, {}, dynamodb=self.dynamodb,
+                                                     elasticsearch=self.elasticsearch).main()
+
+        self.assertEqual(response['statusCode'], 400)
+        self.assertEqual(response['body'], '{"message": "Invalid parameter: Both paid body and price are required."}')
+
+    # priceがparamsに存在しない場合
+    def test_validation_paid_article_publish_without_price_ng(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'draftId00001',
+            },
+            'body': {
+                'topic': 'crypto',
+                'tags': ['A', 'B', 'C', 'D', 'E' * 25],
+                'eye_catch_url': 'https://' + os.environ['DOMAIN'] + '/test.png',
+                'paid_body': '有料記事のコンテンツです'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
+            }
+        }
+
+        params['body'] = json.dumps(params['body'])
+
+        response = MeArticlesDraftsPublishWithHeader(params, {}, dynamodb=self.dynamodb,
+                                                     elasticsearch=self.elasticsearch).main()
+
+        self.assertEqual(response['statusCode'], 400)
+        self.assertEqual(response['body'], '{"message": "Invalid parameter: Both paid body and price are required."}')
+
+    @patch('time_util.TimeUtil.generate_sort_key', MagicMock(return_value=1520150552000000))
+    @patch('time.time', MagicMock(return_value=1525000000.000000))
+    # 有料記事だった記事を無料記事として公開する場合
+    def test_make_article_free_ok(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'draftId00004',
+            },
+            'body': {
+                'topic': 'crypto',
+                'tags': ['A', 'B', 'C', 'D', 'E' * 25],
+                'eye_catch_url': 'https://' + os.environ['DOMAIN'] + '/test.png'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
+            }
+        }
+
+        params['body'] = json.dumps(params['body'])
+
+        article_info_before = self.article_info_table.scan()['Items']
+        article_history_before = self.article_history_table.scan()['Items']
+        article_content_edit_before = self.article_content_edit_table.scan()['Items']
+
+        response = MeArticlesDraftsPublishWithHeader(params, {}, dynamodb=self.dynamodb,
+                                                     elasticsearch=self.elasticsearch).main()
+
+        article_info_after = self.article_info_table.scan()['Items']
+        article_history_after = self.article_history_table.scan()['Items']
+        article_content_edit_after = self.article_content_edit_table.scan()['Items']
+
+        self.assertEqual(response['statusCode'], 200)
+
+        article_info = self.article_info_table.get_item(Key={'article_id': params['pathParameters']['article_id']})['Item']
+        article_content = self.article_content_table.get_item(
+            Key={'article_id': params['pathParameters']['article_id']}
+        )['Item']
+        article_history = self.article_history_table.query(
+            KeyConditionExpression=Key('article_id').eq(params['pathParameters']['article_id'])
+        )['Items'][-1]
+        self.assertEqual(article_info['status'], 'public')
+        self.assertEqual(article_info['sort_key'], 1520150552000000)
+        self.assertEqual(article_info['published_at'], 1525000000)
+        self.assertEqual(article_info['sync_elasticsearch'], 1)
+        self.assertEqual(article_info['topic'], 'crypto')
+        self.assertEqual(article_info['tags'], ['A', 'B', 'C', 'D', 'E' * 25])
+        self.assertEqual(article_info['eye_catch_url'], 'https://' + os.environ['DOMAIN'] + '/test.png')
+        self.assertEqual(article_info.get('price'), None)
+        self.assertEqual(article_content['title'], article_history['title'])
+        self.assertEqual(article_content.get('paid_body'), None)
+        self.assertEqual(len(article_info_after) - len(article_info_before), 0)
+        self.assertEqual(len(article_history_after) - len(article_history_before), 1)
+        self.assertEqual(len(article_content_edit_after) - len(article_content_edit_before), 0)

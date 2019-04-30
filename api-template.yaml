@@ -97,6 +97,8 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   PaidArticlesTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
+  PaidStatusTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
 
 Globals:
   Function:
@@ -138,6 +140,7 @@ Globals:
         DIST_S3_BUCKET_NAME: !Ref DistS3BucketName
         ELASTIC_SEARCH_ENDPOINT: !Ref ElasticSearchEndpoint
         PAID_ARTICLES_TABLE_NAME: !Ref PaidArticlesTableName
+        PAID_STATUS_TABLE_NAME: !Ref PaidStatusTableName
 
 Resources:
   RestApi:
@@ -267,6 +270,13 @@ Resources:
                 type: string
               tip_value:
                 type: string
+          MeWalletTokenSend:
+            type: object
+            properties:
+              recipient_eth_address:
+                type: string
+              send_value:
+                type: string
           MeExternalProviderUserCreate:
             type: object
             properties:
@@ -392,6 +402,13 @@ Resources:
               tip:
                 type: integer
               bonus:
+                type: integer
+          MeArticlesPurchase:
+            type: object
+            properties:
+              article_id:
+                type: string
+              price:
                 type: integer
         paths:
           /search/articles:
@@ -2070,6 +2087,71 @@ Resources:
                 passthroughBehavior: when_no_templates
                 httpMethod: POST
                 type: aws_proxy
+          /me/wallet/token/send:
+            post:
+              description: 'トークンを指定のアドレス（パブリック）に送信する'
+              parameters:
+                - name: 'token send'
+                  in: 'body'
+                  description: 'token send object'
+                  required: true
+                  schema:
+                    $ref: '#/definitions/MeWalletTokenSend'
+              responses:
+                '200':
+                  description: 'トークン送信結果'
+                  schema:
+                    type: object
+                    properties:
+                      is_completed:
+                        type: 'boolean'
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri:
+                  Fn::Join:
+                    - ''
+                    - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
+                      - Fn::ImportValue:
+                          Fn::Sub: "${AlisAppId}-MeWalletTokenSend"
+                      - "/invocations"
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /me/wallet/token/histories:
+            get:
+              description: "トークン入出金履歴の取得"
+              responses:
+                "200":
+                  description: "トークン入出金履歴情報"
+                  schema:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: "string"
+                      relay_events:
+                        type: "string"
+                      apply_relay_events:
+                        type: "string"
+              security:
+                - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri:
+                  Fn::Join:
+                    - ''
+                    - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
+                      - Fn::ImportValue:
+                          Fn::Sub: "${AlisAppId}-MeWalletTokenHistoriesIndex"
+                      - "/invocations"
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
           /me/notifications:
             get:
               description: ログインユーザーの通知の一覧を取得
@@ -2332,6 +2414,70 @@ Resources:
                     - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
                       - Fn::ImportValue:
                           Fn::Sub: "${AlisAppId}-MeArticlesPurchasedIndex"
+                      - "/invocations"
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /me/articles/{article_id}/purchase:
+            post:
+              description: '対象記事を購入する'
+              parameters:
+              - name: 'article_id'
+                in: 'path'
+                description: '対象記事の指定するために使用'
+                required: true
+                type: 'string'
+              - name: 'price'
+                in: 'body'
+                required: true
+                schema:
+                  $ref: '#/definitions/MeArticlesPurchase'
+              responses:
+                '200':
+                  description: '記事購入成功'
+              security:
+              - cognitoUserPool: []
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                uri:
+                  Fn::Join:
+                    - ''
+                    - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
+                      - Fn::ImportValue:
+                          Fn::Sub: "${AlisAppId}-MeArticlesPurchaseCreate"
+                      - "/invocations"
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws_proxy
+          /wallet/bridge_information:
+            get:
+              description: "Bridge情報の取得"
+              responses:
+                "200":
+                  description: "Bridge情報"
+                  schema:
+                    type: object
+                    properties:
+                      max_single_relay_amount:
+                        type: "string"
+                      min_single_relay_amount:
+                        type: "string"
+                      relay_paused:
+                        type: "string"
+                      relay_fee:
+                        type: "string"
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri:
+                  Fn::Join:
+                    - ''
+                    - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
+                      - Fn::ImportValue:
+                          Fn::Sub: "${AlisAppId}-WalletBridgeInformationShow"
                       - "/invocations"
                 passthroughBehavior: when_no_templates
                 httpMethod: POST

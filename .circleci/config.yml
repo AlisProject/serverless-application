@@ -61,7 +61,6 @@ jobs:
             . venv/bin/activate
             # 全テスト実行
             python exec_test.py
-
       - run:
           name: make deploy package
           command: |

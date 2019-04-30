@@ -29,6 +29,7 @@ aws cloudformation deploy \
     PrivateChainAwsAccessKey=${SSM_PARAMS_PREFIX}PrivateChainAwsAccessKey \
     PrivateChainAwsSecretAccessKey=${SSM_PARAMS_PREFIX}PrivateChainAwsSecretAccessKey \
     PrivateChainExecuteApiHost=${SSM_PARAMS_PREFIX}PrivateChainExecuteApiHost \
+    PrivateChainBridgeAddress=${SSM_PARAMS_PREFIX}PrivateChainBridgeAddress \
     BetaModeFlag=${SSM_PARAMS_PREFIX}BetaModeFlag \
     SaltForArticleId=${SSM_PARAMS_PREFIX}SaltForArticleId \
     CognitoUserPoolArn=${SSM_PARAMS_PREFIX}CognitoUserPoolArn \
@@ -58,6 +59,7 @@ aws cloudformation deploy \
     ScreenedArticleTableName=${SSM_PARAMS_PREFIX}ScreenedArticleTableName \
     TokenDistributionTableName=${SSM_PARAMS_PREFIX}TokenDistributionTableName \
     UserFirstExperienceTableName=${SSM_PARAMS_PREFIX}UserFirstExperienceTableName \
+    TokenSendTableName=${SSM_PARAMS_PREFIX}TokenSendTableName \
     DistS3BucketName=${SSM_PARAMS_PREFIX}DistS3BucketName \
     ApiLambdaRole=${SSM_PARAMS_PREFIX}ApiLambdaRole \
     ElasticSearchEndpoint=${SSM_PARAMS_PREFIX}ElasticSearchEndpoint \
@@ -81,5 +83,7 @@ aws cloudformation deploy \
     FacebookAppToken=${SSM_PARAMS_PREFIX}FacebookAppToken \
     RestApiArn=${SSM_PARAMS_PREFIX}RestApiArn \
     PaidArticlesTableName=${SSM_PARAMS_PREFIX}PaidArticlesTableName \
+    PaidStatusTableName=${SSM_PARAMS_PREFIX}PaidStatusTableName \
+    DailyLimitTokenSendValue=${SSM_PARAMS_PREFIX}DailyLimitTokenSendValue \
   --capabilities CAPABILITY_IAM \
   --no-fail-on-empty-changeset
