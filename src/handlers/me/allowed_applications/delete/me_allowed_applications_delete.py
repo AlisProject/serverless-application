@@ -7,13 +7,14 @@ from authlete_util import AuthleteUtil
 from lambda_base import LambdaBase
 
 
-class MeAllowdAppDelete(LambdaBase):
+class MeAllowedApplicationsDelete(LambdaBase):
     def get_schema(self):
         return {
             'type': 'object',
             'properties': {
                 'client_id': settings.parameters['oauth_client']['client_id']
-            }
+            },
+            'required': ['client_id']
         }
 
     def validate_params(self):

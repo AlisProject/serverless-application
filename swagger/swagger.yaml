@@ -2460,7 +2460,7 @@ paths:
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
-  /me/allowed_app:
+  /me/allowed_applications:
     get:
       description: '許可したoauthアプリ'
       security:
@@ -2474,7 +2474,7 @@ paths:
             - ''
             - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
               - Fn::ImportValue:
-                  Fn::Sub: "${AlisAppId}-MeAllowdAppIndex"
+                  Fn::Sub: "${AlisAppId}-MeAllowedApplicationsIndex"
               - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
@@ -2498,7 +2498,7 @@ paths:
             - ''
             - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
               - Fn::ImportValue:
-                  Fn::Sub: "${AlisAppId}-MeAllowdAppDelete"
+                  Fn::Sub: "${AlisAppId}-MeAllowedApplicationsDelete"
               - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST

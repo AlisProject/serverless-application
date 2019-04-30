@@ -327,12 +327,12 @@ Resources:
       MemorySize: 3008
       Runtime: python3.6
       Timeout: 300
-  MeAllowdAppIndex:
+  MeAllowedApplicationsIndex:
     Type: "AWS::Lambda::Function"
     Properties:
       Handler: handler.lambda_handler
       Role: !GetAtt LambdaRole.Arn
-      Code: ./deploy/me_allowed_app_index.zip
+      Code: ./deploy/me_allowed_applications_index.zip
       Environment:
         Variables:
           AUTHLETE_API_KEY: !Ref AuthleteApiKey
@@ -340,12 +340,12 @@ Resources:
       MemorySize: 3008
       Runtime: python3.6
       Timeout: 300
-  MeAllowdAppDelete:
+  MeAllowedApplicationsDelete:
     Type: "AWS::Lambda::Function"
     Properties:
       Handler: handler.lambda_handler
       Role: !GetAtt LambdaRole.Arn
-      Code: ./deploy/me_allowed_app_delete.zip
+      Code: ./deploy/me_allowed_applications_delete.zip
       Environment:
         Variables:
           AUTHLETE_API_KEY: !Ref AuthleteApiKey
@@ -407,11 +407,11 @@ Outputs:
     Value: !GetAtt MeApplicationsDelete.Arn
     Export:
       Name: !Sub "${AlisAppId}-MeApplicationsDelete"
-  MeAllowdAppIndex:
-    Value: !GetAtt MeAllowdAppIndex.Arn
+  MeAllowedApplicationsIndex:
+    Value: !GetAtt MeAllowedApplicationsIndex.Arn
     Export:
-      Name: !Sub "${AlisAppId}-MeAllowdAppIndex"
-  MeAllowdAppDelete:
-    Value: !GetAtt MeAllowdAppDelete.Arn
+      Name: !Sub "${AlisAppId}-MeAllowedApplicationsIndex"
+  MeAllowedApplicationsDelete:
+    Value: !GetAtt MeAllowedApplicationsDelete.Arn
     Export:
-      Name: !Sub "${AlisAppId}-MeAllowdAppDelete"
+      Name: !Sub "${AlisAppId}-MeAllowedApplicationsDelete"
