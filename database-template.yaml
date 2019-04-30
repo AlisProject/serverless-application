@@ -488,8 +488,6 @@ Resources:
           AttributeType: N
         - AttributeName: uncompleted
           AttributeType: N
-        - AttributeName: article_id
-          AttributeType: S
         - AttributeName: past_data_exclusion_key
           AttributeType: N
         - AttributeName: target_date
@@ -506,17 +504,6 @@ Resources:
               KeyType: HASH
           Projection:
             ProjectionType: ALL
-        - IndexName: article_id-past_data_exclusion_key-index
-          KeySchema:
-            - AttributeName: article_id
-              KeyType: HASH
-            - AttributeName: past_data_exclusion_key
-              KeyType: RANGE
-          Projection:
-            ProjectionType: ALL
-          ProvisionedThroughput:
-            ReadCapacityUnits: 1
-            WriteCapacityUnits: 1
         - IndexName: target_date-past_data_exclusion_key-index
           KeySchema:
             - AttributeName: target_date
@@ -525,9 +512,6 @@ Resources:
               KeyType: RANGE
           Projection:
             ProjectionType: ALL
-          ProvisionedThroughput:
-            ReadCapacityUnits: 1
-            WriteCapacityUnits: 1
       BillingMode: PAY_PER_REQUEST
   ScreenedArticle:
     Type: AWS::DynamoDB::Table
