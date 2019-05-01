@@ -6,6 +6,7 @@ import json
 from authlete_util import AuthleteUtil
 from lambda_base import LambdaBase
 from jsonschema import validate
+from parameter_util import ParameterUtil
 
 
 class MeAllowedApplicationsIndex(LambdaBase):
@@ -13,24 +14,21 @@ class MeAllowedApplicationsIndex(LambdaBase):
         return {
             'type': 'object',
             'properties': {
-                'start': {
-                    'type': 'string'
-                },
-                'end': {
-                    'type': 'string'
-                }
+                'start': settings.parameters['authlete_allowed_app_index_parameter'],
+                'end': settings.parameters['authlete_allowed_app_index_parameter']
             }
         }
 
     def validate_params(self):
+        ParameterUtil.cast_parameter_to_int(self.params, self.get_schema())
         validate(self.params, self.get_schema())
 
     def exec_main_proc(self):
-        request_params = {}
-        request_params['start'] = self.params.get('start', 0)
-        request_params['end'] = self.params.get('end', 5)
-        request_params['subject'] = [self.event['requestContext']['authorizer']['claims']['cognito:username']]
-
+        request_params = {
+                'start': self.params.get('start', 0),
+                'end': self.params.get('end', 5),
+                'subject': self.event['requestContext']['authorizer']['claims']['cognito:username']
+        }
         try:
             response = requests.get(
                 settings.AUTHLETE_CLIENT_ENDPOINT + '/authorization/get/list',
@@ -44,7 +42,7 @@ class MeAllowedApplicationsIndex(LambdaBase):
         AuthleteUtil.verify_valid_response(response)
 
         result = []
-        for client in json.loads(response.text)['clients']:
+        for client in json.loads(response.text).get('clients', []):
             result.append({
                 'clientId': client['clientId'],
                 'clientName': client['clientName'],
