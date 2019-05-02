@@ -5,7 +5,7 @@ import settings
 import json
 from authlete_util import AuthleteUtil
 from lambda_base import LambdaBase
-from jsonschema import validate
+from jsonschema import validate, ValidationError
 from parameter_util import ParameterUtil
 
 
@@ -22,11 +22,18 @@ class MeAllowedApplicationsIndex(LambdaBase):
     def validate_params(self):
         ParameterUtil.cast_parameter_to_int(self.params, self.get_schema())
         validate(self.params, self.get_schema())
+        self.params['start'] = self.params.get('start', 0)
+        self.params['end'] = self.params.get('end', 5)
+        count = self.params['end'] - self.params['start']
+        if count > 100:
+            raise ValidationError('displayed items are over 100')
+        if count < 1:
+            raise ValidationError('displayed items are less than 1')
 
     def exec_main_proc(self):
         request_params = {
-                'start': self.params.get('start', 0),
-                'end': self.params.get('end', 5),
+                'start': self.params['start'],
+                'end': self.params['end'],
                 'subject': self.event['requestContext']['authorizer']['claims']['cognito:username']
         }
         try:
@@ -46,7 +53,8 @@ class MeAllowedApplicationsIndex(LambdaBase):
             result.append({
                 'clientId': client['clientId'],
                 'clientName': client['clientName'],
-                'clientType': client['clientType']
+                'clientType': client['clientType'],
+                'createdAt': client['createdAt']
             })
 
         return {

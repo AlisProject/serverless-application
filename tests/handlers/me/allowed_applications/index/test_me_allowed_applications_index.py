@@ -35,7 +35,12 @@ class TestMeAllowedApplicationsIndex(TestCase):
                       json={
                           'statusCode': 200,
                           'clients':
-                              [{"clientId": 12345678901234, "clientName": "test", "clientType": "CONFIDENTIAL"}]},
+                          [{
+                              "clientId": 12345678901234,
+                              "clientName": "test",
+                              "clientType": "CONFIDENTIAL",
+                              "createdAt": 1556857365}]
+                          },
                       status=200)
         response = MeAllowedApplicationsIndex(params, {}).main()
         self.assertEqual(response['statusCode'], 200)
@@ -60,7 +65,7 @@ class TestMeAllowedApplicationsIndex(TestCase):
     def test_invalid_parameter(self):
         params = {
             'queryStringParameters': {
-                'start': '101'
+                'start': '2147483648'
             },
             'requestContext': {
                 'authorizer': {
@@ -71,7 +76,7 @@ class TestMeAllowedApplicationsIndex(TestCase):
             }
         }
         # start パラメータ
-        # 101以上
+        # 2147483648以上
         response = MeAllowedApplicationsIndex(params, {}).main()
         self.assertEqual(response['statusCode'], 400)
         # 0未満
@@ -84,9 +89,9 @@ class TestMeAllowedApplicationsIndex(TestCase):
         self.assertEqual(response['statusCode'], 400)
 
         # end パラメータ
-        # 101以上
+        # 2147483648以上
         params['queryStringParameters'] = {
-                'end': '101'
+                'end': '2147483648'
         }
         response = MeAllowedApplicationsIndex(params, {}).main()
         self.assertEqual(response['statusCode'], 400)
@@ -99,11 +104,27 @@ class TestMeAllowedApplicationsIndex(TestCase):
         response = MeAllowedApplicationsIndex(params, {}).main()
         self.assertEqual(response['statusCode'], 400)
 
+        # end - start < 1
+        params['queryStringParameters'] = {
+                'start': '10',
+                'end': '9'
+        }
+        response = MeAllowedApplicationsIndex(params, {}).main()
+        self.assertEqual(response['statusCode'], 400)
+
+        # end - start > 100
+        params['queryStringParameters'] = {
+                'start': '1',
+                'end': '102'
+        }
+        response = MeAllowedApplicationsIndex(params, {}).main()
+        self.assertEqual(response['statusCode'], 400)
+
     @responses.activate
     def test_valid_parameter(self):
         params = {
             'queryStringParameters': {
-                'start': '100'
+                'start': '4'
             },
             'requestContext': {
                 'authorizer': {
@@ -118,7 +139,12 @@ class TestMeAllowedApplicationsIndex(TestCase):
                       json={
                           'statusCode': 200,
                           'clients':
-                              [{"clientId": 12345678901234, "clientName": "test", "clientType": "CONFIDENTIAL"}]},
+                          [{
+                              "clientId": 12345678901234,
+                              "clientName": "test",
+                              "clientType": "CONFIDENTIAL",
+                              "createdAt": 1556857417
+                          }]},
                       status=200)
         # startだけ
         response = MeAllowedApplicationsIndex(params, {}).main()

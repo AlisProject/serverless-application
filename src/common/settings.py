@@ -223,7 +223,7 @@ parameters = {
     'authlete_allowed_app_index_parameter': {
         'type': 'integer',
         'minimum': 0,
-        'maximum': 100
+        'maximum': 2147483647
     }
 
 }
