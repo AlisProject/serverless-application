@@ -21,7 +21,7 @@ class MeApplicationUpdate(LambdaBase):
                 'client_id': settings.parameters['oauth_client']['client_id'],
                 'redirect_urls': settings.parameters['oauth_client']['redirect_urls']
             },
-            'required': ['name', 'redirect_urls']
+            'required': ['client_id', 'name', 'redirect_urls']
         }
 
     def validate_params(self):
