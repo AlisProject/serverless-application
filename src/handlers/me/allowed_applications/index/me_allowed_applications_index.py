@@ -16,6 +16,10 @@ class MeAllowedApplicationsIndex(LambdaBase):
             'properties': {
                 'start': settings.parameters['authlete_allowed_app_index_parameter'],
                 'end': settings.parameters['authlete_allowed_app_index_parameter']
+            },
+            'dependencies': {
+                'start': ['end'],
+                'end': ['start']
             }
         }
 

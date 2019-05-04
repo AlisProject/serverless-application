@@ -65,7 +65,8 @@ class TestMeAllowedApplicationsIndex(TestCase):
     def test_invalid_parameter(self):
         params = {
             'queryStringParameters': {
-                'start': '2147483648'
+                'start': '2147483648',
+                'end': '5'
             },
             'requestContext': {
                 'authorizer': {
@@ -75,7 +76,7 @@ class TestMeAllowedApplicationsIndex(TestCase):
                 }
             }
         }
-        # start パラメータ
+        # start
         # 2147483648以上
         response = MeAllowedApplicationsIndex(params, {}).main()
         self.assertEqual(response['statusCode'], 400)
@@ -91,6 +92,7 @@ class TestMeAllowedApplicationsIndex(TestCase):
         # end パラメータ
         # 2147483648以上
         params['queryStringParameters'] = {
+                'start': '0',
                 'end': '2147483648'
         }
         response = MeAllowedApplicationsIndex(params, {}).main()
@@ -116,6 +118,20 @@ class TestMeAllowedApplicationsIndex(TestCase):
         params['queryStringParameters'] = {
                 'start': '1',
                 'end': '102'
+        }
+        response = MeAllowedApplicationsIndex(params, {}).main()
+        self.assertEqual(response['statusCode'], 400)
+
+        # startだけ
+        params['queryStringParameters'] = {
+                'start': '1'
+        }
+        response = MeAllowedApplicationsIndex(params, {}).main()
+        self.assertEqual(response['statusCode'], 400)
+
+        # endだけ
+        params['queryStringParameters'] = {
+                'end': '10'
         }
         response = MeAllowedApplicationsIndex(params, {}).main()
         self.assertEqual(response['statusCode'], 400)
@@ -146,15 +162,6 @@ class TestMeAllowedApplicationsIndex(TestCase):
                               "createdAt": 1556857417
                           }]},
                       status=200)
-        # startだけ
-        response = MeAllowedApplicationsIndex(params, {}).main()
-        self.assertEqual(response['statusCode'], 200)
-        # endだけ
-        params['queryStringParameters'] = {
-                'end': '10'
-        }
-        response = MeAllowedApplicationsIndex(params, {}).main()
-        self.assertEqual(response['statusCode'], 200)
         # start, end 両方
         params['queryStringParameters'] = {
                 'start': '1',
