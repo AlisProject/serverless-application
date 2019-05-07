@@ -96,6 +96,8 @@ class MeWalletTip(LambdaBase):
         sort_key = TimeUtil.generate_sort_key()
         user_id = self.event['requestContext']['authorizer']['claims']['cognito:username']
 
+        epoch = int(time.time())
+
         tip_info = {
             'user_id': user_id,
             'to_user_id': article_info['user_id'],
@@ -106,8 +108,8 @@ class MeWalletTip(LambdaBase):
             'uncompleted': 1,
             'sort_key': sort_key,
             'past_data_exclusion_key': sort_key,
-            'target_date': time.strftime('%Y-%m-%d', time.gmtime(int(time.time()))),
-            'created_at': int(time.time())
+            'target_date': time.strftime('%Y-%m-%d', time.gmtime(epoch)),
+            'created_at': epoch
         }
 
         tip_table.put_item(
