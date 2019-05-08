@@ -23,3 +23,17 @@ class ParameterUtil:
 
             if len(lower_items) != len(set(lower_items)):
                 raise ValidationError("{key} must be unique(case-insensitive)".format(key=key))
+
+    @staticmethod
+    def validate_price_params(params_price):
+        if params_price is not None:
+            try:
+                params_price = int(params_price)
+            except ValueError:
+                raise ValidationError('Price must be integer')
+
+            # check price value is not decimal
+            price = params_price / 10 ** 18
+            if price.is_integer() is False:
+                raise ValidationError('Decimal value is not allowed')
+            return True

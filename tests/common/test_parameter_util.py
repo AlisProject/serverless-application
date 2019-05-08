@@ -59,3 +59,17 @@ class TestParameterToInt(TestCase):
 
         with self.assertRaises(ValidationError):
             ParameterUtil.validate_array_unique(target_items, 'tags', case_insensitive=True)
+
+    def test_validate_price_params_ng_string(self):
+        price = 'AAAA'
+        with self.assertRaises(ValidationError):
+            ParameterUtil.validate_price_params(price)
+
+    def test_validate_price_params_ng_decimal(self):
+        price = 1 * (10 ** 18) + 1 * (10 ** 17)
+        with self.assertRaises(ValidationError):
+            ParameterUtil.validate_price_params(price)
+
+    def test_validate_price_through(self):
+        price = 1 * (10 ** 18)
+        self.assertTrue(ParameterUtil.validate_price_params(price))

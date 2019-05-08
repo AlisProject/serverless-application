@@ -1,4 +1,4 @@
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: Lambda functions and API Gateway resources for the ALIS application.
 
@@ -6,101 +6,103 @@ Parameters:
   AlisAppId:
     Type: String
   ArticleInfoTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
+    Type: "AWS::SSM::Parameter::Value<String>"
   ArticleContentTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
+    Type: "AWS::SSM::Parameter::Value<String>"
   ArticleHistoryTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
+    Type: "AWS::SSM::Parameter::Value<String>"
   ArticleContentEditTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
+    Type: "AWS::SSM::Parameter::Value<String>"
   ArticleEvaluatedManageTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
+    Type: "AWS::SSM::Parameter::Value<String>"
   ArticleAlisTokenTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
+    Type: "AWS::SSM::Parameter::Value<String>"
   ArticleLikedUserTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
+    Type: "AWS::SSM::Parameter::Value<String>"
   ArticleFraudUserTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
+    Type: "AWS::SSM::Parameter::Value<String>"
   ArticlePvUserTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
+    Type: "AWS::SSM::Parameter::Value<String>"
   ArticleScoreTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
+    Type: "AWS::SSM::Parameter::Value<String>"
   UsersTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
+    Type: "AWS::SSM::Parameter::Value<String>"
   BetaUsersTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
+    Type: "AWS::SSM::Parameter::Value<String>"
   ExternalProviderUsersTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
+    Type: "AWS::SSM::Parameter::Value<String>"
   NotificationTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
+    Type: "AWS::SSM::Parameter::Value<String>"
   UnreadNotificationManagerTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
+    Type: "AWS::SSM::Parameter::Value<String>"
   CommentTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
+    Type: "AWS::SSM::Parameter::Value<String>"
   CommentLikedUserTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
+    Type: "AWS::SSM::Parameter::Value<String>"
   DeletedCommentTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
+    Type: "AWS::SSM::Parameter::Value<String>"
   UserFraudTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
+    Type: "AWS::SSM::Parameter::Value<String>"
   ScreenedArticleTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
+    Type: "AWS::SSM::Parameter::Value<String>"
   TokenDistributionTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
+    Type: "AWS::SSM::Parameter::Value<String>"
   UserFirstExperienceTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
+    Type: "AWS::SSM::Parameter::Value<String>"
   ElasticSearchEndpoint:
-    Type: 'AWS::SSM::Parameter::Value<String>'
+    Type: "AWS::SSM::Parameter::Value<String>"
   TopicTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
+    Type: "AWS::SSM::Parameter::Value<String>"
   TagTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
+    Type: "AWS::SSM::Parameter::Value<String>"
   TipTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
+    Type: "AWS::SSM::Parameter::Value<String>"
   AlisAppDomain:
-    Type: 'AWS::SSM::Parameter::Value<String>'
+    Type: "AWS::SSM::Parameter::Value<String>"
   PrivateChainAwsAccessKey:
-    Type: 'AWS::SSM::Parameter::Value<String>'
+    Type: "AWS::SSM::Parameter::Value<String>"
   PrivateChainAwsSecretAccessKey:
-    Type: 'AWS::SSM::Parameter::Value<String>'
+    Type: "AWS::SSM::Parameter::Value<String>"
   PrivateChainExecuteApiHost:
-    Type: 'AWS::SSM::Parameter::Value<String>'
+    Type: "AWS::SSM::Parameter::Value<String>"
   BetaModeFlag:
-    Type: 'AWS::SSM::Parameter::Value<String>'
+    Type: "AWS::SSM::Parameter::Value<String>"
   DistS3BucketName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
+    Type: "AWS::SSM::Parameter::Value<String>"
   CognitoUserPoolId:
-    Type: 'AWS::SSM::Parameter::Value<String>'
+    Type: "AWS::SSM::Parameter::Value<String>"
   CognitoUserPoolArn:
-    Type: 'AWS::SSM::Parameter::Value<String>'
+    Type: "AWS::SSM::Parameter::Value<String>"
   CognitoUserPoolAppId:
-    Type: 'AWS::SSM::Parameter::Value<String>'
+    Type: "AWS::SSM::Parameter::Value<String>"
   SaltForArticleId:
-    Type: 'AWS::SSM::Parameter::Value<String>'
+    Type: "AWS::SSM::Parameter::Value<String>"
   TwitterConsumerKey:
-    Type: 'AWS::SSM::Parameter::Value<String>'
+    Type: "AWS::SSM::Parameter::Value<String>"
   TwitterConsumerSecret:
-    Type: 'AWS::SSM::Parameter::Value<String>'
+    Type: "AWS::SSM::Parameter::Value<String>"
   TwitterOauthCallbackUrl:
-    Type: 'AWS::SSM::Parameter::Value<String>'
+    Type: "AWS::SSM::Parameter::Value<String>"
   LineChannelId:
-    Type: 'AWS::SSM::Parameter::Value<String>'
+    Type: "AWS::SSM::Parameter::Value<String>"
   LineChannelSecret:
-    Type: 'AWS::SSM::Parameter::Value<String>'
+    Type: "AWS::SSM::Parameter::Value<String>"
   ExternalProviderLoginCommonTempPassword:
-    Type: 'AWS::SSM::Parameter::Value<String>'
+    Type: "AWS::SSM::Parameter::Value<String>"
   LineRedirectUri:
-    Type: 'AWS::SSM::Parameter::Value<String>'
+    Type: "AWS::SSM::Parameter::Value<String>"
   ExternalProviderLoginMark:
-    Type: 'AWS::SSM::Parameter::Value<String>'
+    Type: "AWS::SSM::Parameter::Value<String>"
   LoginSalt:
-    Type: 'AWS::SSM::Parameter::Value<String>'
+    Type: "AWS::SSM::Parameter::Value<String>"
   PaidArticlesTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
+    Type: "AWS::SSM::Parameter::Value<String>"
+  PaidStatusTableName:
+    Type: "AWS::SSM::Parameter::Value<String>"
   AuthleteApiKey:
-    Type: 'AWS::SSM::Parameter::Value<String>'
+    Type: "AWS::SSM::Parameter::Value<String>"
   AuthleteApiSecret:
-    Type: 'AWS::SSM::Parameter::Value<String>'
+    Type: "AWS::SSM::Parameter::Value<String>"
 
 Globals:
   Function:
@@ -142,6 +144,7 @@ Globals:
         DIST_S3_BUCKET_NAME: !Ref DistS3BucketName
         ELASTIC_SEARCH_ENDPOINT: !Ref ElasticSearchEndpoint
         PAID_ARTICLES_TABLE_NAME: !Ref PaidArticlesTableName
+        PAID_STATUS_TABLE_NAME: !Ref PaidStatusTableName
 
 Resources:
   RestApi:
@@ -409,37 +412,37 @@ Resources:
             Method: post
             RestApiId: !Ref RestApi
   MeArticlesDraftsCreate:
-      Type: AWS::Serverless::Function
-      Properties:
-        Handler: handler.lambda_handler
-        Role: !GetAtt LambdaRole.Arn
-        CodeUri: ./deploy/me_articles_drafts_create.zip
-        Environment:
-          Variables:
-            SALT_FOR_ARTICLE_ID: !Ref SaltForArticleId
-        Events:
-          Api:
-            Type: Api
-            Properties:
-              Path: /me/articles/drafts
-              Method: post
-              RestApiId: !Ref RestApi
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_articles_drafts_create.zip
+      Environment:
+        Variables:
+          SALT_FOR_ARTICLE_ID: !Ref SaltForArticleId
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/articles/drafts
+            Method: post
+            RestApiId: !Ref RestApi
   MeArticlesDraftsArticleIdCreate:
-      Type: AWS::Serverless::Function
-      Properties:
-        Handler: handler.lambda_handler
-        Role: !GetAtt LambdaRole.Arn
-        CodeUri: ./deploy/me_articles_drafts_article_id_create.zip
-        Environment:
-          Variables:
-            SALT_FOR_ARTICLE_ID: !Ref SaltForArticleId
-        Events:
-          Api:
-            Type: Api
-            Properties:
-              Path: /me/articles/drafts/article_id
-              Method: post
-              RestApiId: !Ref RestApi
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_articles_drafts_article_id_create.zip
+      Environment:
+        Variables:
+          SALT_FOR_ARTICLE_ID: !Ref SaltForArticleId
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/articles/drafts/article_id
+            Method: post
+            RestApiId: !Ref RestApi
   MeArticlesDraftsPublish:
     Type: AWS::Serverless::Function
     Properties:
@@ -467,18 +470,18 @@ Resources:
             Method: put
             RestApiId: !Ref RestApi
   MeArticlesDraftsUpdate:
-      Type: AWS::Serverless::Function
-      Properties:
-        Handler: handler.lambda_handler
-        Role: !GetAtt LambdaRole.Arn
-        CodeUri: ./deploy/me_articles_drafts_update.zip
-        Events:
-          Api:
-            Type: Api
-            Properties:
-              Path: /me/articles/{article_id}/drafts
-              Method: put
-              RestApiId: !Ref RestApi
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_articles_drafts_update.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/articles/{article_id}/drafts
+            Method: put
+            RestApiId: !Ref RestApi
   MeArticlesDraftsTitleUpdate:
     Type: AWS::Serverless::Function
     Properties:
@@ -532,18 +535,18 @@ Resources:
             Method: get
             RestApiId: !Ref RestApi
   MeArticlesPublicEdit:
-      Type: AWS::Serverless::Function
-      Properties:
-        Handler: handler.lambda_handler
-        Role: !GetAtt LambdaRole.Arn
-        CodeUri: ./deploy/me_articles_public_edit.zip
-        Events:
-          Api:
-            Type: Api
-            Properties:
-              Path: /me/articles/{article_id}/public/edit
-              Method: get
-              RestApiId: !Ref RestApi
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_articles_public_edit.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/articles/{article_id}/public/edit
+            Method: get
+            RestApiId: !Ref RestApi
   MeArticlesPublicUpdate:
     Type: AWS::Serverless::Function
     Properties:
@@ -655,8 +658,8 @@ Resources:
       Role: !GetAtt LambdaRole.Arn
       CodeUri: ./deploy/me_articles_comments_create.zip
       Environment:
-          Variables:
-            SALT_FOR_ARTICLE_ID: !Ref SaltForArticleId
+        Variables:
+          SALT_FOR_ARTICLE_ID: !Ref SaltForArticleId
       Events:
         Api:
           Type: Api
@@ -671,8 +674,8 @@ Resources:
       Role: !GetAtt LambdaRole.Arn
       CodeUri: ./deploy/me_articles_comments_reply.zip
       Environment:
-          Variables:
-            SALT_FOR_ARTICLE_ID: !Ref SaltForArticleId
+        Variables:
+          SALT_FOR_ARTICLE_ID: !Ref SaltForArticleId
       Events:
         Api:
           Type: Api
@@ -746,18 +749,18 @@ Resources:
             Method: post
             RestApiId: !Ref RestApi
   MeArticlesImagesCreate:
-      Type: AWS::Serverless::Function
-      Properties:
-        Handler: handler.lambda_handler
-        Role: !GetAtt LambdaRole.Arn
-        CodeUri: ./deploy/me_articles_images_create.zip
-        Events:
-          Api:
-            Type: Api
-            Properties:
-              Path: /me/articles/{article_id}/images
-              Method: post
-              RestApiId: !Ref RestApi
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_articles_images_create.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/articles/{article_id}/images
+            Method: post
+            RestApiId: !Ref RestApi
   MeArticlesImageUploadUrlShow:
     Type: AWS::Serverless::Function
     Properties:
@@ -772,18 +775,18 @@ Resources:
             Method: get
             RestApiId: !Ref RestApi
   MeInfoIconCreate:
-      Type: AWS::Serverless::Function
-      Properties:
-        Handler: handler.lambda_handler
-        Role: !GetAtt LambdaRole.Arn
-        CodeUri: ./deploy/me_info_icon_create.zip
-        Events:
-          Api:
-            Type: Api
-            Properties:
-              Path: /me/info/icon
-              Method: post
-              RestApiId: !Ref RestApi
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      CodeUri: ./deploy/me_info_icon_create.zip
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /me/info/icon
+            Method: post
+            RestApiId: !Ref RestApi
   MeInfoFirstExperiencesUpdate:
     Type: AWS::Serverless::Function
     Properties:
@@ -1041,19 +1044,19 @@ Resources:
     Type: "AWS::Elasticsearch::Domain"
     Properties:
       AccessPolicies: !Join
-        - ''
+        - ""
         - - '{ "Version": "2012-10-17", "Statement": [ { "Effect": "Allow", "Principal": { "AWS": "'
           - !GetAtt LambdaRole.Arn
           - '" }, "Action": "es:*", "Resource": "'
-          - 'arn:aws:es:'
-          - !Ref 'AWS::Region'
-          - ':'
-          - !Ref 'AWS::AccountId'
-          - ':domain/'
+          - "arn:aws:es:"
+          - !Ref "AWS::Region"
+          - ":"
+          - !Ref "AWS::AccountId"
+          - ":domain/"
           - !Ref "AWS::StackName"
           - '/*" } ] }'
       AdvancedOptions:
-        rest.action.multi.allow_explicit_index: 'true'
+        rest.action.multi.allow_explicit_index: "true"
       DomainName: !Ref "AWS::StackName"
       EBSOptions:
         EBSEnabled: true
@@ -1066,7 +1069,7 @@ Resources:
         ZoneAwarenessEnabled: false
         DedicatedMasterType: t2.medium.elasticsearch
         DedicatedMasterCount: 3
-      ElasticsearchVersion: '6.2'
+      ElasticsearchVersion: "6.2"
       SnapshotOptions:
         AutomatedSnapshotStartHour: 0
 Outputs:
