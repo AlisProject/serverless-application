@@ -1,7 +1,7 @@
-boto3
-pycodestyle == 2.4.0
-pyflakes == 2.0.0
-green
-awscli
-six
-responses
+boto3==1.9.120
+pycodestyle==2.4.0
+pyflakes==2.0.0
+green==2.14.1
+awscli==1.16.130
+six==1.12.0
+responses==0.10.6

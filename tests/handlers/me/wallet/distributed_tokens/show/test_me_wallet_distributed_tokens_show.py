@@ -18,7 +18,7 @@ class TestMeWalletDistributedTokensShow(TestCase):
                 'distribution_id': 'user01-1536184800000000-tip',
                 'user_id': 'user01',
                 'distribution_type': 'tip',
-                'quantity': 10000000000000000000,
+                'quantity': 1000000000000000000,
                 'created_at': 1536184800,
                 'sort_key': 1536184800000000
             },
@@ -83,7 +83,7 @@ class TestMeWalletDistributedTokensShow(TestCase):
         expected = {
             'article': 6000000000000000000,
             'like': 5000000000000000000,
-            'tip': 10000000000000000000,
+            'tip': 1000000000000000000,
             'bonus': 0  # DBに存在しなくても0が返却されること
         }
 

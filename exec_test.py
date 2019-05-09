@@ -49,7 +49,6 @@ def main():
     # テスト実行のためのtmpディレクトリを作成し、testsをコピーする
     os.mkdir(TEST_TMP_DIR)
     copy_tree(TEST_DIR, TEST_TMP_DIR)
-
     # テスト実行のための環境変数をセットする
     set_global_env_vers()
 
