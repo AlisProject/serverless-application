@@ -116,6 +116,10 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   PaidStatusTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
+  AuthleteApiKey:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  AuthleteApiSecret:
+    Type: 'AWS::SSM::Parameter::Value<String>'
   DailyLimitTokenSendValue:
     Type: 'AWS::SSM::Parameter::Value<String>'
 
@@ -126,18 +130,18 @@ Resources:
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
-        - Effect: "Allow"
-          Principal:
-            Service:
-            - "lambda.amazonaws.com"
-            - "cognito-idp.amazonaws.com"
-          Action:
-          - "sts:AssumeRole"
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "lambda.amazonaws.com"
+                - "cognito-idp.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
       ManagedPolicyArns:
-      - arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess
-      - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
-      - arn:aws:iam::aws:policy/AmazonS3FullAccess
-      - arn:aws:iam::aws:policy/AmazonCognitoPowerUser
+        - arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess
+        - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+        - arn:aws:iam::aws:policy/AmazonCognitoPowerUser
 
   #  Functions
 
@@ -334,6 +338,97 @@ Resources:
       Role: !GetAtt LambdaRole.Arn
       Runtime: python3.6
       Timeout: 300
+  MeApplicationsIndex:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      Code: ./deploy/me_applications_index.zip
+      Environment:
+        Variables:
+          AUTHLETE_API_KEY: !Ref AuthleteApiKey
+          AUTHLETE_API_SECRET: !Ref AuthleteApiSecret
+      MemorySize: 3008
+      Runtime: python3.6
+      Timeout: 300
+  MeApplicationsShow:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      Code: ./deploy/me_applications_show.zip
+      Environment:
+        Variables:
+          AUTHLETE_API_KEY: !Ref AuthleteApiKey
+          AUTHLETE_API_SECRET: !Ref AuthleteApiSecret
+      MemorySize: 3008
+      Runtime: python3.6
+      Timeout: 300
+  MeApplicationsCreate:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      Code: ./deploy/me_applications_create.zip
+      Environment:
+        Variables:
+          AUTHLETE_API_KEY: !Ref AuthleteApiKey
+          AUTHLETE_API_SECRET: !Ref AuthleteApiSecret
+      MemorySize: 3008
+      Runtime: python3.6
+      Timeout: 300
+  MeApplicationsUpdate:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      Code: ./deploy/me_applications_update.zip
+      Environment:
+        Variables:
+          AUTHLETE_API_KEY: !Ref AuthleteApiKey
+          AUTHLETE_API_SECRET: !Ref AuthleteApiSecret
+      MemorySize: 3008
+      Runtime: python3.6
+      Timeout: 300
+  MeApplicationsDelete:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      Code: ./deploy/me_applications_delete.zip
+      Environment:
+        Variables:
+          AUTHLETE_API_KEY: !Ref AuthleteApiKey
+          AUTHLETE_API_SECRET: !Ref AuthleteApiSecret
+      MemorySize: 3008
+      Runtime: python3.6
+      Timeout: 300
+  MeAllowedApplicationsIndex:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      Code: ./deploy/me_allowed_applications_index.zip
+      Environment:
+        Variables:
+          AUTHLETE_API_KEY: !Ref AuthleteApiKey
+          AUTHLETE_API_SECRET: !Ref AuthleteApiSecret
+      MemorySize: 3008
+      Runtime: python3.6
+      Timeout: 300
+  MeAllowedApplicationsDelete:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      Code: ./deploy/me_allowed_applications_delete.zip
+      Environment:
+        Variables:
+          AUTHLETE_API_KEY: !Ref AuthleteApiKey
+          AUTHLETE_API_SECRET: !Ref AuthleteApiSecret
+      MemorySize: 3008
+      Runtime: python3.6
+      Timeout: 300
 
 Outputs:
   LoginYahoo:
@@ -384,3 +479,31 @@ Outputs:
     Value: !GetAtt MeWalletTokenHistoriesIndex.Arn
     Export:
       Name: !Sub "${AlisAppId}-MeWalletTokenHistoriesIndex"
+  MeApplicationsIndex:
+    Value: !GetAtt MeApplicationsIndex.Arn
+    Export:
+      Name: !Sub "${AlisAppId}-MeApplicationsIndex"
+  MeApplicationsShow:
+    Value: !GetAtt MeApplicationsShow.Arn
+    Export:
+      Name: !Sub "${AlisAppId}-MeApplicationsShow"
+  MeApplicationsCreate:
+    Value: !GetAtt MeApplicationsCreate.Arn
+    Export:
+      Name: !Sub "${AlisAppId}-MeApplicationsCreate"
+  MeApplicationsUpdate:
+    Value: !GetAtt MeApplicationsUpdate.Arn
+    Export:
+      Name: !Sub "${AlisAppId}-MeApplicationsUpdate"
+  MeApplicationsDelete:
+    Value: !GetAtt MeApplicationsDelete.Arn
+    Export:
+      Name: !Sub "${AlisAppId}-MeApplicationsDelete"
+  MeAllowedApplicationsIndex:
+    Value: !GetAtt MeAllowedApplicationsIndex.Arn
+    Export:
+      Name: !Sub "${AlisAppId}-MeAllowedApplicationsIndex"
+  MeAllowedApplicationsDelete:
+    Value: !GetAtt MeAllowedApplicationsDelete.Arn
+    Export:
+      Name: !Sub "${AlisAppId}-MeAllowedApplicationsDelete"

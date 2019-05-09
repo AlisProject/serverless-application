@@ -45,41 +45,41 @@ Resources:
       Principal: "apigateway.amazonaws.com"
       SourceArn: !Sub ${RestApiArn}/*/POST/login/facebook
   ArticlesPriceShowApiGatewayInvoke:
-      Type: "AWS::Lambda::Permission"
-      Properties:
-        Action: "lambda:InvokeFunction"
-        FunctionName:
-          Fn::ImportValue:
-            Fn::Sub: "${AlisAppId}-ArticlesPriceShow"
-        Principal: "apigateway.amazonaws.com"
-        SourceArn: !Sub ${RestApiArn}/*/GET/articles/*/price
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-ArticlesPriceShow"
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub ${RestApiArn}/*/GET/articles/*/price
   MeArticlesPurchasedArticleIdsIndexApiGatewayInvoke:
-      Type: "AWS::Lambda::Permission"
-      Properties:
-        Action: "lambda:InvokeFunction"
-        FunctionName:
-          Fn::ImportValue:
-            Fn::Sub: "${AlisAppId}-MeArticlesPurchasedArticleIdsIndex"
-        Principal: "apigateway.amazonaws.com"
-        SourceArn: !Sub ${RestApiArn}/*/GET/me/articles/purchased/article_ids
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-MeArticlesPurchasedArticleIdsIndex"
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub ${RestApiArn}/*/GET/me/articles/purchased/article_ids
   MeArticlesPurchasedShowApiGatewayInvoke:
-      Type: "AWS::Lambda::Permission"
-      Properties:
-        Action: "lambda:InvokeFunction"
-        FunctionName:
-          Fn::ImportValue:
-            Fn::Sub: "${AlisAppId}-MeArticlesPurchasedShow"
-        Principal: "apigateway.amazonaws.com"
-        SourceArn: !Sub ${RestApiArn}/*/GET/me/articles/purchased/*
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-MeArticlesPurchasedShow"
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub ${RestApiArn}/*/GET/me/articles/purchased/*
   MeArticlesPurchasedIndexApiGatewayInvoke:
-      Type: "AWS::Lambda::Permission"
-      Properties:
-        Action: "lambda:InvokeFunction"
-        FunctionName:
-          Fn::ImportValue:
-            Fn::Sub: "${AlisAppId}-MeArticlesPurchasedIndex"
-        Principal: "apigateway.amazonaws.com"
-        SourceArn: !Sub ${RestApiArn}/*/GET/me/articles/purchased
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-MeArticlesPurchasedIndex"
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub ${RestApiArn}/*/GET/me/articles/purchased
   MeArticlesPurchaseApiGatewayInvoke:
     Type: "AWS::Lambda::Permission"
     Properties:
@@ -116,3 +116,66 @@ Resources:
           Fn::Sub: "${AlisAppId}-WalletBridgeInformationShow"
       Principal: "apigateway.amazonaws.com"
       SourceArn: !Sub ${RestApiArn}/*/GET/wallet/bridge_information
+  MeApplicationsIndexApiGatewayInvoke:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-MeApplicationsIndex"
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub ${RestApiArn}/*/GET/me/applications
+  MeApplicationsShowApiGatewayInvoke:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-MeApplicationsShow"
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub ${RestApiArn}/*/GET/me/applications/*
+  MeApplicationsCreateApiGatewayInvoke:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-MeApplicationsCreate"
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub ${RestApiArn}/*/POST/me/applications
+  MeApplicationsUpdateApiGatewayInvoke:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-MeApplicationsUpdate"
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub ${RestApiArn}/*/PUT/me/applications/*
+  MeApplicationsDeleteApiGatewayInvoke:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-MeApplicationsDelete"
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub ${RestApiArn}/*/DELETE/me/applications/*
+  MeAllowedApplicationsIndexApiGatewayInvoke:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-MeAllowedApplicationsIndex"
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub ${RestApiArn}/*/GET/me/allowed_applications
+  MeAllowedApplicationsDeleteApiGatewayInvoke:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-MeAllowedApplicationsDelete"
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub ${RestApiArn}/*/DELETE/me/allowed_applications

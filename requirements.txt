@@ -12,3 +12,4 @@ pyjwt==1.7.1
 pycrypto==2.6.1
 requests==2.21.0
 requests_oauthlib==1.2.0
+responses==0.10.6
