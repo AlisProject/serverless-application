@@ -336,6 +336,8 @@ Resources:
       Handler: handler.lambda_handler
       MemorySize: 3008
       Role: !GetAtt LambdaRole.Arn
+      Runtime: python3.6
+      Timeout: 300
   MeApplicationsIndex:
     Type: "AWS::Lambda::Function"
     Properties:
