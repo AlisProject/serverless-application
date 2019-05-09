@@ -1,127 +1,127 @@
-AWSTemplateFormatVersion: "2010-09-09"
+AWSTemplateFormatVersion: '2010-09-09'
 Description: Lambda functions and API Gateway resources for the ALIS application.
 
 Parameters:
   AlisAppId:
     Type: String
   ArticleInfoTableName:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   ArticleContentTableName:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   ArticleHistoryTableName:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   ArticleContentEditTableName:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   ArticleEvaluatedManageTableName:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   ArticleAlisTokenTableName:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   ArticleLikedUserTableName:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   ArticleFraudUserTableName:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   ArticlePvUserTableName:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   ArticleScoreTableName:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   UsersTableName:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   BetaUsersTableName:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   ExternalProviderUsersTableName:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   NotificationTableName:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   UnreadNotificationManagerTableName:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   CommentTableName:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   CommentLikedUserTableName:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   DeletedCommentTableName:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   UserFraudTableName:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   ScreenedArticleTableName:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   TokenDistributionTableName:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   UserFirstExperienceTableName:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   ElasticSearchEndpoint:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   TopicTableName:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   TagTableName:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   TipTableName:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   AlisAppDomain:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   PrivateChainAwsAccessKey:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   PrivateChainAwsSecretAccessKey:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   PrivateChainExecuteApiHost:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   BetaModeFlag:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   DistS3BucketName:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   CognitoUserPoolId:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   CognitoUserPoolArn:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   CognitoUserPoolAppId:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   SaltForArticleId:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   TwitterConsumerKey:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   TwitterConsumerSecret:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   TwitterOauthCallbackUrl:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   LineChannelId:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   LineChannelSecret:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   NonceTableName:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   TokenSendTableName:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   ExternalProviderLoginCommonTempPassword:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   ExternalProviderLoginMark:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   LoginSalt:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   YahooClientId:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   YahooSecret:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   YahooOauthCallbackUrl:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   FacebookAppId:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   FacebookAppSecret:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   FacebookOauthCallbackUrl:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   FacebookAppToken:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   PrivateChainBridgeAddress:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   PaidArticlesTableName:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   PaidStatusTableName:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   AuthleteApiKey:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   AuthleteApiSecret:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   DailyLimitTokenSendValue:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
 
 Resources:
   LambdaRole:
