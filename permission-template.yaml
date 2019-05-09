@@ -1,9 +1,9 @@
-AWSTemplateFormatVersion: "2010-09-09"
+AWSTemplateFormatVersion: '2010-09-09'
 Description: Lambda functions and API Gateway resources for the ALIS application.
 
 Parameters:
   RestApiArn:
-    Type: "AWS::SSM::Parameter::Value<String>"
+    Type: 'AWS::SSM::Parameter::Value<String>'
   AlisAppId:
     Type: String
 
