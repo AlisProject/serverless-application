@@ -112,17 +112,20 @@ class TestMeArticlesPurchaseCreate(TestCase):
             {
                 'user_id': 'doublerequest001',
                 'article_id': 'publicId0001',
-                'status': 'doing'
+                'status': 'doing',
+                'created_at': 1520150270
             },
             {
                 'user_id': 'purchaseuser001',
                 'article_id': 'publicId0004',
-                'status': 'fail'
+                'status': 'fail',
+                'created_at': 1520150271
             },
             {
                 'user_id': 'doublerequest002',
                 'article_id': 'publicId0001',
-                'status': 'done'
+                'status': 'done',
+                'created_at': 1520150272
             }
         ]
 
