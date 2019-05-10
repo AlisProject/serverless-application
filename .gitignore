@@ -1,4 +1,5 @@
 *packaged-template.yaml
+*package-template.yaml
 venv
 deploy
 vendor-package
