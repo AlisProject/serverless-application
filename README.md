@@ -186,3 +186,10 @@ Following example is that `ArticlesRecent` function is deployed.
 ```bash
 python make_deploy_zip.py && ./deploy_api_function.py ArticlesRecent
 ```
+
+### CloudWatch Alarm
+For production and staging, you should enable alarms.
+
+```bash
+./deploy.sh apialarms
+```  
