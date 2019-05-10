@@ -1,0 +1,8 @@
+{
+  "scripts": {
+    "lint": "yarn cfn-lint validate"
+  },
+  "devDependencies": {
+    "cfn-lint": "^1.9.7"
+  }
+}
