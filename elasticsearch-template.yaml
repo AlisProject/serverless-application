@@ -9,19 +9,29 @@ Parameters:
 Resources:
   ElasticSearchService:
     Type: "AWS::Elasticsearch::Domain"
-    Properties: 
-      AccessPolicies: !Join
-        - ''
-        - - '{ "Version": "2012-10-17", "Statement": [ { "Effect": "Allow", "Principal": { "AWS": "'
-          - !Ref ApiLambdaRole
-          - '" }, "Action": "es:*", "Resource": "'
-          - 'arn:aws:es:'
-          - !Ref 'AWS::Region'
-          - ':'
-          - !Ref 'AWS::AccountId'
-          - ':domain/'
-          - !Ref "AWS::StackName"
-          - '/*" } ] }'
+    Properties:
+      AccessPolicies:
+        !Sub
+        - |-
+          {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Principal": {
+                  "AWS": "${ApiLambdaRole}"
+                },
+                "Action": "es:*",
+                "Resource": "arn:aws:es:${Region}:${AccountId}:domain/${StackName}/*"
+              }
+            ]
+          }
+        - {
+          ApiLambdaRole: !Ref ApiLambdaRole,
+          Region: !Ref 'AWS::Region',
+          AccountId: !Ref 'AWS::AccountId',
+          StackName: !Ref 'AWS::StackName'
+        }
       AdvancedOptions:
         rest.action.multi.allow_explicit_index: 'true'
       DomainName: !Ref "AWS::StackName"
