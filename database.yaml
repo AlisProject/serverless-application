@@ -712,11 +712,23 @@ Resources:
           AttributeType: S
         - AttributeName: user_id
           AttributeType: S
+        - AttributeName: status
+          AttributeType: S
       KeySchema:
         - AttributeName: article_id
           KeyType: HASH
         - AttributeName: user_id
           KeyType: RANGE
+      GlobalSecondaryIndexes:
+        - IndexName: status-index
+          KeySchema:
+            - AttributeName: status
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: 1
+            WriteCapacityUnits: 1
       ProvisionedThroughput:
         ReadCapacityUnits: 1
         WriteCapacityUnits: 1

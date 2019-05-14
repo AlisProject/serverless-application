@@ -1,4 +1,5 @@
 *packaged-template.yaml
+*package-template.yaml
 venv
 deploy
 vendor-package
@@ -24,3 +25,6 @@ dynamodb_local*
 shared-local-instance.db
 LICENSE.txt
 README.txt
+
+# etc
+node_modules
