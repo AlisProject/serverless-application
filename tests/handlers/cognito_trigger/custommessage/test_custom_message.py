@@ -4,7 +4,7 @@ from unittest import TestCase
 from custom_message import CustomMessage
 from tests_util import TestsUtil
 from jsonschema import validate
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import patch, MagicMock
 
 dynamodb = TestsUtil.get_dynamodb_client()
 
