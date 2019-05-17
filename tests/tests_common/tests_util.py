@@ -9,7 +9,7 @@ class TestsUtil:
     @staticmethod
     def create_table(dynamodb, table_name, table_items):
         # create table
-        f = open('/Users/matsumatsu20/Develop/alis/serverless-application/database.yaml', 'r+')
+        f = open('./database.yaml', 'r+')
         template = yaml.load(f)
         f.close()
 
