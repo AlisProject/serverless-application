@@ -1,0 +1,1473 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'CloudWatch Alarms for Serverless Application'
+
+Parameters:
+  AlisAppId:
+    Type: String
+
+Conditions:
+  IsProductionOrStaging: !Or [!Equals [!Ref AlisAppId, "alis"], !Equals [!Ref AlisAppId, "staging"]]
+
+Resources:
+  LoginYahooAuthorizationUrlAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'LoginYahooAuthorizationUrlでエラー'
+      AlarmDescription: 'LoginYahooAuthorizationUrlでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-LoginYahooAuthorizationUrl"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  LoginYahooAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'LoginYahooでエラー'
+      AlarmDescription: 'LoginYahooでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-LoginYahoo"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  LoginFacebookAuthorizationUrlAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'LoginFacebookAuthorizationUrlでエラー'
+      AlarmDescription: 'LoginFacebookAuthorizationUrlでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-LoginFacebookAuthorizationUrl"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  LoginFacebookAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'LoginFacebookでエラー'
+      AlarmDescription: 'LoginFacebookでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-LoginFacebook"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  ArticlesPriceShowAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'ArticlesPriceShowでエラー'
+      AlarmDescription: 'ArticlesPriceShowでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-ArticlesPriceShow"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  MeArticlesPurchasedArticleIdsIndexAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'MeArticlesPurchasedArticleIdsIndexでエラー'
+      AlarmDescription: 'MeArticlesPurchasedArticleIdsIndexでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-MeArticlesPurchasedArticleIdsIndex"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  MeArticlesPurchasedShowAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'MeArticlesPurchasedShowでエラー'
+      AlarmDescription: 'MeArticlesPurchasedShowでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-MeArticlesPurchasedShow"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  MeArticlesPurchasedIndexAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'MeArticlesPurchasedIndexでエラー'
+      AlarmDescription: 'MeArticlesPurchasedIndexでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-MeArticlesPurchasedIndex"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  MeArticlesPurchaseCreateAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'MeArticlesPurchaseCreateでエラー'
+      AlarmDescription: 'MeArticlesPurchaseCreateでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-MeArticlesPurchaseCreate"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  MeWalletTokenHistoriesIndexAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'MeWalletTokenHistoriesIndexでエラー'
+      AlarmDescription: 'MeWalletTokenHistoriesIndexでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-MeWalletTokenHistoriesIndex"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  MeWalletTokenSendAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'MeWalletTokenSendでエラー'
+      AlarmDescription: 'MeWalletTokenSendでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-MeWalletTokenSend"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  WalletBridgeInformationShowAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'WalletBridgeInformationShowでエラー'
+      AlarmDescription: 'WalletBridgeInformationShowでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-WalletBridgeInformationShow"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  MeApplicationsIndexAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'MeApplicationsIndexでエラー'
+      AlarmDescription: 'MeApplicationsIndexでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-MeApplicationsIndex"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  MeApplicationsShowAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'MeApplicationsShowでエラー'
+      AlarmDescription: 'MeApplicationsShowでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-MeApplicationsShow"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  MeApplicationsCreateAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'MeApplicationsCreateでエラー'
+      AlarmDescription: 'MeApplicationsCreateでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-MeApplicationsCreate"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  MeApplicationsUpdateAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'MeApplicationsUpdateでエラー'
+      AlarmDescription: 'MeApplicationsUpdateでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-MeApplicationsUpdate"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  MeApplicationsDeleteAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'MeApplicationsDeleteでエラー'
+      AlarmDescription: 'MeApplicationsDeleteでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-MeApplicationsDelete"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  MeAllowedApplicationsIndexAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'MeAllowedApplicationsIndexでエラー'
+      AlarmDescription: 'MeAllowedApplicationsIndexでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-MeAllowedApplicationsIndex"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  MeAllowedApplicationsDeleteAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'MeAllowedApplicationsDeleteでエラー'
+      AlarmDescription: 'MeAllowedApplicationsDeleteでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-MeAllowedApplicationsDelete"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+
+
+  AuthorizerAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'Authorizerでエラー'
+      AlarmDescription: 'Authorizerでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-Authorizer"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  MeArticlesCommentsReplyAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'MeArticlesCommentsReplyでエラー'
+      AlarmDescription: 'MeArticlesCommentsReplyでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-MeArticlesCommentsReply"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  MeArticlesPublicBodyUpdateAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'MeArticlesPublicBodyUpdateでエラー'
+      AlarmDescription: 'MeArticlesPublicBodyUpdateでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-MeArticlesPublicBodyUpdate"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  MeArticlesPublicRepublishWithHeaderAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'MeArticlesPublicRepublishWithHeaderでエラー'
+      AlarmDescription: 'MeArticlesPublicRepublishWithHeaderでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-MeArticlesPublicRepublishWithHeader"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  MeArticlesFraudCreateAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'MeArticlesFraudCreateでエラー'
+      AlarmDescription: 'MeArticlesFraudCreateでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-MeArticlesFraudCreate"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  ArticlesLikesShowAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'ArticlesLikesShowでエラー'
+      AlarmDescription: 'ArticlesLikesShowでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-ArticlesLikesShow"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  MeArticlesCommentsLikesIndexAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'MeArticlesCommentsLikesIndexでエラー'
+      AlarmDescription: 'MeArticlesCommentsLikesIndexでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-MeArticlesCommentsLikesIndex"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  MeArticlesDraftsIndexAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'MeArticlesDraftsIndexAでエラー'
+      AlarmDescription: 'MeArticlesDraftsIndexAでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-MeArticlesDraftsIndexA"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  MeArticlesDraftsCreateAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'MeArticlesDraftsCreateでエラー'
+      AlarmDescription: 'MeArticlesDraftsCreateでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-MeArticlesDraftsCreate"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  CommentsLikesShowAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'CommentsLikesShowでエラー'
+      AlarmDescription: 'CommentsLikesShowでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-CommentsLikesShow"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  MeCommentsLikesCreateAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'MeCommentsLikesCreateでエラー'
+      AlarmDescription: 'MeCommentsLikesCreateでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-MeCommentsLikesCreate"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  UsersInfoAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'UsersInfoでエラー'
+      AlarmDescription: 'UsersInfoでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-UsersInfo"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  ArticlesEyecatchAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'ArticlesEyecatchでエラー'
+      AlarmDescription: 'ArticlesEyecatchでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-ArticlesEyecatch"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  MeUsersFraudCreateAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'MeUsersFraudCreateでエラー'
+      AlarmDescription: 'MeUsersFraudCreateでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-MeUsersFraudCreate"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  ElasticSearchSearchTagsAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'ElasticSearchSearchでエラー'
+      AlarmDescription: 'ElasticSearchSearchでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-ElasticSearchSearch"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  MeInfoUpdateAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'MeInfoUpdateでエラー'
+      AlarmDescription: 'MeInfoUpdateでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-MeInfoUpdate"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  MeArticlesDraftsPublishWithHeaderAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'MeArticlesDraftsPublishWithHeaderでエラー'
+      AlarmDescription: 'MeArticlesDraftsPublishWithHeaderでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-MeArticlesDraftsPublishWithHeader"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  MeArticlesDraftsTitleUpdateAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'MeArticlesDraftsTitleUpdateでエラー'
+      AlarmDescription: 'MeArticlesDraftsTitleUpdateでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-MeArticlesDraftsTitleUpdate"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  MeCommentsDeleteAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'MeCommentsDeleteでエラー'
+      AlarmDescription: 'MeCommentsDeleteでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-MeCommentsDelete"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  MeArticlesPublicUpdateAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'MeArticlesPublicUpdateでエラー'
+      AlarmDescription: 'MeArticlesPublicUpdateでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-MeArticlesPublicUpdate"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  MeExternalProviderUserCreateAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'MeExternalProviderUserCreateでエラー'
+      AlarmDescription: 'MeExternalProviderUserCreateでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-MeExternalProviderUserCreate"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  MeUnreadNotificationManagersShowAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'MeUnreadNotificationManagersでエラー'
+      AlarmDescription: 'MeUnreadNotificationManagersでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-MeUnreadNotificationManagers"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  MeArticlesDraftsBodyUpdateAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'MeArticlesDraftsBodyUpdateでエラー'
+      AlarmDescription: 'MeArticlesDraftsBodyUpdateでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-MeArticlesDraftsBodyUpdate"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  ElasticSearchSearchArticlesAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'ElasticSearchSearchArticlesでエラー'
+      AlarmDescription: 'ElasticSearchSearchArticlesでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-ElasticSearchSearchArticles"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  MeArticlesImageUploadUrlShowAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'MeArticlesImageUploadUrlShowでエラー'
+      AlarmDescription: 'MeArticlesImageUploadUrlShowでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-MeArticlesImageUploadUrlShow"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  MeArticlesPublicEditAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'MeArticlesPublicEditでエラー'
+      AlarmDescription: 'MeArticlesPublicEditでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-MeArticlesPublicEdit"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  MeInfoIconCreateAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'MeInfoIconCreateでエラー'
+      AlarmDescription: 'MeInfoIconCreateでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-MeInfoIconCreate"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  MeArticlesLikesShowAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'MeArticlesLikesShowでエラー'
+      AlarmDescription: 'MeArticlesLikesShowでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-MeArticlesLikesShow"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  MeArticlesDraftsArticleIdCreateAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'MeArticlesDraftsArticleIdCreateでエラー'
+      AlarmDescription: 'MeArticlesDraftsArticleIdCreateでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-MeArticlesDraftsArticleIdCreate"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  MeWalletBalanceAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'MeWalletBalanceでエラー'
+      AlarmDescription: 'MeWalletBalanceでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-MeWalletBalance"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  MeArticlesPublicShowAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'MeArticlesPublicShowでエラー'
+      AlarmDescription: 'MeArticlesPublicShowでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-MeArticlesPublicShow"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  MeArticlesDraftsPublishAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'MeArticlesDraftsPublishでエラー'
+      AlarmDescription: 'MeArticlesDraftsPublishでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-MeArticlesDraftsPublish"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  UsersArticlesPublicAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'UsersArticlesPublicでエラー'
+      AlarmDescription: 'UsersArticlesPublicでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-UsersArticlesPublic"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  MeNotificationsIndexAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'MeNotificationsIndexでエラー'
+      AlarmDescription: 'MeNotificationsIndexでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-MeNotificationsIndex"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  MeWalletDistributedTokensShowAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'MeWalletDistributedTokensShowでエラー'
+      AlarmDescription: 'MeWalletDistributedTokensShowでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-MeWalletDistributedTokensShow"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  CognitoTriggerPreAuthenticationAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'CognitoTriggerPreAuthenticationでエラー'
+      AlarmDescription: 'CognitoTriggerPreAuthenticationでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-CognitoTriggerPreAuthentication"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  ArticlesShowAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'ArticlesShowでエラー'
+      AlarmDescription: 'ArticlesShowでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-ArticlesShow"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  MeArticlesPublicTitleUpdateAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'MeArticlesPublicTitleUpdateでエラー'
+      AlarmDescription: 'MeArticlesPublicTitleUpdateでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-MeArticlesPublicTitleUpdate"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  TopicsIndexAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'TopicsIndexでエラー'
+      AlarmDescription: 'TopicsIndexでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-TopicsIndex"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  ArticlesRecommendedAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'ArticlesRecommendedでエラー'
+      AlarmDescription: 'ArticlesRecommendedでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-ArticlesRecommended"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  MeArticlesPublicUnpublishAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'MeArticlesPublicUnpublishでエラー'
+      AlarmDescription: 'MeArticlesPublicUnpublishでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-MeArticlesPublicUnpublish"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  MeArticlesCommentsCreateAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'MeArticlesCommentsCreateでエラー'
+      AlarmDescription: 'MeArticlesCommentsCreateでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-MeArticlesCommentsCreate"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  ArticlesRecentAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'ArticlesRecentでエラー'
+      AlarmDescription: 'ArticlesRecentでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-ArticlesRecent"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  ArticlesAlisTokensShowAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'ArticlesAlisTokensShowでエラー'
+      AlarmDescription: 'ArticlesAlisTokensShowでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-ArticlesAlisTokensShow"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  ElasticSearchSearchUsersAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'ElasticSearchSearchUsersでエラー'
+      AlarmDescription: 'ElasticSearchSearchUsersでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-ElasticSearchSearchUsers"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  MeInfoShowAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'MeInfoShowでエラー'
+      AlarmDescription: 'MeInfoShowでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-MeInfoShow"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  ArticlesPopularAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'ArticlesPopularでエラー'
+      AlarmDescription: 'ArticlesPopularでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-ArticlesPopular"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  MeArticlesDraftsUpdateAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'MeArticlesDraftsUpdateでエラー'
+      AlarmDescription: 'MeArticlesDraftsUpdateでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-MeArticlesDraftsUpdate"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  MeArticlesPublicIndexAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'MeArticlesPublicIndexでエラー'
+      AlarmDescription: 'MeArticlesPublicIndexでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-MeArticlesPublicIndex"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  ArticlesCommentsIndexAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'ArticlesCommentsIndexでエラー'
+      AlarmDescription: 'ArticlesCommentsIndexでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-ArticlesCommentsIndex"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  MeUnreadNotificationManagersUpdateAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'MeUnreadNotificationManagersUpdateでエラー'
+      AlarmDescription: 'MeUnreadNotificationManagersUpdateでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-MeUnreadNotificationManagersUpdate"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  MeArticlesImagesCreateAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'MeArticlesImagesCreateでエラー'
+      AlarmDescription: 'MeArticlesImagesCreateでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-MeArticlesImagesCreate"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  MeArticlesPublicRepublishAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'MeArticlesPublicRepublishでエラー'
+      AlarmDescription: 'MeArticlesPublicRepublishでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-MeArticlesPublicRepublish"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
+  MeArticlesDraftsShowAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProductionOrStaging
+    Properties:
+      AlarmName: 'MeArticlesDraftsShowでエラー'
+      AlarmDescription: 'MeArticlesDraftsShowでエラーが発生した場合に通知'
+      Period: 60
+      Threshold: 1
+      EvaluationPeriods: 1
+      ActionsEnabled: True
+      AlarmActions:
+        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Statistic: Sum
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${AlisAppId}-MeArticlesDraftsShow"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      TreatMissingData: notBreaching
