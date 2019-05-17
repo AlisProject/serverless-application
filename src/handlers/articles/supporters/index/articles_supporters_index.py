@@ -38,14 +38,14 @@ class ArticlesSupportersIndex(LambdaBase):
         )
 
     def exec_main_proc(self):
-        tip_table = self.dynamodb.Table(os.environ['TIP_TABLE_NAME'])
+        tip_table = self.dynamodb.Table(os.environ['SUCCEEDED_TIP_TABLE_NAME'])
 
         query_params = {
-            'IndexName': 'article_id-past_data_exclusion_key-index',
+            'IndexName': 'article_id-sort_key-index',
             'KeyConditionExpression': Key('article_id').eq(self.params['article_id'])
         }
 
-        tips = tip_table.query(**query_params)
+        tips = tip_table.query(**query_params)['Items']
 
         users_tip_values = {}
 
@@ -53,14 +53,22 @@ class ArticlesSupportersIndex(LambdaBase):
             tip_value = sum([tip['tip_value'] for tip in g])
             users_tip_values[k] = {'tip_value': tip_value}
 
-        users = self.__bulk_get_users(users_tip_values.keys())
+        users = self.__bulk_get_users(list(users_tip_values.keys()))
 
         users_with_tip = []
         for user in users:
             user_id = user['user_id']
-            users_with_tip.append(user.update(users_tip_values[user_id]))
+            user.update(users_tip_values[user_id])
+            users_with_tip.append(
+                {
+                    'user_id': user['user_id'],
+                    'user_display_name': user['user_display_name'],
+                    'icon_image_url': user['icon_image_url'],
+                    'sum_tip_value': users_tip_values[user_id]['tip_value']
+                }
+            )
 
-        sorted_users_with_tip = sorted(users_with_tip, key=lambda item: item['tip_value'])
+        sorted_users_with_tip = sorted(users_with_tip, key=lambda item: item['sum_tip_value'], reverse=True)
 
         return {
             'statusCode': 200,
@@ -69,6 +77,7 @@ class ArticlesSupportersIndex(LambdaBase):
 
     # user_idの配列を受け取ってDynamoDBにbulk_getをし、userオブジェクトの配列を返却するメソッド
     def __bulk_get_users(self, user_ids):
+        # DynamoDBのbatchGetは100件までしか対応してないため、100件ごとにsplitする
         split_user_ids = [
             user_ids[index * settings.DYNAMO_BATCH_GET_MAX:(index + 1) * settings.DYNAMO_BATCH_GET_MAX]
             for index
@@ -77,7 +86,7 @@ class ArticlesSupportersIndex(LambdaBase):
 
         users = []
 
-        user_table_name = os.environ['USER_TABLE_NAME']
+        user_table_name = os.environ['USERS_TABLE_NAME']
 
         for split_user_id in split_user_ids:
             response = self.dynamodb.batch_get_item(

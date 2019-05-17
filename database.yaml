@@ -568,14 +568,8 @@ Resources:
           AttributeType: S
         - AttributeName: sort_key
           AttributeType: N
-        - AttributeName: article_id
-          AttributeType: S
         - AttributeName: uncompleted
           AttributeType: N
-        - AttributeName: past_data_exclusion_key
-          AttributeType: N
-        - AttributeName: target_date
-          AttributeType: S
       KeySchema:
         - AttributeName: user_id
           KeyType: HASH
@@ -591,22 +585,43 @@ Resources:
           ProvisionedThroughput:
             ReadCapacityUnits: 1
             WriteCapacityUnits: 1
-        - IndexName: target_date-past_data_exclusion_key-index
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+  SucceededTip:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: user_id
+          AttributeType: S
+        - AttributeName: sort_key
+          AttributeType: N
+        - AttributeName: target_date
+          AttributeType: S
+        - AttributeName: article_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: user_id
+          KeyType: HASH
+        - AttributeName: sort_key
+          KeyType: RANGE
+      GlobalSecondaryIndexes:
+        - IndexName: target_date-sort_key-index
           KeySchema:
             - AttributeName: target_date
               KeyType: HASH
-            - AttributeName: past_data_exclusion_key
+            - AttributeName: sort_key
               KeyType: RANGE
           Projection:
             ProjectionType: ALL
           ProvisionedThroughput:
             ReadCapacityUnits: 1
             WriteCapacityUnits: 1
-        - IndexName: article_id-past_data_exclusion_key-index
+        - IndexName: article_id-sort_key-index
           KeySchema:
             - AttributeName: article_id
               KeyType: HASH
-            - AttributeName: past_data_exclusion_key
+            - AttributeName: sort_key
               KeyType: RANGE
           Projection:
             ProjectionType: ALL

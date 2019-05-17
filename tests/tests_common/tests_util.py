@@ -9,7 +9,7 @@ class TestsUtil:
     @staticmethod
     def create_table(dynamodb, table_name, table_items):
         # create table
-        f = open('./database.yaml', 'r+')
+        f = open('/Users/matsumatsu20/Develop/alis/serverless-application/database.yaml', 'r+')
         template = yaml.load(f)
         f.close()
 
@@ -30,7 +30,7 @@ class TestsUtil:
     def get_dynamodb_client():
         if os.environ.get('IS_DYNAMODB_ENDPOINT_OF_AWS') is not None:
             return boto3.resource('dynamodb')
-        return boto3.resource('dynamodb', endpoint_url='http://localhost:8000/')
+        return boto3.resource('dynamodb', endpoint_url='http://localhost:8000/', region_name="ap-northeast-1")
 
     @classmethod
     def create_all_s3_buckets(cls, s3):
@@ -102,7 +102,8 @@ class TestsUtil:
             {'env_name': 'NONCE_TABLE_NAME', 'table_name': 'Nonce'},
             {'env_name': 'PAID_ARTICLES_TABLE_NAME', 'table_name': 'PaidArticles'},
             {'env_name': 'PAID_STATUS_TABLE_NAME', 'table_name': 'PaidStatus'},
-            {'env_name': 'TOKEN_SEND_TABLE_NAME', 'table_name': 'TokenSend'}
+            {'env_name': 'TOKEN_SEND_TABLE_NAME', 'table_name': 'TokenSend'},
+            {'env_name': 'SUCCEEDED_TIP_TABLE_NAME', 'table_name': 'SucceededTip'}
         ]
         if os.environ.get('IS_DYNAMODB_ENDPOINT_OF_AWS') is not None:
             for table in cls.all_tables:
