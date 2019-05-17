@@ -107,7 +107,6 @@ class MeWalletTip(LambdaBase):
             'transaction': transaction_hash,
             'uncompleted': 1,
             'sort_key': sort_key,
-            'past_data_exclusion_key': sort_key,
             'target_date': time.strftime('%Y-%m-%d', time.gmtime(epoch)),
             'created_at': epoch
         }

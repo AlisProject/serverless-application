@@ -94,7 +94,6 @@ class TestMeWalletTip(TestCase):
                 'transaction': '0x0000000000000000000000000000000000000000',
                 'uncompleted': Decimal(1),
                 'sort_key': Decimal(1520150552000003),
-                'past_data_exclusion_key': Decimal(1520150552000003),
                 'target_date': '2018-03-04',
                 'created_at': Decimal(int(1520150552.000003))
             }
@@ -150,7 +149,6 @@ class TestMeWalletTip(TestCase):
                 'transaction': '0x0000000000000000000000000000000000000000',
                 'uncompleted': Decimal(1),
                 'sort_key': 1520150552000003,
-                'past_data_exclusion_key': Decimal(1520150552000003),
                 'target_date': '2018-03-04',
                 'created_at': Decimal(int(1520150552.000003))
             }
