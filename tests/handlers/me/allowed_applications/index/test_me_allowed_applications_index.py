@@ -39,6 +39,7 @@ class TestMeAllowedApplicationsIndex(TestCase):
                               "clientId": 12345678901234,
                               "clientName": "test",
                               "clientType": "CONFIDENTIAL",
+                              "description": "hogehoge",
                               "createdAt": 1556857365}]
                           },
                       status=200)
@@ -46,6 +47,36 @@ class TestMeAllowedApplicationsIndex(TestCase):
         self.assertEqual(response['statusCode'], 200)
         result = json.loads(response['body'])
         self.assertEqual(result[0]['clientId'], 12345678901234)
+        self.assertEqual(result[0]['description'], "hogehoge")
+
+    @responses.activate
+    def test_description_blank(self):
+        params = {
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'user01'
+                    }
+                }
+            }
+        }
+        responses.add(responses.GET,
+                      settings.AUTHLETE_CLIENT_ENDPOINT + '/authorization/get/list',
+                      json={
+                          'statusCode': 200,
+                          'clients':
+                          [{
+                              "clientId": 12345678901234,
+                              "clientName": "test",
+                              "clientType": "CONFIDENTIAL",
+                              "createdAt": 1556857365}]
+                          },
+                      status=200)
+        response = MeAllowedApplicationsIndex(params, {}).main()
+        self.assertEqual(response['statusCode'], 200)
+        result = json.loads(response['body'])
+        # Authlete側からdescriptionが渡されなかったら、値をNoneで作る
+        self.assertEqual(result[0]['description'], None)
 
     @patch('requests.get', MagicMock(side_effect=requests.exceptions.RequestException()))
     def test_main_with_exception(self):
