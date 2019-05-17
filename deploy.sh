@@ -86,5 +86,27 @@ aws cloudformation deploy \
     PaidArticlesTableName=${SSM_PARAMS_PREFIX}PaidArticlesTableName \
     PaidStatusTableName=${SSM_PARAMS_PREFIX}PaidStatusTableName \
     DailyLimitTokenSendValue=${SSM_PARAMS_PREFIX}DailyLimitTokenSendValue \
+    AuthleteApiKey=${SSM_PARAMS_PREFIX}AuthleteApiKey \
+    AuthleteApiSecret=${SSM_PARAMS_PREFIX}AuthleteApiSecret \
   --capabilities CAPABILITY_IAM \
   --no-fail-on-empty-changeset
+
+if [ $1 = "api" ]; then
+    aws cloudformation package \
+      --template-file ${target}with-oauth-template.yaml \
+      --s3-bucket $DEPLOY_BUCKET_NAME \
+      --output-template-file ${target}with-oauth-package-template.yaml
+
+    aws cloudformation deploy \
+      --template-file ${target}with-oauth-package-template.yaml \
+      --s3-bucket $DEPLOY_BUCKET_NAME \
+      --stack-name ${ALIS_APP_ID}${1}-with-oauth \
+      --parameter-overrides FunctionDeployStackName=${ALIS_APP_ID}${1} \
+      --capabilities CAPABILITY_IAM
+
+    returnCode=$?
+
+    if [[ $returnCode = 255 ]]; then
+        exit 0
+    fi
+fi

@@ -112,17 +112,20 @@ class TestMeArticlesPurchaseCreate(TestCase):
             {
                 'user_id': 'doublerequest001',
                 'article_id': 'publicId0001',
-                'status': 'doing'
+                'status': 'doing',
+                'created_at': 1520150552
             },
             {
                 'user_id': 'purchaseuser001',
                 'article_id': 'publicId0004',
-                'status': 'fail'
+                'status': 'fail',
+                'created_at': 1520150552
             },
             {
                 'user_id': 'doublerequest002',
                 'article_id': 'publicId0001',
-                'status': 'done'
+                'status': 'done',
+                'created_at': 1520150552
             }
         ]
 
@@ -256,6 +259,7 @@ class TestMeArticlesPurchaseCreate(TestCase):
                 'article_id': 'publicId0004'
             }).get('Item')
             self.assertEqual(paid_status.get('status'), 'done')
+            self.assertEqual(paid_status.get('created_at'), 1520150552)
             self.assertEqual(len(paid_status_table.scan()['Items']), 3)
 
     @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__create_purchase_transaction',
@@ -388,6 +392,7 @@ class TestMeArticlesPurchaseCreate(TestCase):
                 'article_id': 'publicId0001'
             }).get('Item')
             self.assertEqual(paid_status.get('status'), 'done')
+            self.assertEqual(paid_status.get('created_at'), 1520150552)
             self.assertEqual(len(paid_status_table.scan()['Items']), 4)
 
     @patch('me_articles_purchase_create.MeArticlesPurchaseCreate._MeArticlesPurchaseCreate__create_purchase_transaction',
@@ -1172,6 +1177,7 @@ class TestMeArticlesPurchaseCreate(TestCase):
                 'article_id': 'publicId0001'
             }).get('Item')
             self.assertEqual(paid_status.get('status'), 'doing')
+            self.assertEqual(paid_status.get('created_at'), 1520150552)
             self.assertEqual(len(paid_status_table.scan()['Items']), 3)
 
     # 連続APIリクエストに対応するテスト(statusがdoneの場合)
