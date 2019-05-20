@@ -1,5 +1,4 @@
 import json
-import logging
 import os
 from unittest import TestCase
 from unittest.mock import patch, MagicMock
@@ -260,7 +259,6 @@ class TestMeApplicationUpdate(TestCase):
             params['body'] = json.dumps(params['body'])
 
             response = MeApplicationUpdate(params, {}).main()
-            logging.fatal(response)
             self.assertEqual(response['statusCode'], 400)
 
     def test_validation_required_params(self):
@@ -291,8 +289,31 @@ class TestMeApplicationUpdate(TestCase):
             params['body'] = json.dumps(params['body'])
 
             response = MeApplicationUpdate(params, {}).main()
-            logging.fatal(response)
             self.assertEqual(response['statusCode'], 400)
+
+    def test_validation_without_client_id(self):
+        params = {
+            'pathParameters': {
+            },
+            'body': {
+                'name': 'あ' * 80,
+                'redirect_urls': ['http://example.com/1']
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'user01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
+            }
+        }
+
+        params['body'] = json.dumps(params['body'])
+
+        response = MeApplicationUpdate(params, {}).main()
+        self.assertEqual(response['statusCode'], 400)
 
     @responses.activate
     def test_validation_empty_description_ok(self):
