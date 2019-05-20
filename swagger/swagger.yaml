@@ -330,6 +330,13 @@ definitions:
         type: boolean
       tokenAuthMethod:
         type: string
+  AuthleteClientPublicInfo:
+    type: object
+    properties:
+      clientName:
+        type: string
+      description:
+        type: string
 paths:
   /search/articles:
     get:
@@ -972,6 +979,34 @@ paths:
             - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
               - Fn::ImportValue:
                   Fn::Sub: "${AlisAppId}-LoginFacebookAuthorizationUrl"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /applications/{client_id}:
+    get:
+      description: 'アプリケーションの詳細を取得する'
+      parameters:
+        - name: 'client_id'
+          in: 'path'
+          description: '対象アプリケーションの指定するために使用'
+          required: true
+          type: integer
+      responses:
+        "200":
+          description: "アプリケーションの公開情報"
+          schema:
+            $ref: '#/definitions/AuthleteClientPublicInfo'
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
+              - Fn::ImportValue:
+                  Fn::Sub: "${AlisAppId}-ApplicationsShow"
               - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
