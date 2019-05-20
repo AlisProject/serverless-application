@@ -14,7 +14,8 @@ class ApplicationShow(LambdaBase):
             'type': 'object',
             'properties': {
                 'client_id': settings.parameters['oauth_client']['client_id']
-            }
+            },
+            'required': ['client_id']
         }
 
     def validate_params(self):

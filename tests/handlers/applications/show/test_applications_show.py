@@ -92,6 +92,15 @@ class TestMeApplicationShow(TestCase):
         response = ApplicationShow(params, {}).main()
         self.assertEqual(response['statusCode'], 400)
 
+    def test_validation_without_client_id(self):
+        params = {
+            'pathParameters': {
+            }
+        }
+
+        response = ApplicationShow(params, {}).main()
+        self.assertEqual(response['statusCode'], 400)
+
     def test_validation_client_id_invalid_type(self):
         params = {
             'pathParameters': {
