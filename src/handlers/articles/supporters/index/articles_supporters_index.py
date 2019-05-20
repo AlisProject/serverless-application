@@ -100,7 +100,3 @@ class ArticlesSupportersIndex(LambdaBase):
                 users.append(user)
 
         return users
-
-
-
-

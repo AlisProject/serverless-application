@@ -33,9 +33,6 @@ class TestArticlesSupportersIndex(TestCase):
                 'self_introduction': 'self_introduction00003',
                 'icon_image_url': 'http://example.com',
             }
-            ,
-            {'user_id': 'user00004'},
-            {'user_id': 'user00005'}
         ]
 
         TestsUtil.create_table(self.dynamodb, os.environ['USERS_TABLE_NAME'], self.user_items)
@@ -184,7 +181,6 @@ class TestArticlesSupportersIndex(TestCase):
         response = ArticlesSupportersIndex(params, {}, dynamodb=self.dynamodb).main()
 
         self.assertEqual(102, len(json.loads(response['body'])['Items']))
-
 
     def test_call_validate_article_existence(self):
         params = {
