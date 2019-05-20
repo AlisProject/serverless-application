@@ -654,6 +654,38 @@ paths:
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
+  /articles/{article_id}/supporters:
+    get:
+      description: '指定された article_id に投げ銭したユーザーの一覧を返却する'
+      parameters:
+        - name: 'article_id'
+          in: 'path'
+          description: '対象記事の指定するために使用'
+          required: true
+          type: 'string'
+      responses:
+        '200':
+          description: '投げ銭したユーザーの一覧'
+          schema:
+            type: object
+              properties:
+                user_id:
+                  type: string
+                user_display_name:
+                  type: string
+                icon_image_url:
+                  type: string
+                sum_tip_value:
+                  type: number
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ArticlesCommentsIndex.Arn}/invocations
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
   /comments/{comment_id}/likes:
     get:
       description: '指定されたコメントに付与されているいいね数を取得する'

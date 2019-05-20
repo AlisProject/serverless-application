@@ -231,6 +231,20 @@ Resources:
       Role: !GetAtt LambdaRole.Arn
       Runtime: python3.6
       Timeout: 300
+  ArticleSpporterIndex:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Code: ./deploy/articles_supporters_index.zip
+      Environment:
+        Variables:
+          ARTICLE_INFO_TABLE_NAME: !Ref ArticleInfoTableName
+          SUCCEEDED_TIP_TABLE_NAME: !Ref ArticleInfoTableName
+          USERS_TABLE_NAME: !Ref UsersTableName
+      Handler: handler.lambda_handler
+      MemorySize: 3008
+      Role: !GetAtt LambdaRole.Arn
+      Runtime: python3.6
+      Timeout: 300
   MeArticlesPurchasedShow:
     Type: "AWS::Lambda::Function"
     Properties:
@@ -429,7 +443,6 @@ Resources:
       MemorySize: 3008
       Runtime: python3.6
       Timeout: 300
-
 Outputs:
   LoginYahoo:
     Value: !GetAtt LoginYahoo.Arn
@@ -451,6 +464,10 @@ Outputs:
     Value: !GetAtt ArticlesPriceShow.Arn
     Export:
       Name: !Sub "${AlisAppId}-ArticlesPriceShow"
+  ArticleSpporterIndex:
+    Value: !GetAtt ArticleSpporterIndex.Arn
+    Export:
+      Name: !Sub "${AlisAppId}-ArticleSpporterIndex"
   MeArticlesPurchasedShow:
     Value: !GetAtt MeArticlesPurchasedShow.Arn
     Export:
