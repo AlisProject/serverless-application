@@ -171,6 +171,12 @@ direnv edit
 aws es describe-elasticsearch-domain --domain-name ${ALIS_APP_ID}api | jq '.DomainStatus.Endpoint'
 ```
 
+Enable logs in Production.
+
+```bash
+./enable_elasticsearch_logs.sh YOUR_DOMAIN_NAME
+```
+
 And add ElasticSearch Endpoint to SSM.
 - See: https://github.com/AlisProject/environment
 
