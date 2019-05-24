@@ -710,15 +710,15 @@ paths:
           description: '投げ銭したユーザーの一覧'
           schema:
             type: object
-              properties:
-                user_id:
-                  type: string
-                user_display_name:
-                  type: string
-                icon_image_url:
-                  type: string
-                sum_tip_value:
-                  type: number
+            properties:
+              user_id:
+                type: string
+              user_display_name:
+                type: string
+              icon_image_url:
+                type: string
+              sum_tip_value:
+                type: number
       x-amazon-apigateway-integration:
         responses:
           default:
