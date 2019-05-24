@@ -213,6 +213,9 @@ parameters = {
     }
 }
 
+# ログに出力されてはいけないパラメータ(ログ出力時に値がマスクされる)
+not_logging_parameters = {'access_token', 'pin_code'}
+
 article_recent_default_limit = 20
 users_articles_public_default_limit = 10
 articles_popular_default_limit = 20
