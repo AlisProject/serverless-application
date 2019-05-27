@@ -5,7 +5,7 @@ import boto3
 from elasticsearch import Elasticsearch, RequestsHttpConnection
 from requests_aws4auth import AWS4Auth
 
-from articles_popular import ArticlesPopular
+from articles_tip_ranking import ArticlesTipRanking
 
 dynamodb = boto3.resource('dynamodb')
 awsauth = AWS4Auth(
@@ -25,5 +25,5 @@ elasticsearch = Elasticsearch(
 
 
 def lambda_handler(event, context):
-    articles_popular = ArticlesPopular(event, context, dynamodb=dynamodb, elasticsearch=elasticsearch)
-    return articles_popular.main()
+    articles_tip_ranking = ArticlesTipRanking(event, context, dynamodb=dynamodb, elasticsearch=elasticsearch)
+    return articles_tip_ranking.main()
