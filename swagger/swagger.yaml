@@ -724,7 +724,12 @@ paths:
           default:
             statusCode: "200"
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ArticlesCommentsIndex.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
+              - Fn::ImportValue:
+                  Fn::Sub: "${AlisAppId}-ArticleSpporterIndex"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
