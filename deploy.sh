@@ -62,7 +62,6 @@ aws cloudformation deploy \
     UserFirstExperienceTableName=${SSM_PARAMS_PREFIX}UserFirstExperienceTableName \
     TokenSendTableName=${SSM_PARAMS_PREFIX}TokenSendTableName \
     DistS3BucketName=${SSM_PARAMS_PREFIX}DistS3BucketName \
-    ApiLambdaRole=${SSM_PARAMS_PREFIX}ApiLambdaRole \
     ElasticSearchEndpoint=${SSM_PARAMS_PREFIX}ElasticSearchEndpoint \
     CognitoUserPoolId=${SSM_PARAMS_PREFIX}CognitoUserPoolId \
     CognitoUserPoolAppId=${SSM_PARAMS_PREFIX}CognitoUserPoolAppId \

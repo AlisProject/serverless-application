@@ -20,24 +20,6 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
 
 Resources:
-  LambdaRole:
-    Type: "AWS::IAM::Role"
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: "Allow"
-            Principal:
-              Service:
-                - "lambda.amazonaws.com"
-                - "cognito-idp.amazonaws.com"
-            Action:
-              - "sts:AssumeRole"
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess
-        - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
-        - arn:aws:iam::aws:policy/AmazonS3FullAccess
-        - arn:aws:iam::aws:policy/AmazonCognitoPowerUser
 
   #  Functions
 
@@ -52,7 +34,9 @@ Resources:
           USERS_TABLE_NAME: !Ref UsersTableName
       Handler: handler.lambda_handler
       MemorySize: 3008
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       Runtime: python3.6
       Timeout: 300
   ArticlesTipRanking:
@@ -67,7 +51,9 @@ Resources:
           PRIVATE_CHAIN_EXECUTE_API_HOST: !Ref PrivateChainExecuteApiHost
       Handler: handler.lambda_handler
       MemorySize: 3008
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       Runtime: python3.6
       Timeout: 300
 

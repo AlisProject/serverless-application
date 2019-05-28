@@ -430,6 +430,10 @@ Resources:
       Runtime: python3.6
       Timeout: 300
 Outputs:
+  LambdaRole:
+    Value: !GetAtt LambdaRole.Arn
+    Export:
+      Name: !Sub "${AlisAppId}-LambdaRole"
   LoginYahoo:
     Value: !GetAtt LoginYahoo.Arn
     Export:
