@@ -49,6 +49,9 @@ class TestMeApplicationUpdate(TestCase):
         # AuthleteUtilで呼ばれるAPI callをmockする
         responses.add(responses.GET, settings.AUTHLETE_CLIENT_ENDPOINT + '/get/' + params['pathParameters']['client_id'],
                       json={'developer': "user01"}, status=200)
+        # アプリケーション情報取得で呼ばれるAPI callをmockする
+        responses.add(responses.GET, settings.AUTHLETE_CLIENT_ENDPOINT + '/get/' + params['pathParameters']['client_id'],
+                      json={'developer': "user01"}, status=200)
 
         response = MeApplicationUpdate(params, {}).main()
 
