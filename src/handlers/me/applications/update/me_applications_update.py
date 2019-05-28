@@ -34,26 +34,40 @@ class MeApplicationUpdate(LambdaBase):
             raise NoPermissionError('No permission on this resource')
 
     def exec_main_proc(self):
-        update_params = {
-            'clientName': self.params['name'],
-            'description': self.params.get('description'),
-            'developer': self.event['requestContext']['authorizer']['claims']['cognito:username'],
-            'redirectUris': self.params['redirect_urls']
+        # update 前のアプリケーション情報を取得
+        now_application_info = self.get_application_info()
+        # update 前のアプリケーション情報を元にアプリケーション情報を更新
+        result = self.update_application_info(now_application_info)
+
+        return {
+            'statusCode': 200,
+            'body': result.text
         }
+
+    def update_application_info(self, application_info):
+        application_info['clientName'] = self.params['name']
+        application_info['description'] = self.params.get('description')
+        application_info['redirectUris'] = self.params['redirect_urls']
 
         try:
             response = requests.post(
                 settings.AUTHLETE_CLIENT_ENDPOINT + '/update/' + str(self.params['client_id']),
-                json.dumps(update_params),
+                json.dumps(application_info),
                 headers={'Content-Type': 'application/json'},
                 auth=(os.environ['AUTHLETE_API_KEY'], os.environ['AUTHLETE_API_SECRET'])
             )
         except requests.exceptions.RequestException as err:
             raise Exception('Something went wrong when call Authlete API: {0}'.format(err))
-
         AuthleteUtil.verify_valid_response(response, request_client_id=self.params['client_id'])
+        return response
 
-        return {
-            'statusCode': 200,
-            'body': response.text
-        }
+    def get_application_info(self):
+        try:
+            response = requests.get(
+                settings.AUTHLETE_CLIENT_ENDPOINT + '/get/' + str(self.params['client_id']),
+                auth=(os.environ['AUTHLETE_API_KEY'], os.environ['AUTHLETE_API_SECRET'])
+            )
+        except requests.exceptions.RequestException as err:
+            raise Exception('Something went wrong when call Authlete API: {0}'.format(err))
+        AuthleteUtil.verify_valid_response(response, request_client_id=self.params['client_id'])
+        return json.loads(response.text)

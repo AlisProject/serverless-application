@@ -34,7 +34,7 @@ class MeApplicationsCreate(LambdaBase):
             'clientType': self.__get_client_type_from_application_type(self.params['application_type']),
             'developer': self.event['requestContext']['authorizer']['claims']['cognito:username'],
             'redirectUris': self.params['redirect_urls'],
-            'grantTypes': ['AUTHORIZATION_CODE'],
+            'grantTypes': ['AUTHORIZATION_CODE', 'REFRESH_TOKEN'],
             'responseTypes': ['CODE']
         }
         try:
