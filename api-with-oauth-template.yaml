@@ -9,7 +9,10 @@ Resources:
   RestApiWithCustomAuthorizer:
     Type: AWS::Serverless::Api
     Properties:
-      StageName: api
+      StageName: oauth2api
+      EndpointConfiguration:
+        Types:
+          - "REGIONAL"
       DefinitionBody:
         Fn::Transform:
           Name: AWS::Include
