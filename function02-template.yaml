@@ -6,6 +6,8 @@ Parameters:
     Type: String
   ArticleInfoTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
+  UsersTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
   TopicTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
   ElasticSearchEndpoint:
