@@ -39,7 +39,7 @@ Resources:
 
   #  Functions
 
-  ArticleSpporterIndex:
+  ArticleSupportersIndex:
     Type: "AWS::Lambda::Function"
     Properties:
       Code: ./deploy/articles_supporters_index.zip
@@ -70,10 +70,10 @@ Resources:
       Timeout: 300
 
 Outputs:
-  ArticleSpporterIndex:
-    Value: !GetAtt ArticleSpporterIndex.Arn
+  ArticleSupportersIndex:
+    Value: !GetAtt ArticleSupportersIndex.Arn
     Export:
-      Name: !Sub "${AlisAppId}-ArticleSpporterIndex"
+      Name: !Sub "${AlisAppId}-ArticleSupportersIndex"
   ArticlesTipRanking:
     Value: !GetAtt ArticlesTipRanking.Arn
     Export:

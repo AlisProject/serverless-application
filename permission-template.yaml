@@ -59,7 +59,7 @@ Resources:
       Action: "lambda:InvokeFunction"
       FunctionName:
         Fn::ImportValue:
-          Fn::Sub: "${AlisAppId}-ArticleSpporterIndex"
+          Fn::Sub: "${AlisAppId}-ArticleSupportersIndex"
       Principal: "apigateway.amazonaws.com"
       SourceArn: !Sub ${RestApiArn}/*/GET/articles/supporters
   MeArticlesPurchasedArticleIdsIndexApiGatewayInvoke:
