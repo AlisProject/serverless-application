@@ -511,6 +511,8 @@ Resources:
           AttributeType: N
         - AttributeName: target_date
           AttributeType: S
+        - AttributeName: article_id
+          AttributeType: S
       KeySchema:
         - AttributeName: user_id
           KeyType: HASH
@@ -520,6 +522,14 @@ Resources:
         - IndexName: target_date-sort_key-index
           KeySchema:
             - AttributeName: target_date
+              KeyType: HASH
+            - AttributeName: sort_key
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+        - IndexName: article_id-sort_key-index
+          KeySchema:
+            - AttributeName: article_id
               KeyType: HASH
             - AttributeName: sort_key
               KeyType: RANGE
