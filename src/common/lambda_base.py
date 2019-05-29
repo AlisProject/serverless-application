@@ -2,6 +2,8 @@ from abc import ABCMeta, abstractmethod
 import json
 import logging
 import traceback
+import copy
+import settings
 from jsonschema import ValidationError
 from record_not_found_error import RecordNotFoundError
 from not_authorized_error import NotAuthorizedError
@@ -47,7 +49,7 @@ class LambdaBase(metaclass=ABCMeta):
             return self.exec_main_proc()
         except ValidationError as err:
             logger.fatal(err)
-            logger.info(self.event)
+            logger.info(self.__filter_event_for_log(self.event))
 
             return {
                 'statusCode': 400,
@@ -55,7 +57,7 @@ class LambdaBase(metaclass=ABCMeta):
             }
         except NotVerifiedUserError as err:
             logger.fatal(err)
-            logger.info(self.event)
+            logger.info(self.__filter_event_for_log(self.event))
 
             return {
                 'statusCode': 400,
@@ -63,7 +65,7 @@ class LambdaBase(metaclass=ABCMeta):
             }
         except NotAuthorizedError as err:
             logger.fatal(err)
-            logger.info(self.event)
+            logger.info(self.__filter_event_for_log(self.event))
 
             return {
                 'statusCode': 403,
@@ -71,7 +73,7 @@ class LambdaBase(metaclass=ABCMeta):
             }
         except RecordNotFoundError as err:
             logger.fatal(err)
-            logger.info(self.event)
+            logger.info(self.__filter_event_for_log(self.event))
 
             return {
                 'statusCode': 404,
@@ -80,7 +82,7 @@ class LambdaBase(metaclass=ABCMeta):
 
         except Exception as err:
             logger.fatal(err)
-            logger.info(self.event)
+            logger.info(self.__filter_event_for_log(self.event))
             traceback.print_exc()
 
             return {
@@ -120,3 +122,21 @@ class LambdaBase(metaclass=ABCMeta):
         if self.event.get('headers') is not None:
             result.update(self.event.get('headers'))
         return result
+
+    def __filter_event_for_log(self, event):
+        copied_event = copy.deepcopy(event)
+
+        if 'body' not in copied_event:
+            return copied_event
+
+        try:
+            body = json.loads(copied_event['body'])
+        except Exception:
+            return copied_event
+
+        for not_logging_param in settings.not_logging_parameters:
+            if not_logging_param in body:
+                body[not_logging_param] = 'xxxxx'
+        copied_event['body'] = json.dumps(body)
+
+        return copied_event

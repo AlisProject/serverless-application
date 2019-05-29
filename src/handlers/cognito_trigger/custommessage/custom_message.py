@@ -5,6 +5,7 @@ import settings
 from jsonschema import validate, ValidationError
 from lambda_base import LambdaBase
 from user_util import UserUtil
+from private_chain_util import PrivateChainUtil
 
 
 class CustomMessage(LambdaBase):
@@ -36,6 +37,12 @@ class CustomMessage(LambdaBase):
                 for attribute in user['Attributes']:
                     if attribute['Name'] == 'phone_number_verified' and attribute['Value'] == 'true':
                         raise ValidationError('This phone_number is already exists')
+        # セキュリティ観点より、電話番号変更を実行させない。
+        # これにより XSS が発生したとしても、電話番号認証が必要な処理は回避が可能
+        if self.event['triggerSource'] == 'CustomMessage_VerifyUserAttribute':
+            # phone_number_verified が true の場合は電話番号変更を行っていないため当チェックは不要
+            if params.get('phone_number_verified', '') != 'true':
+                self.__validate_has_not_token(params)
 
     def exec_main_proc(self):
         if self.event['triggerSource'] == 'CustomMessage_ForgotPassword':
@@ -73,3 +80,14 @@ ALIS：https://alismedia.jp
                 user=self.event['userName']
             ).replace("\n", "<br />")
         return self.event
+
+    # トークンを保持していた場合は例外を出力
+    def __validate_has_not_token(self, params):
+        address = params.get('custom:private_eth_address')
+        if address is None:
+            raise ValidationError('Not exists private_eth_address. user_id: ' + self.event['userName'])
+        url = 'https://' + os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'] + '/production/wallet/balance'
+        payload = {'private_eth_address': address[2:]}
+        token = PrivateChainUtil.send_transaction(request_url=url, payload_dict=payload)
+        if token is not None and token != '0x0000000000000000000000000000000000000000000000000000000000000000':
+            raise ValidationError("Do not allow phone number updates")
