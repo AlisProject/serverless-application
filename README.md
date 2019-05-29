@@ -119,7 +119,7 @@ You have to add SNS authentication params to SMS.
 
 
 ```bash
-./deploy.sh function && ./deploy.sh api
+./deploy.sh function && ./deploy.sh function02 && ./deploy.sh api
 ```
 
 You have to add `RestApiArn`, `ApiLambdaRole` and `ElasticSearchEndpoint` to SMS.

@@ -728,7 +728,7 @@ paths:
             - ''
             - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
               - Fn::ImportValue:
-                  Fn::Sub: "${AlisAppId}-ArticleSpporterIndex"
+                  Fn::Sub: "${AlisAppId}-ArticleSupportersIndex"
               - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
