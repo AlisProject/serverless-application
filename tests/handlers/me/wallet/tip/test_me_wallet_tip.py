@@ -247,6 +247,7 @@ class TestMeWalletTip(TestCase):
 
             response = MeWalletTip(event, {}, self.dynamodb, cognito=None).main()
             self.assertEqual(response['statusCode'], 400)
+            self.assertEqual(json.loads(response['body'])['message'], 'Invalid parameter: Required at least 110 token')
 
     @patch('me_wallet_tip.MeWalletTip._MeWalletTip__send_tip',
            MagicMock(return_value='0x0000000000000000000000000000000000000000'))
