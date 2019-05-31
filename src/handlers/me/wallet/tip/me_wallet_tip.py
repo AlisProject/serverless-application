@@ -69,6 +69,11 @@ class MeWalletTip(LambdaBase):
         from_user_eth_address = self.event['requestContext']['authorizer']['claims']['custom:private_eth_address']
         to_user_eth_address = self.__get_user_private_eth_address(article_info['user_id'])
         tip_value = self.params['tip_value']
+        burn_quantity = int(Decimal(tip_value) / Decimal(10))
+
+        if not self.__is_burnable_user(from_user_eth_address, tip_value, burn_quantity):
+            raise ValidationError('Required at least {token} token'.format(token=tip_value + burn_quantity))
+
         transaction_hash = self.__send_tip(from_user_eth_address, to_user_eth_address, tip_value, auth, headers)
 
         burn_transaction = None
@@ -87,6 +92,17 @@ class MeWalletTip(LambdaBase):
         return {
             'statusCode': 200
         }
+
+    @staticmethod
+    def __is_burnable_user(eth_address, tip_value, burn_quantity):
+        url = 'https://' + os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'] + '/production/wallet/balance'
+        payload = {'private_eth_address': eth_address}
+        token = PrivateChainUtil.send_transaction(request_url=url, payload_dict=payload)
+
+        if token >= tip_value + burn_quantity:
+            return True
+
+        return False
 
     @staticmethod
     def __send_tip(from_user_eth_address, to_user_eth_address, tip_value, auth, headers):
@@ -145,8 +161,8 @@ class MeWalletTip(LambdaBase):
         return private_eth_address[0]['Value']
 
     @staticmethod
-    def __burn_transaction(price, user_eth_address, auth, headers):
-        burn_token = format(int(Decimal(price) / Decimal(10)), '064x')
+    def __burn_transaction(burn_quantity, user_eth_address, auth, headers):
+        burn_token = format(burn_quantity, '064x')
 
         burn_payload = json.dumps(
             {

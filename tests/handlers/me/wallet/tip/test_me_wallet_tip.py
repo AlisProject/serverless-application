@@ -16,6 +16,7 @@ class TestMeWalletTip(TestCase):
     def setUp(self):
         TestsUtil.set_all_tables_name_to_env()
         TestsUtil.delete_all_tables(self.dynamodb)
+        TestsUtil.set_aws_auth_to_env()
 
         self.article_info_table_items = [
             {
@@ -48,6 +49,7 @@ class TestMeWalletTip(TestCase):
     @patch('me_wallet_tip.MeWalletTip._MeWalletTip__send_tip',
            MagicMock(return_value='0x0000000000000000000000000000000000000000'))
     @patch('private_chain_util.PrivateChainUtil.is_transaction_completed', MagicMock(return_value=True))
+    @patch('private_chain_util.PrivateChainUtil.send_transaction', MagicMock(return_value=1))
     @patch('me_wallet_tip.MeWalletTip._MeWalletTip__burn_transaction', MagicMock(return_value='burn_transaction_hash'))
     @patch('time_util.TimeUtil.generate_sort_key', MagicMock(return_value=1520150552000003))
     @patch('time.time', MagicMock(return_value=1520150552.000003))
@@ -106,6 +108,8 @@ class TestMeWalletTip(TestCase):
     @patch('me_wallet_tip.MeWalletTip._MeWalletTip__send_tip',
            MagicMock(return_value='0x0000000000000000000000000000000000000000'))
     @patch('time_util.TimeUtil.generate_sort_key', MagicMock(return_value=1520150552000003))
+    @patch('private_chain_util.PrivateChainUtil.send_transaction', MagicMock(
+        return_value=settings.parameters['tip_value']['maximum'] + settings.parameters['tip_value']['maximum'] / 10))
     @patch('time.time', MagicMock(return_value=1520150552.000003))
     def test_main_ok_max_value(self):
         with patch('me_wallet_tip.UserUtil') as user_util_mock, \
@@ -168,6 +172,7 @@ class TestMeWalletTip(TestCase):
 
     @patch('me_wallet_tip.MeWalletTip._MeWalletTip__send_tip',
            MagicMock(return_value='0x0000000000000000000000000000000000000000'))
+    @patch('me_wallet_tip.MeWalletTip._MeWalletTip__is_burnable_user', MagicMock(return_value=True))
     @patch('private_chain_util.PrivateChainUtil.is_transaction_completed', MagicMock(return_value=False))
     def test_main_ok_with_wrong_transaction_status(self):
         with patch('me_wallet_tip.UserUtil') as user_util_mock, \
@@ -206,9 +211,47 @@ class TestMeWalletTip(TestCase):
 
             self.assertEqual(mock_burn_transaction.call_count, 0)
 
+    # 109 しかtokenを持ってないユーザーで 110 tokenを投げ銭する
+    @patch('private_chain_util.PrivateChainUtil.send_transaction', MagicMock(return_value=109))
+    def test_main_ng_with_not_burnable_user(self):
+        with patch('me_wallet_tip.UserUtil') as user_util_mock, \
+             patch('me_wallet_tip.MeWalletTip._MeWalletTip__burn_transaction') as mock_burn_transaction:
+            user_util_mock.get_cognito_user_info.return_value = {
+                'UserAttributes': [{
+                    'Name': 'custom:private_eth_address',
+                    'Value': '0x1111111111111111111111111111111111111111'
+                }]
+            }
+            mock_burn_transaction.return_value = 'burn_transaction_hash'
+
+            target_article_id = self.article_info_table_items[0]['article_id']
+            target_tip_value = str(100)
+
+            event = {
+                'body': {
+                    'article_id': target_article_id,
+                    'tip_value': target_tip_value
+                },
+                'requestContext': {
+                    'authorizer': {
+                        'claims': {
+                            'cognito:username': 'act_user_01',
+                            'custom:private_eth_address': '0x5d7743a4a6f21593ff6d3d81595f270123456789',
+                            'phone_number_verified': 'true',
+                            'email_verified': 'true'
+                        }
+                    }
+                }
+            }
+            event['body'] = json.dumps(event['body'])
+
+            response = MeWalletTip(event, {}, self.dynamodb, cognito=None).main()
+            self.assertEqual(response['statusCode'], 400)
+
     @patch('me_wallet_tip.MeWalletTip._MeWalletTip__send_tip',
            MagicMock(return_value='0x0000000000000000000000000000000000000000'))
     @patch('private_chain_util.PrivateChainUtil.is_transaction_completed', MagicMock(side_effect=Exception()))
+    @patch('me_wallet_tip.MeWalletTip._MeWalletTip__is_burnable_user', MagicMock(return_value=True))
     @patch('time_util.TimeUtil.generate_sort_key', MagicMock(return_value=1520150552000003))
     @patch('time.time', MagicMock(return_value=1520150552.000003))
     def test_main_ok_with_exception_in_is_transaction_completed(self):
