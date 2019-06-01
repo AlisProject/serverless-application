@@ -81,7 +81,7 @@ class MeWalletTip(LambdaBase):
             # 投げ銭が成功した時のみバーン処理を行う
             if PrivateChainUtil.is_transaction_completed(transaction_hash):
                 # バーンのトランザクション処理
-                burn_transaction = self.__burn_transaction(tip_value, from_user_eth_address, auth, headers)
+                burn_transaction = self.__burn_transaction(burn_quantity, from_user_eth_address, auth, headers)
         except Exception as err:
             logging.fatal(err)
             traceback.print_exc()

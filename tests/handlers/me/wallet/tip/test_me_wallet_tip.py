@@ -109,7 +109,7 @@ class TestMeWalletTip(TestCase):
            MagicMock(return_value='0x0000000000000000000000000000000000000000'))
     @patch('time_util.TimeUtil.generate_sort_key', MagicMock(return_value=1520150552000003))
     @patch('private_chain_util.PrivateChainUtil.send_transaction', MagicMock(
-        return_value=settings.parameters['tip_value']['maximum'] + settings.parameters['tip_value']['maximum'] / 10))
+        return_value=settings.parameters['tip_value']['maximum'] + settings.parameters['tip_value']['maximum'] / Decimal(10)))
     @patch('time.time', MagicMock(return_value=1520150552.000003))
     def test_main_ok_max_value(self):
         with patch('me_wallet_tip.UserUtil') as user_util_mock, \
@@ -148,6 +148,9 @@ class TestMeWalletTip(TestCase):
             response = MeWalletTip(event, {}, self.dynamodb, cognito=None).main()
             self.assertEqual(mock_is_transaction_completed.call_count, 1)
             self.assertEqual(mock_burn_transaction.call_count, 1)
+            args, kwargs = mock_burn_transaction.call_args
+            self.assertEqual(args[0], int(settings.parameters['tip_value']['maximum'] / Decimal(10)))
+            self.assertEqual(args[1], '0x5d7743a4a6f21593ff6d3d81595f270123456789')
 
             self.assertEqual(response['statusCode'], 200)
             tip_table = self.dynamodb.Table(os.environ['TIP_TABLE_NAME'])
