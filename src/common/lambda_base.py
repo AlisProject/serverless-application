@@ -148,8 +148,8 @@ class LambdaBase(metaclass=ABCMeta):
             # cognito:username にuser_idが入っていることを期待している関数のためにcognito:usernameにprincipal_idをセットする
             self.event['requestContext']['authorizer']['claims'] = {
                 'cognito:username': principal_id,
-                'phone_number_verified': True,
-                'email_verified': True
+                'phone_number_verified': 'true',
+                'email_verified': 'true'
             }
 
     def __filter_event_for_log(self, event):
