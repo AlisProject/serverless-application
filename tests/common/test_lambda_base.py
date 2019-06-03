@@ -134,8 +134,8 @@ class TestLambdaBase(TestCase):
         lambda_impl.main()
         self.assertEqual('oauth_user_id',
                          lambda_impl.event['requestContext']['authorizer']['claims']['cognito:username'])
-        self.assertEqual(lambda_impl.event['requestContext']['authorizer']['claims']['phone_number_verified'] == 'true')
-        self.assertEqual(lambda_impl.event['requestContext']['authorizer']['claims']['email_verified'] == 'true')
+        self.assertEqual('true', lambda_impl.event['requestContext']['authorizer']['claims']['phone_number_verified'])
+        self.assertEqual('true', lambda_impl.event['requestContext']['authorizer']['claims']['email_verified'])
 
     def test_update_event_ok_not_updated(self):
         event = {
