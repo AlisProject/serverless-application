@@ -146,7 +146,11 @@ class LambdaBase(metaclass=ABCMeta):
 
         if principal_id:
             # cognito:username にuser_idが入っていることを期待している関数のためにcognito:usernameにprincipal_idをセットする
-            self.event['requestContext']['authorizer']['claims'] = {'cognito:username': principal_id}
+            self.event['requestContext']['authorizer']['claims'] = {
+                'cognito:username': principal_id,
+                'phone_number_verified': True,
+                'email_verified': True
+            }
 
     def __filter_event_for_log(self, event):
         copied_event = copy.deepcopy(event)
