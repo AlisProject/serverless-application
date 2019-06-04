@@ -10,6 +10,7 @@ export ALIS_APP_ID=foobar
 # TODO: SAMがIAM認証をサポートしたらteplate.yamlに集約してこの値とスクリプトを除却する
 #   - see: https://github.com/awslabs/serverless-application-model/issues/248
 export SERVERLESS_REST_API_ID=pe6odilrre
+export SERVERLESS_REST_API_WITH_OAUTH_ID=xxxxxxxxxx
 
 # --- AWS ---
 
