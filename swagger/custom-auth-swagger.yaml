@@ -39,17 +39,6 @@ definitions:
         type: string
       created_at:
         type: integer
-  MeArticlesDraftsCreate:
-    type: object
-    properties:
-      title:
-        type: string
-      body:
-        type: string
-      eye_catch_url:
-        type: string
-      overview:
-        type: string
   MeArticlesDraftsTitleUpdate:
     type: object
     properties:
@@ -740,39 +729,6 @@ paths:
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
-    post:
-      description: '下書き記事を作成'
-      parameters:
-      - name: 'article'
-        in: 'body'
-        description: 'article object'
-        required: true
-        schema:
-          $ref: '#/definitions/MeArticlesDraftsCreate'
-      responses:
-        '200':
-          description: '作成された記事ID'
-          schema:
-            type: object
-            properties:
-              article_id:
-                type: 'string'
-      security:
-        - CustomAuthorizer: []
-      x-amazon-apigateway-integration:
-        responses:
-          default:
-            statusCode: '200'
-        uri:
-          Fn::Join:
-            - ''
-            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
-              - Fn::ImportValue:
-                  Fn::Sub: "${FunctionDeployStackName}-MeArticlesDraftsCreate"
-              - "/invocations"
-        passthroughBehavior: when_no_templates
-        httpMethod: POST
-        type: aws_proxy
   /me/articles/drafts/article_id:
     post:
       description: 'article_idを作成'
@@ -796,40 +752,6 @@ paths:
             - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
               - Fn::ImportValue:
                   Fn::Sub: "${FunctionDeployStackName}-MeArticlesDraftsArticleIdCreate"
-              - "/invocations"
-        passthroughBehavior: when_no_templates
-        httpMethod: POST
-        type: aws_proxy
-  /me/articles/{article_id}/drafts/publish:
-    put:
-      description: "指定された article_id の下書き記事を公開"
-      parameters:
-      - name: 'article_id'
-        in: 'path'
-        description: '対象記事の指定するために使用'
-        required: true
-        type: 'string'
-      - name: 'publish'
-        in: 'body'
-        description: 'publish object'
-        required: true
-        schema:
-          $ref: '#/definitions/Publish'
-      responses:
-        '200':
-          description: 'successful operation'
-      security:
-        - CustomAuthorizer: []
-      x-amazon-apigateway-integration:
-        responses:
-          default:
-            statusCode: '200'
-        uri:
-          Fn::Join:
-            - ''
-            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
-              - Fn::ImportValue:
-                  Fn::Sub: "${FunctionDeployStackName}-MeArticlesDraftsPublish"
               - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
@@ -942,39 +864,6 @@ paths:
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
-    put:
-      description: '指定された article_id の編集記事情報を上書き'
-      parameters:
-      - name: 'article_id'
-        in: 'path'
-        description: '対象記事の指定するために使用'
-        required: true
-        type: 'string'
-      - name: 'article'
-        in: 'body'
-        description: 'article object'
-        required: true
-        schema:
-          $ref: '#/definitions/UpdateArticle'
-      responses:
-        '200':
-          description: 'successful operation'
-      security:
-        - CustomAuthorizer: []
-      x-amazon-apigateway-integration:
-        responses:
-          default:
-            statusCode: '200'
-        uri:
-          Fn::Join:
-            - ''
-            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
-              - Fn::ImportValue:
-                  Fn::Sub: "${FunctionDeployStackName}-MeArticlesPublicUpdate"
-              - "/invocations"
-        passthroughBehavior: when_no_templates
-        httpMethod: POST
-        type: aws_proxy
   /me/articles/{article_id}/public/edit:
     get:
       description: '指定された article_id の編集記事情報を取得'
@@ -1029,40 +918,6 @@ paths:
             - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
               - Fn::ImportValue:
                   Fn::Sub: "${FunctionDeployStackName}-MeArticlesPublicUnpublish"
-              - "/invocations"
-        passthroughBehavior: when_no_templates
-        httpMethod: POST
-        type: aws_proxy
-  /me/articles/{article_id}/public/republish:
-    put:
-      description: '指定された article_id の編集記事を公開する'
-      parameters:
-      - name: 'article_id'
-        in: 'path'
-        description: '対象記事を指定するために使用'
-        required: true
-        type: 'string'
-      - name: 'publish'
-        in: 'body'
-        description: 'publish object'
-        required: true
-        schema:
-          $ref: '#/definitions/Publish'
-      responses:
-        '200':
-          description: 'successful operation'
-      security:
-        - CustomAuthorizer: []
-      x-amazon-apigateway-integration:
-        responses:
-          default:
-            statusCode: '200'
-        uri:
-          Fn::Join:
-            - ''
-            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
-              - Fn::ImportValue:
-                  Fn::Sub: "${FunctionDeployStackName}-MeArticlesPublicRepublish"
               - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
@@ -1341,52 +1196,6 @@ paths:
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
-  /me/articles/{article_id}/images:
-    post:
-      description: '対象記事に画像データを登録'
-      produces:
-      - application/json
-        application/octet-stream
-      parameters:
-        - name: 'content-type'
-          in: 'header'
-          required: true
-          type: 'string'
-        - name: 'article_id'
-          description: '対象記事の指定するために使用'
-          in: 'path'
-          required: true
-          type: 'string'
-        - in: 'body'
-          name: 'ArticleImage'
-          description: 'article image object'
-          required: true
-          schema:
-            $ref: '#/definitions/ArticleImage'
-      responses:
-        '200':
-          description: '登録した画像データのURL'
-          schema:
-            type: object
-            properties:
-              image_url:
-                type: 'string'
-      security:
-        - CustomAuthorizer: []
-      x-amazon-apigateway-integration:
-        responses:
-          default:
-            statusCode: "200"
-        uri:
-          Fn::Join:
-            - ''
-            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
-              - Fn::ImportValue:
-                  Fn::Sub: "${FunctionDeployStackName}-MeArticlesImagesCreate"
-              - "/invocations"
-        passthroughBehavior: when_no_templates
-        httpMethod: POST
-        type: aws_proxy
   /me/articles/{article_id}/image_upload_url:
     get:
       description: '対象記事に画像データをアップロードできるURLを取得'
@@ -1600,39 +1409,6 @@ paths:
             - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
               - Fn::ImportValue:
                   Fn::Sub: "${FunctionDeployStackName}-MeArticlesDraftsShow"
-              - "/invocations"
-        passthroughBehavior: when_no_templates
-        httpMethod: POST
-        type: aws_proxy
-    put:
-      description: '下書き記事を更新'
-      parameters:
-      - name: 'article_id'
-        in: 'path'
-        description: '対象記事の指定するために使用'
-        required: true
-        type: 'string'
-      - name: 'article'
-        in: 'body'
-        description: 'article object'
-        required: true
-        schema:
-          $ref: '#/definitions/MeArticlesDraftsCreate'
-      responses:
-        '200':
-          description: 'successful operation'
-      security:
-        - CustomAuthorizer: []
-      x-amazon-apigateway-integration:
-        responses:
-          default:
-            statusCode: '200'
-        uri:
-          Fn::Join:
-            - ''
-            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
-              - Fn::ImportValue:
-                  Fn::Sub: "${FunctionDeployStackName}-MeArticlesDraftsUpdate"
               - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
