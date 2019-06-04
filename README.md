@@ -133,13 +133,13 @@ You have to add `RestApiArn`, `ApiLambdaRole` and `ElasticSearchEndpoint` to SSM
 You have to update Cognito pre authentication trigger.
 
 ```bash
-# Use this script with your Cognito User Pool ID
-./update_cognito_pre_auth.sh ap-northeast-XXXXXXXXXX
+# Get function name.
+aws lambda list-functions | jq -r --arg FUNCTION \
+  "${ALIS_APP_ID}api-CognitoTriggerPreAuthentication" '.Functions[] | select(.FunctionName | test($FUNCTION)) | .FunctionName'
+  
+# Add it to Cognito via Management console
 ```
 
-Specify generated ApiLambdaRole to SSM.
-- See: https://github.com/AlisProject/environment
-  - You can use `functions-replacer.sh`
 
 #### FYI:
 Lambda & API Gateway are bunch of CloudFormation stacks.
