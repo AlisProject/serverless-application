@@ -395,22 +395,6 @@ Resources:
           !Sub "${FunctionDeployStackName}-UsersInfo"
       Action: "lambda:InvokeFunction"
       Principal: "apigateway.amazonaws.com"
-  MeWalletBalanceLambdaPermission:
-    Type: "AWS::Lambda::Permission"
-    Properties:
-      FunctionName:
-        Fn::ImportValue:
-          !Sub "${FunctionDeployStackName}-MeWalletBalance"
-      Action: "lambda:InvokeFunction"
-      Principal: "apigateway.amazonaws.com"
-  MeWalletDistributedTokensShowLambdaPermission:
-    Type: "AWS::Lambda::Permission"
-    Properties:
-      FunctionName:
-        Fn::ImportValue:
-          !Sub "${FunctionDeployStackName}-MeWalletDistributedTokensShow"
-      Action: "lambda:InvokeFunction"
-      Principal: "apigateway.amazonaws.com"
   MeNotificationsIndexLambdaPermission:
     Type: "AWS::Lambda::Permission"
     Properties:
