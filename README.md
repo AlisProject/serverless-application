@@ -158,6 +158,15 @@ aws apigateway  get-rest-apis | jq '.items[] | if .name == "'${ALIS_APP_ID}'api"
 # Set SERVERLESS_REST_API_ID to .envrc
 direnv edit
 
+# Show generated Rest API with OAuth ID
+aws apigateway  get-rest-apis | jq '.items[] | if .name == "'${ALIS_APP_ID}'api-with-oauth" then .id else empty end'
+
+# Set SERVERLESS_REST_API_WITH_OAUTH_ID to .envrc
+direnv edit
+
+## Load envs
+direnv allow
+
 ./fix_api.sh
 ```
 
