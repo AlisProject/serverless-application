@@ -1803,54 +1803,6 @@ paths:
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
-  /me/wallet/balance:
-    get:
-      description: 'ログインユーザ情報を取得'
-      responses:
-        '200':
-          description: 'ログインユーザ情報'
-          schema:
-           $ref: '#/definitions/MeWalletBalance'
-      security:
-        - CustomAuthorizer: []
-      x-amazon-apigateway-integration:
-        responses:
-          default:
-            statusCode: "200"
-        uri:
-          Fn::Join:
-            - ''
-            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
-              - Fn::ImportValue:
-                  Fn::Sub: "${FunctionDeployStackName}-MeWalletBalance"
-              - "/invocations"
-        passthroughBehavior: when_no_templates
-        httpMethod: POST
-        type: aws_proxy
-  /me/wallet/distributed_tokens:
-    get:
-      description: 'ログインユーザのトークン付与情報を取得'
-      responses:
-        '200':
-          description: 'ログインユーザのトークン付与情報'
-          schema:
-            $ref: '#/definitions/DistributedTokens'
-      security:
-        - CustomAuthorizer: []
-      x-amazon-apigateway-integration:
-        responses:
-          default:
-            statusCode: "200"
-        uri:
-          Fn::Join:
-            - ''
-            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
-              - Fn::ImportValue:
-                  Fn::Sub: "${FunctionDeployStackName}-MeWalletDistributedTokensShow"
-              - "/invocations"
-        passthroughBehavior: when_no_templates
-        httpMethod: POST
-        type: aws_proxy
   /me/notifications:
     get:
       description: ログインユーザーの通知の一覧を取得
