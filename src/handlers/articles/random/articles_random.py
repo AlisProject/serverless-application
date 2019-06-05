@@ -1,26 +1,20 @@
 # -*- coding: utf-8 -*-
 import os
 import json
-import settings
+from es_util import ESUtil
 from lambda_base import LambdaBase
 from decimal_encoder import DecimalEncoder
 
 
 class ArticlesRandom(LambdaBase):
     def get_schema(self):
-        return {
-            'type': 'object',
-            'properties': {
-                'article_id': settings.parameters['article_id']
-            },
-            'required': []
-        }
+        pass
 
     def validate_params(self):
-        None
+        pass
 
     def exec_main_proc(self):
-        article_id = ArticlesRandom.__get_random_article()
+        article_id = self.__get_random_article()
 
         article_info_table = self.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
         article_content_table = self.dynamodb.Table(os.environ['ARTICLE_CONTENT_TABLE_NAME'])
@@ -42,7 +36,9 @@ class ArticlesRandom(LambdaBase):
             'body': json.dumps(article_info, cls=DecimalEncoder)
         }
 
-    @staticmethod
-    def __get_random_article():
-        # TODO:
-        return '8pzb0D0LV52E'
+    def __get_random_article(self):
+        response = ESUtil.search_random_article(self.elasticsearch)
+
+        article_id = response["hits"]["hits"][0]['_id']
+
+        return article_id

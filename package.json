@@ -1,8 +1,10 @@
 {
   "scripts": {
-    "lint": "yarn cfn-lint validate"
+    "lint": "yarn cfn-lint validate",
+    "deploy": "yarn sls deploy"
   },
   "devDependencies": {
-    "cfn-lint": "^1.9.7"
+    "cfn-lint": "^1.9.7",
+    "serverless": "^1.44.1"
   }
 }

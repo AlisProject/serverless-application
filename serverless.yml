@@ -1,0 +1,64 @@
+service: ${env:ALIS_APP_ID}
+
+frameworkVersion: ">=1.44.1 <2.0.0"
+
+custom:
+  bucket: ${env:ALIS_APP_ID}-alis-labolatory
+
+provider:
+  name: aws
+  runtime: python3.6
+  stage: labo # CloudFrontとの連携の都合上、stageには固定値を指定している
+  region: ap-northeast-1
+  role: ${cf:${env:ALIS_APP_ID}api.LambdaRole}
+  environment:
+    ARTICLE_INFO_TABLE_NAME: ${ssm:${env:ALIS_APP_ID}ssmArticleInfoTableName}
+    ARTICLE_CONTENT_TABLE_NAME: ${ssm:${env:ALIS_APP_ID}ssmArticleContentTableName}
+    ARTICLE_HISTORY_TABLE_NAME: ${ssm:${env:ALIS_APP_ID}ssmArticleHistoryTableName}
+    ARTICLE_CONTENT_EDIT_TABLE_NAME: ${ssm:${env:ALIS_APP_ID}ssmArticleContentEditTableName}
+    ARTICLE_EVALUATED_MANAGE_TABLE_NAME: ${ssm:${env:ALIS_APP_ID}ssmArticleEvaluatedManageTableName}
+    ARTICLE_ALIS_TOKEN_TABLE_NAME: ${ssm:${env:ALIS_APP_ID}ssmArticleAlisTokenTableName}
+    ARTICLE_LIKED_USER_TABLE_NAME: ${ssm:${env:ALIS_APP_ID}ssmArticleLikedUserTableName}
+    ARTICLE_FRAUD_USER_TABLE_NAME: ${ssm:${env:ALIS_APP_ID}ssmArticleFraudUserTableName}
+    ARTICLE_PV_USER_TABLE_NAME: ${ssm:${env:ALIS_APP_ID}ssmArticlePvUserTableName}
+    ARTICLE_SCORE_TABLE_NAME: ${ssm:${env:ALIS_APP_ID}ssmArticleScoreTableName}
+    USERS_TABLE_NAME: ${ssm:${env:ALIS_APP_ID}ssmUsersTableName}
+    BETA_USERS_TABLE_NAME: ${ssm:${env:ALIS_APP_ID}ssmBetaUsersTableName}
+    NOTIFICATION_TABLE_NAME: ${ssm:${env:ALIS_APP_ID}ssmNotificationTableName}
+    UNREAD_NOTIFICATION_MANAGER_TABLE_NAME: ${ssm:${env:ALIS_APP_ID}ssmUnreadNotificationManagerTableName}
+    COMMENT_TABLE_NAME: ${ssm:${env:ALIS_APP_ID}ssmCommentTableName}
+    COMMENT_LIKED_USER_TABLE_NAME: ${ssm:${env:ALIS_APP_ID}ssmCommentLikedUserTableName}
+    DELETED_COMMENT_TABLE_NAME: ${ssm:${env:ALIS_APP_ID}ssmDeletedCommentTableName}
+    USER_FRAUD_TABLE_NAME: ${ssm:${env:ALIS_APP_ID}ssmUserFraudTableName}
+    SCREENED_ARTICLE_TABLE_NAME: ${ssm:${env:ALIS_APP_ID}ssmScreenedArticleTableName}
+    TOKEN_DISTRIBUTION_TABLE_NAME: ${ssm:${env:ALIS_APP_ID}ssmTokenDistributionTableName}
+    USER_FIRST_EXPERIENCE_TABLE_NAME: ${ssm:${env:ALIS_APP_ID}ssmUserFirstExperienceTableName}
+    TOPIC_TABLE_NAME: ${ssm:${env:ALIS_APP_ID}ssmTopicTableName}
+    TAG_TABLE_NAME: ${ssm:${env:ALIS_APP_ID}ssmTagTableName}
+    TIP_TABLE_NAME: ${ssm:${env:ALIS_APP_ID}ssmTipTableName}
+    EXTERNAL_PROVIDER_USERS_TABLE_NAME: ${ssm:${env:ALIS_APP_ID}ssmExternalProviderUsersTableName}
+    DOMAIN: ${ssm:${env:ALIS_APP_ID}ssmAlisAppDomain}
+    PRIVATE_CHAIN_AWS_ACCESS_KEY: ${ssm:${env:ALIS_APP_ID}ssmPrivateChainAwsAccessKey}
+    PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY: ${ssm:${env:ALIS_APP_ID}ssmPrivateChainAwsSecretAccessKey}
+    PRIVATE_CHAIN_EXECUTE_API_HOST: ${ssm:${env:ALIS_APP_ID}ssmPrivateChainExecuteApiHost}
+    BETA_MODE_FLAG: ${ssm:${env:ALIS_APP_ID}ssmBetaModeFlag}
+    DIST_S3_BUCKET_NAME: ${ssm:${env:ALIS_APP_ID}ssmDistS3BucketName}
+    ELASTIC_SEARCH_ENDPOINT: ${ssm:${env:ALIS_APP_ID}ssmElasticSearchEndpoint}
+    PAID_ARTICLES_TABLE_NAME: ${ssm:${env:ALIS_APP_ID}ssmPaidArticlesTableName}
+    PAID_STATUS_TABLE_NAME: ${ssm:${env:ALIS_APP_ID}ssmPaidStatusTableName}
+
+# パッケージングは packaging.sh で生成されたものを使用する
+package:
+  individually: true
+
+functions:
+  ArticleRandom:
+    description: "記事をランダムに表示"
+    handler: handler.lambda_handler
+    package:
+      artifact: ./deploy/articles_random.zip
+    events:
+      - http:
+          method: get
+          # CloudFrontによるキャッシュを利かさないものは /n/ 以下に配置する
+          path: /n/random

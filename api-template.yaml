@@ -236,19 +236,6 @@ Resources:
             Path: /articles/recommended
             Method: get
             RestApiId: !Ref RestApi
-  ArticlesRandom:
-    Type: AWS::Serverless::Function
-    Properties:
-      Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
-      CodeUri: ./deploy/articles_random.zip
-      Events:
-        Api:
-          Type: Api
-          Properties:
-            Path: /articles/random
-            Method: get
-            RestApiId: !Ref RestApi
   ArticlesShow:
     Type: AWS::Serverless::Function
     Properties:
@@ -1086,6 +1073,11 @@ Resources:
       SnapshotOptions:
         AutomatedSnapshotStartHour: 0
 Outputs:
+  LambdaRole:
+    Value:
+      Fn::GetAtt: LambdaRole.Arn
+    Export:
+      Name: LambdaRole
   Authorizer:
     Value:
       Ref: Authorizer
@@ -1111,11 +1103,6 @@ Outputs:
       Ref: ArticlesRecommended
     Export:
       Name: !Sub "${AWS::StackName}-ArticlesRecommended"
-  ArticlesRandom:
-    Value:
-      Ref: ArticlesRandom
-    Export:
-      Name: !Sub "${AWS::StackName}-ArticlesRandom"
   ArticlesShow:
     Value:
       Ref: ArticlesShow
