@@ -49,7 +49,8 @@ class TestMeWalletTip(TestCase):
     @patch('me_wallet_tip.MeWalletTip._MeWalletTip__send_tip',
            MagicMock(return_value='0x0000000000000000000000000000000000000000'))
     @patch('private_chain_util.PrivateChainUtil.is_transaction_completed', MagicMock(return_value=True))
-    @patch('private_chain_util.PrivateChainUtil.send_transaction', MagicMock(return_value=1))
+    @patch('private_chain_util.PrivateChainUtil.send_transaction', MagicMock(
+        return_value='0x0000000000000000000000000000000000000000000000000000000000000001'))
     @patch('me_wallet_tip.MeWalletTip._MeWalletTip__burn_transaction', MagicMock(return_value='burn_transaction_hash'))
     @patch('time_util.TimeUtil.generate_sort_key', MagicMock(return_value=1520150552000003))
     @patch('time.time', MagicMock(return_value=1520150552.000003))
@@ -109,7 +110,10 @@ class TestMeWalletTip(TestCase):
            MagicMock(return_value='0x0000000000000000000000000000000000000000'))
     @patch('time_util.TimeUtil.generate_sort_key', MagicMock(return_value=1520150552000003))
     @patch('private_chain_util.PrivateChainUtil.send_transaction', MagicMock(
-        return_value=settings.parameters['tip_value']['maximum'] + settings.parameters['tip_value']['maximum'] / Decimal(10)))
+        return_value=format(
+            (10 ** 24 + 10 ** 23),
+            '064x'
+        )))
     @patch('time.time', MagicMock(return_value=1520150552.000003))
     def test_main_ok_max_value(self):
         with patch('me_wallet_tip.UserUtil') as user_util_mock, \
@@ -215,7 +219,8 @@ class TestMeWalletTip(TestCase):
             self.assertEqual(mock_burn_transaction.call_count, 0)
 
     # 109 しかtokenを持ってないユーザーで 110 tokenを投げ銭する
-    @patch('private_chain_util.PrivateChainUtil.send_transaction', MagicMock(return_value=109))
+    @patch('private_chain_util.PrivateChainUtil.send_transaction',
+           MagicMock(return_value='000000000000000000000000000000000000000000000000000000000000006d'))
     def test_main_ng_with_not_burnable_user(self):
         with patch('me_wallet_tip.UserUtil') as user_util_mock, \
              patch('me_wallet_tip.MeWalletTip._MeWalletTip__burn_transaction') as mock_burn_transaction:

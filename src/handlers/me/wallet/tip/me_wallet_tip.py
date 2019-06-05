@@ -99,7 +99,7 @@ class MeWalletTip(LambdaBase):
         payload = {'private_eth_address': eth_address[2:]}
         token = PrivateChainUtil.send_transaction(request_url=url, payload_dict=payload)
 
-        if token >= tip_value + burn_quantity:
+        if int(token, 16) >= tip_value + burn_quantity:
             return True
 
         return False
