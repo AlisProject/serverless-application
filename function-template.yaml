@@ -429,6 +429,20 @@ Resources:
       MemorySize: 3008
       Runtime: python3.6
       Timeout: 300
+  ApplicationsShow:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaRole.Arn
+      Code: ./deploy/applications_show.zip
+      Environment:
+        Variables:
+          AUTHLETE_API_KEY: !Ref AuthleteApiKey
+          AUTHLETE_API_SECRET: !Ref AuthleteApiSecret
+      MemorySize: 3008
+      Runtime: python3.6
+      Timeout: 300
+
 Outputs:
   LambdaRole:
     Value: !GetAtt LambdaRole.Arn
@@ -510,3 +524,7 @@ Outputs:
     Value: !GetAtt MeAllowedApplicationsDelete.Arn
     Export:
       Name: !Sub "${AlisAppId}-MeAllowedApplicationsDelete"
+  ApplicationsShow:
+    Value: !GetAtt ApplicationsShow.Arn
+    Export:
+      Name: !Sub "${AlisAppId}-ApplicationsShow"

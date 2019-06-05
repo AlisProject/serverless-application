@@ -142,3 +142,21 @@ class TestMeApplicationDelete(TestCase):
 
         response = MeApplicationDelete(params, {}).main()
         self.assertEqual(response['statusCode'], 400)
+
+    def test_validation_without_client_id(self):
+        params = {
+            'pathParameters': {
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'user01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
+            }
+        }
+
+        response = MeApplicationDelete(params, {}).main()
+        self.assertEqual(response['statusCode'], 400)

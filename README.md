@@ -114,7 +114,7 @@ Specify generated Cognito User Pool ARN to SSM.
 
 
 ### Lambda & API Gateway
-You have to add SNS authentication params to SMS.
+You have to add SNS authentication params to SSM.
 - See: https://github.com/AlisProject/environment
 
 
@@ -122,7 +122,7 @@ You have to add SNS authentication params to SMS.
 ./deploy.sh function && ./deploy.sh function02 && ./deploy.sh api
 ```
 
-You have to add `RestApiArn`, `ApiLambdaRole` and `ElasticSearchEndpoint` to SMS.
+You have to add `RestApiArn`, `ApiLambdaRole` and `ElasticSearchEndpoint` to SSM.
 - See: https://github.com/AlisProject/environment
   - You can use `api-stack-replacer.sh`
 
@@ -157,6 +157,15 @@ aws apigateway  get-rest-apis | jq '.items[] | if .name == "'${ALIS_APP_ID}'api"
 
 # Set SERVERLESS_REST_API_ID to .envrc
 direnv edit
+
+# Show generated Rest API with OAuth ID
+aws apigateway  get-rest-apis | jq '.items[] | if .name == "'${ALIS_APP_ID}'api-with-oauth" then .id else empty end'
+
+# Set SERVERLESS_REST_API_WITH_OAUTH_ID to .envrc
+direnv edit
+
+## Load envs
+direnv allow
 
 ./fix_api.sh
 ```

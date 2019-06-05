@@ -9,7 +9,8 @@ Resources:
   RestApiWithCustomAuthorizer:
     Type: AWS::Serverless::Api
     Properties:
-      StageName: api
+      StageName: oauth2api
+      EndpointConfiguration: REGIONAL
       DefinitionBody:
         Fn::Transform:
           Name: AWS::Include
@@ -146,28 +147,12 @@ Resources:
           !Sub "${FunctionDeployStackName}-MeArticlesDraftsIndex"
       Action: "lambda:InvokeFunction"
       Principal: "apigateway.amazonaws.com"
-  MeArticlesDraftsCreateLambdaPermission:
-    Type: "AWS::Lambda::Permission"
-    Properties:
-      FunctionName:
-        Fn::ImportValue:
-          !Sub "${FunctionDeployStackName}-MeArticlesDraftsCreate"
-      Action: "lambda:InvokeFunction"
-      Principal: "apigateway.amazonaws.com"
   MeArticlesDraftsArticleIdCreateLambdaPermission:
     Type: "AWS::Lambda::Permission"
     Properties:
       FunctionName:
         Fn::ImportValue:
           !Sub "${FunctionDeployStackName}-MeArticlesDraftsArticleIdCreate"
-      Action: "lambda:InvokeFunction"
-      Principal: "apigateway.amazonaws.com"
-  MeArticlesDraftsPublishLambdaPermission:
-    Type: "AWS::Lambda::Permission"
-    Properties:
-      FunctionName:
-        Fn::ImportValue:
-          !Sub "${FunctionDeployStackName}-MeArticlesDraftsPublish"
       Action: "lambda:InvokeFunction"
       Principal: "apigateway.amazonaws.com"
   MeArticlesDraftsPublishWithHeaderLambdaPermission:
@@ -194,14 +179,6 @@ Resources:
           !Sub "${FunctionDeployStackName}-MeArticlesPublicShow"
       Action: "lambda:InvokeFunction"
       Principal: "apigateway.amazonaws.com"
-  MeArticlesPublicUpdateLambdaPermission:
-    Type: "AWS::Lambda::Permission"
-    Properties:
-      FunctionName:
-        Fn::ImportValue:
-          !Sub "${FunctionDeployStackName}-MeArticlesPublicUpdate"
-      Action: "lambda:InvokeFunction"
-      Principal: "apigateway.amazonaws.com"
   MeArticlesPublicEditLambdaPermission:
     Type: "AWS::Lambda::Permission"
     Properties:
@@ -216,14 +193,6 @@ Resources:
       FunctionName:
         Fn::ImportValue:
           !Sub "${FunctionDeployStackName}-MeArticlesPublicUnpublish"
-      Action: "lambda:InvokeFunction"
-      Principal: "apigateway.amazonaws.com"
-  MeArticlesPublicRepublishLambdaPermission:
-    Type: "AWS::Lambda::Permission"
-    Properties:
-      FunctionName:
-        Fn::ImportValue:
-          !Sub "${FunctionDeployStackName}-MeArticlesPublicRepublish"
       Action: "lambda:InvokeFunction"
       Principal: "apigateway.amazonaws.com"
   MeArticlesPublicRepublishWithHeaderLambdaPermission:
@@ -290,14 +259,6 @@ Resources:
           !Sub "${FunctionDeployStackName}-MeArticlesFraudCreate"
       Action: "lambda:InvokeFunction"
       Principal: "apigateway.amazonaws.com"
-  MeArticlesImagesCreateLambdaPermission:
-    Type: "AWS::Lambda::Permission"
-    Properties:
-      FunctionName:
-        Fn::ImportValue:
-          !Sub "${FunctionDeployStackName}-MeArticlesImagesCreate"
-      Action: "lambda:InvokeFunction"
-      Principal: "apigateway.amazonaws.com"
   MeArticlesImageUploadUrlShowLambdaPermission:
     Type: "AWS::Lambda::Permission"
     Properties:
@@ -346,14 +307,6 @@ Resources:
           !Sub "${FunctionDeployStackName}-MeArticlesDraftsShow"
       Action: "lambda:InvokeFunction"
       Principal: "apigateway.amazonaws.com"
-  MeArticlesDraftsUpdateLambdaPermission:
-    Type: "AWS::Lambda::Permission"
-    Properties:
-      FunctionName:
-        Fn::ImportValue:
-          !Sub "${FunctionDeployStackName}-MeArticlesDraftsUpdate"
-      Action: "lambda:InvokeFunction"
-      Principal: "apigateway.amazonaws.com"
   MeArticlesDraftsTitleUpdateLambdaPermission:
     Type: "AWS::Lambda::Permission"
     Properties:
@@ -392,22 +345,6 @@ Resources:
       FunctionName:
         Fn::ImportValue:
           !Sub "${FunctionDeployStackName}-UsersInfo"
-      Action: "lambda:InvokeFunction"
-      Principal: "apigateway.amazonaws.com"
-  MeWalletBalanceLambdaPermission:
-    Type: "AWS::Lambda::Permission"
-    Properties:
-      FunctionName:
-        Fn::ImportValue:
-          !Sub "${FunctionDeployStackName}-MeWalletBalance"
-      Action: "lambda:InvokeFunction"
-      Principal: "apigateway.amazonaws.com"
-  MeWalletDistributedTokensShowLambdaPermission:
-    Type: "AWS::Lambda::Permission"
-    Properties:
-      FunctionName:
-        Fn::ImportValue:
-          !Sub "${FunctionDeployStackName}-MeWalletDistributedTokensShow"
       Action: "lambda:InvokeFunction"
       Principal: "apigateway.amazonaws.com"
   MeNotificationsIndexLambdaPermission:
