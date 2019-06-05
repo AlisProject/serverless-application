@@ -8,6 +8,7 @@ from me_wallet_token_send import MeWalletTokenSend
 from unittest.mock import patch, MagicMock
 from tests_util import TestsUtil
 from exceptions import SendTransactionError, ReceiptError
+from botocore.exceptions import ClientError
 
 
 class TestMeWalletTokenSend(TestCase):
@@ -34,11 +35,13 @@ class TestMeWalletTokenSend(TestCase):
 
     @patch('time_util.TimeUtil.generate_sort_key', MagicMock(return_value=1520150552000003))
     @patch('time.time', MagicMock(return_value=1520150552.000003))
+    @patch('me_wallet_token_send.MeWalletTokenSend._MeWalletTokenSend__verify_user_attribute', MagicMock())
     def test_main_ok(self):
         with patch('private_chain_util.PrivateChainUtil.send_transaction') \
             as mock_send_transaction, \
             patch('private_chain_util.PrivateChainUtil.is_transaction_completed') \
                 as mock_is_transaction_completed:
+
             # mock の初期化
             return_allowance = "0x0"
             return_get_transaction_count = "0x0"
@@ -59,7 +62,9 @@ class TestMeWalletTokenSend(TestCase):
             event = {
                 'body': {
                     'recipient_eth_address': '0x2000000000000000000000000000000000000000',
-                    'send_value': target_token_send_value
+                    'send_value': target_token_send_value,
+                    'access_token': 'aaaaa',
+                    'pin_code': '123456'
                 },
                 'requestContext': {
                     'authorizer': {
@@ -144,6 +149,7 @@ class TestMeWalletTokenSend(TestCase):
 
     @patch('time_util.TimeUtil.generate_sort_key', MagicMock(return_value=1520150552000003))
     @patch('time.time', MagicMock(return_value=1520150552.000003))
+    @patch('me_wallet_token_send.MeWalletTokenSend._MeWalletTokenSend__verify_user_attribute', MagicMock())
     def test_main_ok_exists_allowance_with_status_doing(self):
         with patch('private_chain_util.PrivateChainUtil.send_transaction') \
             as mock_send_transaction, \
@@ -171,7 +177,9 @@ class TestMeWalletTokenSend(TestCase):
             event = {
                 'body': {
                     'recipient_eth_address': '0x2000000000000000000000000000000000000000',
-                    'send_value': target_token_send_value
+                    'send_value': target_token_send_value,
+                    'access_token': 'aaaaa',
+                    'pin_code': '123456'
                 },
                 'requestContext': {
                     'authorizer': {
@@ -267,6 +275,7 @@ class TestMeWalletTokenSend(TestCase):
 
     @patch('time_util.TimeUtil.generate_sort_key', MagicMock(return_value=1520150552000100))
     @patch('time.time', MagicMock(return_value=1520150552.000100))
+    @patch('me_wallet_token_send.MeWalletTokenSend._MeWalletTokenSend__verify_user_attribute', MagicMock())
     def test_main_ok_exists_token_send_info_with_fail_data(self):
         # 実行前データを作成
         user_id = 'user_01'
@@ -365,7 +374,9 @@ class TestMeWalletTokenSend(TestCase):
             event = {
                 'body': {
                     'recipient_eth_address': '0x2000000000000000000000000000000000000000',
-                    'send_value': target_token_send_value
+                    'send_value': target_token_send_value,
+                    'access_token': 'aaaaa',
+                    'pin_code': '123456'
                 },
                 'requestContext': {
                     'authorizer': {
@@ -462,6 +473,7 @@ class TestMeWalletTokenSend(TestCase):
 
     @patch('time_util.TimeUtil.generate_sort_key', MagicMock(return_value=1520150552000100))
     @patch('time.time', MagicMock(return_value=1520150552.000100))
+    @patch('me_wallet_token_send.MeWalletTokenSend._MeWalletTokenSend__verify_user_attribute', MagicMock())
     def test_main_ng_over_limit(self):
         # 実行前データを作成
         user_id = 'user_01'
@@ -527,7 +539,9 @@ class TestMeWalletTokenSend(TestCase):
         event = {
             'body': {
                 'recipient_eth_address': '0x2000000000000000000000000000000000000000',
-                'send_value': target_token_send_value
+                'send_value': target_token_send_value,
+                'access_token': 'aaaaa',
+                'pin_code': '123456'
             },
             'requestContext': {
                 'authorizer': {
@@ -551,6 +565,7 @@ class TestMeWalletTokenSend(TestCase):
 
     @patch('time_util.TimeUtil.generate_sort_key', MagicMock(return_value=1520150552000003))
     @patch('time.time', MagicMock(return_value=1520150552.000003))
+    @patch('me_wallet_token_send.MeWalletTokenSend._MeWalletTokenSend__verify_user_attribute', MagicMock())
     def test_main_ng_with_status_fail_at_SendTransactionError(self):
         with patch('private_chain_util.PrivateChainUtil.send_transaction') \
             as mock_send_transaction, \
@@ -575,7 +590,9 @@ class TestMeWalletTokenSend(TestCase):
             event = {
                 'body': {
                     'recipient_eth_address': '0x2000000000000000000000000000000000000000',
-                    'send_value': target_token_send_value
+                    'send_value': target_token_send_value,
+                    'access_token': 'aaaaa',
+                    'pin_code': '123456'
                 },
                 'requestContext': {
                     'authorizer': {
@@ -612,6 +629,7 @@ class TestMeWalletTokenSend(TestCase):
 
     @patch('time_util.TimeUtil.generate_sort_key', MagicMock(return_value=1520150552000003))
     @patch('time.time', MagicMock(return_value=1520150552.000003))
+    @patch('me_wallet_token_send.MeWalletTokenSend._MeWalletTokenSend__verify_user_attribute', MagicMock())
     def test_main_ng_with_status_fail_at_ReceiptError(self):
         with patch('private_chain_util.PrivateChainUtil.send_transaction') \
             as mock_send_transaction, \
@@ -636,7 +654,9 @@ class TestMeWalletTokenSend(TestCase):
             event = {
                 'body': {
                     'recipient_eth_address': '0x2000000000000000000000000000000000000000',
-                    'send_value': target_token_send_value
+                    'send_value': target_token_send_value,
+                    'access_token': 'aaaaa',
+                    'pin_code': '123456'
                 },
                 'requestContext': {
                     'authorizer': {
@@ -671,12 +691,15 @@ class TestMeWalletTokenSend(TestCase):
             }
             self.assertEqual(expected_token_send, token_send_itmes[0])
 
+    @patch('me_wallet_token_send.MeWalletTokenSend._MeWalletTokenSend__verify_user_attribute', MagicMock())
     def test_main_ng_less_than_min_value(self):
         target_token_send_value = str(settings.parameters['token_send_value']['minimum'] - 1)
         event = {
             'body': {
                 'recipient_eth_address': '0x2000000000000000000000000000000000000000',
-                'send_value': target_token_send_value
+                'send_value': target_token_send_value,
+                'access_token': 'aaaaa',
+                'pin_code': '123456'
             },
             'requestContext': {
                 'authorizer': {
@@ -699,12 +722,15 @@ class TestMeWalletTokenSend(TestCase):
         items = token_send_table_name.scan()['Items']
         self.assertEqual(len(items), 0)
 
+    @patch('me_wallet_token_send.MeWalletTokenSend._MeWalletTokenSend__verify_user_attribute', MagicMock())
     def test_main_ng_minus_value(self):
         target_token_send_value = '-1'
         event = {
             'body': {
                 'recipient_eth_address': '0x2000000000000000000000000000000000000000',
-                'send_value': target_token_send_value
+                'send_value': target_token_send_value,
+                'access_token': 'aaaaa',
+                'pin_code': '123456'
             },
             'requestContext': {
                 'authorizer': {
@@ -727,12 +753,15 @@ class TestMeWalletTokenSend(TestCase):
         items = token_send_table_name.scan()['Items']
         self.assertEqual(len(items), 0)
 
+    @patch('me_wallet_token_send.MeWalletTokenSend._MeWalletTokenSend__verify_user_attribute', MagicMock())
     def test_main_ng_greater_than_max_value(self):
         target_token_send_value = str(settings.parameters['token_send_value']['maximum'] + 1)
         event = {
             'body': {
                 'recipient_eth_address': '0x2000000000000000000000000000000000000000',
-                'send_value': target_token_send_value
+                'send_value': target_token_send_value,
+                'access_token': 'aaaaa',
+                'pin_code': '123456'
             },
             'requestContext': {
                 'authorizer': {
@@ -755,12 +784,15 @@ class TestMeWalletTokenSend(TestCase):
         items = token_send_table_name.scan()['Items']
         self.assertEqual(len(items), 0)
 
+    @patch('me_wallet_token_send.MeWalletTokenSend._MeWalletTokenSend__verify_user_attribute', MagicMock())
     def test_main_ng_not_number_for_value(self):
         target_token_send_value = 'aaaaaaaaaaaaa'
         event = {
             'body': {
                 'recipient_eth_address': '0x2000000000000000000000000000000000000000',
-                'send_value': target_token_send_value
+                'send_value': target_token_send_value,
+                'access_token': 'aaaaa',
+                'pin_code': '123456'
             },
             'requestContext': {
                 'authorizer': {
@@ -783,12 +815,15 @@ class TestMeWalletTokenSend(TestCase):
         items = token_send_table_name.scan()['Items']
         self.assertEqual(len(items), 0)
 
+    @patch('me_wallet_token_send.MeWalletTokenSend._MeWalletTokenSend__verify_user_attribute', MagicMock())
     def test_main_ng_not_string_for_eth_address(self):
         target_token_send_value = str(settings.parameters['token_send_value']['minimum'])
         event = {
             'body': {
                 'recipient_eth_address': 0x2000000000000000000000000000000000000000,
-                'send_value': target_token_send_value
+                'send_value': target_token_send_value,
+                'access_token': 'aaaaa',
+                'pin_code': '123456'
             },
             'requestContext': {
                 'authorizer': {
@@ -811,12 +846,15 @@ class TestMeWalletTokenSend(TestCase):
         items = token_send_table_name.scan()['Items']
         self.assertEqual(len(items), 0)
 
+    @patch('me_wallet_token_send.MeWalletTokenSend._MeWalletTokenSend__verify_user_attribute', MagicMock())
     def test_main_ng_not_match_pattern_for_eth_address(self):
         target_token_send_value = str(settings.parameters['token_send_value']['minimum'])
         event = {
             'body': {
                 'recipient_eth_address': '0x200000000000000000000000000000000000ZZZZ',
-                'send_value': target_token_send_value
+                'send_value': target_token_send_value,
+                'access_token': 'aaaaa',
+                'pin_code': '123456'
             },
             'requestContext': {
                 'authorizer': {
@@ -838,3 +876,52 @@ class TestMeWalletTokenSend(TestCase):
         token_send_table_name = self.dynamodb.Table(os.environ['TOKEN_SEND_TABLE_NAME'])
         items = token_send_table_name.scan()['Items']
         self.assertEqual(len(items), 0)
+
+    def test_main_ng_invalid_pin_code(self):
+        with patch('me_wallet_token_send.MeWalletTokenSend._MeWalletTokenSend__verify_user_attribute') \
+                as mock_verify_user_attribute:
+            target_token_send_value = str(settings.parameters['token_send_value']['minimum'])
+            event = {
+                'body': {
+                    'recipient_eth_address': '0x2000000000000000000000000000000000000000',
+                    'send_value': target_token_send_value,
+                    'access_token': 'aaaaa',
+                    'pin_code': '123456'
+                },
+                'requestContext': {
+                    'authorizer': {
+                        'claims': {
+                            'cognito:username': 'user_01',
+                            'custom:private_eth_address': '0x3000000000000000000000000000000000000000',
+                            'phone_number_verified': 'true',
+                            'email_verified': 'true'
+                        }
+                    }
+                }
+            }
+            event['body'] = json.dumps(event['body'])
+
+            # テスト対象実施
+            mock_verify_user_attribute.side_effect = ClientError({'Error': {'Code': 'NotAuthorizedException'}}, '')
+            response = MeWalletTokenSend(event, {}, self.dynamodb, cognito=None).main()
+            self.assertEqual(response['statusCode'], 400)
+            self.assertIsNotNone(re.match('{"message": "Invalid parameter: Access token is invalid"}', response['body']))
+
+            mock_verify_user_attribute.side_effect = ClientError({'Error': {'Code': 'CodeMismatchException'}}, '')
+            response = MeWalletTokenSend(event, {}, self.dynamodb, cognito=None).main()
+            self.assertEqual(response['statusCode'], 400)
+            self.assertIsNotNone(re.match('{"message": "Invalid parameter: Pin code is invalid"}', response['body']))
+
+            mock_verify_user_attribute.side_effect = ClientError({'Error': {'Code': 'ExpiredCodeException'}}, '')
+            response = MeWalletTokenSend(event, {}, self.dynamodb, cognito=None).main()
+            self.assertEqual(response['statusCode'], 400)
+            self.assertIsNotNone(re.match('{"message": "Invalid parameter: Pin code is expired"}', response['body']))
+
+            mock_verify_user_attribute.side_effect = ClientError({'Error': {'Code': 'LimitExceededException'}}, '')
+            response = MeWalletTokenSend(event, {}, self.dynamodb, cognito=None).main()
+            self.assertEqual(response['statusCode'], 400)
+            self.assertIsNotNone(re.match('{"message": "Invalid parameter: Verification limit is exceeded"}', response['body']))
+
+            mock_verify_user_attribute.side_effect = ClientError({'Error': {'Code': 'Other'}}, '')
+            response = MeWalletTokenSend(event, {}, self.dynamodb, cognito=None).main()
+            self.assertEqual(response['statusCode'], 500)

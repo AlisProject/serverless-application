@@ -58,7 +58,8 @@ class MeAllowedApplicationsIndex(LambdaBase):
                 'clientId': client['clientId'],
                 'clientName': client['clientName'],
                 'clientType': client['clientType'],
-                'createdAt': client['createdAt']
+                'createdAt': client['createdAt'],
+                'description': client.get('description')
             })
 
         return {

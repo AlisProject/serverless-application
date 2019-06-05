@@ -2,7 +2,7 @@ import json
 
 from tests_util import TestsUtil
 from unittest import TestCase
-from unittest.mock import MagicMock
+from unittest.mock import patch, MagicMock
 from jsonschema import ValidationError
 from lambda_base import LambdaBase
 from record_not_found_error import RecordNotFoundError
@@ -134,6 +134,8 @@ class TestLambdaBase(TestCase):
         lambda_impl.main()
         self.assertEqual('oauth_user_id',
                          lambda_impl.event['requestContext']['authorizer']['claims']['cognito:username'])
+        self.assertEqual('true', lambda_impl.event['requestContext']['authorizer']['claims']['phone_number_verified'])
+        self.assertEqual('true', lambda_impl.event['requestContext']['authorizer']['claims']['email_verified'])
 
     def test_update_event_ok_not_updated(self):
         event = {
@@ -164,3 +166,51 @@ class TestLambdaBase(TestCase):
         lambda_impl = self.TestLambdaImpl(event, {})
         lambda_impl.main()
         self.assertFalse(lambda_impl.event.get('requestContext'))
+
+    def test_filter_event_for_log_ok(self):
+        with patch('settings.not_logging_parameters', {"not_logging_param_1", "not_logging_param_2"}), \
+                patch('logging.Logger.info') as mock_logger_info:
+
+            event = {
+                'body': '{"logging_param": "aaaaa", "not_logging_param_1": "bbbbb", "not_logging_param_2": "ccccc"}',
+                'other_part': {}
+            }
+            lambda_impl = self.TestLambdaImpl(event, {})
+            lambda_impl.exec_main_proc = MagicMock(side_effect=Exception())
+
+            lambda_impl.main()
+
+            mock_logger_info.assert_called_with({
+                'body': '{"logging_param": "aaaaa", "not_logging_param_1": "xxxxx", "not_logging_param_2": "xxxxx"}',
+                'other_part': {}
+            })
+
+    def test_filter_event_for_log_ok_with_no_body(self):
+        with patch('logging.Logger.info') as mock_logger_info:
+
+            event = {
+                'other_part': {}
+            }
+            lambda_impl = self.TestLambdaImpl(event, {})
+            lambda_impl.exec_main_proc = MagicMock(side_effect=Exception())
+
+            lambda_impl.main()
+
+            mock_logger_info.assert_called_with({
+                'other_part': {}
+            })
+
+    def test_filter_event_for_log_ok_with_invalid_body(self):
+        with patch('logging.Logger.info') as mock_logger_info:
+
+            event = {
+                'body': 'invalid body'
+            }
+            lambda_impl = self.TestLambdaImpl(event, {})
+            lambda_impl.exec_main_proc = MagicMock(side_effect=Exception())
+
+            lambda_impl.main()
+
+            mock_logger_info.assert_called_with({
+                'body': 'invalid body'
+            })
