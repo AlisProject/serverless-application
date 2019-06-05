@@ -112,10 +112,10 @@
       "PutRequest": {
         "Item": {
           "name": {
-            "S": "sport"
+            "S": "game"
           },
           "display_name": {
-            "S": "スポーツ"
+            "S": "ゲーム"
           },
           "index_hash_key": {
             "S": "topic"
