@@ -56,8 +56,8 @@ class MeApplicationsCreate(LambdaBase):
 
     def __get_client_type_from_application_type(self, application_type):
         if application_type == 'WEB':
-            return 'PUBLIC'
-        elif application_type == 'NATIVE':
             return 'CONFIDENTIAL'
+        elif application_type == 'NATIVE':
+            return 'PUBLIC'
         else:
             raise ValueError('Invalid application_type')
