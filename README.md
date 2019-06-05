@@ -173,11 +173,10 @@ direnv allow
 ### ElasticSearch
 
 ```bash
-# Notice: This is only for production env. Unnecessary for dev env.
 ./deploy.sh elasticsearch
 
 # show ElasticSearch Endpoint
-aws es describe-elasticsearch-domain --domain-name ${ALIS_APP_ID}api | jq '.DomainStatus.Endpoint'
+aws es describe-elasticsearch-domain --domain-name ${ALIS_APP_ID}elasticsearch | jq '.DomainStatus.Endpoint'
 ```
 
 And add ElasticSearch Endpoint to SSM.
