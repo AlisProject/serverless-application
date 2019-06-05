@@ -96,7 +96,7 @@ class MeWalletTip(LambdaBase):
     @staticmethod
     def __is_burnable_user(eth_address, tip_value, burn_quantity):
         url = 'https://' + os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'] + '/production/wallet/balance'
-        payload = {'private_eth_address': eth_address}
+        payload = {'private_eth_address': eth_address[2:]}
         token = PrivateChainUtil.send_transaction(request_url=url, payload_dict=payload)
 
         if token >= tip_value + burn_quantity:
