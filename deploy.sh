@@ -51,6 +51,7 @@ aws cloudformation deploy \
     TopicTableName=${SSM_PARAMS_PREFIX}TopicTableName \
     TagTableName=${SSM_PARAMS_PREFIX}TagTableName \
     TipTableName=${SSM_PARAMS_PREFIX}TipTableName \
+    SucceededTipTableName=${SSM_PARAMS_PREFIX}SucceededTipTableName \
     NonceTableName=${SSM_PARAMS_PREFIX}NonceTableName \
     CommentTableName=${SSM_PARAMS_PREFIX}CommentTableName \
     CommentLikedUserTableName=${SSM_PARAMS_PREFIX}CommentLikedUserTableName \
@@ -61,7 +62,6 @@ aws cloudformation deploy \
     UserFirstExperienceTableName=${SSM_PARAMS_PREFIX}UserFirstExperienceTableName \
     TokenSendTableName=${SSM_PARAMS_PREFIX}TokenSendTableName \
     DistS3BucketName=${SSM_PARAMS_PREFIX}DistS3BucketName \
-    ApiLambdaRole=${SSM_PARAMS_PREFIX}ApiLambdaRole \
     ElasticSearchEndpoint=${SSM_PARAMS_PREFIX}ElasticSearchEndpoint \
     CognitoUserPoolId=${SSM_PARAMS_PREFIX}CognitoUserPoolId \
     CognitoUserPoolAppId=${SSM_PARAMS_PREFIX}CognitoUserPoolAppId \

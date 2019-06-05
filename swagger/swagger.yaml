@@ -528,6 +528,48 @@ paths:
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
+  /articles/tip_ranking:
+    get:
+      description: '投げ銭ランキングの記事一覧を取得する'
+      parameters:
+        - name: 'limit'
+          in: 'query'
+          description: '取得件数'
+          required: false
+          type: 'integer'
+          minimum: 1
+        - name: 'page'
+          in: 'query'
+          description: '取得対象ページのoffset'
+          required: false
+          type: 'integer'
+          minimum: 1
+        - name: 'topic'
+          in: 'query'
+          description: '検索対象のトピック名'
+          required: false
+          type: 'string'
+      responses:
+        '200':
+          description: '投げ銭ランキングの記事一覧'
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ArticleInfo'
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
+              - Fn::ImportValue:
+                  Fn::Sub: "${AlisAppId}-ArticlesTipRanking"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
   /articles/eyecatch:
     get:
       description: 'アイキャッチ記事一覧情報を取得'
@@ -676,6 +718,43 @@ paths:
             statusCode: "200"
         uri:
           Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ArticlesCommentsIndex.Arn}/invocations
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /articles/{article_id}/supporters:
+    get:
+      description: '指定された article_id に投げ銭したユーザーの一覧を返却する'
+      parameters:
+        - name: 'article_id'
+          in: 'path'
+          description: '対象記事の指定するために使用'
+          required: true
+          type: 'string'
+      responses:
+        '200':
+          description: '投げ銭したユーザーの一覧'
+          schema:
+            type: object
+            properties:
+              user_id:
+                type: string
+              user_display_name:
+                type: string
+              icon_image_url:
+                type: string
+              sum_tip_value:
+                type: number
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
+              - Fn::ImportValue:
+                  Fn::Sub: "${AlisAppId}-ArticleSupportersIndex"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy

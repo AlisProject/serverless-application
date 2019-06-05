@@ -257,6 +257,7 @@ not_logging_parameters = {'access_token', 'pin_code'}
 article_recent_default_limit = 20
 users_articles_public_default_limit = 10
 articles_popular_default_limit = 20
+ARTICLES_TIP_RAKING_DEFAULT_LIMIT = 20
 
 USERS_ARTICLE_INDEX_DEFAULT_LIMIT = 10
 NOTIFICATION_INDEX_DEFAULT_LIMIT = 10
@@ -330,6 +331,7 @@ COMMENT_NOTIFICATION_TYPES = [
 ]
 
 ARTICLE_SCORE_INDEX_NAME = 'article_scores'
+ARTICLE_TIP_RANKING_INDEX_NAME = 'tip_ranking'
 TOPIC_INDEX_HASH_KEY = 'topic'
 
 TAG_DENIED_SYMBOL_PATTERN = '([!-,./:-@[-`{-~]|--| {2})'
