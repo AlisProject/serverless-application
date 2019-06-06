@@ -348,7 +348,8 @@ class MeArticlesPurchaseCreate(LambdaBase):
         item = {
             'article_id': self.params['article_id'],
             'user_id': user_id,
-            'status': 'doing'
+            'status': 'doing',
+            'created_at': int(time.time())
         }
         try:
             paid_status_table.put_item(

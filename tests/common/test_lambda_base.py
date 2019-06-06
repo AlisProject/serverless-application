@@ -117,6 +117,55 @@ class TestLambdaBase(TestCase):
         }
         self.assertEqual(expected_headers, lambda_impl.headers)
 
+    def test_update_event_ok(self):
+        event = {
+            'body': {
+                'hoge': 'fuga'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'principalId': 'oauth_user_id'
+                }
+            }
+        }
+
+        lambda_impl = self.TestLambdaImpl(event, {})
+        lambda_impl.main()
+        self.assertEqual('oauth_user_id',
+                         lambda_impl.event['requestContext']['authorizer']['claims']['cognito:username'])
+        self.assertEqual('true', lambda_impl.event['requestContext']['authorizer']['claims']['phone_number_verified'])
+        self.assertEqual('true', lambda_impl.event['requestContext']['authorizer']['claims']['email_verified'])
+
+    def test_update_event_ok_not_updated(self):
+        event = {
+            'body': {
+                'hoge': 'fuga'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test_user_id'
+                    }
+                }
+            }
+        }
+
+        lambda_impl = self.TestLambdaImpl(event, {})
+        lambda_impl.main()
+        self.assertEqual('test_user_id',
+                         lambda_impl.event['requestContext']['authorizer']['claims']['cognito:username'])
+
+    def test_update_event_ok_with_no_authorizer(self):
+        event = {
+            'body': {
+                'hoge': 'fuga'
+            }
+        }
+
+        lambda_impl = self.TestLambdaImpl(event, {})
+        lambda_impl.main()
+        self.assertFalse(lambda_impl.event.get('requestContext'))
+
     def test_filter_event_for_log_ok(self):
         with patch('settings.not_logging_parameters', {"not_logging_param_1", "not_logging_param_2"}), \
                 patch('logging.Logger.info') as mock_logger_info:

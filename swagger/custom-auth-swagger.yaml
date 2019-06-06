@@ -1,0 +1,1736 @@
+swagger: "2.0"
+info:
+  title:
+    Fn::Sub: ${AWS::StackName}
+  version: 1.0.0
+basePath: /
+schemes:
+  - https
+definitions:
+  ArticleInfo:
+    type: object
+    properties:
+      article_id:
+        type: string
+      user_id:
+        type: string
+      title:
+        type: string
+      overview:
+        type: string
+      eye_catch_url:
+        type: string
+      created_at:
+        type: integer
+  ArticleContent:
+    type: object
+    properties:
+      article_id:
+        type: string
+      user_id:
+        type: string
+      title:
+        type: string
+      overview:
+        type: string
+      eye_catch_url:
+        type: string
+      body:
+        type: string
+      created_at:
+        type: integer
+  MeArticlesDraftsTitleUpdate:
+    type: object
+    properties:
+      title:
+        type: string
+  MeArticlesPublicTitleUpdate:
+    type: object
+    properties:
+      title:
+        type: string
+  MeArticlesDraftsBodyUpdate:
+    type: object
+    properties:
+      body:
+        type: string
+  MeArticlesPublicBodyUpdate:
+    type: object
+    properties:
+      body:
+        type: string
+  MeInfoUpdate:
+    type: object
+    properties:
+      user_display_name:
+        type: string
+      self_introduction:
+        type: string
+  MeInfoIcon:
+    type: object
+    properties:
+      icon_image:
+        type: string
+  ArticleImage:
+    type: object
+    properties:
+      article_image:
+        type: string
+  UserInfo:
+    type: object
+    properties:
+      user_id:
+        type: string
+      user_display_name:
+        type: string
+      icon_image_url:
+        type: string
+      self_introduction:
+        type: string
+  UpdateArticle:
+    type: object
+    properties:
+      title:
+        type: string
+      body:
+        type: string
+      eye_catch_url:
+        type: string
+      overview:
+        type: string
+  MeWalletBalance:
+    type: object
+    properties:
+      private_eth_address:
+        type: string
+  MeWalletTip:
+    type: object
+    properties:
+      article_id:
+        type: string
+      tip_value:
+        type: string
+  MeExternalProviderUserCreate:
+    type: object
+    properties:
+      user_id:
+        type: string
+  SignUpLineAuthorizeUrl:
+    type: object
+    properties:
+      callback_url:
+        type: string
+  LoginLineAuthorizeUrl:
+    type: object
+    properties:
+      callback_url:
+        type: string
+  LoginLineAuthorizeRequest:
+    type: object
+    properties:
+      accessToken:
+        type: string
+      lastAuthUser:
+        type: string
+      idToken:
+        type: string
+      refreshToken:
+        type: string
+      hasUserId:
+        type: boolean
+  Notification:
+    type: object
+    properties:
+      user_id:
+        type: string
+      sort_key:
+        type: integer
+      type:
+        type: string
+      acted_user_id:
+        type: string
+      created_at:
+        type: integer
+  Comment:
+    type: object
+    properties:
+      comment_id:
+        type: string
+      article_id:
+        type: string
+      sort_key:
+        type: integer
+      user_id:
+        type: string
+      text:
+        type: string
+      created_at:
+        type: integer
+  Topic:
+    type: object
+    properties:
+      name:
+        type: string
+      display_name:
+        type: string
+      order:
+        type: integer
+      index_hash_key:
+        type: string
+  Publish:
+    type: object
+    properties:
+      topic:
+        type: string
+      tags:
+        type: array
+        items:
+          type: string
+  PublishWithHeader:
+    type: object
+    properties:
+      topic:
+        type: string
+      tags:
+        type: array
+        items:
+          type: string
+      eye_catch_url:
+        type: string
+  Tag:
+    type: object
+    properties:
+      name:
+        type: string
+      name_with_analyzer:
+        type: string
+      count:
+        type: integer
+      created_at:
+        type: integer
+  Fraud:
+    type: object
+    properties:
+      reason:
+        type: 'string'
+        enum:
+        - 'illegal_act'
+        - 'anything_contrary_to_public_order'
+        - 'nuisance'
+        - 'copyright_violation'
+        - 'slander'
+        - 'illegal_token_usage'
+        - 'other'
+      origin_url:
+        type: 'string'
+      free_text:
+        type: 'string'
+  DistributedTokens:
+    type: object
+    properties:
+      article:
+        type: integer
+      like:
+        type: integer
+      tip:
+        type: integer
+      bonus:
+        type: integer
+paths:
+  /search/articles:
+    get:
+      description: "記事検索"
+      parameters:
+      - name: "query"
+        in: "query"
+        description: "検索ワード(tag, queryいずれかは必須)"
+        required: false
+        type: "string"
+      - name: "limit"
+        in: "query"
+        description: "取得件数"
+        required: false
+        type: "integer"
+        minimum: 1
+      - name: "page"
+        in: "query"
+        description: "ページ"
+        required: false
+        type: "integer"
+      - name: "tag"
+        in: "query"
+        description: "検索タグ(tag, queryいずれかは必須)"
+        required: false
+        type: "integer"
+      responses:
+        "200":
+          description: "検索記事一覧"
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ArticleInfo'
+      security:
+        - CustomAuthorizer: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-ElasticSearchSearchArticles"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /search/users:
+    get:
+      description: "ユーザー検索"
+      parameters:
+      - name: "query"
+        in: "query"
+        description: "検索ワード"
+        required: true
+        type: "string"
+      - name: "limit"
+        in: "query"
+        description: "取得件数"
+        required: false
+        type: "integer"
+        minimum: 1
+      - name: "page"
+        in: "query"
+        description: "ページ"
+        required: false
+        type: "integer"
+      responses:
+        "200":
+          description: "検索ユーザー一覧"
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/UserInfo'
+      security:
+        - CustomAuthorizer: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-ElasticSearchSearchUsers"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /search/tags:
+    get:
+      description: "タグ検索"
+      parameters:
+      - name: "query"
+        in: "query"
+        description: "検索ワード"
+        required: true
+        type: "string"
+      - name: "limit"
+        in: "query"
+        description: "取得件数"
+        required: false
+        type: "integer"
+        minimum: 1
+      - name: "page"
+        in: "query"
+        description: "ページ"
+        required: false
+        type: "integer"
+      responses:
+        "200":
+          description: "タグ一覧"
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Tag'
+      security:
+        - CustomAuthorizer: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-ElasticSearchSearchTags"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /articles/recent:
+    get:
+      description: "最新記事一覧情報を取得"
+      parameters:
+      - name: "limit"
+        in: "query"
+        description: "取得件数"
+        required: false
+        type: "integer"
+        minimum: 1
+      - name: "topic"
+        in: "query"
+        description: "トピック"
+        required: false
+        type: "string"
+      - name: "page"
+        in: "query"
+        description: "ページ数"
+        required: false
+        type: "integer"
+      responses:
+        "200":
+          description: "最新記事一覧"
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ArticleInfo'
+      security:
+        - CustomAuthorizer: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-ArticlesRecent"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /articles/popular:
+    get:
+      description: '人気記事一覧情報を取得'
+      parameters:
+      - name: 'limit'
+        in: 'query'
+        description: '取得件数'
+        required: false
+        type: 'integer'
+        minimum: 1
+      - name: 'page'
+        in: 'query'
+        description: '取得対象ページのoffset'
+        required: false
+        type: 'integer'
+        minimum: 1
+      - name: 'topic'
+        in: 'query'
+        description: '検索対象のトピック名'
+        required: false
+        type: 'string'
+      responses:
+        '200':
+          description: '人気記事一覧'
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ArticleInfo'
+      security:
+        - CustomAuthorizer: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-ArticlesPopular"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /articles/eyecatch:
+    get:
+      description: 'アイキャッチ記事一覧情報を取得'
+      responses:
+        '200':
+          description: 'アイキャッチ記事一覧'
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ArticleInfo'
+      security:
+        - CustomAuthorizer: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-ArticlesEyecatch"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /articles/recommended:
+    get:
+      description: 'オススメ記事一覧情報を取得'
+      parameters:
+      - name: 'limit'
+        in: 'query'
+        description: '取得件数'
+        required: false
+        type: 'integer'
+        minimum: 1
+      - name: 'page'
+        in: 'query'
+        description: '取得対象ページのoffset'
+        required: false
+        type: 'integer'
+        minimum: 1
+      responses:
+        '200':
+          description: 'オススメ記事一覧'
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ArticleInfo'
+      security:
+        - CustomAuthorizer: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-ArticlesRecommended"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /articles/{article_id}:
+    get:
+      description: "指定されたarticle_idの記事情報を取得"
+      parameters:
+      - name: "article_id"
+        in: "path"
+        description: "対象記事の指定するために使用"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "記事内容取得"
+          schema:
+            $ref: '#/definitions/ArticleContent'
+      security:
+        - CustomAuthorizer: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-ArticlesShow"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /articles/{article_id}/alistoken:
+    get:
+      description: "指定された article_id のALISトークン数を取得"
+      parameters:
+      - name: "article_id"
+        in: "path"
+        description: "対象記事の指定するために使用"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "ALISトークン数"
+          schema:
+            type: object
+            properties:
+              alistoken:
+                type: "number"
+                format: "double"
+      security:
+        - CustomAuthorizer: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-ArticlesAlisTokensShow"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /articles/{article_id}/likes:
+    get:
+      description: '指定された article_id の記事の「いいね」数を取得'
+      parameters:
+      - name: 'article_id'
+        in: 'path'
+        description: '対象記事の指定するために使用'
+        required: true
+        type: 'string'
+      responses:
+        '200':
+          description: '対象記事の「いいね」数'
+          schema:
+            type: object
+            properties:
+              count:
+                type: "number"
+                format: "double"
+      security:
+        - CustomAuthorizer: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-ArticlesLikesShow"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /articles/{article_id}/comments:
+    get:
+      description: '指定された article_id の記事のコメントの一覧を取得する'
+      parameters:
+      - name: 'article_id'
+        in: 'path'
+        description: '対象記事の指定するために使用'
+        required: true
+        type: 'string'
+      responses:
+        '200':
+          description: '対象記事のコメントの一覧'
+          schema:
+            $ref: '#/definitions/Comment'
+      security:
+        - CustomAuthorizer: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-ArticlesCommentsIndex"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /comments/{comment_id}/likes:
+    get:
+      description: '指定されたコメントに付与されているいいね数を取得する'
+      parameters:
+      - name: 'comment_id'
+        in: 'path'
+        description: '対象コメントを指定するために使用'
+        required: true
+        type: 'string'
+      responses:
+        '200':
+          description: '対象記事のコメントの一覧'
+          schema:
+            type: object
+            properties:
+              count:
+                type: "number"
+                format: "double"
+      security:
+        - CustomAuthorizer: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-CommentsLikesShow"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /me/articles/drafts:
+    get:
+      description: '下書き記事一覧情報を取得'
+      parameters:
+      - name: 'limit'
+        in: 'query'
+        description: '取得件数'
+        required: false
+        type: 'integer'
+        minimum: 1
+      - name: 'article_id'
+        in: 'query'
+        description: 'ページング処理における、現在のページの最後の記事のID'
+        required: false
+        type: 'string'
+      - name: 'sort_key'
+        in: 'query'
+        description: 'ページング処理における、現在のページの最後の記事のソートキー'
+        required: false
+        type: 'integer'
+        minimum: 1
+      responses:
+        '200':
+          description: '下書き記事一覧'
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ArticleInfo'
+      security:
+        - CustomAuthorizer: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: '200'
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeArticlesDraftsIndex"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /me/articles/drafts/article_id:
+    post:
+      description: 'article_idを作成'
+      responses:
+        '200':
+          description: '作成された記事ID'
+          schema:
+            type: object
+            properties:
+              article_id:
+                type: 'string'
+      security:
+        - CustomAuthorizer: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: '200'
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeArticlesDraftsArticleIdCreate"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /me/articles/{article_id}/drafts/publish_with_header:
+    put:
+      description: "指定された article_id の下書き記事を公開"
+      parameters:
+      - name: 'article_id'
+        in: 'path'
+        description: '対象記事の指定するために使用'
+        required: true
+        type: 'string'
+      - name: 'publish'
+        in: 'body'
+        description: 'publish object'
+        required: true
+        schema:
+          $ref: '#/definitions/PublishWithHeader'
+      responses:
+        '200':
+          description: 'successful operation'
+      security:
+        - CustomAuthorizer: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: '200'
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeArticlesDraftsPublishWithHeader"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /me/articles/public:
+    get:
+      description: '公開記事一覧情報を取得'
+      parameters:
+      - name: 'limit'
+        in: 'query'
+        description: '取得件数'
+        required: false
+        type: 'integer'
+        minimum: 1
+      - name: 'article_id'
+        in: 'query'
+        description: 'ページング処理における、現在のページの最後の記事のID'
+        required: false
+        type: 'string'
+      - name: 'sort_key'
+        in: 'query'
+        description: 'ページング処理における、現在のページの最後の記事のソートキー'
+        required: false
+        type: 'integer'
+        minimum: 1
+      responses:
+        '200':
+          description: '公開記事一覧'
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ArticleInfo'
+      security:
+        - CustomAuthorizer: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: '200'
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeArticlesPublicIndex"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /me/articles/{article_id}/public:
+    get:
+      description: '指定された article_id の公開記事情報を取得'
+      parameters:
+      - name: 'article_id'
+        in: 'path'
+        description: '対象記事の指定するために使用'
+        required: true
+        type: 'string'
+      responses:
+        '200':
+          description: '記事内容取得'
+          schema:
+            $ref: '#/definitions/ArticleContent'
+      security:
+        - CustomAuthorizer: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: '200'
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeArticlesPublicShow"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /me/articles/{article_id}/public/edit:
+    get:
+      description: '指定された article_id の編集記事情報を取得'
+      parameters:
+      - name: 'article_id'
+        in: 'path'
+        description: '対象記事を指定するために使用'
+        required: true
+        type: 'string'
+      responses:
+        '200':
+          description: '記事内容取得'
+          schema:
+            $ref: '#/definitions/ArticleContent'
+      security:
+        - CustomAuthorizer: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: '200'
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeArticlesPublicEdit"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /me/articles/{article_id}/public/unpublish:
+    put:
+      description: '指定された article_id の公開記事を下書きに戻す'
+      parameters:
+      - name: 'article_id'
+        in: 'path'
+        description: '対象記事を指定するために使用'
+        required: true
+        type: 'string'
+      responses:
+        '200':
+          description: 'successful operation'
+      security:
+        - CustomAuthorizer: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: '200'
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeArticlesPublicUnpublish"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /me/articles/{article_id}/public/republish_with_header:
+    put:
+      description: '指定された article_id の編集記事を公開する'
+      parameters:
+      - name: 'article_id'
+        in: 'path'
+        description: '対象記事を指定するために使用'
+        required: true
+        type: 'string'
+      - name: 'publish'
+        in: 'body'
+        description: 'publish object'
+        required: true
+        schema:
+          $ref: '#/definitions/PublishWithHeader'
+      responses:
+        '200':
+          description: 'successful operation'
+      security:
+        - CustomAuthorizer: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: '200'
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeArticlesPublicRepublishWithHeader"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /me/articles/{article_id}/like:
+    get:
+      description: '指定された article_id の記事に「いいね」を行ったかを確認'
+      parameters:
+      - name: 'article_id'
+        in: 'path'
+        description: '対象記事の指定するために使用'
+        required: true
+        type: 'string'
+      responses:
+        '200':
+          description: '対象記事に「いいね」を行ったかを判定'
+          schema:
+            type: object
+            properties:
+              liked:
+                type: boolean
+      security:
+        - CustomAuthorizer: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeArticlesLikesShow"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /me/articles/{article_id}/comments:
+    post:
+      description: '指定された article_id の記事に対してコメントを登録する'
+      parameters:
+      - name: 'article_id'
+        in: 'path'
+        description: '対象記事の指定するために使用'
+        required: true
+        type: 'string'
+      responses:
+        '200':
+          description: 'コメント登録の完了'
+          schema:
+            type: object
+            properties:
+              comment_id:
+                type: 'string'
+      security:
+        - CustomAuthorizer: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeArticlesCommentsCreate"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /me/articles/{article_id}/comments/reply:
+    post:
+      description: '指定された article_id の記事に対してコメントの返信を登録する'
+      parameters:
+      - name: 'article_id'
+        in: 'path'
+        description: '対象記事の指定するために使用'
+        required: true
+        type: 'string'
+      - name: 'text'
+        in: 'body'
+        description: 'コメントの内容'
+        required: true
+        type: 'string'
+      - name: 'parent_id'
+        in: 'body'
+        description: '返信するスレッドの親コメントのid'
+        required: true
+        type: 'string'
+      - name: 'replyed_user_id'
+        in: 'body'
+        description: '返信先のユーザーのid'
+        required: true
+        type: 'string'
+      responses:
+        '200':
+          description: 'コメント登録の完了'
+          schema:
+            type: object
+            properties:
+              comment_id:
+                type: 'string'
+      security:
+      - CustomAuthorizer: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeArticlesCommentsReply"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /me/articles/{article_id}/comments/likes:
+    get:
+      description: '指定された記事のコメントの中で、自分がいいねを実行したコメントのIDの一覧を取得する'
+      parameters:
+      - name: 'article_id'
+        in: 'path'
+        description: '対象記事を指定するために使用'
+        required: true
+        type: 'string'
+      responses:
+        '200':
+          description: 'いいねを実施したコメントのIDの一覧'
+          schema:
+            type: object
+            properties:
+              comment_ids:
+                type: array
+                items:
+                  type: 'string'
+                  enum:
+                    - "comment_id"
+      security:
+        - CustomAuthorizer: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeArticlesCommentsLikesIndex"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /me/comments/{comment_id}:
+    delete:
+      description: '指定されたコメントを削除する'
+      parameters:
+      - name: 'comment_id'
+        in: 'path'
+        description: '対象コメントを指定するために使用'
+        required: true
+        type: 'string'
+      responses:
+        '200':
+          description: 'コメント削除の完了'
+      security:
+        - CustomAuthorizer: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeCommentsDelete"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /me/comments/{comment_id}/likes:
+    post:
+      description: '指定されたコメントに対していいねする'
+      parameters:
+      - name: 'comment_id'
+        in: 'path'
+        description: '対象コメントを指定するために使用'
+        required: true
+        type: 'string'
+      responses:
+        '200':
+          description: 'いいねの完了'
+      security:
+        - CustomAuthorizer: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeCommentsLikesCreate"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /me/articles/{article_id}/fraud:
+    post:
+      description: '対象記事に不正報告を行う'
+      parameters:
+      - name: 'article_id'
+        in: 'path'
+        description: '対象記事の指定するために使用'
+        required: true
+        type: 'string'
+      - name: 'Fraud'
+        in: 'body'
+        required: true
+        schema:
+          $ref: '#/definitions/Fraud'
+      responses:
+        '200':
+          description: '不正報告の実施成功'
+      security:
+        - CustomAuthorizer: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeArticlesFraudCreate"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /me/articles/{article_id}/image_upload_url:
+    get:
+      description: '対象記事に画像データをアップロードできるURLを取得'
+      parameters:
+      - name: 'article_id'
+        description: '対象記事の指定するために使用'
+        in: 'path'
+        required: true
+        type: 'string'
+      - name: 'upload_image_size'
+        in: 'query'
+        description: '対象画像のサイズ(byte)'
+        required: true
+        type: 'integer'
+      - name: 'upload_image_extension'
+        in: 'query'
+        description: '対象画像の拡張子'
+        required: true
+        schema:
+          type: 'string'
+          enum:
+          - 'gif'
+          - 'jpg'
+          - 'jpeg'
+          - 'png'
+      responses:
+        '200':
+          description: 'アップロード用のURL'
+          schema:
+            type: object
+            properties:
+              image_url:
+                type: 'string'
+      security:
+        - CustomAuthorizer: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeArticlesImageUploadUrlShow"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /me/info:
+    get:
+      description: 'ログインユーザ情報を取得'
+      responses:
+        '200':
+          description: 'ログインユーザ情報'
+          schema:
+            $ref: '#/definitions/UserInfo'
+      security:
+        - CustomAuthorizer: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeInfoShow"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+    put:
+      description: 'ユーザ情報を更新'
+      parameters:
+      - name: 'user info'
+        in: 'body'
+        description: 'user info object'
+        required: true
+        schema:
+          $ref: '#/definitions/MeInfoUpdate'
+      responses:
+        '200':
+          description: 'ユーザ情報更新成功'
+      security:
+        - CustomAuthorizer: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: '200'
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeInfoUpdate"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /me/info/icon:
+    post:
+      description: 'ユーザアイコンを登録'
+      produces:
+      - application/json
+        application/octet-stream
+      parameters:
+        - name: 'icon'
+          in: 'body'
+          description: 'icon object'
+          required: true
+          schema:
+            $ref: '#/definitions/MeInfoIcon'
+      responses:
+        '200':
+          description: '登録した画像データのURL'
+          schema:
+            type: object
+            properties:
+              image_url:
+                type: 'string'
+      security:
+        - CustomAuthorizer: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeInfoIconCreate"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /users/{user_id}/articles/public:
+    get:
+      description: '指定されたユーザーの公開記事一覧情報を取得'
+      parameters:
+      - name: 'user_id'
+        in: 'path'
+        description: '対象ユーザを指定するために使用'
+        required: true
+        type: 'string'
+      - name: 'limit'
+        in: 'query'
+        description: '取得件数'
+        required: false
+        type: 'integer'
+        minimum: 1
+      - name: 'article_id'
+        in: 'query'
+        description: 'ページング処理における、現在のページの最後の記事のID'
+        required: false
+        type: 'string'
+      - name: 'sort_key'
+        in: 'query'
+        description: 'ページング処理における、現在のページの最後の記事のソートキー'
+        required: false
+        type: 'integer'
+        minimum: 1
+      responses:
+        '200':
+          description: '公開記事一覧'
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ArticleInfo'
+      security:
+        - CustomAuthorizer: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: '200'
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-UsersArticlesPublic"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /me/articles/{article_id}/drafts:
+    get:
+      description: '指定されたIDの下書き記事取得を取得'
+      parameters:
+      - name: 'article_id'
+        in: 'path'
+        description: '対象記事の指定するために使用'
+        required: true
+        type: 'string'
+      responses:
+        '200':
+          description: '記事内容取得'
+          schema:
+            $ref: '#/definitions/ArticleContent'
+      security:
+        - CustomAuthorizer: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: '200'
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeArticlesDraftsShow"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /me/articles/{article_id}/drafts/title:
+    put:
+      description: '下書き記事のタイトル更新'
+      parameters:
+      - name: 'article_id'
+        in: 'path'
+        description: '対象記事を指定するために使用'
+        required: true
+        type: 'string'
+      - name: 'title'
+        in: 'body'
+        description: 'title object'
+        required: true
+        schema:
+          $ref: '#/definitions/MeArticlesDraftsTitleUpdate'
+      responses:
+        '200':
+          description: 'successful operation'
+      security:
+        - CustomAuthorizer: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: '200'
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeArticlesDraftsTitleUpdate"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /me/articles/{article_id}/drafts/body:
+    put:
+      description: '下書き記事のbody更新'
+      parameters:
+      - name: 'article_id'
+        in: 'path'
+        description: '対象記事を指定するために使用'
+        required: true
+        type: 'string'
+      - name: 'body'
+        in: 'body'
+        description: 'body object'
+        required: true
+        schema:
+          $ref: '#/definitions/MeArticlesDraftsBodyUpdate'
+      responses:
+        '200':
+          description: 'successful operation'
+      security:
+        - CustomAuthorizer: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: '200'
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeArticlesDraftsBodyUpdate"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /me/articles/{article_id}/public/title:
+    put:
+      description: '公開記事のタイトル更新'
+      parameters:
+      - name: 'article_id'
+        in: 'path'
+        description: '対象記事を指定するために使用'
+        required: true
+        type: 'string'
+      - name: 'title'
+        in: 'body'
+        description: 'title object'
+        required: true
+        schema:
+          $ref: '#/definitions/MeArticlesPublicTitleUpdate'
+      responses:
+        '200':
+          description: 'successful operation'
+      security:
+      - CustomAuthorizer: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: '200'
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeArticlesPublicTitleUpdate"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /me/articles/{article_id}/public/body:
+    put:
+      description: '公開記事のbody更新'
+      parameters:
+      - name: 'article_id'
+        in: 'path'
+        description: '対象記事を指定するために使用'
+        required: true
+        type: 'string'
+      - name: 'body'
+        in: 'body'
+        description: 'body object'
+        required: true
+        schema:
+          $ref: '#/definitions/MeArticlesPublicBodyUpdate'
+      responses:
+        '200':
+          description: 'successful operation'
+      security:
+      - CustomAuthorizer: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: '200'
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeArticlesPublicBodyUpdate"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /users/{user_id}/info:
+    get:
+      description: '指定されたユーザーのユーザ情報を取得'
+      parameters:
+      - name: 'user_id'
+        in: 'path'
+        description: '対象ユーザを指定するために使用'
+        required: true
+        type: 'string'
+      responses:
+        '200':
+          description: '対象ユーザ情報'
+          schema:
+            $ref: '#/definitions/UserInfo'
+      security:
+        - CustomAuthorizer: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: '200'
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-UsersInfo"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /me/notifications:
+    get:
+      description: ログインユーザーの通知の一覧を取得
+      responses:
+        '200':
+          description: 'ログインユーザーの通知の一覧'
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Notification'
+      security:
+        - CustomAuthorizer: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: '200'
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeNotificationsIndex"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /me/unread_notification_managers:
+    get:
+      description: 'ログインユーザーの通知の未読情報を取得'
+      responses:
+        '200':
+          description: '対象ユーザの通知未読情報'
+          schema:
+            type: object
+            properties:
+              unread:
+                type: boolean
+      security:
+        - CustomAuthorizer: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: '200'
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeUnreadNotificationManagersShow"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+    put:
+      description: 'ログインユーザーの通知の未読情報を未読に更新する'
+      responses:
+        '200':
+          description: 'successful operation'
+      security:
+        - CustomAuthorizer: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: '200'
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeUnreadNotificationManagersUpdate"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /topics:
+    get:
+      description: トピックの一覧を取得
+      responses:
+        '200':
+          description: トピックの一覧
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Topic'
+      security:
+        - CustomAuthorizer: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: '200'
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-TopicsIndex"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /me/users/{user_id}/fraud:
+    post:
+      description: '対象ユーザーに不正報告を行う'
+      parameters:
+      - name: 'user_id'
+        in: 'path'
+        description: '対象ユーザーの指定するために使用'
+        required: true
+        type: 'string'
+      - name: 'Fraud'
+        in: 'body'
+        required: true
+        schema:
+          $ref: '#/definitions/Fraud'
+      responses:
+        '200':
+          description: '不正報告の実施成功'
+          in: 'body'
+          required: true
+          schema:
+            $ref: '#/definitions/Fraud'
+      security:
+        - CustomAuthorizer: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: '200'
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+              - Fn::ImportValue:
+                  Fn::Sub: "${FunctionDeployStackName}-MeUsersFraudCreate"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+securityDefinitions:
+  CustomAuthorizer:
+    type: apiKey
+    name: Authorization
+    in: header
+    x-amazon-apigateway-authtype: custom
+    x-amazon-apigateway-authorizer:
+      type: token
+      authorizerUri:
+        Fn::Join:
+          - ''
+          - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+            - Fn::ImportValue:
+                Fn::Sub: "${FunctionDeployStackName}-Authorizer"
+            - "/invocations"
+      authorizerCredentials:
+        Fn::Sub: ${ApiGatewayAuthorizerRole.Arn}
+      authorizerResultTtlInSeconds: 0

@@ -1,3 +1,5 @@
+import sys
+
 parameters = {
     'limit': {
         'type': 'integer',
@@ -186,11 +188,47 @@ parameters = {
             'is_created_article'
         ]
     },
+    'oauth_client': {
+        'client_id': {
+            'type': 'integer',
+            'minimum': 1,
+            'maximum': sys.maxsize
+        },
+        'name': {
+            'type': 'string',
+            'maxLength': 80
+        },
+        'description': {
+            'type': 'string',
+            'maxLength': 180
+        },
+        'application_type': {
+            'type': 'string',
+            'enum': [
+                'WEB',
+                'NATIVE'
+            ]
+        },
+        'redirect_urls': {
+            'type': 'array',
+            'items': {
+                'type': 'string',
+                'format': 'uri',
+                'maxLength': 200
+            },
+            'maxItems': 5
+        }
+    },
     'code': {
         'type': 'string'
     },
     'state': {
         'type': 'string'
+    },
+    'authlete_allowed_app_index_parameter': {
+        'type': 'integer',
+        'minimum': 0,
+        'maximum': 2147483647
     },
     'price': {
         'type': 'number',
@@ -343,3 +381,7 @@ ARTICLE_PURCHASE_ERROR_TYPE = 'purchase_error'
 HISTORY_RANGE_DAYS = 30
 AVERAGE_BLOCK_TIME = 30
 TRANSACTION_CONFIRM_COUNT = 5
+
+AUTHLETE_CLIENT_ENDPOINT = 'https://api.authlete.com/api/client'
+AUTHLETE_SCOPE_READ = 'read'
+AUTHLETE_SCOPE_WRITE = 'write'

@@ -1,0 +1,397 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Lambda functions and API Gateway resources for the ALIS application.
+
+Parameters:
+  FunctionDeployStackName:
+    Type: String
+Resources:
+  RestApiWithCustomAuthorizer:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: oauth2api
+      EndpointConfiguration: REGIONAL
+      DefinitionBody:
+        Fn::Transform:
+          Name: AWS::Include
+          Parameters:
+            Location: ./swagger/custom-auth-swagger.yaml
+  ApiGatewayAuthorizerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "apigateway.amazonaws.com"
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyName: "InvokeAuthorizerFunction"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - lambda:InvokeAsync
+                  - lambda:InvokeFunction
+                Resource:
+                  Fn::Join:
+                    - ''
+                    - - Fn::Sub: "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:"
+                      - Fn::ImportValue:
+                          Fn::Sub: "${FunctionDeployStackName}-Authorizer"
+  ElasticSearchSearchArticlesLambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName:
+        Fn::ImportValue:
+          !Sub "${FunctionDeployStackName}-ElasticSearchSearchArticles"
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+  ElasticSearchSearchUsersLambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName:
+        Fn::ImportValue:
+          !Sub "${FunctionDeployStackName}-ElasticSearchSearchUsers"
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+  ElasticSearchSearchTagsLambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName:
+        Fn::ImportValue:
+          !Sub "${FunctionDeployStackName}-ElasticSearchSearchTags"
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+  ArticlesRecentLambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName:
+        Fn::ImportValue:
+          !Sub "${FunctionDeployStackName}-ArticlesRecent"
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+  ArticlesPopularLambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName:
+        Fn::ImportValue:
+          !Sub "${FunctionDeployStackName}-ArticlesPopular"
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+  ArticlesEyecatchLambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName:
+        Fn::ImportValue:
+          !Sub "${FunctionDeployStackName}-ArticlesEyecatch"
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+  ArticlesRecommendedLambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName:
+        Fn::ImportValue:
+          !Sub "${FunctionDeployStackName}-ArticlesRecommended"
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+  ArticlesShowLambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName:
+        Fn::ImportValue:
+          !Sub "${FunctionDeployStackName}-ArticlesShow"
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+  ArticlesAlisTokensShowLambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName:
+        Fn::ImportValue:
+          !Sub "${FunctionDeployStackName}-ArticlesAlisTokensShow"
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+  ArticlesLikesShowLambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName:
+        Fn::ImportValue:
+          !Sub "${FunctionDeployStackName}-ArticlesLikesShow"
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+  ArticlesCommentsIndexLambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName:
+        Fn::ImportValue:
+          !Sub "${FunctionDeployStackName}-ArticlesCommentsIndex"
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+  CommentsLikesShowLambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName:
+        Fn::ImportValue:
+          !Sub "${FunctionDeployStackName}-CommentsLikesShow"
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+  MeArticlesDraftsIndexLambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName:
+        Fn::ImportValue:
+          !Sub "${FunctionDeployStackName}-MeArticlesDraftsIndex"
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+  MeArticlesDraftsArticleIdCreateLambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName:
+        Fn::ImportValue:
+          !Sub "${FunctionDeployStackName}-MeArticlesDraftsArticleIdCreate"
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+  MeArticlesDraftsPublishWithHeaderLambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName:
+        Fn::ImportValue:
+          !Sub "${FunctionDeployStackName}-MeArticlesDraftsPublishWithHeader"
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+  MeArticlesPublicIndexLambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName:
+        Fn::ImportValue:
+          !Sub "${FunctionDeployStackName}-MeArticlesPublicIndex"
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+  MeArticlesPublicShowLambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName:
+        Fn::ImportValue:
+          !Sub "${FunctionDeployStackName}-MeArticlesPublicShow"
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+  MeArticlesPublicEditLambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName:
+        Fn::ImportValue:
+          !Sub "${FunctionDeployStackName}-MeArticlesPublicEdit"
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+  MeArticlesPublicUnpublishLambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName:
+        Fn::ImportValue:
+          !Sub "${FunctionDeployStackName}-MeArticlesPublicUnpublish"
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+  MeArticlesPublicRepublishWithHeaderLambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName:
+        Fn::ImportValue:
+          !Sub "${FunctionDeployStackName}-MeArticlesPublicRepublishWithHeader"
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+  MeArticlesLikesShowLambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName:
+        Fn::ImportValue:
+          !Sub "${FunctionDeployStackName}-MeArticlesLikesShow"
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+  MeArticlesCommentsCreateLambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName:
+        Fn::ImportValue:
+          !Sub "${FunctionDeployStackName}-MeArticlesCommentsCreate"
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+  MeArticlesCommentsReplyLambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName:
+        Fn::ImportValue:
+          !Sub "${FunctionDeployStackName}-MeArticlesCommentsReply"
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+  MeArticlesCommentsLikesIndexLambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName:
+        Fn::ImportValue:
+          !Sub "${FunctionDeployStackName}-MeArticlesCommentsLikesIndex"
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+  MeCommentsDeleteLambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName:
+        Fn::ImportValue:
+          !Sub "${FunctionDeployStackName}-MeCommentsDelete"
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+  MeCommentsLikesCreateLambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName:
+        Fn::ImportValue:
+          !Sub "${FunctionDeployStackName}-MeCommentsLikesCreate"
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+  MeArticlesFraudCreateLambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName:
+        Fn::ImportValue:
+          !Sub "${FunctionDeployStackName}-MeArticlesFraudCreate"
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+  MeArticlesImageUploadUrlShowLambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName:
+        Fn::ImportValue:
+          !Sub "${FunctionDeployStackName}-MeArticlesImageUploadUrlShow"
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+  MeInfoShowLambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName:
+        Fn::ImportValue:
+          !Sub "${FunctionDeployStackName}-MeInfoShow"
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+  MeInfoUpdateLambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName:
+        Fn::ImportValue:
+          !Sub "${FunctionDeployStackName}-MeInfoUpdate"
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+  MeInfoIconCreateLambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName:
+        Fn::ImportValue:
+          !Sub "${FunctionDeployStackName}-MeInfoIconCreate"
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+  UsersArticlesPublicLambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName:
+        Fn::ImportValue:
+          !Sub "${FunctionDeployStackName}-UsersArticlesPublic"
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+  MeArticlesDraftsShowLambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName:
+        Fn::ImportValue:
+          !Sub "${FunctionDeployStackName}-MeArticlesDraftsShow"
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+  MeArticlesDraftsTitleUpdateLambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName:
+        Fn::ImportValue:
+          !Sub "${FunctionDeployStackName}-MeArticlesDraftsTitleUpdate"
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+  MeArticlesDraftsBodyUpdateLambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName:
+        Fn::ImportValue:
+          !Sub "${FunctionDeployStackName}-MeArticlesDraftsBodyUpdate"
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+  MeArticlesPublicTitleUpdateLambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName:
+        Fn::ImportValue:
+          !Sub "${FunctionDeployStackName}-MeArticlesPublicTitleUpdate"
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+  MeArticlesPublicBodyUpdateLambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName:
+        Fn::ImportValue:
+          !Sub "${FunctionDeployStackName}-MeArticlesPublicBodyUpdate"
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+  UsersInfoLambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName:
+        Fn::ImportValue:
+          !Sub "${FunctionDeployStackName}-UsersInfo"
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+  MeNotificationsIndexLambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName:
+        Fn::ImportValue:
+          !Sub "${FunctionDeployStackName}-MeNotificationsIndex"
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+  MeUnreadNotificationManagersShowLambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName:
+        Fn::ImportValue:
+          !Sub "${FunctionDeployStackName}-MeUnreadNotificationManagersShow"
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+  MeUnreadNotificationManagersUpdateLambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName:
+        Fn::ImportValue:
+          !Sub "${FunctionDeployStackName}-MeUnreadNotificationManagersUpdate"
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+  TopicsIndexLambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName:
+        Fn::ImportValue:
+          !Sub "${FunctionDeployStackName}-TopicsIndex"
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+  MeUsersFraudCreateLambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName:
+        Fn::ImportValue:
+          !Sub "${FunctionDeployStackName}-MeUsersFraudCreate"
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+  AuthorizerLambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName:
+        Fn::ImportValue:
+          !Sub "${FunctionDeployStackName}-Authorizer"
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
