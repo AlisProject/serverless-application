@@ -6,13 +6,17 @@ references:
       version: 17.11.0-ce
 
 executors:
-  deployment:
+  python3_6_1:
     working_directory: /tmp/repo
     docker:
       - image: circleci/python:3.6.1
 
 commands:
-  prepare-deployment:
+  prepare-resources:
+    parameters:
+      resource:
+        type: string
+        default: 'requirements.txt'
     steps:
       - checkout
 
@@ -20,7 +24,7 @@ commands:
 
       - restore_cache:
           keys:
-            - v3-dependencies-{{ checksum "requirements.txt" }}
+            - v3-dependencies-{{ checksum "<< parameters.resource >>" }}
             - v3-dependencies-
 
       - run:
@@ -28,15 +32,35 @@ commands:
           command: |
             python3 -m venv venv
             . venv/bin/activate
-            pip install -r requirements.txt
+            pip install -r << parameters.resource >>
 
       - save_cache:
           paths:
             - ./venv
-          key: v3-dependencies-{{ checksum "requirements.txt" }}
+          key: v3-dependencies-{{ checksum "<< parameters.resource >>" }}
 
 jobs:
-  lint-and-test:
+  lint:
+    executor:
+      name: python3_6_1
+
+    steps:
+      - prepare-resources:
+          resource: 'requirements_test.txt'
+
+      - run:
+          name: checkstyle
+          command: |
+            . venv/bin/activate
+            pycodestyle src tests ./*.py
+
+      - run:
+          name: pyflakes
+          command: |
+            . venv/bin/activate
+            pyflakes src tests ./*.py
+
+  test:
     docker:
       - image: circleci/python:3.6.1
       - image: bluszcz/bflocalstack-dynamodb-s3
@@ -49,8 +73,6 @@ jobs:
           discovery.type: single-node
 
     working_directory: /tmp/repo
-
-    #parallelism: 4
 
     steps:
       - checkout
@@ -76,18 +98,6 @@ jobs:
           key: v3-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements_test.txt" }}
 
       - run:
-          name: run checkstyle for python code
-          command: |
-            . venv/bin/activate
-            pycodestyle src tests ./*.py
-
-      - run:
-          name: run pyflakes for python code
-          command: |
-            . venv/bin/activate
-            pyflakes src tests ./*.py
-
-      - run:
           name: run tests
           command: |
             . venv/bin/activate
@@ -100,10 +110,10 @@ jobs:
 
   packaging:
     executor:
-      name: deployment
+      name: python3_6_1
 
     steps:
-      - prepare-deployment
+      - prepare-resources
 
       - run:
           name: make deploy package
@@ -118,10 +128,10 @@ jobs:
 
   deploy:
     executor:
-      name: deployment
+      name: python3_6_1
 
     steps:
-      - prepare-deployment
+      - prepare-resources
 
       - attach_workspace:
           at: /tmp/repo
@@ -178,11 +188,13 @@ jobs:
 workflows:
   build-deploy:
     jobs:
-      - lint-and-test
+      - lint
+      - test
       - packaging
       - deploy:
           requires:
-            - lint-and-test
+            - lint
+            - test
             - packaging
       - labo:
           requires:
