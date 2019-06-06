@@ -1,5 +1,4 @@
 import json
-
 from tests_util import TestsUtil
 from unittest import TestCase
 from unittest.mock import patch, MagicMock
