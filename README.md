@@ -201,8 +201,8 @@ python elasticsearch-setup.py $(curl https://checkip.amazonaws.com/)
 Experimental features.
 
 ```bash
-yarn
-yarn deploy
+npm i
+npx deploy
 ```  
 
 ### CloudWatch Alarm

@@ -88,11 +88,11 @@ class ESUtil:
     @staticmethod
     def search_random_article(elasticsearch):
         query = {
-            "function_score" : {
-                "query" : {
+            "function_score": {
+                "query": {
                     "match_all": {}
                 },
-                "random_score" : {},
+                "random_score": {},
             }
         }
 

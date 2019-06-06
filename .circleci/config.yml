@@ -1,13 +1,12 @@
-version: 2
+version: 2.1
 
 references:
-    setup_remote_docker: &setup_remote_docker
-      setup_remote_docker:
-        version: 17.11.0-ce
+  setup_remote_docker: &setup_remote_docker
+    setup_remote_docker:
+      version: 17.11.0-ce
 
 jobs:
-  build:
-
+  main:
     docker:
       - image: circleci/python:3.6.1
       - image: bluszcz/bflocalstack-dynamodb-s3
@@ -19,16 +18,17 @@ jobs:
         environment:
           discovery.type: single-node
 
-    working_directory: ~/repo
+    working_directory: /tmp/repo
 
     steps:
       - checkout
+
       - <<: *setup_remote_docker
-      # Download and cache dependencies
+
       - restore_cache:
           keys:
-          - v3-dependencies-{{ checksum "requirements.txt" }}
-          - v3-dependencies-
+            - v3-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements_test.txt" }}
+            - v3-dependencies-
 
       - run:
           name: install dependencies
@@ -41,7 +41,7 @@ jobs:
       - save_cache:
           paths:
             - ./venv
-          key: v3-dependencies-{{ checksum "requirements.txt" }}
+          key: v3-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements_test.txt" }}
 
       - run:
           name: run checkstyle for python code
@@ -60,17 +60,13 @@ jobs:
           command: |
             . venv/bin/activate
             # 全テスト実行
-            python exec_test.py
+             python exec_test.py
+
       - run:
           name: make deploy package
           command: |
-            if [ $ALIS_APP_ID ]; then
-              docker image build --tag deploy-image .
-              docker container run -it --name deploy-container deploy-image
-              docker container cp deploy-container:/workdir/vendor-package .
-              . venv/bin/activate
-              python make_deploy_zip.py
-            fi
+            . venv/bin/activate
+            ./packaging.sh
 
       - run:
           name: run deploy
@@ -78,9 +74,57 @@ jobs:
             if [ $ALIS_APP_ID ]; then
               . venv/bin/activate
               ./deploy_api.sh
+            fi
+
+            if [ $SERVERLESS_REST_API_ID ]; then
               ./fix_api.sh
             fi
 
       - store_artifacts:
           path: test-reports
           destination: test-reports
+
+      - persist_to_workspace:
+          root: /tmp/repo/deploy
+          paths:
+            - articles_random.zip
+
+  labo:
+    docker:
+      - image: circleci/node:12.4.0
+
+    working_directory: /tmp/repo
+
+    steps:
+      - checkout
+
+      - attach_workspace:
+          at: /tmp/repo/deploy
+
+      - restore_cache:
+          keys:
+            - v1-npm-dependencies-{{ checksum "package-lock.json" }}
+            - v1-npm-dependencies-
+
+      - run:
+          command: npm i
+
+      - save_cache:
+          paths:
+            - ./node_modules
+          key: v1-npm-dependencies-{{ checksum "package-lock.json" }}
+
+      - run:
+          name: Deployment
+          command: |
+            if [ $ALIS_APP_ID ]; then
+              npm run deploy
+            fi
+
+workflows:
+  build-deploy:
+    jobs:
+      - main
+      - labo:
+          requires:
+            - main
