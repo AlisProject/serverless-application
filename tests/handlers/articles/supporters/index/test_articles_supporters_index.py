@@ -25,7 +25,6 @@ class TestArticlesSupportersIndex(TestCase):
                 'user_id': 'user00002',
                 'user_display_name': 'user00002',
                 'self_introduction': 'self_introduction00002',
-                'icon_image_url': 'http://example.com',
             },
             {
                 'user_id': 'user00003',
@@ -133,7 +132,6 @@ class TestArticlesSupportersIndex(TestCase):
             {
                 'user_id': 'user00002',
                 'user_display_name': 'user00002',
-                'icon_image_url': 'http://example.com',
                 'sum_tip_value': 100000000000000000000  # 100 ALIS
             },
             {

@@ -59,14 +59,15 @@ class ArticlesSupportersIndex(LambdaBase):
         for user in users:
             user_id = user['user_id']
             user.update(users_tip_values[user_id])
-            users_with_tip.append(
-                {
-                    'user_id': user['user_id'],
-                    'user_display_name': user['user_display_name'],
-                    'icon_image_url': user['icon_image_url'],
-                    'sum_tip_value': users_tip_values[user_id]['tip_value']
-                }
-            )
+            user_data = {
+                'user_id': user['user_id'],
+                'user_display_name': user['user_display_name'],
+                'sum_tip_value': users_tip_values[user_id]['tip_value']
+            }
+            icon_image_url = user.get('icon_image_url')
+            if icon_image_url is not None:
+                user_data['icon_image_url'] = icon_image_url
+            users_with_tip.append(user_data)
 
         sorted_users_with_tip = sorted(users_with_tip, key=lambda item: item['sum_tip_value'], reverse=True)
 
