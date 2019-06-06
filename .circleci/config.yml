@@ -5,8 +5,38 @@ references:
     setup_remote_docker:
       version: 17.11.0-ce
 
+executors:
+  deployment:
+    working_directory: /tmp/repo
+    docker:
+      - image: circleci/python:3.6.1
+
+commands:
+  prepare-deployment:
+    steps:
+      - checkout
+
+      - <<: *setup_remote_docker
+
+      - restore_cache:
+          keys:
+            - v3-dependencies-{{ checksum "requirements.txt" }}
+            - v3-dependencies-
+
+      - run:
+          name: install dependencies
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            pip install -r requirements.txt
+
+      - save_cache:
+          paths:
+            - ./venv
+          key: v3-dependencies-{{ checksum "requirements.txt" }}
+
 jobs:
-  main:
+  lint-and-test:
     docker:
       - image: circleci/python:3.6.1
       - image: bluszcz/bflocalstack-dynamodb-s3
@@ -19,6 +49,8 @@ jobs:
           discovery.type: single-node
 
     working_directory: /tmp/repo
+
+    #parallelism: 4
 
     steps:
       - checkout
@@ -60,7 +92,18 @@ jobs:
           command: |
             . venv/bin/activate
             # 全テスト実行
-             python exec_test.py
+            python exec_test.py
+
+      - store_artifacts:
+          path: test-reports
+          destination: test-reports
+
+  packaging:
+    executor:
+      name: deployment
+
+    steps:
+      - prepare-deployment
 
       - run:
           name: make deploy package
@@ -68,8 +111,23 @@ jobs:
             . venv/bin/activate
             ./packaging.sh
 
+      - persist_to_workspace:
+          root: /tmp/repo
+          paths:
+            - deploy/*
+
+  deploy:
+    executor:
+      name: deployment
+
+    steps:
+      - prepare-deployment
+
+      - attach_workspace:
+          at: /tmp/repo
+
       - run:
-          name: run deploy
+          name: Deployment
           command: |
             if [ $ALIS_APP_ID ]; then
               . venv/bin/activate
@@ -80,14 +138,10 @@ jobs:
               ./fix_api.sh
             fi
 
-      - store_artifacts:
-          path: test-reports
-          destination: test-reports
-
       - persist_to_workspace:
-          root: /tmp/repo/deploy
+          root: /tmp/repo
           paths:
-            - articles_random.zip
+            - deploy/*
 
   labo:
     docker:
@@ -99,7 +153,7 @@ jobs:
       - checkout
 
       - attach_workspace:
-          at: /tmp/repo/deploy
+          at: /tmp/repo
 
       - restore_cache:
           keys:
@@ -124,7 +178,12 @@ jobs:
 workflows:
   build-deploy:
     jobs:
-      - main
+      - lint-and-test
+      - packaging
+      - deploy:
+          requires:
+            - lint-and-test
+            - packaging
       - labo:
           requires:
-            - main
+            - deploy
