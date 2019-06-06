@@ -39,6 +39,24 @@ commands:
             - ./venv
           key: v3-dependencies-{{ checksum "<< parameters.resource >>" }}
 
+  deploy:
+    parameters:
+      target:
+        type: string
+    steps:
+      - prepare-resources
+
+      - attach_workspace:
+          at: /tmp/repo
+
+      - run:
+          name: Deployment
+          command: |
+            if [ $ALIS_APP_ID ]; then
+              . venv/bin/activate
+              ./deploy.sh << parameters.target >>
+            fi
+
 jobs:
   lint:
     executor:
@@ -126,32 +144,29 @@ jobs:
           paths:
             - deploy/*
 
-  deploy:
+  deploy-function:
     executor:
       name: python3_6_1
 
     steps:
-      - prepare-resources
+      - deploy:
+          target: 'function'
 
-      - attach_workspace:
-          at: /tmp/repo
+  deploy-api:
+    executor:
+      name: python3_6_1
 
-      - run:
-          name: Deployment
-          command: |
-            if [ $ALIS_APP_ID ]; then
-              . venv/bin/activate
-              ./deploy_api.sh
-            fi
+    steps:
+      - deploy:
+          target: 'api'
 
-            if [ $SERVERLESS_REST_API_ID ]; then
-              ./fix_api.sh
-            fi
+  deploy-permission:
+    executor:
+      name: python3_6_1
 
-      - persist_to_workspace:
-          root: /tmp/repo
-          paths:
-            - deploy/*
+    steps:
+      - deploy:
+          target: 'permission'
 
   labo:
     docker:
@@ -191,11 +206,21 @@ workflows:
       - lint
       - test
       - packaging
-      - deploy:
+      - deploy-function:
           requires:
             - lint
             - test
             - packaging
+      - deploy-api:
+          requires:
+            - lint
+            - test
+            - packaging
+      - deploy-permission:
+          requires:
+            - deploy-function
+            - deploy-api
       - labo:
           requires:
-            - deploy
+            - deploy-function
+            - deploy-api
