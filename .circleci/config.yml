@@ -7,7 +7,7 @@ references:
 
 executors:
   python3_6_1:
-    working_directory: /tmp/repo
+    working_directory: ~/repo
     docker:
       - image: circleci/python:3.6.1
 
@@ -47,7 +47,7 @@ commands:
       - prepare-resources
 
       - attach_workspace:
-          at: /tmp/repo
+          at: .
 
       - run:
           name: Deployment
@@ -90,7 +90,7 @@ jobs:
         environment:
           discovery.type: single-node
 
-    working_directory: /tmp/repo
+    working_directory: ~/repo
 
     steps:
       - checkout
@@ -140,7 +140,7 @@ jobs:
             ./packaging.sh
 
       - persist_to_workspace:
-          root: /tmp/repo
+          root: .
           paths:
             - deploy/*
 
@@ -172,13 +172,13 @@ jobs:
     docker:
       - image: circleci/node:12.4.0
 
-    working_directory: /tmp/repo
+    working_directory: ~/repo
 
     steps:
       - checkout
 
       - attach_workspace:
-          at: /tmp/repo
+          at: .
 
       - restore_cache:
           keys:
