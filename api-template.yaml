@@ -1077,7 +1077,7 @@ Outputs:
     Value:
       Fn::GetAtt: LambdaRole.Arn
     Export:
-      Name: LambdaRole
+      Name: !Sub "${AWS::StackName}-LambdaRole"
   Authorizer:
     Value:
       Ref: Authorizer
