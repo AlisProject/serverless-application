@@ -12,7 +12,8 @@ executors:
       - image: circleci/python:3.6.1
 
 commands:
-  prepare-resources:
+  prepare-python-resources:
+    description: 'Pythonのリソースを準備'
     parameters:
       resource:
         type: string
@@ -39,17 +40,18 @@ commands:
             - ./venv
           key: v3-dependencies-{{ checksum "<< parameters.resource >>" }}
 
-  deploy:
+  deploy-resources:
+    description: 'リソースのデプロイの共通処理'
     parameters:
       target:
         type: string
     steps:
-      - prepare-resources
+      - prepare-python-resources
 
       - attach_workspace:
           at: .
 
-      - run:
+      - deploy:
           name: Deployment
           command: |
             if [ $ALIS_APP_ID ]; then
@@ -63,7 +65,7 @@ jobs:
       name: python3_6_1
 
     steps:
-      - prepare-resources:
+      - prepare-python-resources:
           resource: 'requirements_test.txt'
 
       - run:
@@ -119,19 +121,14 @@ jobs:
           name: run tests
           command: |
             . venv/bin/activate
-            # 全テスト実行
             python exec_test.py
-
-      - store_artifacts:
-          path: test-reports
-          destination: test-reports
 
   packaging:
     executor:
       name: python3_6_1
 
     steps:
-      - prepare-resources
+      - prepare-python-resources
 
       - run:
           name: make deploy package
@@ -149,7 +146,7 @@ jobs:
       name: python3_6_1
 
     steps:
-      - deploy:
+      - deploy-resources:
           target: 'function'
 
   deploy-api:
@@ -157,7 +154,7 @@ jobs:
       name: python3_6_1
 
     steps:
-      - deploy:
+      - deploy-resources:
           target: 'api'
 
   deploy-permission:
@@ -165,7 +162,7 @@ jobs:
       name: python3_6_1
 
     steps:
-      - deploy:
+      - deploy-resources:
           target: 'permission'
 
   labo:
@@ -193,7 +190,7 @@ jobs:
             - ./node_modules
           key: v1-npm-dependencies-{{ checksum "package-lock.json" }}
 
-      - run:
+      - deploy:
           name: Deployment
           command: |
             if [ $ALIS_APP_ID ]; then
@@ -201,6 +198,7 @@ jobs:
             fi
 
 workflows:
+  # CloudFormationスタックの依存関係に即したワークフロー
   build-deploy:
     jobs:
       - lint
