@@ -3,17 +3,17 @@ Transform: AWS::Serverless-2016-10-31
 Description: ElasticSearchService
 
 Parameters:
-  ApiLambdaRole:
-    Type: 'AWS::SSM::Parameter::Value<String>'
+  AlisAppId:
+    Type: String
 
 Resources:
   ElasticSearchService:
     Type: "AWS::Elasticsearch::Domain"
-    Properties: 
+    Properties:
       AccessPolicies: !Join
         - ''
         - - '{ "Version": "2012-10-17", "Statement": [ { "Effect": "Allow", "Principal": { "AWS": "'
-          - !Ref ApiLambdaRole
+          - Fn::ImportValue: !Sub "${AlisAppId}-LambdaRole"
           - '" }, "Action": "es:*", "Resource": "'
           - 'arn:aws:es:'
           - !Ref 'AWS::Region'

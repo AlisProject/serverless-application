@@ -57,6 +57,8 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   TipTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
+  SucceededTipTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
   AlisAppDomain:
     Type: 'AWS::SSM::Parameter::Value<String>'
   PrivateChainAwsAccessKey:
@@ -135,6 +137,7 @@ Globals:
         TOPIC_TABLE_NAME: !Ref TopicTableName
         TAG_TABLE_NAME: !Ref TagTableName
         TIP_TABLE_NAME: !Ref TipTableName
+        SUCCEEDED_TIP_TABLE_NAME: !Ref SucceededTipTableName
         EXTERNAL_PROVIDER_USERS_TABLE_NAME: !Ref ExternalProviderUsersTableName
         DOMAIN: !Ref AlisAppDomain
         PRIVATE_CHAIN_AWS_ACCESS_KEY: !Ref PrivateChainAwsAccessKey
@@ -178,7 +181,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/authorizer.zip
       Environment:
         Variables:
@@ -188,7 +193,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/articles_recent.zip
       Events:
         Api:
@@ -201,7 +208,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/articles_popular.zip
       Events:
         Api:
@@ -214,7 +223,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/articles_eyecatch.zip
       Events:
         Api:
@@ -227,7 +238,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/articles_recommended.zip
       Events:
         Api:
@@ -240,7 +253,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/articles_show.zip
       Events:
         Api:
@@ -253,7 +268,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/articles_alis_tokens_show.zip
       Events:
         Api:
@@ -266,7 +283,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/articles_likes_show.zip
       Events:
         Api:
@@ -279,7 +298,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/users_articles_public.zip
       Events:
         Api:
@@ -292,7 +313,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/users_info_show.zip
       Events:
         Api:
@@ -305,7 +328,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/me_articles_drafts_index.zip
       Events:
         Api:
@@ -318,7 +343,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/login_twitter_index.zip
       Environment:
         Variables:
@@ -340,7 +367,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/login_twitter_authorization_url.zip
       Environment:
         Variables:
@@ -358,7 +387,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/sign_up_line_authorize_url.zip
       Environment:
         Variables:
@@ -375,7 +406,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/login_line_authorize_url.zip
       Environment:
         Variables:
@@ -392,7 +425,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/login_line_authorize_request.zip
       Environment:
         Variables:
@@ -415,7 +450,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/me_articles_drafts_create.zip
       Environment:
         Variables:
@@ -431,7 +468,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/me_articles_drafts_article_id_create.zip
       Environment:
         Variables:
@@ -447,7 +486,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/me_articles_drafts_publish.zip
       Events:
         Api:
@@ -460,7 +501,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/me_articles_drafts_publish_with_header.zip
       Events:
         Api:
@@ -473,7 +516,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/me_articles_drafts_update.zip
       Events:
         Api:
@@ -486,7 +531,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/me_articles_drafts_title_update.zip
       Events:
         Api:
@@ -499,7 +546,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/me_articles_drafts_body_update.zip
       Events:
         Api:
@@ -512,7 +561,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/me_articles_public_index.zip
       Events:
         Api:
@@ -525,7 +576,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/me_articles_public_show.zip
       Events:
         Api:
@@ -538,7 +591,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/me_articles_public_edit.zip
       Events:
         Api:
@@ -551,7 +606,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/me_articles_public_update.zip
       Events:
         Api:
@@ -564,7 +621,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/me_articles_public_title_update.zip
       Events:
         Api:
@@ -577,7 +636,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/me_articles_public_body_update.zip
       Events:
         Api:
@@ -590,7 +651,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/me_articles_public_unpublish.zip
       Events:
         Api:
@@ -603,7 +666,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/me_articles_public_republish.zip
       Events:
         Api:
@@ -616,7 +681,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/me_articles_public_republish_with_header.zip
       Events:
         Api:
@@ -629,7 +696,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/me_articles_like_create.zip
       Events:
         Api:
@@ -642,7 +711,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/articles_comments_index.zip
       Events:
         Api:
@@ -655,7 +726,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/me_articles_comments_create.zip
       Environment:
         Variables:
@@ -671,7 +744,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/me_articles_comments_reply.zip
       Environment:
         Variables:
@@ -687,7 +762,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/me_articles_comments_likes_index.zip
       Events:
         Api:
@@ -700,7 +777,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/comments_likes_show.zip
       Events:
         Api:
@@ -713,7 +792,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/me_comments_likes_create.zip
       Events:
         Api:
@@ -726,7 +807,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/me_comments_delete.zip
       Events:
         Api:
@@ -739,7 +822,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/me_articles_fraud_create.zip
       Events:
         Api:
@@ -752,7 +837,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/me_articles_images_create.zip
       Events:
         Api:
@@ -765,7 +852,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/me_articles_image_upload_url_show.zip
       Events:
         Api:
@@ -778,7 +867,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/me_info_icon_create.zip
       Events:
         Api:
@@ -791,7 +882,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/me_info_first_experiences_update.zip
       Events:
         Api:
@@ -804,7 +897,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/me_articles_like_show.zip
       Events:
         Api:
@@ -817,7 +912,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/me_articles_drafts_show.zip
       Events:
         Api:
@@ -830,7 +927,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/me_articles_pv_create.zip
       Events:
         Api:
@@ -843,7 +942,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/me_info_update.zip
       Events:
         Api:
@@ -856,7 +957,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/me_info_show.zip
       Events:
         Api:
@@ -869,7 +972,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/me_wallet_balance.zip
       Events:
         Api:
@@ -882,7 +987,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/me_wallet_distributed_tokens_show.zip
       Events:
         Api:
@@ -895,7 +1002,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/me_wallet_tip.zip
       Environment:
         Variables:
@@ -911,7 +1020,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/me_notifications_index.zip
       Events:
         Api:
@@ -924,7 +1035,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/me_unread_notification_managers_show.zip
       Events:
         Api:
@@ -937,7 +1050,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/me_unread_notification_managers_update.zip
       Events:
         Api:
@@ -950,7 +1065,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/me_external_provider_user_create.zip
       Environment:
         Variables:
@@ -970,7 +1087,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/topics_index.zip
       Events:
         Api:
@@ -983,7 +1102,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/cognito_trigger_preauthentication.zip
       Environment:
         Variables:
@@ -992,7 +1113,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/search_articles.zip
       Events:
         Api:
@@ -1005,7 +1128,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/search_users.zip
       Events:
         Api:
@@ -1018,7 +1143,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/search_tags.zip
       Events:
         Api:
@@ -1031,7 +1158,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaRole.Arn
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/me_users_fraud_create.zip
       Events:
         Api:
@@ -1040,38 +1169,6 @@ Resources:
             Path: /me/users/{user_id}/fraud
             Method: post
             RestApiId: !Ref RestApi
-  ElasticSearchService:
-    Type: "AWS::Elasticsearch::Domain"
-    Properties:
-      AccessPolicies: !Join
-        - ''
-        - - '{ "Version": "2012-10-17", "Statement": [ { "Effect": "Allow", "Principal": { "AWS": "'
-          - !GetAtt LambdaRole.Arn
-          - '" }, "Action": "es:*", "Resource": "'
-          - 'arn:aws:es:'
-          - !Ref 'AWS::Region'
-          - ':'
-          - !Ref 'AWS::AccountId'
-          - ':domain/'
-          - !Ref "AWS::StackName"
-          - '/*" } ] }'
-      AdvancedOptions:
-        rest.action.multi.allow_explicit_index: 'true'
-      DomainName: !Ref "AWS::StackName"
-      EBSOptions:
-        EBSEnabled: true
-        VolumeType: gp2
-        VolumeSize: 35
-      ElasticsearchClusterConfig:
-        InstanceType: t2.medium.elasticsearch
-        InstanceCount: 2
-        DedicatedMasterEnabled: true
-        ZoneAwarenessEnabled: false
-        DedicatedMasterType: t2.medium.elasticsearch
-        DedicatedMasterCount: 3
-      ElasticsearchVersion: '6.2'
-      SnapshotOptions:
-        AutomatedSnapshotStartHour: 0
 Outputs:
   LambdaRole:
     Value:

@@ -1,0 +1,68 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Lambda functions and API Gateway resources for the ALIS application.
+
+Parameters:
+  AlisAppId:
+    Type: String
+  ArticleInfoTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  UsersTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  TopicTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  ElasticSearchEndpoint:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  PrivateChainAwsSecretAccessKey:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  PrivateChainExecuteApiHost:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  SucceededTipTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+
+Resources:
+
+  #  Functions
+
+  ArticleSupportersIndex:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Code: ./deploy/articles_supporters_index.zip
+      Environment:
+        Variables:
+          ARTICLE_INFO_TABLE_NAME: !Ref ArticleInfoTableName
+          SUCCEEDED_TIP_TABLE_NAME: !Ref SucceededTipTableName
+          USERS_TABLE_NAME: !Ref UsersTableName
+      Handler: handler.lambda_handler
+      MemorySize: 3008
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
+      Runtime: python3.6
+      Timeout: 300
+  ArticlesTipRanking:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Code: ./deploy/articles_tip_ranking.zip
+      Environment:
+        Variables:
+          TOPIC_TABLE_NAME: !Ref TopicTableName
+          ELASTIC_SEARCH_ENDPOINT: !Ref ElasticSearchEndpoint
+          PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY: !Ref PrivateChainAwsSecretAccessKey
+          PRIVATE_CHAIN_EXECUTE_API_HOST: !Ref PrivateChainExecuteApiHost
+      Handler: handler.lambda_handler
+      MemorySize: 3008
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
+      Runtime: python3.6
+      Timeout: 300
+
+Outputs:
+  ArticleSupportersIndex:
+    Value: !GetAtt ArticleSupportersIndex.Arn
+    Export:
+      Name: !Sub "${AlisAppId}-ArticleSupportersIndex"
+  ArticlesTipRanking:
+    Value: !GetAtt ArticlesTipRanking.Arn
+    Export:
+      Name: !Sub "${AlisAppId}-ArticlesTipRanking"

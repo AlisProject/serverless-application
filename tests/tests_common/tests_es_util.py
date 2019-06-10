@@ -11,8 +11,8 @@ class TestsEsUtil:
             indices = elastic_search.indices.get_alias(alias_name)
 
             for index in indices:
-                elastic_search.indices.delete_alias(index, alias_name)
-                elastic_search.indices.delete(index)
+                elastic_search.indices.delete_alias(index, alias_name, ignore=[404])
+                elastic_search.indices.delete(index, ignore=[404])
 
     @staticmethod
     def create_articles_index(elasticsearch):
@@ -30,6 +30,21 @@ class TestsEsUtil:
             }
         }
         elasticsearch.indices.create(index='articles', body=article_settings)
+
+    @staticmethod
+    def create_tip_ranked_articles_index(elasticsearch, index_name):
+        article_settings = {
+            'mappings': {
+                'article_tip_ranking': {
+                    'properties': {
+                        'tip_value': {
+                            'type': 'double'
+                        }
+                    }
+                }
+            }
+        }
+        elasticsearch.indices.create(index=index_name, body=article_settings)
 
     @staticmethod
     def remove_articles_index(elasticsearch):
