@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+import settings
+
+
 class ESUtil:
 
     @staticmethod
@@ -126,6 +129,37 @@ class ESUtil:
 
         response = elasticsearch.search(
             index='article_scores',
+            body=body
+        )
+
+        articles = [item['_source'] for item in response['hits']['hits']]
+
+        return articles
+
+    @staticmethod
+    def search_tip_ranked_articles(elasticsearch, params, limit, page):
+        if not elasticsearch.indices.exists(index=settings.ARTICLE_TIP_RANKING_INDEX_NAME):
+            return []
+
+        body = {
+            'query': {
+                'bool': {
+                    'must': [
+                    ]
+                }
+            },
+            'sort': [
+                {'tip_value': 'desc'}
+            ],
+            'from': limit * (page - 1),
+            'size': limit
+        }
+
+        if params.get('topic'):
+            body['query']['bool']['must'].append({'match': {'topic': params.get('topic')}})
+
+        response = elasticsearch.search(
+            index=settings.ARTICLE_TIP_RANKING_INDEX_NAME,
             body=body
         )
 

@@ -53,6 +53,15 @@ Resources:
           Fn::Sub: "${AlisAppId}-ArticlesPriceShow"
       Principal: "apigateway.amazonaws.com"
       SourceArn: !Sub ${RestApiArn}/*/GET/articles/*/price
+  ArticlesSupportersIndexApiGatewayInvoke:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-ArticleSupportersIndex"
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub ${RestApiArn}/*/GET/articles/*/supporters
   MeArticlesPurchasedArticleIdsIndexApiGatewayInvoke:
     Type: "AWS::Lambda::Permission"
     Properties:
@@ -116,6 +125,15 @@ Resources:
           Fn::Sub: "${AlisAppId}-WalletBridgeInformationShow"
       Principal: "apigateway.amazonaws.com"
       SourceArn: !Sub ${RestApiArn}/*/GET/wallet/bridge_information
+  ArticlesTipRankingApiGatewayInvoke:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-ArticlesTipRanking"
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub ${RestApiArn}/*/GET/articles/tip_ranking
   MeApplicationsIndexApiGatewayInvoke:
     Type: "AWS::Lambda::Permission"
     Properties:

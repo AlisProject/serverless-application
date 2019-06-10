@@ -1,9 +1,15 @@
 # -*- coding: utf-8 -*-
+import logging
 import os
+import traceback
+from decimal import Decimal
+
 import settings
 import json
 import requests
 import time
+
+from private_chain_util import PrivateChainUtil
 from time_util import TimeUtil
 from db_util import DBUtil
 from aws_requests_auth.aws_auth import AWSRequestsAuth
@@ -53,21 +59,53 @@ class MeWalletTip(LambdaBase):
             raise ValidationError('Can not tip to myself')
 
         # send tip
+        headers = {'content-type': 'application/json'}
+        auth = AWSRequestsAuth(aws_access_key=os.environ['PRIVATE_CHAIN_AWS_ACCESS_KEY'],
+                               aws_secret_access_key=os.environ['PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY'],
+                               aws_host=os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'],
+                               aws_region='ap-northeast-1',
+                               aws_service='execute-api')
+
         from_user_eth_address = self.event['requestContext']['authorizer']['claims']['custom:private_eth_address']
         to_user_eth_address = self.__get_user_private_eth_address(article_info['user_id'])
         tip_value = self.params['tip_value']
-        transaction_hash = self.__send_tip(from_user_eth_address, to_user_eth_address, tip_value)
+        burn_quantity = int(Decimal(tip_value) / Decimal(10))
 
-        # create tip info
-        self.__create_tip_info(transaction_hash, article_info)
+        if not self.__is_burnable_user(from_user_eth_address, tip_value, burn_quantity):
+            raise ValidationError('Required at least {token} token'.format(token=tip_value + burn_quantity))
+
+        transaction_hash = self.__send_tip(from_user_eth_address, to_user_eth_address, tip_value, auth, headers)
+
+        burn_transaction = None
+        try:
+            # 投げ銭が成功した時のみバーン処理を行う
+            if PrivateChainUtil.is_transaction_completed(transaction_hash):
+                # バーンのトランザクション処理
+                burn_transaction = self.__burn_transaction(burn_quantity, from_user_eth_address, auth, headers)
+        except Exception as err:
+            logging.fatal(err)
+            traceback.print_exc()
+        finally:
+            # create tip info
+            self.__create_tip_info(transaction_hash, burn_transaction, article_info)
 
         return {
             'statusCode': 200
         }
 
     @staticmethod
-    def __send_tip(from_user_eth_address, to_user_eth_address, tip_value):
-        headers = {'content-type': 'application/json'}
+    def __is_burnable_user(eth_address, tip_value, burn_quantity):
+        url = 'https://' + os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'] + '/production/wallet/balance'
+        payload = {'private_eth_address': eth_address[2:]}
+        token = PrivateChainUtil.send_transaction(request_url=url, payload_dict=payload)
+
+        if int(token, 16) >= tip_value + burn_quantity:
+            return True
+
+        return False
+
+    @staticmethod
+    def __send_tip(from_user_eth_address, to_user_eth_address, tip_value, auth, headers):
         payload = json.dumps(
             {
                 'from_user_eth_address': from_user_eth_address,
@@ -75,11 +113,6 @@ class MeWalletTip(LambdaBase):
                 'tip_value': format(tip_value, '064x')
             }
         )
-        auth = AWSRequestsAuth(aws_access_key=os.environ['PRIVATE_CHAIN_AWS_ACCESS_KEY'],
-                               aws_secret_access_key=os.environ['PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY'],
-                               aws_host=os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'],
-                               aws_region='ap-northeast-1',
-                               aws_service='execute-api')
         response = requests.post('https://' + os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'] +
                                  '/production/wallet/tip', auth=auth, headers=headers, data=payload)
 
@@ -90,11 +123,13 @@ class MeWalletTip(LambdaBase):
         # return transaction hash
         return json.dumps(json.loads(response.text).get('result')).replace('"', '')
 
-    def __create_tip_info(self, transaction_hash, article_info):
+    def __create_tip_info(self, transaction_hash, burn_transaction, article_info):
         tip_table = self.dynamodb.Table(os.environ['TIP_TABLE_NAME'])
 
         sort_key = TimeUtil.generate_sort_key()
         user_id = self.event['requestContext']['authorizer']['claims']['cognito:username']
+
+        epoch = int(time.time())
 
         tip_info = {
             'user_id': user_id,
@@ -103,9 +138,11 @@ class MeWalletTip(LambdaBase):
             'article_id': self.params['article_id'],
             'article_title': article_info['title'],
             'transaction': transaction_hash,
+            'burn_transaction': burn_transaction,
             'uncompleted': 1,
             'sort_key': sort_key,
-            'created_at': int(time.time())
+            'target_date': time.strftime('%Y-%m-%d', time.gmtime(epoch)),
+            'created_at': epoch
         }
 
         tip_table.put_item(
@@ -122,3 +159,29 @@ class MeWalletTip(LambdaBase):
             raise RecordNotFoundError('Record Not Found: private_eth_address')
 
         return private_eth_address[0]['Value']
+
+    @staticmethod
+    def __burn_transaction(burn_quantity, user_eth_address, auth, headers):
+        burn_token = format(burn_quantity, '064x')
+
+        burn_payload = json.dumps(
+            {
+                'from_user_eth_address': user_eth_address,
+                'to_user_eth_address': settings.ETH_ZERO_ADDRESS,
+                'tip_value': burn_token
+            }
+        )
+
+        # burn transaction
+        response = requests.post('https://' + os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'] +
+                                 '/production/wallet/tip', auth=auth, headers=headers, data=burn_payload)
+
+        # validate status code
+        if response.status_code != 200:
+            raise SendTransactionError('status code not 200')
+
+        # exists error
+        if json.loads(response.text).get('error'):
+            raise SendTransactionError(json.loads(response.text).get('error'))
+
+        return json.loads(response.text).get('result').replace('"', '')
