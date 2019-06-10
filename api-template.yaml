@@ -1170,11 +1170,6 @@ Resources:
             Method: post
             RestApiId: !Ref RestApi
 Outputs:
-  LambdaRole:
-    Value:
-      Fn::GetAtt: LambdaRole.Arn
-    Export:
-      Name: !Sub "${AWS::StackName}-LambdaRole"
   Authorizer:
     Value:
       Ref: Authorizer

@@ -11,7 +11,7 @@ provider:
   runtime: python3.6
   stage: labo # CloudFrontとの連携の都合上、stageには固定値を指定している
   region: ap-northeast-1
-  role: ${cf:${env:ALIS_APP_ID}api.LambdaRole}
+  role: LaboLambdaRole
   environment:
     ARTICLE_INFO_TABLE_NAME: ${ssm:${env:ALIS_APP_ID}ssmArticleInfoTableName}
     ARTICLE_CONTENT_TABLE_NAME: ${ssm:${env:ALIS_APP_ID}ssmArticleContentTableName}
@@ -48,7 +48,7 @@ provider:
     PAID_ARTICLES_TABLE_NAME: ${ssm:${env:ALIS_APP_ID}ssmPaidArticlesTableName}
     PAID_STATUS_TABLE_NAME: ${ssm:${env:ALIS_APP_ID}ssmPaidStatusTableName}
 
-# パッケージングは packaging.sh で生成されたものを使用する
+# パッケージは packaging.sh で生成されたものを使用する
 package:
   individually: true
 
@@ -63,3 +63,30 @@ functions:
           method: get
           # CloudFrontによるキャッシュを利かさないものは /n/ 以下に配置する
           path: /n/random
+
+resources:
+  Resources:
+    # Laboは既存システムと疎結合にするためIAM Roleを分離する
+    LaboLambdaRole:
+      Type: AWS::IAM::Role
+      Properties:
+        Path: /
+        RoleName: LaboLambdaRole
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action: sts:AssumeRole
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+        ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/AmazonDynamoDBReadOnlyAccess
+  Outputs:
+    # Elasticsearchで指定する必要があるためExport
+    LaboLambdaRole:
+      Value:
+        Fn::GetAtt: LaboLambdaRole.Arn
+      Export:
+        Name: !Sub "${env:ALIS_APP_ID}-LaboLambdaRole"
+
