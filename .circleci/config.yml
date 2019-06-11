@@ -149,6 +149,14 @@ jobs:
       - deploy-resources:
           target: 'function'
 
+  deploy-function02:
+    executor:
+      name: python3_6_1
+
+    steps:
+      - deploy-resources:
+          target: 'function02'
+
   deploy-api:
     executor:
       name: python3_6_1
@@ -204,21 +212,26 @@ workflows:
       - lint
       - test
       - packaging
+      - labo:
+          requires:
+            - lint
+            - test
+            - packaging
       - deploy-function:
+          requires:
+            - lint
+            - test
+            - packaging
+      - deploy-function02:
           requires:
             - lint
             - test
             - packaging
       - deploy-api:
           requires:
-            - lint
-            - test
-            - packaging
+            - deploy-function
+            - deploy-function02
       - deploy-permission:
           requires:
-            - deploy-function
             - deploy-api
-      - labo:
-          requires:
-            - deploy-function
-            - deploy-api
+
