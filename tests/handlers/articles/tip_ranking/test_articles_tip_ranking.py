@@ -37,7 +37,7 @@ class TestArticleTipRanking(TestCase):
                 'overview': 'overview02',
                 'status': 'public',
                 'topic': 'crypto',
-                'tip_value': 12000000000000,
+                'sort_tip_value': 12000000000000,
                 'sort_key': 1520150272000001
             },
             {
@@ -48,7 +48,7 @@ class TestArticleTipRanking(TestCase):
                 'overview': 'overview03',
                 'status': 'public',
                 'topic': 'fashion',
-                'tip_value': 18000000000000,
+                'sort_tip_value': 18000000000000,
                 'sort_key': 1520150272000002
             },
             {
@@ -59,7 +59,7 @@ class TestArticleTipRanking(TestCase):
                 'overview': 'overview04',
                 'status': 'public',
                 'topic': 'crypto',
-                'tip_value': 6000000000000000000000000,
+                'sort_tip_value': 6000000000000000000000000,
                 'sort_key': 1520150272000003
             },
             {
@@ -70,7 +70,7 @@ class TestArticleTipRanking(TestCase):
                 'overview': 'overview05',
                 'status': 'public',
                 'topic': 'fashion',
-                'tip_value': 18000000000000.1,
+                'sort_tip_value': 18000000000000.1,
                 'sort_key': 1520150272000003
             }
         ]
@@ -119,7 +119,7 @@ class TestArticleTipRanking(TestCase):
                 'overview': 'overview04',
                 'status': 'public',
                 'topic': 'crypto',
-                'tip_value': 6000000000000000000000000,
+                'sort_tip_value': 6000000000000000000000000,
                 'sort_key': 1520150272000003
             },
             {
@@ -130,7 +130,7 @@ class TestArticleTipRanking(TestCase):
                 'overview': 'overview05',
                 'status': 'public',
                 'topic': 'fashion',
-                'tip_value': 18000000000000.1,
+                'sort_tip_value': 18000000000000.1,
                 'sort_key': 1520150272000003
             }
         ]
@@ -152,7 +152,7 @@ class TestArticleTipRanking(TestCase):
                     'overview': 'overview03',
                     'status': 'public',
                     'topic': 'crypto',
-                    'tip_value': 18000000000000,
+                    'sort_tip_value': 18000000000000,
                     'sort_key': 1520150273000000 + i
                 }
             )
@@ -185,7 +185,7 @@ class TestArticleTipRanking(TestCase):
                 'overview': 'overview05',
                 'status': 'public',
                 'topic': 'fashion',
-                'tip_value': 18000000000000.1,
+                'sort_tip_value': 18000000000000.1,
                 'sort_key': 1520150272000003
             },
             {
@@ -196,7 +196,7 @@ class TestArticleTipRanking(TestCase):
                 'overview': 'overview03',
                 'status': 'public',
                 'topic': 'fashion',
-                'tip_value': 18000000000000,
+                'sort_tip_value': 18000000000000,
                 'sort_key': 1520150272000002
             }
         ]
@@ -223,7 +223,7 @@ class TestArticleTipRanking(TestCase):
                 'overview': 'overview02',
                 'status': 'public',
                 'topic': 'crypto',
-                'tip_value': 12000000000000,
+                'sort_tip_value': 12000000000000,
                 'sort_key': 1520150272000001
             }
         ]
