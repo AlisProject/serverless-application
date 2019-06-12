@@ -214,6 +214,9 @@ aws apigateway  get-rest-apis | jq -r '.items[] | select( .name | contains("'${A
 # Show ACM
 aws acm list-certificates --region us-east-1
 
+# Show Route53 Hosted zone
+aws route53 list-hosted-zones
+
 ## Add it to env
 direnv edit
 

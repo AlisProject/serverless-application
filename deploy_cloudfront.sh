@@ -19,5 +19,6 @@ aws cloudformation deploy \
     Oauth2apiApiGatewayId=${Oauth2apiApiGatewayId} \
     LaboApiGatewayId=${LaboApiGatewayId} \
     AcmCertificateArn=${AcmCertificateArn} \
+    Route53HostZoneId=${Route53HostZoneId} \
   --capabilities CAPABILITY_IAM \
   --no-fail-on-empty-changeset
