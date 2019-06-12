@@ -37,7 +37,7 @@ class TestsEsUtil:
             'mappings': {
                 'article_tip_ranking': {
                     'properties': {
-                        'tip_value': {
+                        'sort_tip_value': {
                             'type': 'double'
                         }
                     }

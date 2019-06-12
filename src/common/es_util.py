@@ -171,7 +171,7 @@ class ESUtil:
                 }
             },
             'sort': [
-                {'tip_value': 'desc'}
+                {'sort_tip_value': 'desc'}
             ],
             'from': limit * (page - 1),
             'size': limit
