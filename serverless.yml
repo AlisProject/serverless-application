@@ -1,15 +1,15 @@
-# スタック名: labo-${env:ALIS_APP_ID}
+# スタック名: ${env:ALIS_APP_ID}-laboratory
 service: ${env:ALIS_APP_ID}
 
 frameworkVersion: ">=1.44.1 <2.0.0"
 
 custom:
-  bucket: ${env:ALIS_APP_ID}-alis-labolatory
+  bucket: ${env:ALIS_APP_ID}-alis-laboratory
 
 provider:
   name: aws
   runtime: python3.6
-  stage: labo # CloudFrontとの連携の都合上、stageには固定値を指定している
+  stage: laboratory # CloudFrontとの連携の都合上、stageには固定値を指定している
   region: ap-northeast-1
   role: LaboLambdaRole
   environment:
