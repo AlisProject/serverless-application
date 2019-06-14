@@ -21,15 +21,17 @@ class LaboMajorityJudgement(LambdaBase):
 
         table = self.dynamodb.Table(os.environ['MAJORITY_JUDGEMENT_TABLE_NAME'])
 
-        item = {
-            'user_id': 'foobar',
-            'created_at': int(time.time())
-        }
+        user_id = 'foobar'
+        if not LaboMajorityJudgement.__is_exists(table, user_id):
+            item = {
+                'user_id': 'foobar',
+                'created_at': int(time.time())
+            }
 
-        table.put_item(
-            Item=item,
-            ConditionExpression='attribute_not_exists(user_id)'
-        )
+            table.put_item(
+                Item=item,
+                ConditionExpression='attribute_not_exists(user_id)'
+            )
 
         return {
             'statusCode': 200
