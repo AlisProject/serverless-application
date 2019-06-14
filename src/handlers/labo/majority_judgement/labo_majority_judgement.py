@@ -1,30 +1,38 @@
 # -*- coding: utf-8 -*-
 import os
 import time
-import json
-from es_util import ESUtil
 from lambda_base import LambdaBase
-from decimal_encoder import DecimalEncoder
+from jsonschema import validate
 
 
 class LaboMajorityJudgement(LambdaBase):
-    # FIXME:
     def get_schema(self):
-        pass
+        opt = {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 5
+        }
 
-    # FIXME:
+        return {
+            "type": "object",
+            "properties": {
+                "opt_1": opt,
+                "opt_2": opt,
+                "opt_3": opt,
+            },
+            "required": ["opt_1", "opt_2", "opt_3"]
+        }
+
     def validate_params(self):
-        pass
+        validate(self.params, self.get_schema())
 
     def exec_main_proc(self):
-        # article_id = self.__get_random_article()
-
         table = self.dynamodb.Table(os.environ['MAJORITY_JUDGEMENT_TABLE_NAME'])
 
-        user_id = 'foobar'
+        user_id = self.event['requestContext']['authorizer']['claims']['cognito:username']
         if not LaboMajorityJudgement.__is_exists(table, user_id):
             item = {
-                'user_id': 'foobar',
+                'user_id': user_id,
                 'opt_1': 5,
                 'opt_2': 2,
                 'opt_3': 3,
@@ -39,13 +47,6 @@ class LaboMajorityJudgement(LambdaBase):
         return {
             'statusCode': 200
         }
-
-    # def __get_random_article(self):
-    #     response = ESUtil.search_random_article(self.elasticsearch)
-    #
-    #     article_id = response["hits"]["hits"][0]['_id']
-    #
-    #     return article_id
 
     @staticmethod
     def __is_exists(table, user_id):
