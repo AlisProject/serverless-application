@@ -2,7 +2,8 @@
   "scripts": {
     "lint": "npx cfn-lint validate",
     "deploy": "npx sls deploy",
-    "remove": "npx sls remove"
+    "remove": "npx sls remove",
+    "invoke": "npx sls invoke -f"
   },
   "devDependencies": {
     "cfn-lint": "^1.9.7",
