@@ -25,6 +25,9 @@ class LaboMajorityJudgement(LambdaBase):
         if not LaboMajorityJudgement.__is_exists(table, user_id):
             item = {
                 'user_id': 'foobar',
+                'opt_1': 5,
+                'opt_2': 2,
+                'opt_3': 3,
                 'created_at': int(time.time())
             }
 
