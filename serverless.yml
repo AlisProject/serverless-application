@@ -95,14 +95,23 @@ resources:
               Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.stage}-*"
         Roles:
           - Ref: LaboLambdaRole
+
+    # DynamoDB
     MajorityJudgmentDB:
       Type: AWS::DynamoDB::Table
+      DeletionPolicy: 'Retain'
       Properties:
-        TableName: MajorityJudgment
+        TableName: "${env:ALIS_APP_ID}-MajorityJudgment"
         AttributeDefinitions:
           - AttributeName: user_id
             AttributeType: S
+        KeySchema:
+          - AttributeName: user_id
+            KeyType: HASH
+        PointInTimeRecoverySpecification:
+          PointInTimeRecoveryEnabled: true
         BillingMode: PAY_PER_REQUEST
+
   Outputs:
     # Elasticsearchで指定する必要があるためExport
     LaboLambdaRole:
