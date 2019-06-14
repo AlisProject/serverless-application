@@ -89,6 +89,28 @@ class ESUtil:
         return res
 
     @staticmethod
+    def search_random_article(elasticsearch):
+        query = {
+            "function_score": {
+                "query": {
+                    "match_all": {}
+                },
+                "random_score": {},
+            }
+        }
+
+        body = {
+            "query": query,
+            "size": 1
+        }
+
+        res = elasticsearch.search(
+            index="articles",
+            body=body
+        )
+        return res
+
+    @staticmethod
     def search_user(elasticsearch, word, limit, page):
         body = {
             "query": {
@@ -149,7 +171,7 @@ class ESUtil:
                 }
             },
             'sort': [
-                {'tip_value': 'desc'}
+                {'sort_tip_value': 'desc'}
             ],
             'from': limit * (page - 1),
             'size': limit
