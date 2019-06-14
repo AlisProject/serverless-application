@@ -12,6 +12,8 @@ provider:
   stage: laboratory # CloudFrontとの連携の都合上、stageには固定値を指定している
   region: ap-northeast-1
   role: LaboLambdaRole
+  logs:
+    restApi: true
   environment:
     # Labo
     MAJORITY_JUDGEMENT_TABLE_NAME: "${env:ALIS_APP_ID}-${self:provider.stage}-MajorityJudgment"
