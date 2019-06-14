@@ -95,6 +95,14 @@ resources:
               Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.stage}-*"
         Roles:
           - Ref: LaboLambdaRole
+    MajorityJudgmentDB:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: MajorityJudgment
+        AttributeDefinitions:
+          - AttributeName: user_id
+            AttributeType: S
+        BillingMode: PAY_PER_REQUEST
   Outputs:
     # Elasticsearchで指定する必要があるためExport
     LaboLambdaRole:
