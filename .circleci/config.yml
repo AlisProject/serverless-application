@@ -4,6 +4,25 @@ references:
   setup_remote_docker: &setup_remote_docker
     setup_remote_docker:
       version: 17.11.0-ce
+  ignore_master: &ignore_master
+    filters:
+      branches:
+        ignore:
+          - master
+  only_master: &only_master
+    filters:
+      branches:
+        only:
+          - master
+  deploy_requirements: &deploy_requires
+    requires:
+      - lint
+      - test
+      - packaging
+
+orbs:
+  aws-cli: circleci/aws-cli@0.1.13
+  slack: circleci/slack@3.2.0
 
 executors:
   python3_6_1:
@@ -205,6 +224,37 @@ jobs:
               npm run deploy
             fi
 
+  notify-to-slack-for-approval:
+    executor:
+      name: python3_6_1
+
+    steps:
+      - slack/approval:
+          message: "本番環境へのデプロイを承認してください"
+          color: "#F5E911"
+
+  bulk-deployment-to-production:
+    executor:
+      name: python3_6_1
+
+    steps:
+      - prepare-python-resources
+
+      - attach_workspace:
+          at: .
+
+      - aws-cli/install
+
+      - aws-cli/configure
+
+      - deploy:
+          name: Bulk deployment
+          command: |
+            . venv/bin/activate
+            ./deploy_api.sh
+            ./fix_api.sh
+
+
 workflows:
   # CloudFormationスタックの依存関係に即したワークフロー
   build-deploy:
@@ -213,25 +263,41 @@ workflows:
       - test
       - packaging
       - labo:
-          requires:
-            - lint
-            - test
-            - packaging
+          <<: *ignore_master
+          <<: *deploy_requires
       - deploy-function:
-          requires:
-            - lint
-            - test
-            - packaging
+          <<: *ignore_master
+          <<: *deploy_requires
       - deploy-function02:
-          requires:
-            - lint
-            - test
-            - packaging
+          <<: *ignore_master
+          <<: *deploy_requires
       - deploy-api:
+          <<: *ignore_master
           requires:
             - deploy-function
             - deploy-function02
       - deploy-permission:
+          <<: *ignore_master
           requires:
             - deploy-api
+
+      # 以下は本番環境へのデプロイ時のみ実行される
+      - notify-to-slack-for-approval:
+          <<: *deploy_requires
+          <<: *only_master
+          context: slack_notification
+      - approval:
+          <<: *deploy_requires
+          <<: *only_master
+          type: approval
+      - bulk-deployment-to-production:
+          <<: *only_master
+          context: serverless_production
+          requires:
+            - approval
+      - labo:
+          <<: *only_master
+          context: serverless_production
+          requires:
+            - approval
 
