@@ -159,24 +159,6 @@ Resources:
           Name: AWS::Include
           Parameters:
             Location: ./swagger/swagger.yaml
-  LambdaRole:
-    Type: "AWS::IAM::Role"
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: "Allow"
-            Principal:
-              Service:
-                - "lambda.amazonaws.com"
-                - "cognito-idp.amazonaws.com"
-            Action:
-              - "sts:AssumeRole"
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess
-        - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
-        - arn:aws:iam::aws:policy/AmazonS3FullAccess
-        - arn:aws:iam::aws:policy/AmazonCognitoPowerUser
   Authorizer:
     Type: AWS::Serverless::Function
     Properties:
