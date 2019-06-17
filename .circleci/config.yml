@@ -259,10 +259,8 @@ workflows:
   # CloudFormationスタックの依存関係に即したワークフロー
   build-deploy:
     jobs:
-      - lint:
-          <<: *ignore_master
-      - test:
-          <<: *ignore_master
+      - lint
+      - test
       - packaging
       - labo:
           <<: *ignore_master
@@ -285,9 +283,11 @@ workflows:
 
       # 以下は本番環境へのデプロイ時のみ実行される
       - notify-to-slack-for-approval:
+          <<: *deploy_requires
           <<: *only_master
           context: slack_notification
       - approval:
+          <<: *deploy_requires
           <<: *only_master
           type: approval
       - bulk-deployment-to-production:
@@ -295,11 +295,9 @@ workflows:
           context: serverless_production
           requires:
             - approval
-            - packaging
       - labo:
           <<: *only_master
           context: serverless_production
           requires:
             - approval
-            - packaging
 
