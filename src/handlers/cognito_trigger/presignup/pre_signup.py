@@ -7,6 +7,7 @@ from not_authorized_error import NotAuthorizedError
 from user_util import UserUtil
 
 
+# Todo: LambdaBase → CognitoTriggerBase への変更
 class PreSignUp(LambdaBase):
     def get_schema(self):
         params = self.event
