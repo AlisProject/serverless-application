@@ -170,14 +170,24 @@ direnv allow
 ./fix_api.sh
 ```
 
+
+#### Single API Lambda Function
+You can deploy single function on `api-template.yaml` with using `deploy_api_function.py` script.
+Following example is that `ArticlesRecent` function is deployed.
+
+```bash
+python make_deploy_zip.py && ./deploy_api_function.py ArticlesRecent
+```
+
 ### ElasticSearch
 
 ```bash
-# Notice: This is only for production env. Unnecessary for dev env.
 ./deploy.sh elasticsearch
 
 # show ElasticSearch Endpoint
-aws es describe-elasticsearch-domain --domain-name ${ALIS_APP_ID}api | jq '.DomainStatus.Endpoint'
+aws es describe-elasticsearch-domain --domain-name ${ALIS_APP_ID}elasticsearch | jq '.DomainStatus.Endpoint'
+
+# Notice: After this, Elasticsearch is expensive if it is the default setting, so it may be better to reconfigure its performance settings.
 ```
 
 And add ElasticSearch Endpoint to SSM.
@@ -188,13 +198,13 @@ Add Your local IP to ES access policy.
 python elasticsearch-setup.py $(curl https://checkip.amazonaws.com/)
 ```
 
-### Single API Lambda Function
-You can deploy single function on `api-template.yaml` with using `deploy_api_function.py` script.
-Following example is that `ArticlesRecent` function is deployed.
+### ALIS Laboratory resources
+Experimental features.
 
 ```bash
-python make_deploy_zip.py && ./deploy_api_function.py ArticlesRecent
-```
+npm i
+npx deploy
+```  
 
 ### CloudWatch Alarm
 For production and staging, you should enable alarms.

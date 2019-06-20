@@ -1,8 +1,11 @@
 {
   "scripts": {
-    "lint": "yarn cfn-lint validate"
+    "lint": "npx cfn-lint validate",
+    "deploy": "npx sls deploy",
+    "remove": "npx sls remove"
   },
   "devDependencies": {
-    "cfn-lint": "^1.9.7"
+    "cfn-lint": "^1.9.7",
+    "serverless": "^1.44.1"
   }
 }

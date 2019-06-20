@@ -6,35 +6,86 @@ Parameters:
   AlisAppId:
     Type: String
 
+Conditions:
+  IsProduction: !Equals [!Ref AlisAppId, "alis"]
+
 Resources:
   ElasticSearchService:
     Type: "AWS::Elasticsearch::Domain"
     Properties:
-      AccessPolicies: !Join
-        - ''
-        - - '{ "Version": "2012-10-17", "Statement": [ { "Effect": "Allow", "Principal": { "AWS": "'
-          - Fn::ImportValue: !Sub "${AlisAppId}-LambdaRole"
-          - '" }, "Action": "es:*", "Resource": "'
-          - 'arn:aws:es:'
-          - !Ref 'AWS::Region'
-          - ':'
-          - !Ref 'AWS::AccountId'
-          - ':domain/'
-          - !Ref "AWS::StackName"
-          - '/*" } ] }'
+      AccessPolicies:
+        "Fn::Sub":
+          - |-
+            {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Principal": {
+                    "AWS": "${ApiLambdaRole}"
+                  },
+                  "Action": "es:*",
+                  "Resource": "arn:aws:es:${Region}:${AccountId}:domain/${StackName}/*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Principal": {
+                    "AWS": "${LaboLambdaRole}"
+                  },
+                  "Action": "es:*",
+                  "Resource": "arn:aws:es:${Region}:${AccountId}:domain/${StackName}/*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Principal": {
+                    "AWS": "*"
+                  },
+                  "Action": "es:*",
+                  "Resource": "Resource": "arn:aws:es:${Region}:${AccountId}:domain/${StackName}/*"
+                  "Condition": {
+                    "IpAddress": {
+                      "aws:SourceIp": "192.168.0.1"
+                    }
+                  }
+                }
+              ]
+            }
+          - {
+            ApiLambdaRole: {"Fn::ImportValue": !Sub "${AlisAppId}-LambdaRole"},
+            LaboLambdaRole: {"Fn::ImportValue": !Sub "${AlisAppId}-LaboLambdaRole"},
+            Region: !Ref 'AWS::Region',
+            AccountId: !Ref 'AWS::AccountId',
+            StackName: !Ref 'AWS::StackName'
+          }
       AdvancedOptions:
         rest.action.multi.allow_explicit_index: 'true'
       DomainName: !Ref "AWS::StackName"
       EBSOptions:
         EBSEnabled: true
         VolumeType: gp2
-        VolumeSize: 35
+        VolumeSize: !If [
+          IsProduction,
+          35,
+          10
+        ]
       ElasticsearchClusterConfig:
-        InstanceType: t2.medium.elasticsearch
-        InstanceCount: 2
+        InstanceType: !If [
+          IsProduction,
+          t2.medium.elasticsearch,
+          t2.small.elasticsearch
+        ]
+        InstanceCount: !If [
+          IsProduction,
+          2,
+          1
+        ]
         DedicatedMasterEnabled: true
         ZoneAwarenessEnabled: false
-        DedicatedMasterType: t2.medium.elasticsearch
+        DedicatedMasterType: !If [
+          IsProduction,
+          t2.medium.elasticsearch,
+          t2.small.elasticsearch
+        ]
         DedicatedMasterCount: 3
       ElasticsearchVersion: '6.2'
       SnapshotOptions:

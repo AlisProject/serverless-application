@@ -1,13 +1,105 @@
-version: 2
+version: 2.1
 
 references:
-    setup_remote_docker: &setup_remote_docker
-      setup_remote_docker:
-        version: 17.11.0-ce
+  setup_remote_docker: &setup_remote_docker
+    setup_remote_docker:
+      version: 17.11.0-ce
+  ignore_master: &ignore_master
+    filters:
+      branches:
+        ignore:
+          - master
+  only_master: &only_master
+    filters:
+      branches:
+        only:
+          - master
+  deploy_requirements: &deploy_requires
+    requires:
+      - lint
+      - test
+      - packaging
+
+orbs:
+  aws-cli: circleci/aws-cli@0.1.13
+  slack: circleci/slack@3.2.0
+
+executors:
+  python3_6_1:
+    working_directory: ~/repo
+    docker:
+      - image: circleci/python:3.6.1
+
+commands:
+  prepare-python-resources:
+    description: 'Pythonのリソースを準備'
+    parameters:
+      resource:
+        type: string
+        default: 'requirements.txt'
+    steps:
+      - checkout
+
+      - <<: *setup_remote_docker
+
+      - restore_cache:
+          keys:
+            - v3-dependencies-{{ checksum "<< parameters.resource >>" }}
+            - v3-dependencies-
+
+      - run:
+          name: install dependencies
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            pip install -r << parameters.resource >>
+
+      - save_cache:
+          paths:
+            - ./venv
+          key: v3-dependencies-{{ checksum "<< parameters.resource >>" }}
+
+  deploy-resources:
+    description: 'リソースのデプロイの共通処理'
+    parameters:
+      target:
+        type: string
+    steps:
+      - prepare-python-resources
+
+      - attach_workspace:
+          at: .
+
+      - deploy:
+          name: Deployment
+          command: |
+            if [ $ALIS_APP_ID ]; then
+              . venv/bin/activate
+              ./deploy.sh << parameters.target >>
+            fi
 
 jobs:
-  build:
+  lint:
+    executor:
+      name: python3_6_1
 
+    steps:
+      - prepare-python-resources:
+          resource: 'requirements_test.txt'
+
+      - run:
+          name: checkstyle
+          command: |
+            . venv/bin/activate
+            pycodestyle src tests ./*.py
+
+      - run:
+          name: pyflakes
+          command: |
+            . venv/bin/activate
+            pyflakes src tests ./*.py
+
+  test:
     docker:
       - image: circleci/python:3.6.1
       - image: bluszcz/bflocalstack-dynamodb-s3
@@ -23,12 +115,13 @@ jobs:
 
     steps:
       - checkout
+
       - <<: *setup_remote_docker
-      # Download and cache dependencies
+
       - restore_cache:
           keys:
-          - v3-dependencies-{{ checksum "requirements.txt" }}
-          - v3-dependencies-
+            - v3-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements_test.txt" }}
+            - v3-dependencies-
 
       - run:
           name: install dependencies
@@ -41,46 +134,170 @@ jobs:
       - save_cache:
           paths:
             - ./venv
-          key: v3-dependencies-{{ checksum "requirements.txt" }}
-
-      - run:
-          name: run checkstyle for python code
-          command: |
-            . venv/bin/activate
-            pycodestyle src tests ./*.py
-
-      - run:
-          name: run pyflakes for python code
-          command: |
-            . venv/bin/activate
-            pyflakes src tests ./*.py
+          key: v3-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements_test.txt" }}
 
       - run:
           name: run tests
           command: |
             . venv/bin/activate
-            # 全テスト実行
             python exec_test.py
+
+  packaging:
+    executor:
+      name: python3_6_1
+
+    steps:
+      - prepare-python-resources
+
       - run:
           name: make deploy package
           command: |
-            if [ $ALIS_APP_ID ]; then
-              docker image build --tag deploy-image .
-              docker container run -it --name deploy-container deploy-image
-              docker container cp deploy-container:/workdir/vendor-package .
-              . venv/bin/activate
-              python make_deploy_zip.py
-            fi
+            . venv/bin/activate
+            ./packaging.sh
+
+      - persist_to_workspace:
+          root: .
+          paths:
+            - deploy/*
+
+  deploy-function:
+    executor:
+      name: python3_6_1
+
+    steps:
+      - deploy-resources:
+          target: 'function'
+
+  deploy-function02:
+    executor:
+      name: python3_6_1
+
+    steps:
+      - deploy-resources:
+          target: 'function02'
+
+  deploy-api:
+    executor:
+      name: python3_6_1
+
+    steps:
+      - deploy-resources:
+          target: 'api'
+
+  deploy-permission:
+    executor:
+      name: python3_6_1
+
+    steps:
+      - deploy-resources:
+          target: 'permission'
+
+  labo:
+    docker:
+      - image: circleci/node:12.4.0
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+
+      - attach_workspace:
+          at: .
+
+      - restore_cache:
+          keys:
+            - v1-npm-dependencies-{{ checksum "package-lock.json" }}
+            - v1-npm-dependencies-
 
       - run:
-          name: run deploy
+          command: npm i
+
+      - save_cache:
+          paths:
+            - ./node_modules
+          key: v1-npm-dependencies-{{ checksum "package-lock.json" }}
+
+      - deploy:
+          name: Deployment
           command: |
             if [ $ALIS_APP_ID ]; then
-              . venv/bin/activate
-              ./deploy_api.sh
-              ./fix_api.sh
+              npm run deploy
             fi
 
-      - store_artifacts:
-          path: test-reports
-          destination: test-reports
+  notify-to-slack-for-approval:
+    executor:
+      name: python3_6_1
+
+    steps:
+      - slack/approval:
+          message: "本番環境へのデプロイを承認してください"
+          color: "#F5E911"
+
+  bulk-deployment-to-production:
+    executor:
+      name: python3_6_1
+
+    steps:
+      - prepare-python-resources
+
+      - attach_workspace:
+          at: .
+
+      - aws-cli/install
+
+      - aws-cli/configure
+
+      - deploy:
+          name: Bulk deployment
+          command: |
+            . venv/bin/activate
+            ./deploy_api.sh
+            ./fix_api.sh
+
+
+workflows:
+  # CloudFormationスタックの依存関係に即したワークフロー
+  build-deploy:
+    jobs:
+      - lint
+      - test
+      - packaging
+      - labo:
+          <<: *ignore_master
+          <<: *deploy_requires
+      - deploy-function:
+          <<: *ignore_master
+          <<: *deploy_requires
+      - deploy-function02:
+          <<: *ignore_master
+          <<: *deploy_requires
+      - deploy-api:
+          <<: *ignore_master
+          requires:
+            - deploy-function
+            - deploy-function02
+      - deploy-permission:
+          <<: *ignore_master
+          requires:
+            - deploy-api
+
+      # 以下は本番環境へのデプロイ時のみ実行される
+      - notify-to-slack-for-approval:
+          <<: *deploy_requires
+          <<: *only_master
+          context: slack_notification
+      - approval:
+          <<: *deploy_requires
+          <<: *only_master
+          type: approval
+      - bulk-deployment-to-production:
+          <<: *only_master
+          context: serverless_production
+          requires:
+            - approval
+      - labo:
+          <<: *only_master
+          context: serverless_production
+          requires:
+            - approval
+
