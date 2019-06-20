@@ -8,6 +8,7 @@ from boto3.dynamodb.conditions import Key
 from botocore.exceptions import ClientError
 
 
+# Todo: LambdaBase → CognitoTriggerBase への変更
 class PreAuthentication(LambdaBase):
     def get_schema(self):
         pass
