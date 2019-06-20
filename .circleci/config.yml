@@ -110,9 +110,10 @@ jobs:
       - image: docker.elastic.co/elasticsearch/elasticsearch:6.2.0
         environment:
           discovery.type: single-node
-        resource_class: medium
 
     working_directory: ~/repo
+
+    resource_class: medium
 
     steps:
       - checkout
