@@ -16,8 +16,8 @@ Parameters:
     Type: String
   AcmCertificateArn:
     Type: String
-  Route53HostZoneId:
-    Type: String
+#  Route53HostZoneId:
+#    Type: String
 # FIXME: OAIの扱いが難しいためS3分は割愛
 #  OaiForS3Bucket:
 #    Type: String
@@ -25,16 +25,16 @@ Parameters:
 #    Type: 'AWS::SSM::Parameter::Value<String>'
 
 Resources:
-  RecordSetGroup:
-    Type: 'AWS::Route53::RecordSetGroup'
-    Properties:
-      HostedZoneId: !Ref Route53HostZoneId
-      RecordSets:
-        - Name: !Sub "${AlisAppId}.alis-test.tk."
-          Type: A
-          AliasTarget:
-            HostedZoneId: !Ref Route53HostZoneId
-            DNSName: !GetAtt CloudfrontDistribution.DomainName
+  #  RecordSetGroup:
+  #    Type: 'AWS::Route53::RecordSetGroup'
+  #    Properties:
+  #      HostedZoneId: !Ref Route53HostZoneId
+  #      RecordSets:
+  #        - Name: !Sub "${AlisAppId}.alis-test.tk."
+  #          Type: A
+  #          AliasTarget:
+  #            HostedZoneId: !Ref Route53HostZoneId
+  #            DNSName: !Sub "${CloudfrontDistribution.DomainName}."
   # FIXME: Oauth分？
   #  dnsoauth2alisstagingalistesttk:
   #    Type: 'AWS::Route53::RecordSetGroup'
@@ -62,6 +62,9 @@ Resources:
               HTTPPort: '80'
               HTTPSPort: '443'
               OriginProtocolPolicy: https-only
+              OriginSSLProtocols:
+                - TLSv1.1
+                - TLSv1.2
           - DomainName: !Sub "${FrontendApiGatewayId}.execute-api.ap-northeast-1.amazonaws.com"
             Id: frontend
             OriginPath: /prod
@@ -69,6 +72,9 @@ Resources:
               HTTPPort: '80'
               HTTPSPort: '443'
               OriginProtocolPolicy: https-only
+              OriginSSLProtocols:
+                - TLSv1.1
+                - TLSv1.2
           # FIXME: 手作業で作成
           #          - DomainName: !Sub "${DistS3BucketName}.s3.amazonaws.com"
           #            Id: s3-dist
@@ -80,18 +86,27 @@ Resources:
               HTTPPort: '80'
               HTTPSPort: '443'
               OriginProtocolPolicy: https-only
+              OriginSSLProtocols:
+                - TLSv1.1
+                - TLSv1.2
           - DomainName: !Sub "${Oauth2apiApiGatewayId}.execute-api.ap-northeast-1.amazonaws.com"
             Id: oauth2api
             CustomOriginConfig:
               HTTPPort: '80'
               HTTPSPort: '443'
               OriginProtocolPolicy: https-only
+              OriginSSLProtocols:
+                - TLSv1.1
+                - TLSv1.2
           - DomainName: !Sub "${LaboApiGatewayId}.execute-api.ap-northeast-1.amazonaws.com"
             Id: labo
             CustomOriginConfig:
               HTTPPort: '80'
               HTTPSPort: '443'
               OriginProtocolPolicy: https-only
+              OriginSSLProtocols:
+                - TLSv1.1
+                - TLSv1.2
         Restrictions:
           GeoRestriction:
             RestrictionType: none
@@ -315,6 +330,27 @@ Resources:
                 - Authorization
               Cookies:
                 Forward: all
+          - TargetOriginId: labo
+            PathPattern: /labo/*
+            ViewerProtocolPolicy: allow-all
+            MinTTL: 0 # productionでは120
+            MaxTTL: 0
+            DefaultTTL: 0
+            AllowedMethods:
+              - HEAD
+              - DELETE
+              - POST
+              - GET
+              - OPTIONS
+              - PUT
+              - PATCH
+            CachedMethods:
+              - HEAD
+              - GET
+            ForwardedValues:
+              QueryString: true
+              Cookies:
+                Forward: none
           #  FIXME: 手作業で作成
           #          - TargetOriginId: s3-dist
           #            PathPattern: /d/api/*
