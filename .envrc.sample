@@ -27,9 +27,6 @@ export LaboApiGatewayId=xxxxxxxx
 # ACMのCertificationのArn
 export AcmCertificateArn=arn:aws:acm:us-east-1:xxxxxx:xxxxxx
 
-# Route53 Hosted zone
-export Route53HostZoneId=XXXXXXXXX
-
 
 # --- AWS ---
 
