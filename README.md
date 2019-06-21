@@ -182,11 +182,12 @@ python make_deploy_zip.py && ./deploy_api_function.py ArticlesRecent
 ### ElasticSearch
 
 ```bash
-# Notice: This is only for production env. Unnecessary for dev env.
 ./deploy.sh elasticsearch
 
 # show ElasticSearch Endpoint
-aws es describe-elasticsearch-domain --domain-name ${ALIS_APP_ID}api | jq '.DomainStatus.Endpoint'
+aws es describe-elasticsearch-domain --domain-name ${ALIS_APP_ID}elasticsearch | jq '.DomainStatus.Endpoint'
+
+# Notice: After this, Elasticsearch is expensive if it is the default setting, so it may be better to reconfigure its performance settings.
 ```
 
 And add ElasticSearch Endpoint to SSM.

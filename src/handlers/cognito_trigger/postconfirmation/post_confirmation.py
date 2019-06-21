@@ -6,6 +6,7 @@ from aws_requests_auth.aws_auth import AWSRequestsAuth
 from lambda_base import LambdaBase
 
 
+# Todo: LambdaBase → CognitoTriggerBase への変更
 class PostConfirmation(LambdaBase):
     def get_schema(self):
         pass

@@ -1,5 +1,4 @@
 import os
-import json
 from unittest import TestCase
 from custom_message import CustomMessage
 from tests_util import TestsUtil
@@ -14,11 +13,26 @@ class TestCustomMessage(TestCase):
     @classmethod
     def setUpClass(cls):
         TestsUtil.set_aws_auth_to_env()
+        TestsUtil.set_all_tables_name_to_env()
         pass
 
     @classmethod
     def tearDownClass(cls):
         pass
+
+    def setUp(self):
+        TestsUtil.delete_all_tables(dynamodb)
+        external_provider_user_items = [
+            {
+                'external_provider_user_id': 'external_provider_user_id',
+                'password': 'password',
+                'user_id': 'external_provider_user'
+            }
+        ]
+        TestsUtil.create_table(dynamodb, os.environ['EXTERNAL_PROVIDER_USERS_TABLE_NAME'], external_provider_user_items)
+
+    def tearDown(self):
+        TestsUtil.delete_all_tables(dynamodb)
 
     def test_email_verify(self):
         os.environ['DOMAIN'] = "alis.example.com"
@@ -225,10 +239,9 @@ class TestCustomMessage(TestCase):
                         }
                     }
             custom_message = CustomMessage(event=event, context="", dynamodb=dynamodb)
-            response = custom_message.main()
-            self.assertEqual(response['statusCode'], 400)
-            self.assertEqual(json.loads(response['body'])['message'],
-                             'Invalid parameter: Do not allow phone number updates')
+            with self.assertRaises(Exception) as e:
+                custom_message.main()
+            self.assertEqual('Do not allow phone number updates', str(e.exception))
 
     def test_invalid_phone_number(self):
         os.environ['DOMAIN'] = "alis.example.com"
@@ -264,23 +277,27 @@ class TestCustomMessage(TestCase):
         # 桁が足りない
         event['request']['userAttributes']['phone_number'] = "+810801234567"
         custommessage = CustomMessage(event=event, context="", dynamodb=dynamodb)
-        response = custommessage.main()
-        self.assertEqual(response['statusCode'],  400)
+        with self.assertRaises(Exception) as e:
+            custommessage.main()
+        self.assertEqual("'+810801234567' does not match '^\\\\+81[6-9]0\\\\d{8}$'", str(e.exception))
         # 桁が多い
         event['request']['userAttributes']['phone_number'] = "+81080123456789"
         custommessage = CustomMessage(event=event, context="", dynamodb=dynamodb)
-        response = custommessage.main()
-        self.assertEqual(response['statusCode'],  400)
+        with self.assertRaises(Exception) as e:
+            custommessage.main()
+        self.assertEqual("'+81080123456789' is too long", str(e.exception))
         # 日本の番号ではない
-        event['request']['userAttributes']['phone_number'] = "+4408012345678"
+        event['request']['userAttributes']['phone_number'] = "+440801234567"
         custommessage = CustomMessage(event=event, context="", dynamodb=dynamodb)
-        response = custommessage.main()
-        self.assertEqual(response['statusCode'],  400)
+        with self.assertRaises(Exception) as e:
+            custommessage.main()
+        self.assertEqual("'+440801234567' does not match '^\\\\+81[6-9]0\\\\d{8}$'", str(e.exception))
         # 090,080,070,060以外で始まる番号
-        event['request']['userAttributes']['phone_number'] = "+8105012345678"
+        event['request']['userAttributes']['phone_number'] = "+810501234567"
         custommessage = CustomMessage(event=event, context="", dynamodb=dynamodb)
-        response = custommessage.main()
-        self.assertEqual(response['statusCode'],  400)
+        with self.assertRaises(Exception) as e:
+            custommessage.main()
+        self.assertEqual("'+810501234567' does not match '^\\\\+81[6-9]0\\\\d{8}$'", str(e.exception))
 
     def test_correct_phone_number(self):
         custommessage = CustomMessage(event={}, context="", dynamodb=dynamodb)
@@ -326,6 +343,42 @@ class TestCustomMessage(TestCase):
         self.assertEqual(response['response']['emailMessage'], 'resetuserさんのパスワード再設定コードは {####} です')
         self.assertEqual(response['response']['smsMessage'], 'resetuserさんのパスワード再設定コードは {####} です。')
 
+    def test_reset_password_ng_with_external_provider_user(self):
+        event = {
+                    'version': '1',
+                    'region': 'us-east-1',
+                    'userPoolId': 'us-east-1_xxxxxxxxx',
+                    'userName': 'external_provider_user',
+                    'callerContext': {
+                        'awsSdkVersion': 'aws-sdk-js-2.6.4',
+                        'clientId': 'abcdefghijklmnopqrstuvwxy'
+                    },
+                    'triggerSource': 'CustomMessage_ForgotPassword',
+                    'request': {
+                        'userAttributes': {
+                                'sub': '11111111-2222-3333-4444-555555555555',
+                                'email_verified': 'true',
+                                'cognito:user_status': 'CONFIRMED',
+                                'cognito:email_alias': 'y1@example.net',
+                                'phone_number_verified': 'true',
+                                'cognito:phone_number_alias': '+818012345678',
+                                'phone_number': '+818012345678',
+                                'email': 'y1@example.net'
+                            },
+                        'codeParameter': '{####}',
+                        'usernameParameter': None
+                    },
+                    'response': {
+                        'smsMessage': None,
+                        'emailMessage': None,
+                        'emailSubject': None
+                    }
+            }
+        custommessage = CustomMessage(event=event, context="", dynamodb=dynamodb)
+        with self.assertRaises(Exception) as e:
+            custommessage.main()
+        self.assertEqual("external provider's user can not execute", str(e.exception))
+
     def test_invalid_line_user_attempt_to_register_phone_number(self):
         os.environ['DOMAIN'] = "alis.example.com"
         event = {
@@ -359,10 +412,9 @@ class TestCustomMessage(TestCase):
                 }
         event['request']['userAttributes']['phone_number'] = "+818011112222"
         custommessage = CustomMessage(event=event, context="", dynamodb=dynamodb)
-        response = custommessage.main()
-        self.assertEqual(response['statusCode'],  400)
-        self.assertEqual(response['body'],
-                         json.dumps({"message": "Invalid parameter: external provider's user can not execute"}))
+        with self.assertRaises(Exception) as e:
+            custommessage.main()
+        self.assertEqual("external provider's user can not execute", str(e.exception))
 
     def test_invalid_twitter_user_attempt_to_register_phone_number(self):
         os.environ['DOMAIN'] = "alis.example.com"
@@ -396,10 +448,9 @@ class TestCustomMessage(TestCase):
                     }
                 }
         custommessage = CustomMessage(event=event, context="", dynamodb=dynamodb)
-        response = custommessage.main()
-        self.assertEqual(response['statusCode'],  400)
-        self.assertEqual(response['body'],
-                         json.dumps({"message": "Invalid parameter: external provider's user can not execute"}))
+        with self.assertRaises(Exception) as e:
+            custommessage.main()
+        self.assertEqual("external provider's user can not execute", str(e.exception))
 
     def test_invalid_yahoo_user_attempt_to_register_phone_number(self):
         os.environ['DOMAIN'] = "alis.example.com"
@@ -433,10 +484,9 @@ class TestCustomMessage(TestCase):
                     }
                 }
         custommessage = CustomMessage(event=event, context="", dynamodb=dynamodb)
-        response = custommessage.main()
-        self.assertEqual(response['statusCode'],  400)
-        self.assertEqual(response['body'],
-                         json.dumps({"message": "Invalid parameter: external provider's user can not execute"}))
+        with self.assertRaises(Exception) as e:
+            custommessage.main()
+        self.assertEqual("external provider's user can not execute", str(e.exception))
 
     def test_invalid_facebook_user_attempt_to_register_phone_number(self):
         os.environ['DOMAIN'] = "alis.example.com"
@@ -470,7 +520,6 @@ class TestCustomMessage(TestCase):
                     }
                 }
         custommessage = CustomMessage(event=event, context="", dynamodb=dynamodb)
-        response = custommessage.main()
-        self.assertEqual(response['statusCode'],  400)
-        self.assertEqual(response['body'],
-                         json.dumps({"message": "Invalid parameter: external provider's user can not execute"}))
+        with self.assertRaises(Exception) as e:
+            custommessage.main()
+        self.assertEqual("external provider's user can not execute", str(e.exception))

@@ -71,7 +71,7 @@ resources:
       Type: AWS::IAM::Role
       Properties:
         Path: /
-        RoleName: LaboLambdaRole
+        RoleName: "${env:ALIS_APP_ID}-LaboLambdaRole"
         AssumeRolePolicyDocument:
           Version: '2012-10-17'
           Statement:
@@ -88,5 +88,5 @@ resources:
       Value:
         Fn::GetAtt: LaboLambdaRole.Arn
       Export:
-        Name: !Sub "${env:ALIS_APP_ID}-LaboLambdaRole"
+        Name: "${env:ALIS_APP_ID}-LaboLambdaRole"
 
