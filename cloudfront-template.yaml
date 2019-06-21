@@ -16,8 +16,6 @@ Parameters:
     Type: String
   AcmCertificateArn:
     Type: String
-#  Route53HostZoneId:
-#    Type: String
 # FIXME: OAIの扱いが難しいためS3分は割愛
 #  OaiForS3Bucket:
 #    Type: String
@@ -25,28 +23,6 @@ Parameters:
 #    Type: 'AWS::SSM::Parameter::Value<String>'
 
 Resources:
-  #  RecordSetGroup:
-  #    Type: 'AWS::Route53::RecordSetGroup'
-  #    Properties:
-  #      HostedZoneId: !Ref Route53HostZoneId
-  #      RecordSets:
-  #        - Name: !Sub "${AlisAppId}.alis-test.tk."
-  #          Type: A
-  #          AliasTarget:
-  #            HostedZoneId: !Ref Route53HostZoneId
-  #            DNSName: !Sub "${CloudfrontDistribution.DomainName}."
-  # FIXME: Oauth分？
-  #  dnsoauth2alisstagingalistesttk:
-  #    Type: 'AWS::Route53::RecordSetGroup'
-  #    Properties:
-  #      HostedZoneId: !Ref zonealistesttk
-  #      RecordSets:
-  #        - Name: oauth2!Sub "${AlisAppId}.alis-test.tk".
-  #          Type: CNAME
-  #          TTL: '60'
-  #          ResourceRecords:
-  #            - d1582tru02jlgw.cloudfront.net
-
   CloudfrontDistribution:
     Type: 'AWS::CloudFront::Distribution'
     Properties:
@@ -76,7 +52,7 @@ Resources:
               OriginSSLProtocols:
                 - TLSv1.1
                 - TLSv1.2
-          # FIXME: 手作業で作成
+          # FIXME: OAIの扱いが難しいためS3分は割愛
           #          - DomainName: !Sub "${DistS3BucketName}.s3.amazonaws.com"
           #            Id: s3-dist
           #            S3OriginConfig:
@@ -352,7 +328,7 @@ Resources:
               QueryString: true
               Cookies:
                 Forward: none
-          #  FIXME: 手作業で作成
+          #  FIXME: OAIの扱いが難しいためS3分は割愛
           #          - TargetOriginId: s3-dist
           #            PathPattern: /d/api/*
           #            ViewerProtocolPolicy: allow-all
