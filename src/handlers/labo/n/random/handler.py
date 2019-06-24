@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import boto3
-from articles_random import ArticlesRandom
+from article import LaboNRandomArticle
 from elasticsearch import Elasticsearch, RequestsHttpConnection
 from requests_aws4auth import AWS4Auth
 
@@ -23,5 +23,5 @@ elasticsearch = Elasticsearch(
 
 
 def lambda_handler(event, context):
-    articles_random = ArticlesRandom(event, context, dynamodb, elasticsearch=elasticsearch)
+    articles_random = LaboNRandomArticle(event, context, dynamodb, elasticsearch=elasticsearch)
     return articles_random.main()

@@ -6,6 +6,6 @@
   },
   "devDependencies": {
     "cfn-lint": "^1.9.7",
-    "serverless": "^1.44.1"
+    "serverless": "^1.45.1"
   }
 }
