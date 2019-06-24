@@ -19,7 +19,8 @@ class TestUserUtil(TestCase):
 
         self.external_provider_users_table_items = [
             {
-                'external_provider_user_id': 'external_provider_user_id'
+                'external_provider_user_id': 'external_provider_user_id',
+                'user_id': 'user_id'
             }
         ]
         TestsUtil.create_table(
@@ -169,6 +170,12 @@ class TestUserUtil(TestCase):
 
     def test_exists_user_ng(self):
         self.assertFalse(UserUtil.exists_user(self.dynamodb, 'test-user'))
+
+    def test_is_external_provider_user_ok(self):
+        self.assertTrue(UserUtil.is_external_provider_user(self.dynamodb, 'user_id'))
+
+    def test_is_external_provider_user_ng(self):
+        self.assertFalse(UserUtil.is_external_provider_user(self.dynamodb, 'test-user'))
 
     def test_create_external_provider_user_ok(self):
         self.cognito.admin_create_user = MagicMock(return_value=True)

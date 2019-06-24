@@ -3,12 +3,12 @@ import os
 import boto3
 import settings
 from jsonschema import validate, ValidationError
-from lambda_base import LambdaBase
+from cognito_trigger_base import CognitoTriggerBase
 from user_util import UserUtil
 from private_chain_util import PrivateChainUtil
 
 
-class CustomMessage(LambdaBase):
+class CustomMessage(CognitoTriggerBase):
     def get_schema(self):
         return {
             'type': 'object',
@@ -43,6 +43,12 @@ class CustomMessage(LambdaBase):
             # phone_number_verified が true の場合は電話番号変更を行っていないため当チェックは不要
             if params.get('phone_number_verified', '') != 'true':
                 self.__validate_has_not_token(params)
+
+        # サードパーティを利用したユーザの場合、パスワード変更を実行させない
+        if self.event['triggerSource'] == 'CustomMessage_ForgotPassword':
+            # サードパーティを利用したユーザかを確認
+            if UserUtil.is_external_provider_user(self.dynamodb, self.event['userName']):
+                raise ValidationError("external provider's user can not execute")
 
     def exec_main_proc(self):
         if self.event['triggerSource'] == 'CustomMessage_ForgotPassword':
