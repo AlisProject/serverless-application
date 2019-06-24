@@ -126,6 +126,10 @@ jobs:
 
       - <<: *setup_remote_docker
 
+      - aws-cli/install
+
+      - aws-cli/configure
+
       - restore_cache:
           keys:
             - v3-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements_test.txt" }}
