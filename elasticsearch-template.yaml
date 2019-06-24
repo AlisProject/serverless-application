@@ -41,7 +41,7 @@ Resources:
                     "AWS": "*"
                   },
                   "Action": "es:*",
-                  "Resource": "Resource": "arn:aws:es:${Region}:${AccountId}:domain/${StackName}/*"
+                  "Resource": "arn:aws:es:${Region}:${AccountId}:domain/${StackName}/*",
                   "Condition": {
                     "IpAddress": {
                       "aws:SourceIp": "192.168.0.1"
