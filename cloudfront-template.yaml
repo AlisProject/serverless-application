@@ -119,7 +119,9 @@ Resources:
           - TargetOriginId: api
             PathPattern: /api/articles/*/comments
             ViewerProtocolPolicy: allow-all
-            MinTTL: 5
+            MinTTL: 0 # productionでは120
+            MaxTTL: 0
+            DefaultTTL: 0
             AllowedMethods:
               - HEAD
               - DELETE
@@ -201,7 +203,9 @@ Resources:
           - TargetOriginId: api
             PathPattern: /api/*
             ViewerProtocolPolicy: allow-all
-            MinTTL: 120
+            MinTTL: 0 # productionでは120
+            MaxTTL: 0
+            DefaultTTL: 0
             AllowedMethods:
               - HEAD
               - DELETE
@@ -243,7 +247,9 @@ Resources:
           - TargetOriginId: oauth2api
             PathPattern: /oauth2api/*
             ViewerProtocolPolicy: allow-all
-            MinTTL: 120
+            MinTTL: 0 # productionでは120
+            MaxTTL: 0
+            DefaultTTL: 0
             AllowedMethods:
               - HEAD
               - DELETE
@@ -362,7 +368,9 @@ Resources:
           - TargetOriginId: frontend
             PathPattern: /*
             ViewerProtocolPolicy: redirect-to-https
-            MinTTL: 120
+            MinTTL: 0 # productionでは120
+            MaxTTL: 0
+            DefaultTTL: 0
             AllowedMethods:
               - HEAD
               - DELETE
@@ -381,7 +389,9 @@ Resources:
         DefaultCacheBehavior:
           TargetOriginId: frontend
           ViewerProtocolPolicy: redirect-to-https
-          MinTTL: 120
+          MinTTL: 0 # productionでは120
+          MaxTTL: 0
+          DefaultTTL: 0
           AllowedMethods:
             - HEAD
             - DELETE
