@@ -291,7 +291,7 @@ Resources:
               Cookies:
                 Forward: none
           - TargetOriginId: labo
-            PathPattern: /labo/n/*
+            PathPattern: /laboratory/labo/n/*
             ViewerProtocolPolicy: allow-all
             MinTTL: 0
             MaxTTL: 0
@@ -314,7 +314,7 @@ Resources:
               Cookies:
                 Forward: all
           - TargetOriginId: labo
-            PathPattern: /labo/*
+            PathPattern: /laboratory/labo/*
             ViewerProtocolPolicy: allow-all
             MinTTL: 0 # productionでは120
             MaxTTL: 0
