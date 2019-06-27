@@ -113,8 +113,8 @@ jobs:
       - image: bluszcz/bflocalstack-dynamodb-s3
       - image: alismedia/dynamodb-local
         environment:
-          MAX_HEAP_SIZE: 2048m
-          HEAP_NEWSIZE: 512m
+          MAX_HEAP_SIZE: 4096m
+          HEAP_NEWSIZE: 3072m
       - image: docker.elastic.co/elasticsearch/elasticsearch:6.2.0
         environment:
           discovery.type: single-node
