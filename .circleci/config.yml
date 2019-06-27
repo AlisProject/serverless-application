@@ -4,6 +4,7 @@ references:
   setup_remote_docker: &setup_remote_docker
     setup_remote_docker:
       version: 17.11.0-ce
+      docker_layer_caching: true
   ignore_master: &ignore_master
     filters:
       branches:
@@ -121,14 +122,14 @@ jobs:
 
     working_directory: ~/repo
 
+    resource_class: large
+
     steps:
       - checkout
 
       - <<: *setup_remote_docker
 
-      - aws-cli/install
-
-      - aws-cli/configure
+      - prepare-aws-cli
 
       - restore_cache:
           keys:
@@ -272,7 +273,8 @@ workflows:
   build-deploy:
     jobs:
       - lint
-      - test
+      - test:
+          context: common_staging_deployment
       - packaging
       - labo:
           <<: *ignore_master
