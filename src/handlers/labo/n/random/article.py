@@ -6,7 +6,7 @@ from lambda_base import LambdaBase
 from decimal_encoder import DecimalEncoder
 
 
-class ArticlesRandom(LambdaBase):
+class LaboNRandomArticle(LambdaBase):
     def get_schema(self):
         pass
 

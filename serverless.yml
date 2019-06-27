@@ -1,17 +1,19 @@
-# スタック名: labo-${env:ALIS_APP_ID}
+# スタック名: ${env:ALIS_APP_ID}-laboratory
 service: ${env:ALIS_APP_ID}
 
-frameworkVersion: ">=1.44.1 <2.0.0"
+frameworkVersion: ">=1.45.1 <2.0.0"
 
 custom:
-  bucket: ${env:ALIS_APP_ID}-alis-labolatory
+  bucket: ${env:ALIS_APP_ID}-alis-laboratory
 
 provider:
   name: aws
   runtime: python3.6
-  stage: labo # CloudFrontとの連携の都合上、stageには固定値を指定している
+  stage: laboratory # CloudFrontとの連携の都合上、stageには固定値を指定している
   region: ap-northeast-1
   role: LaboLambdaRole
+  logs:
+    restApi: true
   environment:
     ARTICLE_INFO_TABLE_NAME: ${ssm:${env:ALIS_APP_ID}ssmArticleInfoTableName}
     ARTICLE_CONTENT_TABLE_NAME: ${ssm:${env:ALIS_APP_ID}ssmArticleContentTableName}
@@ -53,16 +55,17 @@ package:
   individually: true
 
 functions:
-  ArticleRandom:
+  LaboNRandom:
     description: "記事をランダムに表示"
     handler: handler.lambda_handler
     package:
-      artifact: ./deploy/articles_random.zip
+      artifact: ./deploy/labo_n_random.zip
     events:
       - http:
           method: get
           # CloudFrontによるキャッシュを利かさないものは /n/ 以下に配置する
-          path: /n/random
+          path: /labo/n/random
+
 
 resources:
   Resources:
@@ -82,6 +85,7 @@ resources:
                   - lambda.amazonaws.com
         ManagedPolicyArns:
           - arn:aws:iam::aws:policy/AmazonDynamoDBReadOnlyAccess
+          - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
   Outputs:
     # Elasticsearchで指定する必要があるためExport
     LaboLambdaRole:

@@ -31,6 +31,12 @@ executors:
       - image: circleci/python:3.6.1
 
 commands:
+  prepare-aws-cli:
+    description: 'AWS CLIを準備'
+    steps:
+      - aws-cli/install
+      - aws-cli/configure
+
   prepare-python-resources:
     description: 'Pythonのリソースを準備'
     parameters:
@@ -66,6 +72,8 @@ commands:
         type: string
     steps:
       - prepare-python-resources
+
+      - prepare-aws-cli
 
       - attach_workspace:
           at: .
@@ -119,6 +127,10 @@ jobs:
       - checkout
 
       - <<: *setup_remote_docker
+
+      - aws-cli/install
+
+      - aws-cli/configure
 
       - restore_cache:
           keys:

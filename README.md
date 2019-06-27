@@ -104,7 +104,6 @@ Add master data to DynamoDB.
 
 ### Cognito
 
-
 ```bash
 ./deploy.sh cognito
 ```
@@ -121,6 +120,27 @@ You have to add SNS authentication params to SSM.
 ```bash
 ./deploy.sh function && ./deploy.sh function02 && ./deploy.sh api
 ```
+
+### ElasticSearch
+
+```bash
+./deploy.sh elasticsearch
+
+# show ElasticSearch Endpoint
+aws es describe-elasticsearch-domain --domain-name ${ALIS_APP_ID}elasticsearch | jq '.DomainStatus.Endpoint'
+
+# Notice: After this, Elasticsearch is expensive if it is the default setting, so it may be better to reconfigure its performance settings.
+```
+
+And add ElasticSearch Endpoint to SSM.
+- See: https://github.com/AlisProject/environment
+
+Add Your local IP to ES access policy.
+```bash
+python elasticsearch-setup.py $(curl https://checkip.amazonaws.com/)
+```
+
+### Permissions
 
 You have to add `RestApiArn`, `ApiLambdaRole` and `ElasticSearchEndpoint` to SSM.
 - See: https://github.com/AlisProject/environment
@@ -177,25 +197,6 @@ Following example is that `ArticlesRecent` function is deployed.
 
 ```bash
 python make_deploy_zip.py && ./deploy_api_function.py ArticlesRecent
-```
-
-### ElasticSearch
-
-```bash
-./deploy.sh elasticsearch
-
-# show ElasticSearch Endpoint
-aws es describe-elasticsearch-domain --domain-name ${ALIS_APP_ID}elasticsearch | jq '.DomainStatus.Endpoint'
-
-# Notice: After this, Elasticsearch is expensive if it is the default setting, so it may be better to reconfigure its performance settings.
-```
-
-And add ElasticSearch Endpoint to SSM.
-- See: https://github.com/AlisProject/environment
-
-Add Your local IP to ES access policy.
-```bash
-python elasticsearch-setup.py $(curl https://checkip.amazonaws.com/)
 ```
 
 ### ALIS Laboratory resources
