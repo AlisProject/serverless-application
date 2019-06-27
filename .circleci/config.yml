@@ -4,6 +4,7 @@ references:
   setup_remote_docker: &setup_remote_docker
     setup_remote_docker:
       version: 17.11.0-ce
+      docker_layer_caching: true
   ignore_master: &ignore_master
     filters:
       branches:
