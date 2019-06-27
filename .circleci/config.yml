@@ -272,7 +272,8 @@ workflows:
   build-deploy:
     jobs:
       - lint
-      - test
+      - test:
+          context: common_staging_deployment
       - packaging
       - labo:
           <<: *ignore_master
