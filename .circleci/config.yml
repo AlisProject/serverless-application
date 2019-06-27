@@ -122,7 +122,7 @@ jobs:
 
     working_directory: ~/repo
 
-    resource_class: large
+    resource_class: xlarge
 
     steps:
       - checkout
