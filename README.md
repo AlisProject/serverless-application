@@ -213,3 +213,21 @@ For production and staging, you should enable alarms.
 ```bash
 ./deploy.sh apialarms
 ```  
+
+### Cloudfront
+For development only.
+You can create Cloudfront and Route53 resources via Cloudformation.
+
+```bash
+# Show API Gateway IDs
+aws apigateway  get-rest-apis | jq -r '.items[] | select( .name | contains("'${ALIS_APP_ID}'")) | .name + " : " + .id'
+
+# Show ACM
+aws acm list-certificates --region us-east-1
+
+## Add it to env
+direnv edit
+
+# Deployment
+./deploy_cloudfront.sh
+```
