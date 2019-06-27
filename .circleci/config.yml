@@ -128,9 +128,7 @@ jobs:
 
       - <<: *setup_remote_docker
 
-      - aws-cli/install
-
-      - aws-cli/configure
+      - prepare-aws-cli
 
       - restore_cache:
           keys:
