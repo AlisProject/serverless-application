@@ -17,9 +17,11 @@ references:
   deploy_requirements: &deploy_requires
     requires:
       - lint
-      - test1
-      - test2
-      - test3
+      - test_parallel1
+      - test_parallel2
+      - test_parallel3
+      - test_parallel4
+      - test_parallel5
       - packaging
 
 orbs:
@@ -100,11 +102,8 @@ commands:
               ./deploy.sh << parameters.target >>
             fi
 
-  test:
-    description: 'テストを実行する'
-    parameters:
-      options:
-        type: string
+  prepare_test:
+    description: 'テストの準備をする'
     steps:
       - checkout
 
@@ -130,6 +129,12 @@ commands:
             - ./venv
           key: v3-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements_test.txt" }}
 
+  run_tests:
+    description: 'テストを実行する'
+    parameters:
+      options:
+        type: string
+    steps:
       - run:
           name: run tests
           command: |
@@ -157,29 +162,60 @@ jobs:
             . venv/bin/activate
             pyflakes src tests ./*.py
 
-  test1:
+  # 本来は CircleCIの parallelism を使用したいがLabmdaのテストは少々特殊なため難しく、力技で並列化している
+  # 効率的なワークフローとするため、個々のテストはpackagingの実行時間を下回ることを目標とする
+  test_parallel1:
     executor:
       name: test
 
     steps:
-      - test:
-          options: '--ignore /handlers/me/articles/public,/handlers/me/articles/drafts'
+      - prepare_test
 
-  test2:
+      # 重めのテストは切り出して個別に実行するので、それ以外をすべて実行
+      - run_tests:
+          options: '--ignore /handlers/me/articles/public,/handlers/me/articles/drafts,/handlers/me/articles/purchase,/handlers/me/articles/comments,/handlers/articles,/handlers/me/comments,/handlers/search'
+
+  test_parallel2:
     executor:
       name: test
 
     steps:
-      - test:
+      - prepare_test
+      - run_tests:
           options: '--target /handlers/me/articles/public'
 
-  test3:
+  test_parallel3:
     executor:
       name: test
 
     steps:
-      - test:
+      - prepare_test
+      - run_tests:
           options: '--target /handlers/me/articles/drafts'
+
+  test_parallel4:
+    executor:
+      name: test
+
+    steps:
+      - prepare_test
+      - run_tests:
+          options: '--target /handlers/me/articles/comments'
+      - run_tests:
+          options: '--target /handlers/me/articles/purchase'
+
+  test_parallel5:
+    executor:
+      name: test
+
+    steps:
+      - prepare_test
+      - run_tests:
+          options: '--target /handlers/articles'
+      - run_tests:
+          options: '--target /handlers/me/comments'
+      - run_tests:
+          options: '--target /handlers/search'
 
   packaging:
     executor:
@@ -299,9 +335,11 @@ workflows:
   build-deploy:
     jobs:
       - lint
-      - test1
-      - test2
-      - test3
+      - test_parallel1
+      - test_parallel2
+      - test_parallel3
+      - test_parallel4
+      - test_parallel5
       - packaging
       - labo:
           <<: *ignore_master
