@@ -58,6 +58,12 @@ docker run -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker.elas
 
 # exec
 python exec_test.py
+
+# single directory
+python exec_test.py --target /handlers
+
+# ignore specific directory
+python exec_test.py --ignore /handlers
 ```
 
 # Set SSM valuables

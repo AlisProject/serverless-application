@@ -17,7 +17,11 @@ references:
   deploy_requirements: &deploy_requires
     requires:
       - lint
-      - test
+      - test_parallel1
+      - test_parallel2
+      - test_parallel3
+      - test_parallel4
+      - test_parallel5
       - packaging
 
 orbs:
@@ -29,6 +33,18 @@ executors:
     working_directory: ~/repo
     docker:
       - image: circleci/python:3.6.1
+  test:
+    working_directory: ~/repo
+    docker:
+      - image: circleci/python:3.6.1
+      - image: bluszcz/bflocalstack-dynamodb-s3
+      - image: alismedia/dynamodb-local
+        environment:
+          MAX_HEAP_SIZE: 4096m
+          HEAP_NEWSIZE: 3072m
+      - image: docker.elastic.co/elasticsearch/elasticsearch:6.2.0
+        environment:
+          discovery.type: single-node
 
 commands:
   prepare-aws-cli:
@@ -86,6 +102,45 @@ commands:
               ./deploy.sh << parameters.target >>
             fi
 
+  prepare_test:
+    description: 'テストの準備をする'
+    steps:
+      - checkout
+
+      - <<: *setup_remote_docker
+
+      - prepare-aws-cli
+
+      - restore_cache:
+          keys:
+            - v3-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements_test.txt" }}
+            - v3-dependencies-
+
+      - run:
+          name: install dependencies
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            pip install -r requirements.txt
+            pip install -r requirements_test.txt
+
+      - save_cache:
+          paths:
+            - ./venv
+          key: v3-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements_test.txt" }}
+
+  run_tests:
+    description: 'テストを実行する'
+    parameters:
+      options:
+        type: string
+    steps:
+      - run:
+          name: run tests
+          command: |
+            . venv/bin/activate
+            python exec_test.py << parameters.options >>
+
 jobs:
   lint:
     executor:
@@ -107,52 +162,60 @@ jobs:
             . venv/bin/activate
             pyflakes src tests ./*.py
 
-  test:
-    docker:
-      - image: circleci/python:3.6.1
-      - image: bluszcz/bflocalstack-dynamodb-s3
-      - image: alismedia/dynamodb-local
-        environment:
-          MAX_HEAP_SIZE: 4096m
-          HEAP_NEWSIZE: 3072m
-      - image: docker.elastic.co/elasticsearch/elasticsearch:6.2.0
-        environment:
-          discovery.type: single-node
-
-    working_directory: ~/repo
+  # 本来は CircleCIの parallelism を使用したいがLabmdaのテストは少々特殊なため難しく、力技で並列化している
+  # 効率的なワークフローとするため、個々のテストはpackagingの実行時間を下回ることを目標とする
+  test_parallel1:
+    executor:
+      name: test
 
     steps:
-      - checkout
+      - prepare_test
 
-      - <<: *setup_remote_docker
+      # 重めのテストは切り出して個別に実行するので、それ以外をすべて実行
+      - run_tests:
+          options: '--ignore /handlers/me/articles/public,/handlers/me/articles/drafts,/handlers/me/articles/purchase,/handlers/me/articles/comments,/handlers/articles,/handlers/me/comments,/handlers/search'
 
-      - aws-cli/install
+  test_parallel2:
+    executor:
+      name: test
 
-      - aws-cli/configure
+    steps:
+      - prepare_test
+      - run_tests:
+          options: '--target /handlers/me/articles/public'
 
-      - restore_cache:
-          keys:
-            - v3-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements_test.txt" }}
-            - v3-dependencies-
+  test_parallel3:
+    executor:
+      name: test
 
-      - run:
-          name: install dependencies
-          command: |
-            python3 -m venv venv
-            . venv/bin/activate
-            pip install -r requirements.txt
-            pip install -r requirements_test.txt
+    steps:
+      - prepare_test
+      - run_tests:
+          options: '--target /handlers/me/articles/drafts'
 
-      - save_cache:
-          paths:
-            - ./venv
-          key: v3-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements_test.txt" }}
+  test_parallel4:
+    executor:
+      name: test
 
-      - run:
-          name: run tests
-          command: |
-            . venv/bin/activate
-            python exec_test.py
+    steps:
+      - prepare_test
+      - run_tests:
+          options: '--target /handlers/me/articles/comments'
+      - run_tests:
+          options: '--target /handlers/me/articles/purchase'
+
+  test_parallel5:
+    executor:
+      name: test
+
+    steps:
+      - prepare_test
+      - run_tests:
+          options: '--target /handlers/articles'
+      - run_tests:
+          options: '--target /handlers/me/comments'
+      - run_tests:
+          options: '--target /handlers/search'
 
   packaging:
     executor:
@@ -272,7 +335,11 @@ workflows:
   build-deploy:
     jobs:
       - lint
-      - test
+      - test_parallel1
+      - test_parallel2
+      - test_parallel3
+      - test_parallel4
+      - test_parallel5
       - packaging
       - labo:
           <<: *ignore_master
