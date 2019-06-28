@@ -31,3 +31,4 @@ node_modules
 .serverless
 *.log
 update_function.sh
+tmp*
