@@ -1,6 +1,7 @@
 import sys
 import os
 import shutil
+import argparse
 import subprocess
 import glob
 import re
@@ -42,35 +43,35 @@ def set_global_env_vers():
 
 
 def main():
-    # テスト事前準備
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--ignore', help='テスト対象外のディレクトリを指定。カンマ区切りで複数指定可')
+    parser.add_argument('--target', help='テスト対象のディレクトリを指定')
+    args = parser.parse_args()
+
     if os.path.isdir(TEST_TMP_DIR):
         shutil.rmtree(TEST_TMP_DIR)
 
-    # テスト実行のためのtmpディレクトリを作成し、testsをコピーする
+    # Lambdaではファイルがフラットに展開される。tests以下を汚さないためにtmpディレクトリを準備
     os.mkdir(TEST_TMP_DIR)
     copy_tree(TEST_DIR, TEST_TMP_DIR)
-    # テスト実行のための環境変数をセットする
+
+    # テスト対象外のディレクトリを除却
+    if args.ignore is not None:
+        ignore_dirs = args.ignore.split(',')
+        for ignore_dir in ignore_dirs:
+            shutil.rmtree(TEST_TMP_DIR + '/' + ignore_dir)
+
+    # テスト実行のための準備
     set_global_env_vers()
+    for name in glob.iglob(TEST_TMP_DIR + '/**/test_*.py', recursive=True):
+        copy_required_files(name)
 
-    # 引数でファイル名を受け取っている場合は変数にセットする
-    target_file_path = sys.argv[1] if len(sys.argv) == 2 else None
+    # # 引数でテストするディレクトリを受け取っている場合は変数にセットする
+    target_dir = args.target if args.target is not None else ''
 
-    if target_file_path:
-        # tmpフォルダ上の指定されたファイルのパスを取得
-        exec_file = TEST_TMP_DIR + target_file_path[(target_file_path.find(TEST_DIR) + len(TEST_DIR)):]
-        exec_dir = exec_file[:exec_file.rfind('/')]
-        copy_required_files(exec_file)
-    else:
-        exec_dir = TEST_TMP_DIR
+    result = exec_test(TEST_TMP_DIR + target_dir)
 
-        for name in glob.iglob(TEST_TMP_DIR + '/**/test_*.py', recursive=True):
-            copy_required_files(name)
-
-    result = exec_test(exec_dir)
-
-    # tmpディレクトリは削除
-
-    shutil.rmtree(TEST_TMP_DIR)
+    # shutil.rmtree(TEST_TMP_DIR)
     sys.exit(result)
 
 
