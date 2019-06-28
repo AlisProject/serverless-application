@@ -17,7 +17,9 @@ references:
   deploy_requirements: &deploy_requires
     requires:
       - lint
-      - test
+      - test1
+      - test2
+      - test3
       - packaging
 
 orbs:
@@ -29,6 +31,18 @@ executors:
     working_directory: ~/repo
     docker:
       - image: circleci/python:3.6.1
+  test:
+    working_directory: ~/repo
+    docker:
+      - image: circleci/python:3.6.1
+      - image: bluszcz/bflocalstack-dynamodb-s3
+      - image: alismedia/dynamodb-local
+        environment:
+          MAX_HEAP_SIZE: 4096m
+          HEAP_NEWSIZE: 3072m
+      - image: docker.elastic.co/elasticsearch/elasticsearch:6.2.0
+        environment:
+          discovery.type: single-node
 
 commands:
   prepare-aws-cli:
@@ -86,49 +100,17 @@ commands:
               ./deploy.sh << parameters.target >>
             fi
 
-jobs:
-  lint:
-    executor:
-      name: python3_6_1
-
-    steps:
-      - prepare-python-resources:
-          resource: 'requirements_test.txt'
-
-      - run:
-          name: checkstyle
-          command: |
-            . venv/bin/activate
-            pycodestyle src tests ./*.py
-
-      - run:
-          name: pyflakes
-          command: |
-            . venv/bin/activate
-            pyflakes src tests ./*.py
-
   test:
-    docker:
-      - image: circleci/python:3.6.1
-      - image: bluszcz/bflocalstack-dynamodb-s3
-      - image: alismedia/dynamodb-local
-        environment:
-          MAX_HEAP_SIZE: 4096m
-          HEAP_NEWSIZE: 3072m
-      - image: docker.elastic.co/elasticsearch/elasticsearch:6.2.0
-        environment:
-          discovery.type: single-node
-
-    working_directory: ~/repo
-
+    description: 'テストを実行する'
+    parameters:
+      options:
+        type: string
     steps:
       - checkout
 
       - <<: *setup_remote_docker
 
-      - aws-cli/install
-
-      - aws-cli/configure
+      - prepare-aws-cli
 
       - restore_cache:
           keys:
@@ -152,7 +134,52 @@ jobs:
           name: run tests
           command: |
             . venv/bin/activate
-            python exec_test.py
+            python exec_test.py << parameters.options >>
+
+jobs:
+  lint:
+    executor:
+      name: python3_6_1
+
+    steps:
+      - prepare-python-resources:
+          resource: 'requirements_test.txt'
+
+      - run:
+          name: checkstyle
+          command: |
+            . venv/bin/activate
+            pycodestyle src tests ./*.py
+
+      - run:
+          name: pyflakes
+          command: |
+            . venv/bin/activate
+            pyflakes src tests ./*.py
+
+  test1:
+    executor:
+      name: test
+
+    steps:
+      - test:
+          options: '--ignore /handlers/me/articles/public,/handlers/me/articles/drafts'
+
+  test2:
+    executor:
+      name: test
+
+    steps:
+      - test:
+          options: '--target /handlers/me/articles/public'
+
+  test3:
+    executor:
+      name: test
+
+    steps:
+      - test:
+          options: '--target /handlers/me/articles/drafts'
 
   packaging:
     executor:
@@ -272,7 +299,9 @@ workflows:
   build-deploy:
     jobs:
       - lint
-      - test
+      - test1
+      - test2
+      - test3
       - packaging
       - labo:
           <<: *ignore_master
