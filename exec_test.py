@@ -71,7 +71,7 @@ def main():
 
     result = exec_test(TEST_TMP_DIR + target_dir)
 
-    # shutil.rmtree(TEST_TMP_DIR)
+    shutil.rmtree(TEST_TMP_DIR)
     sys.exit(result)
 
 
