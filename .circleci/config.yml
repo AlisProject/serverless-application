@@ -238,7 +238,7 @@ jobs:
           paths:
             - deploy/*
 
-  deploy-function:
+  deploy-function: &deploy-function
     executor:
       name: python3_6_1
 
@@ -246,7 +246,9 @@ jobs:
       - deploy-resources:
           target: 'function'
 
-  deploy-function02:
+  deploy-function-production: *deploy-function
+
+  deploy-function02: &deploy-function02
     executor:
       name: python3_6_1
 
@@ -254,7 +256,9 @@ jobs:
       - deploy-resources:
           target: 'function02'
 
-  deploy-api:
+  deploy-function-production02: *deploy-function02
+
+  deploy-api: &deploy-api
     executor:
       name: python3_6_1
 
@@ -262,13 +266,17 @@ jobs:
       - deploy-resources:
           target: 'api'
 
-  deploy-permission:
+  deploy-api-production: *deploy-api
+
+  deploy-permission: &deploy-permission
     executor:
       name: python3_6_1
 
     steps:
       - deploy-resources:
           target: 'permission'
+
+  deploy-permission-production: *deploy-permission
 
   labo:
     docker:
@@ -302,37 +310,7 @@ jobs:
               npm run deploy
             fi
 
-  notify-to-slack-for-approval:
-    executor:
-      name: python3_6_1
-
-    steps:
-      - slack/approval:
-          message: "本番環境へのデプロイを承認してください"
-          color: "#F5E911"
-
-  bulk-deployment-to-production:
-    executor:
-      name: python3_6_1
-
-    steps:
-      - prepare-python-resources
-
-      - attach_workspace:
-          at: .
-
-      - aws-cli/install
-
-      - aws-cli/configure
-
-      - deploy:
-          name: Bulk deployment
-          command: |
-            . venv/bin/activate
-            ./deploy_api.sh
-            ./fix_api.sh
-
-  fix-api:
+  fix-api: &fix-api
     executor:
       name: python3_6_1
 
@@ -350,6 +328,17 @@ jobs:
             . venv/bin/activate
             ./fix_api.sh
 
+  fix-api-production: *fix-api
+
+  notify-to-slack-for-approval:
+    executor:
+      name: python3_6_1
+
+    steps:
+      - slack/approval:
+          message: "本番環境へのデプロイを承認してください"
+          color: "#F5E911"
+
 
 workflows:
   # CloudFormationスタックの依存関係に即したワークフロー
@@ -366,26 +355,32 @@ workflows:
       # ステージング環境(本番環境以外)のワークフロー
       - labo:
           <<: *ignore_master
+          context: serverless_staging
           <<: *deploy_requires
       - deploy-function:
           <<: *ignore_master
+          context: serverless_staging
           <<: *deploy_requires
       - deploy-function02:
           <<: *ignore_master
+          context: serverless_staging
           <<: *deploy_requires
       - deploy-api:
           <<: *ignore_master
+          context: serverless_staging
           requires:
             - deploy-function
             - deploy-function02
       - deploy-permission:
           <<: *ignore_master
+          context: serverless_staging
           requires:
             - deploy-api
       - fix-api:
           <<: *ignore_master
+          context: serverless_staging
           requires:
-            - deploy-permission
+            - deploy-api
 
       # 本番環境のワークフロー
       - notify-to-slack-for-approval:
@@ -396,32 +391,31 @@ workflows:
           <<: *deploy_requires
           <<: *only_master
           type: approval
-      - bulk-deployment-to-production:
-          <<: *only_master
-          context: serverless_production
-          <<: *require_approval
       - labo:
           <<: *only_master
           context: serverless_production
           <<: *require_approval
-      - deploy-function:
+      - deploy-function-production:
           <<: *only_master
           context: serverless_production
           <<: *require_approval
-      - deploy-function02:
+      - deploy-function-production02:
           <<: *only_master
           context: serverless_production
           <<: *require_approval
-      - deploy-api:
+      - deploy-api-production:
           <<: *only_master
+          context: serverless_production
           requires:
-            - deploy-function
-            - deploy-function02
-      - deploy-permission:
+            - deploy-function-production
+            - deploy-function-production02
+      - deploy-permission-production:
           <<: *only_master
+          context: serverless_production
           requires:
-            - deploy-api
-      - fix-api:
+            - deploy-api-production
+      - fix-api-production:
           <<: *only_master
+          context: serverless_production
           requires:
-            - deploy-permission
+            - deploy-api-production
