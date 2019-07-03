@@ -201,6 +201,27 @@ Resources:
               Cookies:
                 Forward: none
           - TargetOriginId: api
+            PathPattern: /api/wallet/bridge_information
+            ViewerProtocolPolicy: allow-all
+            MinTTL: 0
+            MaxTTL: 0
+            DefaultTTL: 0
+            AllowedMethods:
+             - HEAD
+             - DELETE
+             - POST
+             - GET
+             - OPTIONS
+             - PUT
+             - PATCH
+            CachedMethods:
+             - HEAD
+             - GET
+            ForwardedValues:
+             QueryString: true
+             Cookies:
+               Forward: all
+          - TargetOriginId: api
             PathPattern: /api/*
             ViewerProtocolPolicy: allow-all
             MinTTL: 0 # productionでは120
