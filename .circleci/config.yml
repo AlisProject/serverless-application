@@ -23,6 +23,9 @@ references:
       - test_parallel4
       - test_parallel5
       - packaging
+  require_approval: &require_approval
+    requires:
+      - approval
 
 orbs:
   aws-cli: circleci/aws-cli@0.1.13
@@ -359,6 +362,8 @@ workflows:
       - test_parallel4
       - test_parallel5
       - packaging
+
+      # ステージング環境(本番環境以外)のワークフロー
       - labo:
           <<: *ignore_master
           <<: *deploy_requires
@@ -382,7 +387,7 @@ workflows:
           requires:
             - deploy-permission
 
-      # 以下は本番環境へのデプロイ時のみ実行される
+      # 本番環境のワークフロー
       - notify-to-slack-for-approval:
           <<: *deploy_requires
           <<: *only_master
@@ -394,11 +399,29 @@ workflows:
       - bulk-deployment-to-production:
           <<: *only_master
           context: serverless_production
-          requires:
-            - approval
+          <<: *require_approval
       - labo:
           <<: *only_master
           context: serverless_production
+          <<: *require_approval
+      - deploy-function:
+          <<: *only_master
+          context: serverless_production
+          <<: *require_approval
+      - deploy-function02:
+          <<: *only_master
+          context: serverless_production
+          <<: *require_approval
+      - deploy-api:
+          <<: *only_master
           requires:
-            - approval
-
+            - deploy-function
+            - deploy-function02
+      - deploy-permission:
+          <<: *only_master
+          requires:
+            - deploy-api
+      - fix-api:
+          <<: *only_master
+          requires:
+            - deploy-permission
