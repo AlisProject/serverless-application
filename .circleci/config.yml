@@ -329,6 +329,24 @@ jobs:
             ./deploy_api.sh
             ./fix_api.sh
 
+  fix-api:
+    executor:
+      name: python3_6_1
+
+    steps:
+      - prepare-python-resources
+
+      - attach_workspace:
+          at: .
+
+      - prepare-aws-cli
+
+      - deploy:
+          name: Fix API via script.
+          command: |
+            . venv/bin/activate
+            ./fix_api.sh
+
 
 workflows:
   # CloudFormationスタックの依存関係に即したワークフロー
@@ -359,6 +377,10 @@ workflows:
           <<: *ignore_master
           requires:
             - deploy-api
+      - fix-api:
+          <<: *ignore_master
+          requires:
+            - deploy-permission
 
       # 以下は本番環境へのデプロイ時のみ実行される
       - notify-to-slack-for-approval:
