@@ -1,0 +1,409 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: 'ALIS Route53 & CloudFront Resources for development.'
+
+Parameters:
+  AlisAppId:
+    Type: String
+  ApiApiGatewayId:
+    Type: String
+  FrontendApiGatewayId:
+    Type: String
+  Oauth2ApiGatewayId:
+    Type: String
+  Oauth2apiApiGatewayId:
+    Type: String
+  LaboApiGatewayId:
+    Type: String
+  AcmCertificateArn:
+    Type: String
+# FIXME: OAIの扱いが難しいためS3分は割愛
+#  OaiForS3Bucket:
+#    Type: String
+#  DistS3BucketName:
+#    Type: 'AWS::SSM::Parameter::Value<String>'
+
+Resources:
+  CloudfrontDistribution:
+    Type: 'AWS::CloudFront::Distribution'
+    Properties:
+      DistributionConfig:
+        Comment: !Ref AlisAppId
+        Aliases:
+          - !Sub "${AlisAppId}.alis-test.tk"
+        Enabled: true
+        PriceClass: PriceClass_200
+        Origins:
+          - DomainName: !Sub "${ApiApiGatewayId}.execute-api.ap-northeast-1.amazonaws.com"
+            Id: api
+            CustomOriginConfig:
+              HTTPPort: '80'
+              HTTPSPort: '443'
+              OriginProtocolPolicy: https-only
+              OriginSSLProtocols:
+                - TLSv1.1
+                - TLSv1.2
+          - DomainName: !Sub "${FrontendApiGatewayId}.execute-api.ap-northeast-1.amazonaws.com"
+            Id: frontend
+            OriginPath: /prod
+            CustomOriginConfig:
+              HTTPPort: '80'
+              HTTPSPort: '443'
+              OriginProtocolPolicy: https-only
+              OriginSSLProtocols:
+                - TLSv1.1
+                - TLSv1.2
+          # FIXME: OAIの扱いが難しいためS3分は割愛
+          #          - DomainName: !Sub "${DistS3BucketName}.s3.amazonaws.com"
+          #            Id: s3-dist
+          #            S3OriginConfig:
+          #              OriginAccessIdentity: !Sub "origin-access-identity/cloudfront/${OaiForS3Bucket}"
+          - DomainName: !Sub "${Oauth2ApiGatewayId}.execute-api.ap-northeast-1.amazonaws.com"
+            Id: oauth2
+            CustomOriginConfig:
+              HTTPPort: '80'
+              HTTPSPort: '443'
+              OriginProtocolPolicy: https-only
+              OriginSSLProtocols:
+                - TLSv1.1
+                - TLSv1.2
+          - DomainName: !Sub "${Oauth2apiApiGatewayId}.execute-api.ap-northeast-1.amazonaws.com"
+            Id: oauth2api
+            CustomOriginConfig:
+              HTTPPort: '80'
+              HTTPSPort: '443'
+              OriginProtocolPolicy: https-only
+              OriginSSLProtocols:
+                - TLSv1.1
+                - TLSv1.2
+          - DomainName: !Sub "${LaboApiGatewayId}.execute-api.ap-northeast-1.amazonaws.com"
+            Id: labo
+            CustomOriginConfig:
+              HTTPPort: '80'
+              HTTPSPort: '443'
+              OriginProtocolPolicy: https-only
+              OriginSSLProtocols:
+                - TLSv1.1
+                - TLSv1.2
+        Restrictions:
+          GeoRestriction:
+            RestrictionType: none
+            Locations: []
+        ViewerCertificate:
+          AcmCertificateArn: !Ref AcmCertificateArn
+          SslSupportMethod: sni-only
+          MinimumProtocolVersion: TLSv1.1_2016
+        CacheBehaviors:
+          - TargetOriginId: api
+            PathPattern: /api/me/*
+            ViewerProtocolPolicy: allow-all
+            MinTTL: 0
+            MaxTTL: 0
+            DefaultTTL: 0
+            AllowedMethods:
+              - HEAD
+              - DELETE
+              - POST
+              - GET
+              - OPTIONS
+              - PUT
+              - PATCH
+            CachedMethods:
+              - HEAD
+              - GET
+            ForwardedValues:
+              QueryString: true
+              Headers:
+                - Authorization
+              Cookies:
+                Forward: all
+          - TargetOriginId: api
+            PathPattern: /api/articles/*/comments
+            ViewerProtocolPolicy: allow-all
+            MinTTL: 0 # productionでは120
+            MaxTTL: 0
+            DefaultTTL: 0
+            AllowedMethods:
+              - HEAD
+              - DELETE
+              - POST
+              - GET
+              - OPTIONS
+              - PUT
+              - PATCH
+            CachedMethods:
+              - HEAD
+              - GET
+            ForwardedValues:
+              QueryString: true
+              Cookies:
+                Forward: all
+          - TargetOriginId: api
+            PathPattern: /api/articles/*/price
+            ViewerProtocolPolicy: allow-all
+            MinTTL: 0
+            MaxTTL: 0
+            DefaultTTL: 0
+            AllowedMethods:
+              - HEAD
+              - DELETE
+              - POST
+              - GET
+              - OPTIONS
+              - PUT
+              - PATCH
+            CachedMethods:
+              - HEAD
+              - GET
+            ForwardedValues:
+              QueryString: true
+              Cookies:
+                Forward: all
+          - TargetOriginId: api
+            PathPattern: /api/login/*
+            ViewerProtocolPolicy: allow-all
+            MinTTL: 0
+            MaxTTL: 0
+            DefaultTTL: 0
+            AllowedMethods:
+              - HEAD
+              - DELETE
+              - POST
+              - GET
+              - OPTIONS
+              - PUT
+              - PATCH
+            CachedMethods:
+              - HEAD
+              - GET
+            ForwardedValues:
+              QueryString: true
+              Cookies:
+                Forward: none
+          - TargetOriginId: api
+            PathPattern: /api/sign_up/*
+            ViewerProtocolPolicy: allow-all
+            MinTTL: 0
+            MaxTTL: 0
+            DefaultTTL: 0
+            AllowedMethods:
+              - HEAD
+              - DELETE
+              - POST
+              - GET
+              - OPTIONS
+              - PUT
+              - PATCH
+            CachedMethods:
+              - HEAD
+              - GET
+            ForwardedValues:
+              QueryString: true
+              Cookies:
+                Forward: none
+          - TargetOriginId: api
+            PathPattern: /api/*
+            ViewerProtocolPolicy: allow-all
+            MinTTL: 0 # productionでは120
+            MaxTTL: 0
+            DefaultTTL: 0
+            AllowedMethods:
+              - HEAD
+              - DELETE
+              - POST
+              - GET
+              - OPTIONS
+              - PUT
+              - PATCH
+            CachedMethods:
+              - HEAD
+              - GET
+            ForwardedValues:
+              QueryString: true
+              Cookies:
+                Forward: none
+          - TargetOriginId: oauth2api
+            PathPattern: /oauth2api/me/*
+            ViewerProtocolPolicy: allow-all
+            MinTTL: 0
+            MaxTTL: 0
+            DefaultTTL: 0
+            AllowedMethods:
+              - HEAD
+              - DELETE
+              - POST
+              - GET
+              - OPTIONS
+              - PUT
+              - PATCH
+            CachedMethods:
+              - HEAD
+              - GET
+            ForwardedValues:
+              QueryString: true
+              Headers:
+                - Authorization
+              Cookies:
+                Forward: all
+          - TargetOriginId: oauth2api
+            PathPattern: /oauth2api/*
+            ViewerProtocolPolicy: allow-all
+            MinTTL: 0 # productionでは120
+            MaxTTL: 0
+            DefaultTTL: 0
+            AllowedMethods:
+              - HEAD
+              - DELETE
+              - POST
+              - GET
+              - OPTIONS
+              - PUT
+              - PATCH
+            CachedMethods:
+              - HEAD
+              - GET
+            ForwardedValues:
+              QueryString: true
+              Headers:
+                - Authorization
+              Cookies:
+                Forward: none
+          - TargetOriginId: oauth2
+            PathPattern: /oauth2/*
+            ViewerProtocolPolicy: allow-all
+            MinTTL: 0
+            MaxTTL: 0
+            DefaultTTL: 0
+            AllowedMethods:
+              - HEAD
+              - DELETE
+              - POST
+              - GET
+              - OPTIONS
+              - PUT
+              - PATCH
+            CachedMethods:
+              - HEAD
+              - GET
+            ForwardedValues:
+              QueryString: true
+              Headers:
+                - Authorization
+              Cookies:
+                Forward: none
+          - TargetOriginId: labo
+            PathPattern: /laboratory/labo/n/*
+            ViewerProtocolPolicy: allow-all
+            MinTTL: 0
+            MaxTTL: 0
+            DefaultTTL: 0
+            AllowedMethods:
+              - HEAD
+              - DELETE
+              - POST
+              - GET
+              - OPTIONS
+              - PUT
+              - PATCH
+            CachedMethods:
+              - HEAD
+              - GET
+            ForwardedValues:
+              QueryString: true
+              Headers:
+                - Authorization
+              Cookies:
+                Forward: all
+          - TargetOriginId: labo
+            PathPattern: /laboratory/labo/*
+            ViewerProtocolPolicy: allow-all
+            MinTTL: 0 # productionでは120
+            MaxTTL: 0
+            DefaultTTL: 0
+            AllowedMethods:
+              - HEAD
+              - DELETE
+              - POST
+              - GET
+              - OPTIONS
+              - PUT
+              - PATCH
+            CachedMethods:
+              - HEAD
+              - GET
+            ForwardedValues:
+              QueryString: true
+              Cookies:
+                Forward: none
+          #  FIXME: OAIの扱いが難しいためS3分は割愛
+          #          - TargetOriginId: s3-dist
+          #            PathPattern: /d/api/*
+          #            ViewerProtocolPolicy: allow-all
+          #            MinTTL: 100
+          #            AllowedMethods:
+          #              - HEAD
+          #              - GET
+          #            CachedMethods:
+          #              - HEAD
+          #              - GET
+          #            ForwardedValues:
+          #              QueryString: true
+          #              Cookies:
+          #                Forward: none
+          #          - TargetOriginId: s3-dist
+          #            PathPattern: /d/*
+          #            ViewerProtocolPolicy: allow-all
+          #            MinTTL: 0
+          #              MaxTTL: 0
+          #              DefaultTTL: 0
+          #            AllowedMethods:
+          #              - HEAD
+          #              - GET
+          #            CachedMethods:
+          #              - HEAD
+          #              - GET
+          #            ForwardedValues:
+          #              QueryString: false
+          #              Cookies:
+          #                Forward: none
+          - TargetOriginId: frontend
+            PathPattern: /*
+            ViewerProtocolPolicy: redirect-to-https
+            MinTTL: 0 # productionでは120
+            MaxTTL: 0
+            DefaultTTL: 0
+            AllowedMethods:
+              - HEAD
+              - DELETE
+              - POST
+              - GET
+              - OPTIONS
+              - PUT
+              - PATCH
+            CachedMethods:
+              - HEAD
+              - GET
+            ForwardedValues:
+              QueryString: true
+              Cookies:
+                Forward: none
+        DefaultCacheBehavior:
+          TargetOriginId: frontend
+          ViewerProtocolPolicy: redirect-to-https
+          MinTTL: 0 # productionでは120
+          MaxTTL: 0
+          DefaultTTL: 0
+          AllowedMethods:
+            - HEAD
+            - DELETE
+            - POST
+            - GET
+            - OPTIONS
+            - PUT
+            - PATCH
+          CachedMethods:
+            - HEAD
+            - GET
+          ForwardedValues:
+            QueryString: true
+            Cookies:
+              Forward: none

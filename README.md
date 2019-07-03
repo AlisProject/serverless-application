@@ -58,6 +58,12 @@ docker run -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker.elas
 
 # exec
 python exec_test.py
+
+# single directory
+python exec_test.py --target /handlers
+
+# ignore specific directory
+python exec_test.py --ignore /handlers
 ```
 
 # Set SSM valuables
@@ -104,7 +110,6 @@ Add master data to DynamoDB.
 
 ### Cognito
 
-
 ```bash
 ./deploy.sh cognito
 ```
@@ -121,6 +126,27 @@ You have to add SNS authentication params to SSM.
 ```bash
 ./deploy.sh function && ./deploy.sh function02 && ./deploy.sh api
 ```
+
+### ElasticSearch
+
+```bash
+./deploy.sh elasticsearch
+
+# show ElasticSearch Endpoint
+aws es describe-elasticsearch-domain --domain-name ${ALIS_APP_ID}elasticsearch | jq '.DomainStatus.Endpoint'
+
+# Notice: After this, Elasticsearch is expensive if it is the default setting, so it may be better to reconfigure its performance settings.
+```
+
+And add ElasticSearch Endpoint to SSM.
+- See: https://github.com/AlisProject/environment
+
+Add Your local IP to ES access policy.
+```bash
+python elasticsearch-setup.py $(curl https://checkip.amazonaws.com/)
+```
+
+### Permissions
 
 You have to add `RestApiArn`, `ApiLambdaRole` and `ElasticSearchEndpoint` to SSM.
 - See: https://github.com/AlisProject/environment
@@ -179,25 +205,6 @@ Following example is that `ArticlesRecent` function is deployed.
 python make_deploy_zip.py && ./deploy_api_function.py ArticlesRecent
 ```
 
-### ElasticSearch
-
-```bash
-./deploy.sh elasticsearch
-
-# show ElasticSearch Endpoint
-aws es describe-elasticsearch-domain --domain-name ${ALIS_APP_ID}elasticsearch | jq '.DomainStatus.Endpoint'
-
-# Notice: After this, Elasticsearch is expensive if it is the default setting, so it may be better to reconfigure its performance settings.
-```
-
-And add ElasticSearch Endpoint to SSM.
-- See: https://github.com/AlisProject/environment
-
-Add Your local IP to ES access policy.
-```bash
-python elasticsearch-setup.py $(curl https://checkip.amazonaws.com/)
-```
-
 ### ALIS Laboratory resources
 Experimental features.
 
@@ -212,3 +219,21 @@ For production and staging, you should enable alarms.
 ```bash
 ./deploy.sh apialarms
 ```  
+
+### Cloudfront
+For development only.
+You can create Cloudfront and Route53 resources via Cloudformation.
+
+```bash
+# Show API Gateway IDs
+aws apigateway  get-rest-apis | jq -r '.items[] | select( .name | contains("'${ALIS_APP_ID}'")) | .name + " : " + .id'
+
+# Show ACM
+aws acm list-certificates --region us-east-1
+
+## Add it to env
+direnv edit
+
+# Deployment
+./deploy_cloudfront.sh
+```
