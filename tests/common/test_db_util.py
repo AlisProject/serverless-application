@@ -761,3 +761,41 @@ class TestDBUtil(TestCase):
             }
             for key in expected_item.keys():
                 self.assertEqual(expected_item[key], actual_items[i][key])
+
+    def test_get_article_content_edit_history_ok(self):
+        # テスト用データ作成
+        target_article = self.article_info_table_items[0]
+        test_body = 'test_body'
+        DBUtil.create_article_content_edit_history(
+            dynamodb=self.dynamodb,
+            user_id=target_article['user_id'],
+            article_id=target_article['article_id'],
+            sanitized_body=test_body
+        )
+        # 該当データが取得できること
+        version = '00'
+        actual_item = DBUtil.get_article_content_edit_history(
+            dynamodb=self.dynamodb,
+            user_id=target_article['user_id'],
+            article_id=target_article['article_id'],
+            version=version
+        )
+        expected_item = {
+            'user_id': target_article['user_id'],
+            'article_edit_history_id': target_article['article_id'] + '_' + version,
+            'body': test_body,
+            'article_id': target_article['article_id'],
+            'version': version,
+        }
+        for key in expected_item.keys():
+            self.assertEqual(expected_item[key], actual_item[key])
+
+    def test_get_article_content_edit_history_ng_not_exists_target(self):
+        # 該当データが取得できない場合
+        with self.assertRaises(RecordNotFoundError):
+            DBUtil.get_article_content_edit_history(
+                dynamodb=self.dynamodb,
+                user_id='test',
+                article_id='test',
+                version='00'
+            )

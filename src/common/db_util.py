@@ -211,3 +211,16 @@ class DBUtil:
                 'update_at': int(create_time)
             }
         )
+
+    @staticmethod
+    def get_article_content_edit_history(dynamodb, user_id, article_id, version):
+        article_content_edit_history_table = dynamodb.Table(os.environ['ARTICLE_CONTENT_EDIT_HISTORY_TABLE_NAME'])
+        article_content_edit_history = article_content_edit_history_table.get_item(
+            Key={
+                'user_id': user_id,
+                'article_edit_history_id': article_id + '_' + version
+            }
+        ).get('Item')
+        if article_content_edit_history is None:
+            raise RecordNotFoundError('Record Not Found')
+        return article_content_edit_history

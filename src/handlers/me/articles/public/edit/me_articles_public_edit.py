@@ -13,7 +13,8 @@ class MeArticlesPublicEdit(LambdaBase):
         return {
             'type': 'object',
             'properties': {
-                'article_id': settings.parameters['article_id']
+                'article_id': settings.parameters['article_id'],
+                'version': settings.parameters['article_content_edit_history_version']
             },
             'required': ['article_id']
         }
@@ -55,6 +56,16 @@ class MeArticlesPublicEdit(LambdaBase):
             article_info.update(article_content)
 
             return_value = article_info
+
+        # version が指定されていた場合は、指定の version で body を上書き
+        if self.params.get('version') is not None:
+            article_content_edit_history = DBUtil.get_article_content_edit_history(
+                self.dynamodb,
+                self.event['requestContext']['authorizer']['claims']['cognito:username'],
+                self.params['article_id'],
+                self.params['version']
+            )
+            return_value['body'] = article_content_edit_history.get('body')
 
         return {
             'statusCode': 200,
