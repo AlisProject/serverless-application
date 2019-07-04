@@ -32,20 +32,26 @@ class MeArticlesPublicBodyUpdate(LambdaBase):
         )
 
     def exec_main_proc(self):
+        # 編集記事を保存
         article_content_edit_table = self.dynamodb.Table(os.environ['ARTICLE_CONTENT_EDIT_TABLE_NAME'])
-
         expression_attribute_values = {
             ':user_id': self.event['requestContext']['authorizer']['claims']['cognito:username'],
             ':body': TextSanitizer.sanitize_article_body_v2(self.params.get('body'))
         }
         DBUtil.items_values_empty_to_none(expression_attribute_values)
-
         article_content_edit_table.update_item(
             Key={
                 'article_id': self.params['article_id'],
             },
             UpdateExpression="set user_id=:user_id, body=:body",
             ExpressionAttributeValues=expression_attribute_values
+        )
+        # 履歴を保存
+        DBUtil.create_article_content_edit_history(
+            dynamodb=self.dynamodb,
+            user_id=expression_attribute_values[':user_id'],
+            article_id=self.params.get('article_id'),
+            sanitized_body=expression_attribute_values[':body']
         )
 
         return {

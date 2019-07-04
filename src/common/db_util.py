@@ -1,6 +1,7 @@
 import os
 
 import settings
+import time
 from boto3.dynamodb.conditions import Key
 from jsonschema import ValidationError
 from record_not_found_error import RecordNotFoundError
@@ -181,3 +182,32 @@ class DBUtil:
                                   .format(replyed_user_id=replyed_user_id))
 
         return True
+
+    @staticmethod
+    def create_article_content_edit_history(dynamodb, user_id, article_id, sanitized_body):
+        article_content_edit_history_table = dynamodb.Table(os.environ['ARTICLE_CONTENT_EDIT_HISTORY_TABLE_NAME'])
+        # 最新の version を取得
+        query_params = {
+            'Limit': 1,
+            'IndexName': 'article_id-sort_key-index',
+            'KeyConditionExpression': Key('article_id').eq(article_id),
+            'ScanIndexForward': False
+        }
+        items = article_content_edit_history_table.query(**query_params)['Items']
+        # version は 00 → 99 をループ
+        version = str(0 if len(items) == 0 else (int(items[0]['version']) + 1) % 100).zfill(2)
+
+        # 該当バージョンで書き込み（put で上書きすることで過去 version の削除を不要にしている）
+        # version の値が重複することもシステム的にはありえるが、後勝ちで問題ないためトランザクション処理は省略
+        create_time = time.time()
+        article_content_edit_history_table.put_item(
+            Item={
+                'user_id': user_id,
+                'article_edit_history_id': article_id + '_' + version,
+                'body': sanitized_body,
+                'article_id': article_id,
+                'version': version,
+                'sort_key': int(create_time * 1000000),
+                'update_at': int(create_time)
+            }
+        )

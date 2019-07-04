@@ -253,9 +253,20 @@ class TestDBUtil(TestCase):
         ]
         TestsUtil.create_table(cls.dynamodb, os.environ['TOPIC_TABLE_NAME'], topic_items)
 
+    def setUp(self):
+        # create article_content_edit_history_table
+        TestsUtil.create_table(self.dynamodb, os.environ['ARTICLE_CONTENT_EDIT_HISTORY_TABLE_NAME'], [])
+
     @classmethod
     def tearDownClass(cls):
         TestsUtil.delete_all_tables(cls.dynamodb)
+
+    def tearDown(self):
+        # delete article_content_edit_history_table
+        del_table = self.dynamodb.Table(os.environ['ARTICLE_CONTENT_EDIT_HISTORY_TABLE_NAME'])
+        del_table.delete()
+        del_table.meta.client.get_waiter('table_not_exists').\
+            wait(TableName=os.environ['ARTICLE_CONTENT_EDIT_HISTORY_TABLE_NAME'])
 
     def test_exists_article_ok(self):
         result = DBUtil.exists_article(
@@ -657,3 +668,96 @@ class TestDBUtil(TestCase):
                 self.dynamodb,
                 'testid000003'
             )
+
+    # article_content_edit_history の作成
+    def test_create_article_content_edit_history_ok(self):
+        user_id = 'test-user'
+        article_id = 'test-article_id'
+        body = 'test-body'
+        article_content_edit_history_table = self.dynamodb.Table(os.environ['ARTICLE_CONTENT_EDIT_HISTORY_TABLE_NAME'])
+
+        # 初回作成
+        version = '00'
+        DBUtil.create_article_content_edit_history(
+            dynamodb=self.dynamodb,
+            user_id=user_id,
+            article_id=article_id,
+            sanitized_body=body + version,
+        )
+        # 登録確認（version = 00 で該当データが作成されていること）
+        expected_item = {
+            'user_id': user_id,
+            'article_edit_history_id': article_id + '_' + version,
+            'body': body + version,
+            'article_id': article_id,
+            'version': version,
+        }
+        actual_items = article_content_edit_history_table.scan()['Items']
+        self.assertEqual(len(actual_items), 1)
+        for key in expected_item.keys():
+            self.assertEqual(expected_item[key], actual_items[0][key])
+
+        # 2回目作成
+        version = '01'
+        DBUtil.create_article_content_edit_history(
+            dynamodb=self.dynamodb,
+            user_id=user_id,
+            article_id=article_id,
+            sanitized_body=body + version,
+        )
+        # 登録確認（version = 01 で該当データが作成されていること）
+        expected_item = {
+            'user_id': user_id,
+            'article_edit_history_id': article_id + '_' + version,
+            'body': body + version,
+            'article_id': article_id,
+            'version': version,
+        }
+        actual_items = article_content_edit_history_table.scan()['Items']
+        self.assertEqual(len(actual_items), 2)
+        for key in expected_item.keys():
+            self.assertEqual(expected_item[key], actual_items[1][key])
+
+    # article_content_edit_history の作成（ループ有り）
+    def test_create_article_content_edit_history_ok_with_loop(self):
+        user_id = 'test-user'
+        article_id = 'test-article_id'
+        body = 'test-body'
+        article_content_edit_history_table = self.dynamodb.Table(os.environ['ARTICLE_CONTENT_EDIT_HISTORY_TABLE_NAME'])
+
+        # 合計で 101 回保存（ループさせる）
+        for i in range(101):
+            version = str(i).zfill(2)
+            DBUtil.create_article_content_edit_history(
+                dynamodb=self.dynamodb,
+                user_id=user_id,
+                article_id=article_id,
+                sanitized_body=body + version,
+            )
+
+        # 意図した順序でデータを取得できること
+        # article_content_edit_history を取得。body 値も確認したいため index を利用せず scan で取得し、ソートは独自に実施する。
+        # (容量削減の観点で index には body を含めていないため scan で取得する必要がある)
+        items = article_content_edit_history_table.scan()['Items']
+        actual_items = sorted(items, key=lambda x: x['sort_key'], reverse=True)
+        # 100件登録されていること
+        self.assertEqual(len(actual_items), 100)
+        # loop 確認。101 回実行しているため version が 00、99、98.... となる順序でデータが取得される。
+        for i in range(100):
+            # 先頭データはループしているため version は 00 となるが、body の内容は 101 回目に書き込んだデータが設定される
+            if i == 0:
+                test_version = '00'
+                test_body = body + '100'
+            # ループしていないデータは、99、98、.. 01 のように降順となる
+            else:
+                test_version = str(100 - i).zfill(2)
+                test_body = body + test_version
+            expected_item = {
+                'user_id': user_id,
+                'article_edit_history_id': article_id + '_' + test_version,
+                'body': test_body,
+                'article_id': article_id,
+                'version': test_version,
+            }
+            for key in expected_item.keys():
+                self.assertEqual(expected_item[key], actual_items[i][key])
