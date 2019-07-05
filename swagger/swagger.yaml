@@ -39,6 +39,17 @@ definitions:
         type: string
       created_at:
         type: integer
+  ArticleContentEditHistories:
+    type: object
+    properties:
+      user_id:
+        type: string
+      article_id:
+        type: string
+      version:
+        type: string
+      update_at:
+        type: integer
   MeArticlesDraftsCreate:
     type: object
     properties:
@@ -1356,6 +1367,38 @@ paths:
             statusCode: '200'
         uri:
           Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesPublicEdit.Arn}/invocations
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /me/articles/{article_id}/content_edit_histories:
+    get:
+      description: '公開記事一覧情報を取得'
+      parameters:
+        - name: 'article_id'
+          in: 'query'
+          description: '対象記事を指定するために使用'
+          required: true
+          type: 'string'
+      responses:
+        '200':
+          description: '記事編集履歴一覧'
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ArticleContentEditHistories'
+      security:
+        - cognitoUserPool: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: '200'
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
+              - Fn::ImportValue:
+                  Fn::Sub: "${AlisAppId}-MeArticlesContentEditHistoriesIndex"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy

@@ -206,3 +206,12 @@ Resources:
           Fn::Sub: "${AlisAppId}-ApplicationsShow"
       Principal: "apigateway.amazonaws.com"
       SourceArn: !Sub ${RestApiArn}/*/GET/applications/*
+  MeArticlesContentEditHistoriesIndexApiGatewayInvoke:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-MeArticlesContentEditHistoriesIndex"
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub ${RestApiArn}/*/GET/me/articles/*/content_edit_histories
