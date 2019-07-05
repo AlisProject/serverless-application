@@ -132,7 +132,9 @@ class TestMeArticlesDraftsShow(TestCase):
     def test_main_ok_with_content_edit_history(self):
         params = {
             'pathParameters': {
-                'article_id': 'draftId00001',
+                'article_id': 'draftId00001'
+            },
+            'queryStringParameters': {
                 'version': '01'
             },
             'requestContext': {
@@ -248,15 +250,32 @@ class TestMeArticlesDraftsShow(TestCase):
 
     def test_validation_with_no_params(self):
         params = {
-            'pathParameters': {}
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
+            }
         }
 
         self.assert_bad_request(params)
 
     def test_validation_article_id_max(self):
         params = {
-            'queryStringParameters': {
+            'pathParameters': {
                 'article_id': 'A' * 13
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
             }
         }
 
@@ -264,8 +283,59 @@ class TestMeArticlesDraftsShow(TestCase):
 
     def test_validation_article_id_min(self):
         params = {
-            'queryStringParameters': {
+            'pathParameters': {
                 'article_id': 'A' * 11
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
+            }
+        }
+
+        self.assert_bad_request(params)
+
+    def test_validation_version_max(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'draftId00001'
+            },
+            'queryStringParameters': {
+                'version': '000'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
+            }
+        }
+
+        self.assert_bad_request(params)
+
+    def test_validation_version_min(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'draftId00001'
+            },
+            'queryStringParameters': {
+                'version': '0'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
             }
         }
 

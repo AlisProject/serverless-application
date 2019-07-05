@@ -86,7 +86,7 @@ class TestMeArticlesContentEditHistoriesIndex(TestCase):
 
         # 1件作成
         test_body = 'test_body'
-        DBUtil.create_article_content_edit_history(
+        DBUtil.put_article_content_edit_history(
             dynamodb=self.dynamodb,
             user_id=params['requestContext']['authorizer']['claims']['cognito:username'],
             article_id=params['queryStringParameters']['article_id'],
@@ -127,7 +127,7 @@ class TestMeArticlesContentEditHistoriesIndex(TestCase):
         # 2件作成
         test_body = 'test_body'
         for i in range(2):
-            DBUtil.create_article_content_edit_history(
+            DBUtil.put_article_content_edit_history(
                 dynamodb=self.dynamodb,
                 user_id=params['requestContext']['authorizer']['claims']['cognito:username'],
                 article_id=params['queryStringParameters']['article_id'],

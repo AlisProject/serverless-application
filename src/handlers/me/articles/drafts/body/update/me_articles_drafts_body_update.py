@@ -38,7 +38,7 @@ class MeArticlesDraftsBodyUpdate(LambdaBase):
         DBUtil.items_values_empty_to_none(expression_attribute_values)
         self.__update_article_content(expression_attribute_values)
         # 履歴を保存
-        DBUtil.create_article_content_edit_history(
+        DBUtil.put_article_content_edit_history(
             dynamodb=self.dynamodb,
             user_id=self.event['requestContext']['authorizer']['claims']['cognito:username'],
             article_id=self.params.get('article_id'),

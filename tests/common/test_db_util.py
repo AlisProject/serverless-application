@@ -678,7 +678,7 @@ class TestDBUtil(TestCase):
 
         # 初回作成
         version = '00'
-        DBUtil.create_article_content_edit_history(
+        DBUtil.put_article_content_edit_history(
             dynamodb=self.dynamodb,
             user_id=user_id,
             article_id=article_id,
@@ -699,7 +699,7 @@ class TestDBUtil(TestCase):
 
         # 2回目作成
         version = '01'
-        DBUtil.create_article_content_edit_history(
+        DBUtil.put_article_content_edit_history(
             dynamodb=self.dynamodb,
             user_id=user_id,
             article_id=article_id,
@@ -728,7 +728,7 @@ class TestDBUtil(TestCase):
         # 合計で 101 回保存（ループさせる）
         for i in range(101):
             version = str(i).zfill(2)
-            DBUtil.create_article_content_edit_history(
+            DBUtil.put_article_content_edit_history(
                 dynamodb=self.dynamodb,
                 user_id=user_id,
                 article_id=article_id,
@@ -766,7 +766,7 @@ class TestDBUtil(TestCase):
         # テスト用データ作成
         target_article = self.article_info_table_items[0]
         test_body = 'test_body'
-        DBUtil.create_article_content_edit_history(
+        DBUtil.put_article_content_edit_history(
             dynamodb=self.dynamodb,
             user_id=target_article['user_id'],
             article_id=target_article['article_id'],

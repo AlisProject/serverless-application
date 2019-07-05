@@ -265,8 +265,8 @@ class TestMeArticlesDraftsBodyUpdate(TestCase):
         mock_lib = MagicMock()
         with patch('me_articles_drafts_body_update.DBUtil', mock_lib):
             MeArticlesDraftsBodyUpdate(params, {}, self.dynamodb).main()
-            args, kwargs = mock_lib.create_article_content_edit_history.call_args
-            self.assertTrue(mock_lib.create_article_content_edit_history.called)
+            args, kwargs = mock_lib.put_article_content_edit_history.call_args
+            self.assertTrue(mock_lib.put_article_content_edit_history.called)
             self.assertTrue(kwargs['dynamodb'] is not None)
             self.assertEqual('test01', kwargs['user_id'])
             self.assertEqual('draftId00001', kwargs['article_id'])

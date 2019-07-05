@@ -88,8 +88,8 @@ parameters = {
     },
     'article_content_edit_history_version': {
         'type': 'string',
-        'minimum': 2,
-        'maximum': 2
+        'minLength': 2,
+        'maxLength': 2
     },
     'user_display_name': {
         'type': 'string',

@@ -184,7 +184,7 @@ class DBUtil:
         return True
 
     @staticmethod
-    def create_article_content_edit_history(dynamodb, user_id, article_id, sanitized_body):
+    def put_article_content_edit_history(dynamodb, user_id, article_id, sanitized_body):
         article_content_edit_history_table = dynamodb.Table(os.environ['ARTICLE_CONTENT_EDIT_HISTORY_TABLE_NAME'])
         # 最新の version を取得
         query_params = {

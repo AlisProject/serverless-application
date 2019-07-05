@@ -2,8 +2,9 @@
 import os
 import json
 import settings
+from user_util import UserUtil
 from lambda_base import LambdaBase
-from jsonschema import validate, ValidationError
+from jsonschema import validate
 from decimal_encoder import DecimalEncoder
 from db_util import DBUtil
 
@@ -20,10 +21,8 @@ class MeArticlesPublicEdit(LambdaBase):
         }
 
     def validate_params(self):
-        if self.event.get('pathParameters') is None:
-            raise ValidationError('pathParameters is required')
-
-        validate(self.event.get('pathParameters'), self.get_schema())
+        UserUtil.verified_phone_and_email(self.event)
+        validate(self.params, self.get_schema())
 
         DBUtil.validate_article_existence(
             self.dynamodb,

@@ -47,7 +47,7 @@ class MeArticlesPublicBodyUpdate(LambdaBase):
             ExpressionAttributeValues=expression_attribute_values
         )
         # 履歴を保存
-        DBUtil.create_article_content_edit_history(
+        DBUtil.put_article_content_edit_history(
             dynamodb=self.dynamodb,
             user_id=expression_attribute_values[':user_id'],
             article_id=self.params.get('article_id'),
