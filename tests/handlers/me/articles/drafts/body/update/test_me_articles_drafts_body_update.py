@@ -240,7 +240,7 @@ class TestMeArticlesDraftsBodyUpdate(TestCase):
             self.assertTrue(mock_lib.sanitize_article_body_v2.called)
             self.assertEqual(args[0], body_str)
 
-    def test_call_create_article_content_edit_history(self):
+    def test_call_put_article_content_edit_history(self):
         body_str = '<p>update body</p>'
         params = {
             'pathParameters': {

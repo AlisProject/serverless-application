@@ -670,7 +670,7 @@ class TestDBUtil(TestCase):
             )
 
     # article_content_edit_history の作成
-    def test_create_article_content_edit_history_ok(self):
+    def test_put_article_content_edit_history_ok(self):
         user_id = 'test-user'
         article_id = 'test-article_id'
         body = 'test-body'
@@ -719,7 +719,7 @@ class TestDBUtil(TestCase):
             self.assertEqual(expected_item[key], actual_items[1][key])
 
     # article_content_edit_history の作成（ループ有り）
-    def test_create_article_content_edit_history_ok_with_loop(self):
+    def test_put_article_content_edit_history_ok_with_loop(self):
         user_id = 'test-user'
         article_id = 'test-article_id'
         body = 'test-body'
