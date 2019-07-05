@@ -68,6 +68,9 @@ class TestMeArticlesDraftsBodyUpdate(TestCase):
 
         TestsUtil.create_table(self.dynamodb, os.environ['ARTICLE_CONTENT_TABLE_NAME'], article_content_items)
 
+        # create article_content_edit_history_table
+        TestsUtil.create_table(self.dynamodb, os.environ['ARTICLE_CONTENT_EDIT_HISTORY_TABLE_NAME'], [])
+
     def tearDown(self):
         TestsUtil.delete_all_tables(self.dynamodb)
 
@@ -236,6 +239,38 @@ class TestMeArticlesDraftsBodyUpdate(TestCase):
             args, kwargs = mock_lib.sanitize_article_body_v2.call_args
             self.assertTrue(mock_lib.sanitize_article_body_v2.called)
             self.assertEqual(args[0], body_str)
+
+    def test_call_put_article_content_edit_history(self):
+        body_str = '<p>update body</p>'
+        params = {
+            'pathParameters': {
+                'article_id': 'draftId00001'
+            },
+            'body': {
+                'body': body_str
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
+            }
+        }
+
+        params['body'] = json.dumps(params['body'])
+
+        mock_lib = MagicMock()
+        with patch('me_articles_drafts_body_update.DBUtil', mock_lib):
+            MeArticlesDraftsBodyUpdate(params, {}, self.dynamodb).main()
+            args, kwargs = mock_lib.put_article_content_edit_history.call_args
+            self.assertTrue(mock_lib.put_article_content_edit_history.called)
+            self.assertTrue(kwargs['dynamodb'] is not None)
+            self.assertEqual('test01', kwargs['user_id'])
+            self.assertEqual('draftId00001', kwargs['article_id'])
+            self.assertEqual(body_str, kwargs['sanitized_body'])
 
     def test_validation_with_no_params(self):
         params = {}

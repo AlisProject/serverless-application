@@ -86,6 +86,11 @@ parameters = {
         'type': 'string',
         'maxLength': 100
     },
+    'article_content_edit_history_version': {
+        'type': 'string',
+        'minLength': 2,
+        'maxLength': 2
+    },
     'user_display_name': {
         'type': 'string',
         'minLength': 1,

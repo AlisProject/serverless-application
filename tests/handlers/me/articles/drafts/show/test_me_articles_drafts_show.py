@@ -10,7 +10,7 @@ class TestMeArticlesDraftsShow(TestCase):
     dynamodb = TestsUtil.get_dynamodb_client()
 
     @classmethod
-    def setUpClass(cls):
+    def setUp(cls):
         TestsUtil.set_all_tables_name_to_env()
         TestsUtil.delete_all_tables(cls.dynamodb)
 
@@ -65,6 +65,30 @@ class TestMeArticlesDraftsShow(TestCase):
 
         TestsUtil.create_table(cls.dynamodb, os.environ['ARTICLE_CONTENT_TABLE_NAME'], article_content_items)
 
+        # create article_content_edit_history_table
+        article_content_edit_history_items = [
+            {
+                'user_id': 'test01',
+                'article_edit_history_id': 'draftId00001_00',
+                'body': 'test01_body_00',
+                'article_id': 'draftId00001',
+                'version': '00',
+                'sort_key': 1520150272000000,
+                'update_at': 1520150272
+            },
+            {
+                'user_id': 'test01',
+                'article_edit_history_id': 'draftId00001_01',
+                'body': 'test01_body_01',
+                'article_id': 'draftId00001',
+                'version': '01',
+                'sort_key': 1520150273000000,
+                'update_at': 1520150273
+            }
+        ]
+        TestsUtil.create_table(cls.dynamodb, os.environ['ARTICLE_CONTENT_EDIT_HISTORY_TABLE_NAME'],
+                               article_content_edit_history_items)
+
     @classmethod
     def tearDownClass(cls):
         TestsUtil.delete_all_tables(cls.dynamodb)
@@ -100,6 +124,39 @@ class TestMeArticlesDraftsShow(TestCase):
             'sort_key': 1520150272000000,
             'title': 'sample_title1',
             'body': 'sample_body1'
+        }
+
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(json.loads(response['body']), expected_item)
+
+    def test_main_ok_with_content_edit_history(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'draftId00001'
+            },
+            'queryStringParameters': {
+                'version': '01'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
+            }
+        }
+
+        response = MeArticlesDraftsShow(params, {}, self.dynamodb).main()
+
+        expected_item = {
+            'article_id': 'draftId00001',
+            'user_id': 'test01',
+            'status': 'draft',
+            'sort_key': 1520150272000000,
+            'title': 'sample_title1',
+            'body': 'test01_body_01'
         }
 
         self.assertEqual(response['statusCode'], 200)
@@ -193,15 +250,32 @@ class TestMeArticlesDraftsShow(TestCase):
 
     def test_validation_with_no_params(self):
         params = {
-            'pathParameters': {}
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
+            }
         }
 
         self.assert_bad_request(params)
 
     def test_validation_article_id_max(self):
         params = {
-            'queryStringParameters': {
+            'pathParameters': {
                 'article_id': 'A' * 13
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
             }
         }
 
@@ -209,8 +283,59 @@ class TestMeArticlesDraftsShow(TestCase):
 
     def test_validation_article_id_min(self):
         params = {
-            'queryStringParameters': {
+            'pathParameters': {
                 'article_id': 'A' * 11
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
+            }
+        }
+
+        self.assert_bad_request(params)
+
+    def test_validation_version_max(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'draftId00001'
+            },
+            'queryStringParameters': {
+                'version': '000'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
+            }
+        }
+
+        self.assert_bad_request(params)
+
+    def test_validation_version_min(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'draftId00001'
+            },
+            'queryStringParameters': {
+                'version': '0'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
             }
         }
 

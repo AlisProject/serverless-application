@@ -3,7 +3,7 @@ import os
 import json
 import settings
 from lambda_base import LambdaBase
-from jsonschema import validate, ValidationError
+from jsonschema import validate
 from decimal_encoder import DecimalEncoder
 from db_util import DBUtil
 from user_util import UserUtil
@@ -14,17 +14,15 @@ class MeArticlesDraftsShow(LambdaBase):
         return {
             'type': 'object',
             'properties': {
-                'article_id': settings.parameters['article_id']
+                'article_id': settings.parameters['article_id'],
+                'version': settings.parameters['article_content_edit_history_version']
             },
             'required': ['article_id']
         }
 
     def validate_params(self):
         UserUtil.verified_phone_and_email(self.event)
-        if self.event.get('pathParameters') is None:
-            raise ValidationError('pathParameters is required')
-
-        validate(self.event.get('pathParameters'), self.get_schema())
+        validate(self.params, self.get_schema())
 
     def exec_main_proc(self):
         params = self.event.get('pathParameters')
@@ -45,6 +43,16 @@ class MeArticlesDraftsShow(LambdaBase):
         if 'price' in article_info:
             article_content['body'] = article_content['paid_body']
             article_content.pop('paid_body', None)
+
+        # version が指定されていた場合は、指定の version で body を上書き
+        if self.params.get('version') is not None:
+            article_content_edit_history = DBUtil.get_article_content_edit_history(
+                self.dynamodb,
+                self.event['requestContext']['authorizer']['claims']['cognito:username'],
+                self.params['article_id'],
+                self.params['version']
+            )
+            article_content['body'] = article_content_edit_history.get('body')
 
         if article_content is not None:
             article_info.update(article_content)
