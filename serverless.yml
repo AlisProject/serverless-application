@@ -1,7 +1,7 @@
 # スタック名: ${env:ALIS_APP_ID}-laboratory
 service: ${env:ALIS_APP_ID}
 
-frameworkVersion: ">=1.45.1 <2.0.0"
+frameworkVersion: ">=1.47.0 <2.0.0"
 
 custom:
   bucket: ${env:ALIS_APP_ID}-alis-laboratory
@@ -130,6 +130,7 @@ resources:
           PointInTimeRecoverySpecification:
             PointInTimeRecoveryEnabled: true
           BillingMode: PAY_PER_REQUEST
+
   Outputs:
     # Elasticsearchで指定する必要があるためExport
     LaboLambdaRole:
