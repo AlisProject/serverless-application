@@ -3,7 +3,7 @@ version: 2.1
 references:
   setup_remote_docker: &setup_remote_docker
     setup_remote_docker:
-      version: 17.11.0-ce
+      version: 18.09.3
   ignore_master: &ignore_master
     filters:
       branches:
@@ -23,6 +23,9 @@ references:
       - test_parallel4
       - test_parallel5
       - packaging
+  require_approval: &require_approval
+    requires:
+      - approval
 
 orbs:
   aws-cli: circleci/aws-cli@0.1.13
@@ -235,7 +238,7 @@ jobs:
           paths:
             - deploy/*
 
-  deploy-function:
+  deploy-function: &deploy-function
     executor:
       name: python3_6_1
 
@@ -243,7 +246,9 @@ jobs:
       - deploy-resources:
           target: 'function'
 
-  deploy-function02:
+  deploy-function-production: *deploy-function
+
+  deploy-function02: &deploy-function02
     executor:
       name: python3_6_1
 
@@ -251,7 +256,9 @@ jobs:
       - deploy-resources:
           target: 'function02'
 
-  deploy-api:
+  deploy-function-production02: *deploy-function02
+
+  deploy-api: &deploy-api
     executor:
       name: python3_6_1
 
@@ -259,13 +266,17 @@ jobs:
       - deploy-resources:
           target: 'api'
 
-  deploy-permission:
+  deploy-api-production: *deploy-api
+
+  deploy-permission: &deploy-permission
     executor:
       name: python3_6_1
 
     steps:
       - deploy-resources:
           target: 'permission'
+
+  deploy-permission-production: *deploy-permission
 
   labo:
     docker:
@@ -299,16 +310,7 @@ jobs:
               npm run deploy
             fi
 
-  notify-to-slack-for-approval:
-    executor:
-      name: python3_6_1
-
-    steps:
-      - slack/approval:
-          message: "本番環境へのデプロイを承認してください"
-          color: "#F5E911"
-
-  bulk-deployment-to-production:
+  fix-api: &fix-api
     executor:
       name: python3_6_1
 
@@ -318,16 +320,24 @@ jobs:
       - attach_workspace:
           at: .
 
-      - aws-cli/install
-
-      - aws-cli/configure
+      - prepare-aws-cli
 
       - deploy:
-          name: Bulk deployment
+          name: Fix API via script.
           command: |
             . venv/bin/activate
-            ./deploy_api.sh
             ./fix_api.sh
+
+  fix-api-production: *fix-api
+
+  notify-to-slack-for-approval:
+    executor:
+      name: python3_6_1
+
+    steps:
+      - slack/approval:
+          message: "本番環境へのデプロイを承認してください"
+          color: "#F5E911"
 
 
 workflows:
@@ -341,26 +351,38 @@ workflows:
       - test_parallel4
       - test_parallel5
       - packaging
+
+      # ステージング環境(本番環境以外)のワークフロー
       - labo:
           <<: *ignore_master
+          context: serverless_staging
           <<: *deploy_requires
       - deploy-function:
           <<: *ignore_master
+          context: serverless_staging
           <<: *deploy_requires
       - deploy-function02:
           <<: *ignore_master
+          context: serverless_staging
           <<: *deploy_requires
       - deploy-api:
           <<: *ignore_master
+          context: serverless_staging
           requires:
             - deploy-function
             - deploy-function02
       - deploy-permission:
           <<: *ignore_master
+          context: serverless_staging
+          requires:
+            - deploy-api
+      - fix-api:
+          <<: *ignore_master
+          context: serverless_staging
           requires:
             - deploy-api
 
-      # 以下は本番環境へのデプロイ時のみ実行される
+      # 本番環境のワークフロー
       - notify-to-slack-for-approval:
           <<: *deploy_requires
           <<: *only_master
@@ -369,14 +391,31 @@ workflows:
           <<: *deploy_requires
           <<: *only_master
           type: approval
-      - bulk-deployment-to-production:
-          <<: *only_master
-          context: serverless_production
-          requires:
-            - approval
       - labo:
           <<: *only_master
           context: serverless_production
+          <<: *require_approval
+      - deploy-function-production:
+          <<: *only_master
+          context: serverless_production
+          <<: *require_approval
+      - deploy-function-production02:
+          <<: *only_master
+          context: serverless_production
+          <<: *require_approval
+      - deploy-api-production:
+          <<: *only_master
+          context: serverless_production
           requires:
-            - approval
-
+            - deploy-function-production
+            - deploy-function-production02
+      - deploy-permission-production:
+          <<: *only_master
+          context: serverless_production
+          requires:
+            - deploy-api-production
+      - fix-api-production:
+          <<: *only_master
+          context: serverless_production
+          requires:
+            - deploy-api-production

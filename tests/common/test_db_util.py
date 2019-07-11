@@ -1,6 +1,7 @@
 import os
-
 import settings
+import datetime
+from freezegun import freeze_time
 from boto3.dynamodb.conditions import Key
 from db_util import DBUtil
 from jsonschema import ValidationError
@@ -253,9 +254,24 @@ class TestDBUtil(TestCase):
         ]
         TestsUtil.create_table(cls.dynamodb, os.environ['TOPIC_TABLE_NAME'], topic_items)
 
+    def setUp(self):
+        # create article_content_edit_history_table
+        TestsUtil.create_table(self.dynamodb, os.environ['ARTICLE_CONTENT_EDIT_HISTORY_TABLE_NAME'], [])
+        # backup settings
+        self.tmp_put_interval = settings.ARTICLE_HISTORY_PUT_INTERVAL
+
     @classmethod
     def tearDownClass(cls):
         TestsUtil.delete_all_tables(cls.dynamodb)
+
+    def tearDown(self):
+        # delete article_content_edit_history_table
+        del_table = self.dynamodb.Table(os.environ['ARTICLE_CONTENT_EDIT_HISTORY_TABLE_NAME'])
+        del_table.delete()
+        del_table.meta.client.get_waiter('table_not_exists').\
+            wait(TableName=os.environ['ARTICLE_CONTENT_EDIT_HISTORY_TABLE_NAME'])
+        # restore settings
+        settings.ARTICLE_HISTORY_PUT_INTERVAL = self.tmp_put_interval
 
     def test_exists_article_ok(self):
         result = DBUtil.exists_article(
@@ -656,4 +672,219 @@ class TestDBUtil(TestCase):
             DBUtil.validate_exists_title_and_body(
                 self.dynamodb,
                 'testid000003'
+            )
+
+    # article_content_edit_history の作成
+    def test_put_article_content_edit_history_ok(self):
+        user_id = 'test-user'
+        article_id = 'test-article_id'
+        body = 'test-body'
+        article_content_edit_history_table = self.dynamodb.Table(os.environ['ARTICLE_CONTENT_EDIT_HISTORY_TABLE_NAME'])
+        settings.ARTICLE_HISTORY_PUT_INTERVAL = 0
+
+        # 初回作成
+        version = '00'
+        DBUtil.put_article_content_edit_history(
+            dynamodb=self.dynamodb,
+            user_id=user_id,
+            article_id=article_id,
+            sanitized_body=body + version,
+        )
+        # 登録確認（version = 00 で該当データが作成されていること）
+        expected_item = {
+            'user_id': user_id,
+            'article_edit_history_id': article_id + '_' + version,
+            'body': body + version,
+            'article_id': article_id,
+            'version': version,
+        }
+        actual_items = article_content_edit_history_table.scan()['Items']
+        self.assertEqual(len(actual_items), 1)
+        for key in expected_item.keys():
+            self.assertEqual(expected_item[key], actual_items[0][key])
+
+        # 2回目作成
+        version = '01'
+        DBUtil.put_article_content_edit_history(
+            dynamodb=self.dynamodb,
+            user_id=user_id,
+            article_id=article_id,
+            sanitized_body=body + version,
+        )
+        # 登録確認（version = 01 で該当データが作成されていること）
+        expected_item = {
+            'user_id': user_id,
+            'article_edit_history_id': article_id + '_' + version,
+            'body': body + version,
+            'article_id': article_id,
+            'version': version,
+        }
+        actual_items = article_content_edit_history_table.scan()['Items']
+        self.assertEqual(len(actual_items), 2)
+        for key in expected_item.keys():
+            self.assertEqual(expected_item[key], actual_items[1][key])
+
+    # article_content_edit_history の作成（ループ有り）
+    def test_put_article_content_edit_history_ok_with_loop(self):
+        user_id = 'test-user'
+        article_id = 'test-article_id'
+        body = 'test-body'
+        article_content_edit_history_table = self.dynamodb.Table(os.environ['ARTICLE_CONTENT_EDIT_HISTORY_TABLE_NAME'])
+        settings.ARTICLE_HISTORY_PUT_INTERVAL = 0
+
+        # 合計で 101 回保存（ループさせる）
+        for i in range(101):
+            version = str(i).zfill(2)
+            DBUtil.put_article_content_edit_history(
+                dynamodb=self.dynamodb,
+                user_id=user_id,
+                article_id=article_id,
+                sanitized_body=body + version,
+            )
+
+        # 意図した順序でデータを取得できること
+        # article_content_edit_history を取得。body 値も確認したいため index を利用せず scan で取得し、ソートは独自に実施する。
+        # (容量削減の観点で index には body を含めていないため scan で取得する必要がある)
+        items = article_content_edit_history_table.scan()['Items']
+        actual_items = sorted(items, key=lambda x: x['sort_key'], reverse=True)
+        # 100件登録されていること
+        self.assertEqual(len(actual_items), 100)
+        # loop 確認。101 回実行しているため version が 00、99、98.... となる順序でデータが取得される。
+        for i in range(100):
+            # 先頭データはループしているため version は 00 となるが、body の内容は 101 回目に書き込んだデータが設定される
+            if i == 0:
+                test_version = '00'
+                test_body = body + '100'
+            # ループしていないデータは、99、98、.. 01 のように降順となる
+            else:
+                test_version = str(100 - i).zfill(2)
+                test_body = body + test_version
+            expected_item = {
+                'user_id': user_id,
+                'article_edit_history_id': article_id + '_' + test_version,
+                'body': test_body,
+                'article_id': article_id,
+                'version': test_version,
+            }
+            for key in expected_item.keys():
+                self.assertEqual(expected_item[key], actual_items[i][key])
+
+    # article_content_edit_history の作成で、規定時間経過していない場合データが作成されていないこと
+    def test_put_article_content_edit_history_ok_exec_before_put_interval(self):
+        user_id = 'test-user'
+        article_id = 'test-article_id'
+        body = 'test-body'
+        article_content_edit_history_table = self.dynamodb.Table(os.environ['ARTICLE_CONTENT_EDIT_HISTORY_TABLE_NAME'])
+        settings.ARTICLE_HISTORY_PUT_INTERVAL = 1
+
+        # 合計で 3 回保存
+        for i in range(3):
+            version = str(i).zfill(2)
+            DBUtil.put_article_content_edit_history(
+                dynamodb=self.dynamodb,
+                user_id=user_id,
+                article_id=article_id,
+                sanitized_body=body + version,
+            )
+
+        expected_item = {
+            'user_id': user_id,
+            'article_edit_history_id': article_id + '_00',
+            'body': body + '00',
+            'article_id': article_id,
+            'version': '00'
+        }
+
+        # 最初の 1 件のみが登録されていること
+        actual_items = article_content_edit_history_table.scan()['Items']
+        self.assertEqual(len(actual_items), 1)
+        for key in expected_item.keys():
+            self.assertEqual(expected_item[key], actual_items[0][key])
+
+    # article_content_edit_history の作成で、規定時間経過している場合データが作成されること
+    def test_put_article_content_edit_history_ok_exec_after_put_interval(self):
+        user_id = 'test-user'
+        article_id = 'test-article_id'
+        body = 'test-body'
+        article_content_edit_history_table = self.dynamodb.Table(os.environ['ARTICLE_CONTENT_EDIT_HISTORY_TABLE_NAME'])
+
+        with freeze_time() as frozen_datetime:
+            # 規定時間経過後に保存
+            version = '00'
+            DBUtil.put_article_content_edit_history(
+                dynamodb=self.dynamodb,
+                user_id=user_id,
+                article_id=article_id,
+                sanitized_body=body + version,
+            )
+            # 規定時間経過
+            frozen_datetime.tick(delta=datetime.timedelta(seconds=settings.ARTICLE_HISTORY_PUT_INTERVAL))
+            version = '01'
+            DBUtil.put_article_content_edit_history(
+                dynamodb=self.dynamodb,
+                user_id=user_id,
+                article_id=article_id,
+                sanitized_body=body + version,
+            )
+
+        # 2 件登録されていること
+        expected_item_1 = {
+            'user_id': user_id,
+            'article_edit_history_id': article_id + '_01',
+            'body': body + '01',
+            'article_id': article_id,
+            'version': '01'
+        }
+        expected_item_2 = {
+            'user_id': user_id,
+            'article_edit_history_id': article_id + '_00',
+            'body': body + '00',
+            'article_id': article_id,
+            'version': '00'
+        }
+        items = article_content_edit_history_table.scan()['Items']
+        actual_items = sorted(items, key=lambda x: x['sort_key'], reverse=True)
+        self.assertEqual(len(actual_items), 2)
+        for key in expected_item_1.keys():
+            self.assertEqual(expected_item_1[key], actual_items[0][key])
+        for key in expected_item_2.keys():
+            self.assertEqual(expected_item_2[key], actual_items[1][key])
+
+    def test_get_article_content_edit_history_ok(self):
+        settings.ARTICLE_HISTORY_PUT_INTERVAL = 0
+        # テスト用データ作成
+        target_article = self.article_info_table_items[0]
+        test_body = 'test_body'
+        DBUtil.put_article_content_edit_history(
+            dynamodb=self.dynamodb,
+            user_id=target_article['user_id'],
+            article_id=target_article['article_id'],
+            sanitized_body=test_body
+        )
+        # 該当データが取得できること
+        version = '00'
+        actual_item = DBUtil.get_article_content_edit_history(
+            dynamodb=self.dynamodb,
+            user_id=target_article['user_id'],
+            article_id=target_article['article_id'],
+            version=version
+        )
+        expected_item = {
+            'user_id': target_article['user_id'],
+            'article_edit_history_id': target_article['article_id'] + '_' + version,
+            'body': test_body,
+            'article_id': target_article['article_id'],
+            'version': version,
+        }
+        for key in expected_item.keys():
+            self.assertEqual(expected_item[key], actual_item[key])
+
+    def test_get_article_content_edit_history_ng_not_exists_target(self):
+        # 該当データが取得できない場合
+        with self.assertRaises(RecordNotFoundError):
+            DBUtil.get_article_content_edit_history(
+                dynamodb=self.dynamodb,
+                user_id='test',
+                article_id='test',
+                version='00'
             )

@@ -86,6 +86,11 @@ parameters = {
         'type': 'string',
         'maxLength': 100
     },
+    'article_content_edit_history_version': {
+        'type': 'string',
+        'minLength': 2,
+        'maxLength': 2
+    },
     'user_display_name': {
         'type': 'string',
         'minLength': 1,
@@ -387,3 +392,5 @@ TRANSACTION_CONFIRM_COUNT = 5
 AUTHLETE_CLIENT_ENDPOINT = 'https://api.authlete.com/api/client'
 AUTHLETE_SCOPE_READ = 'read'
 AUTHLETE_SCOPE_WRITE = 'write'
+
+ARTICLE_HISTORY_PUT_INTERVAL = 60

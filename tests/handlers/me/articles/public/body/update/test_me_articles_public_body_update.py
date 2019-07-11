@@ -69,6 +69,9 @@ class TestMeArticlesPublicBodyUpdate(TestCase):
         TestsUtil.create_table(self.dynamodb, os.environ['ARTICLE_CONTENT_EDIT_TABLE_NAME'],
                                self.article_content_edit_items)
 
+        # create article_content_edit_history_table
+        TestsUtil.create_table(self.dynamodb, os.environ['ARTICLE_CONTENT_EDIT_HISTORY_TABLE_NAME'], [])
+
     def tearDown(self):
         TestsUtil.delete_all_tables(self.dynamodb)
 
@@ -255,6 +258,38 @@ class TestMeArticlesPublicBodyUpdate(TestCase):
             args, kwargs = mock_lib.sanitize_article_body_v2.call_args
             self.assertTrue(mock_lib.sanitize_article_body_v2.called)
             self.assertEqual(args[0], body_str)
+
+    def test_call_put_article_content_edit_history(self):
+        body_str = '<p>update body</p>'
+        params = {
+            'pathParameters': {
+                'article_id': 'publicId0001'
+            },
+            'body': {
+                'body': body_str
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
+            }
+        }
+
+        params['body'] = json.dumps(params['body'])
+
+        mock_lib = MagicMock()
+        with patch('me_articles_public_body_update.DBUtil', mock_lib):
+            MeArticlesPublicBodyUpdate(params, {}, self.dynamodb).main()
+            args, kwargs = mock_lib.put_article_content_edit_history.call_args
+            self.assertTrue(mock_lib.put_article_content_edit_history.called)
+            self.assertTrue(kwargs['dynamodb'] is not None)
+            self.assertEqual('test01', kwargs['user_id'])
+            self.assertEqual('publicId0001', kwargs['article_id'])
+            self.assertEqual(body_str, kwargs['sanitized_body'])
 
     def test_validation_with_no_params(self):
         params = {}
