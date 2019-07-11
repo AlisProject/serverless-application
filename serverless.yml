@@ -70,7 +70,6 @@ functions:
           # CloudFrontによるキャッシュを利かさないものは /n/ 以下に配置する
           path: /labo/n/random
 
-
   MajorityJudgement:
     description: "MajorityJudgementの投票を行う"
     handler: handler.lambda_handler
@@ -80,7 +79,6 @@ functions:
       - http:
           method: get
           path: /labo/majority_judgement
-
 
 resources:
   Resources:
