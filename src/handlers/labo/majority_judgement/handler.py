@@ -6,5 +6,5 @@ dynamodb = boto3.resource('dynamodb')
 
 
 def lambda_handler(event, context):
-    articles_random = LaboMajorityJudgement(event, context, dynamodb)
-    return articles_random.main()
+    target = LaboMajorityJudgement(event, context, dynamodb)
+    return target.main()
