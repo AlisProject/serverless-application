@@ -4,7 +4,8 @@ import time
 from lambda_base import LambdaBase
 from jsonschema import validate
 
-options_count = 5
+options_count = 5  # 選択肢の数
+valuation_level = 5  # n段階評価の、n TODO: 確認
 
 
 class LaboNMajorityJudgement(LambdaBase):
@@ -12,7 +13,7 @@ class LaboNMajorityJudgement(LambdaBase):
         opt = {
             "type": "number",
             "minimum": 1,
-            "maximum": 5
+            "maximum": valuation_level
         }
 
         required = []
@@ -41,13 +42,11 @@ class LaboNMajorityJudgement(LambdaBase):
         if not LaboNMajorityJudgement.__is_exists(table, user_id):
             item = {
                 'user_id': user_id,
-                'opt_1': 5,
-                'opt_2': 2,
-                'opt_3': 3,
-                'opt_4': 3,
-                'opt_5': 2,
                 'created_at': int(time.time())
             }
+
+            for key, value in self.params.items():
+                item[key] = value
 
             table.put_item(
                 Item=item,
