@@ -115,21 +115,21 @@ resources:
         Roles:
           - Ref: LaboLambdaRole
 
-      # DynamoDB
-      MajorityJudgmentDB:
-        Type: AWS::DynamoDB::Table
-        DeletionPolicy: 'Retain'
-        Properties:
-          TableName: "${env:ALIS_APP_ID}-${self:provider.stage}-MajorityJudgment"
-          AttributeDefinitions:
-            - AttributeName: user_id
-              AttributeType: S
-          KeySchema:
-            - AttributeName: user_id
-              KeyType: HASH
-          PointInTimeRecoverySpecification:
-            PointInTimeRecoveryEnabled: true
-          BillingMode: PAY_PER_REQUEST
+    # DynamoDB
+    MajorityJudgmentDB:
+      Type: AWS::DynamoDB::Table
+      DeletionPolicy: 'Retain'
+      Properties:
+        TableName: "${env:ALIS_APP_ID}-${self:provider.stage}-MajorityJudgment"
+        AttributeDefinitions:
+          - AttributeName: user_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: user_id
+            KeyType: HASH
+        PointInTimeRecoverySpecification:
+          PointInTimeRecoveryEnabled: true
+        BillingMode: PAY_PER_REQUEST
 
   Outputs:
     # Elasticsearchで指定する必要があるためExport
