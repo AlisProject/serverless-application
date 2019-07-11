@@ -4,6 +4,8 @@ import time
 from lambda_base import LambdaBase
 from jsonschema import validate
 
+options_count = 5
+
 
 class LaboMajorityJudgement(LambdaBase):
     def get_schema(self):
@@ -13,14 +15,20 @@ class LaboMajorityJudgement(LambdaBase):
             "maximum": 5
         }
 
+        required = []
+        properties = {}
+        for i in range(options_count):
+            key = 'opt_' + str(i + 1)
+            properties[key] = opt
+            required.append(key)
+
+        for i in range(options_count):
+            properties['opt_' + str(i + 1)] = opt
+
         return {
             "type": "object",
-            "properties": {
-                "opt_1": opt,
-                "opt_2": opt,
-                "opt_3": opt,
-            },
-            "required": ["opt_1", "opt_2", "opt_3"]
+            "properties": properties,
+            "required": required
         }
 
     def validate_params(self):
@@ -36,6 +44,8 @@ class LaboMajorityJudgement(LambdaBase):
                 'opt_1': 5,
                 'opt_2': 2,
                 'opt_3': 3,
+                'opt_4': 3,
+                'opt_5': 2,
                 'created_at': int(time.time())
             }
 
