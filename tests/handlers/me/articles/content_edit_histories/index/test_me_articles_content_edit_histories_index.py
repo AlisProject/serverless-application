@@ -1,5 +1,6 @@
 import os
 import json
+import settings
 from unittest import TestCase
 from me_articles_content_edit_histories_index import MeArticlesContentEditHistoriesIndex
 from tests_util import TestsUtil
@@ -35,10 +36,16 @@ class TestMeArticlesContentEditHistoriesIndex(TestCase):
 
         # create article_content_edit_history_table
         TestsUtil.create_table(self.dynamodb, os.environ['ARTICLE_CONTENT_EDIT_HISTORY_TABLE_NAME'], [])
+        # backup settings
+        self.tmp_put_interval = settings.ARTICLE_HISTORY_PUT_INTERVAL
 
     @classmethod
     def tearDownClass(cls):
         TestsUtil.delete_all_tables(cls.dynamodb)
+
+    def tearDown(self):
+        # restore settings
+        settings.ARTICLE_HISTORY_PUT_INTERVAL = self.tmp_put_interval
 
     def assert_bad_request(self, params):
         function = MeArticlesContentEditHistoriesIndex(params, {}, self.dynamodb)
@@ -109,6 +116,7 @@ class TestMeArticlesContentEditHistoriesIndex(TestCase):
             self.assertEqual(expected_item[key], actual_items[0][key])
 
     def test_main_ok_exists_content_edit_histories_multiple(self):
+        settings.ARTICLE_HISTORY_PUT_INTERVAL = 0
         params = {
             'queryStringParameters': {
                 'article_id': 'publicId0001'

@@ -1,6 +1,7 @@
 import os
-import time
 import settings
+import datetime
+from freezegun import freeze_time
 from boto3.dynamodb.conditions import Key
 from db_util import DBUtil
 from jsonschema import ValidationError
@@ -256,6 +257,8 @@ class TestDBUtil(TestCase):
     def setUp(self):
         # create article_content_edit_history_table
         TestsUtil.create_table(self.dynamodb, os.environ['ARTICLE_CONTENT_EDIT_HISTORY_TABLE_NAME'], [])
+        # backup settings
+        self.tmp_put_interval = settings.ARTICLE_HISTORY_PUT_INTERVAL
 
     @classmethod
     def tearDownClass(cls):
@@ -267,6 +270,8 @@ class TestDBUtil(TestCase):
         del_table.delete()
         del_table.meta.client.get_waiter('table_not_exists').\
             wait(TableName=os.environ['ARTICLE_CONTENT_EDIT_HISTORY_TABLE_NAME'])
+        # restore settings
+        settings.ARTICLE_HISTORY_PUT_INTERVAL = self.tmp_put_interval
 
     def test_exists_article_ok(self):
         result = DBUtil.exists_article(
@@ -796,31 +801,31 @@ class TestDBUtil(TestCase):
         for key in expected_item.keys():
             self.assertEqual(expected_item[key], actual_items[0][key])
 
-    # article_content_edit_history の作成で、規定時間経過している場合、データが作成されること
+    # article_content_edit_history の作成で、規定時間経過している場合データが作成されること
     def test_put_article_content_edit_history_ok_exec_after_put_interval(self):
         user_id = 'test-user'
         article_id = 'test-article_id'
         body = 'test-body'
         article_content_edit_history_table = self.dynamodb.Table(os.environ['ARTICLE_CONTENT_EDIT_HISTORY_TABLE_NAME'])
-        settings.ARTICLE_HISTORY_PUT_INTERVAL = 1
 
-        # 規定時間経過後に保存
-        version = '00'
-        DBUtil.put_article_content_edit_history(
-            dynamodb=self.dynamodb,
-            user_id=user_id,
-            article_id=article_id,
-            sanitized_body=body + version,
-        )
-        # 規定時間経過
-        time.sleep(settings.ARTICLE_HISTORY_PUT_INTERVAL)
-        version = '01'
-        DBUtil.put_article_content_edit_history(
-            dynamodb=self.dynamodb,
-            user_id=user_id,
-            article_id=article_id,
-            sanitized_body=body + version,
-        )
+        with freeze_time() as frozen_datetime:
+            # 規定時間経過後に保存
+            version = '00'
+            DBUtil.put_article_content_edit_history(
+                dynamodb=self.dynamodb,
+                user_id=user_id,
+                article_id=article_id,
+                sanitized_body=body + version,
+            )
+            # 規定時間経過
+            frozen_datetime.tick(delta=datetime.timedelta(seconds=settings.ARTICLE_HISTORY_PUT_INTERVAL))
+            version = '01'
+            DBUtil.put_article_content_edit_history(
+                dynamodb=self.dynamodb,
+                user_id=user_id,
+                article_id=article_id,
+                sanitized_body=body + version,
+            )
 
         # 2 件登録されていること
         expected_item_1 = {
