@@ -12,6 +12,22 @@ export ALIS_APP_ID=foobar
 export SERVERLESS_REST_API_ID=pe6odilrre
 export SERVERLESS_REST_API_WITH_OAUTH_ID=xxxxxxxxxx
 
+
+## --- for Cloudfront ---
+
+# Cloudfrontリソースを生成する場合のみ必要
+# 本番環境では利用しないリソースなのでSSMではなくここに配置している
+
+# API Gateway IDs
+export FrontendApiGatewayId=xxxxxxxx
+export Oauth2ApiGatewayId=xxxxxxxx
+export Oauth2apiApiGatewayId=xxxxxxxx
+export LaboApiGatewayId=xxxxxxxx
+
+# ACMのCertificationのArn
+export AcmCertificateArn=arn:aws:acm:us-east-1:xxxxxx:xxxxxx
+
+
 # --- AWS ---
 
 ## aws-cli

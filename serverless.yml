@@ -1,7 +1,7 @@
 # スタック名: ${env:ALIS_APP_ID}-laboratory
 service: ${env:ALIS_APP_ID}
 
-frameworkVersion: ">=1.44.1 <2.0.0"
+frameworkVersion: ">=1.45.1 <2.0.0"
 
 custom:
   bucket: ${env:ALIS_APP_ID}-alis-laboratory
@@ -59,16 +59,17 @@ package:
   individually: true
 
 functions:
-  ArticleRandom:
+  LaboNRandom:
     description: "記事をランダムに表示"
     handler: handler.lambda_handler
     package:
-      artifact: ./deploy/articles_random.zip
+      artifact: ./deploy/labo_n_random.zip
     events:
       - http:
           method: get
           # CloudFrontによるキャッシュを利かさないものは /n/ 以下に配置する
-          path: /n/random
+          path: /labo/n/random
+
 
   MajorityJudgement:
     description: "MajorityJudgementの投票を行う"
@@ -100,6 +101,7 @@ resources:
                   - lambda.amazonaws.com
         ManagedPolicyArns:
           - arn:aws:iam::aws:policy/AmazonDynamoDBReadOnlyAccess
+          - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
     LaboLambdaRolePolicies:
       Type: AWS::IAM::Policy
       Properties:
@@ -113,22 +115,21 @@ resources:
         Roles:
           - Ref: LaboLambdaRole
 
-    # DynamoDB
-    MajorityJudgmentDB:
-      Type: AWS::DynamoDB::Table
-      DeletionPolicy: 'Retain'
-      Properties:
-        TableName: "${env:ALIS_APP_ID}-${self:provider.stage}-MajorityJudgment"
-        AttributeDefinitions:
-          - AttributeName: user_id
-            AttributeType: S
-        KeySchema:
-          - AttributeName: user_id
-            KeyType: HASH
-        PointInTimeRecoverySpecification:
-          PointInTimeRecoveryEnabled: true
-        BillingMode: PAY_PER_REQUEST
-
+      # DynamoDB
+      MajorityJudgmentDB:
+        Type: AWS::DynamoDB::Table
+        DeletionPolicy: 'Retain'
+        Properties:
+          TableName: "${env:ALIS_APP_ID}-${self:provider.stage}-MajorityJudgment"
+          AttributeDefinitions:
+            - AttributeName: user_id
+              AttributeType: S
+          KeySchema:
+            - AttributeName: user_id
+              KeyType: HASH
+          PointInTimeRecoverySpecification:
+            PointInTimeRecoveryEnabled: true
+          BillingMode: PAY_PER_REQUEST
   Outputs:
     # Elasticsearchで指定する必要があるためExport
     LaboLambdaRole:

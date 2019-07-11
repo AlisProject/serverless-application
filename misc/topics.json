@@ -4,60 +4,6 @@
       "PutRequest": {
         "Item": {
           "name": {
-            "S": "technology"
-          },
-          "display_name": {
-            "S": "テクノロジー"
-          },
-          "index_hash_key": {
-            "S": "topic"
-          },
-          "order": {
-            "N": "3"
-          }
-        }
-      }
-    },
-    {
-      "PutRequest": {
-        "Item": {
-          "name": {
-            "S": "comic-animation"
-          },
-          "display_name": {
-            "S": "マンガ・アニメ"
-          },
-          "index_hash_key": {
-            "S": "topic"
-          },
-          "order": {
-            "N": "2"
-          }
-        }
-      }
-    },
-    {
-      "PutRequest": {
-        "Item": {
-          "name": {
-            "S": "business"
-          },
-          "display_name": {
-            "S": "ビジネス"
-          },
-          "index_hash_key": {
-            "S": "topic"
-          },
-          "order": {
-            "N": "1"
-          }
-        }
-      }
-    },
-    {
-      "PutRequest": {
-        "Item": {
-          "name": {
             "S": "crypto"
           },
           "display_name": {
@@ -67,7 +13,7 @@
             "S": "topic"
           },
           "order": {
-            "N": "4"
+            "N": "1"
           }
         }
       }
@@ -85,25 +31,7 @@
             "S": "topic"
           },
           "order": {
-            "N": "5"
-          }
-        }
-      }
-    },
-    {
-      "PutRequest": {
-        "Item": {
-          "name": {
-            "S": "travel"
-          },
-          "display_name": {
-            "S": "トラベル"
-          },
-          "index_hash_key": {
-            "S": "topic"
-          },
-          "order": {
-            "N": "6"
+            "N": "2"
           }
         }
       }
@@ -121,6 +49,78 @@
             "S": "topic"
           },
           "order": {
+            "N": "3"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "name": {
+            "S": "business"
+          },
+          "display_name": {
+            "S": "ビジネス"
+          },
+          "index_hash_key": {
+            "S": "topic"
+          },
+          "order": {
+            "N": "4"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "name": {
+            "S": "travel"
+          },
+          "display_name": {
+            "S": "トラベル"
+          },
+          "index_hash_key": {
+            "S": "topic"
+          },
+          "order": {
+            "N": "5"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "name": {
+            "S": "beauty"
+          },
+          "display_name": {
+            "S": "ビューティ"
+          },
+          "index_hash_key": {
+            "S": "topic"
+          },
+          "order": {
+            "N": "6"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "name": {
+            "S": "education-parenting"
+          },
+          "display_name": {
+            "S": "教育・子育て"
+          },
+          "index_hash_key": {
+            "S": "topic"
+          },
+          "order": {
             "N": "7"
           }
         }
@@ -130,10 +130,10 @@
       "PutRequest": {
         "Item": {
           "name": {
-            "S": "entertainment"
+            "S": "comic-animation"
           },
           "display_name": {
-            "S": "おもしろ"
+            "S": "マンガ・アニメ"
           },
           "index_hash_key": {
             "S": "topic"

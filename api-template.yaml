@@ -9,6 +9,8 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   ArticleContentTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
+  ArticleContentEditHistoryTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
   ArticleHistoryTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
   ArticleContentEditTableName:
@@ -115,6 +117,7 @@ Globals:
       Variables:
         ARTICLE_INFO_TABLE_NAME: !Ref ArticleInfoTableName
         ARTICLE_CONTENT_TABLE_NAME: !Ref ArticleContentTableName
+        ARTICLE_CONTENT_EDIT_HISTORY_TABLE_NAME: !Ref ArticleContentEditHistoryTableName
         ARTICLE_HISTORY_TABLE_NAME: !Ref ArticleHistoryTableName
         ARTICLE_CONTENT_EDIT_TABLE_NAME: !Ref ArticleContentEditTableName
         ARTICLE_EVALUATED_MANAGE_TABLE_NAME: !Ref ArticleEvaluatedManageTableName

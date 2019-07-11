@@ -11,6 +11,7 @@ from aws_requests_auth.aws_auth import AWSRequestsAuth
 from botocore.exceptions import ClientError
 from record_not_found_error import RecordNotFoundError
 from not_verified_user_error import NotVerifiedUserError
+from boto3.dynamodb.conditions import Key
 
 
 class UserUtil:
@@ -63,6 +64,17 @@ class UserUtil:
                 return False
             else:
                 raise e
+
+    @staticmethod
+    def is_external_provider_user(dynamodb, user_id):
+        external_provider_users_table = dynamodb.Table(os.environ['EXTERNAL_PROVIDER_USERS_TABLE_NAME'])
+        external_provider_users = external_provider_users_table.query(
+            IndexName="user_id-index",
+            KeyConditionExpression=Key('user_id').eq(user_id)
+        )
+        if external_provider_users.get('Count') == 1:
+            return True
+        return False
 
     @staticmethod
     def external_provider_login(cognito, user_id, user_pool_id, user_pool_app_id, password, provider):
