@@ -1,6 +1,7 @@
 {
   "scripts": {
     "lint": "npx cfn-lint validate",
+    "build": "python make_deploy_zip.py --target 'src/handlers/labo/**/handler.py'",
     "deploy": "npx sls deploy",
     "remove": "npx sls remove",
     "invoke": "npx sls invoke -f"
