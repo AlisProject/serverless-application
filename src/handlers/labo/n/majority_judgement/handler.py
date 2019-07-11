@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 import boto3
-from labo_majority_judgement import LaboMajorityJudgement
+from majority_judgement import LaboNMajorityJudgement
 
 dynamodb = boto3.resource('dynamodb')
 
 
 def lambda_handler(event, context):
-    target = LaboMajorityJudgement(event, context, dynamodb)
+    target = LaboNMajorityJudgement(event, context, dynamodb)
     return target.main()

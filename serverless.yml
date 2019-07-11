@@ -74,11 +74,11 @@ functions:
     description: "MajorityJudgementの投票を行う"
     handler: handler.lambda_handler
     package:
-      artifact: ./deploy/labo_majority_judgement.zip
+      artifact: ./deploy/labo_n_majority_judgement.zip
     events:
       - http:
           method: get
-          path: /labo/majority_judgement
+          path: /labo/n/majority_judgement
 
 resources:
   Resources:

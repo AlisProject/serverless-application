@@ -7,7 +7,7 @@ from jsonschema import validate
 options_count = 5
 
 
-class LaboMajorityJudgement(LambdaBase):
+class LaboNMajorityJudgement(LambdaBase):
     def get_schema(self):
         opt = {
             "type": "number",
@@ -38,7 +38,7 @@ class LaboMajorityJudgement(LambdaBase):
         table = self.dynamodb.Table(os.environ['MAJORITY_JUDGEMENT_TABLE_NAME'])
 
         user_id = self.event['requestContext']['authorizer']['claims']['cognito:username']
-        if not LaboMajorityJudgement.__is_exists(table, user_id):
+        if not LaboNMajorityJudgement.__is_exists(table, user_id):
             item = {
                 'user_id': user_id,
                 'opt_1': 5,
