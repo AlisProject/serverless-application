@@ -194,12 +194,17 @@ class DBUtil:
             'ScanIndexForward': False
         }
         items = article_content_edit_history_table.query(**query_params)['Items']
+        create_time = time.time()
+
+        # 規定秒数経過していない場合は保存処理を実施しない
+        if len(items) != 0 and int(create_time) - items[0]['update_at'] < settings.ARTICLE_HISTORY_PUT_INTERVAL:
+            return
+
         # version は 00 → 99 をループ
         version = str(0 if len(items) == 0 else (int(items[0]['version']) + 1) % 100).zfill(2)
 
         # 該当バージョンで書き込み（put で上書きすることで過去 version の削除を不要にしている）
         # version の値が重複することもシステム的にはありえるが、後勝ちで問題ないためトランザクション処理は省略
-        create_time = time.time()
         article_content_edit_history_table.put_item(
             Item={
                 'user_id': user_id,
