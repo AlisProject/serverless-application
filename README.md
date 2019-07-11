@@ -85,9 +85,17 @@ aws s3api create-bucket --bucket ${ALIS_APP_ID}-serverless-deploy-bucket \
 
 ### Packaging
 
+Pack all resources.
+
 ```bash
 ./packaging.sh
 ```
+
+You can Pack specify resource if you want.
+
+```bash
+python make_deploy_zip.py --target 'src/handlers/labo/n/random/handler.py'
+``` 
 
 ### DynamoDB
 ```bash
