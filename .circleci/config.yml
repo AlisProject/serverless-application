@@ -26,6 +26,12 @@ references:
   require_approval: &require_approval
     requires:
       - approval
+  staging_steps: &staging_steps
+    <<: *ignore_master
+    context: serverless_staging
+  production_steps: &production_steps
+    <<: *only_master
+    context: serverless_production
 
 orbs:
   aws-cli: circleci/aws-cli@0.1.13
@@ -351,78 +357,63 @@ workflows:
       - test_parallel3
       - test_parallel4
       - test_parallel5
-      - packaging:
-          context: serverless_staging
-          post-steps:
-            - jira/notify
+      - packaging
 
 
       # ステージング環境(本番環境以外)のワークフロー
       - labo:
-          <<: *ignore_master
-          context: serverless_staging
+          <<: *staging_steps
           <<: *deploy_requires
       - deploy-function:
-          <<: *ignore_master
-          context: serverless_staging
+          <<: *staging_steps
           <<: *deploy_requires
       - deploy-function02:
-          <<: *ignore_master
-          context: serverless_staging
+          <<: *staging_steps
           <<: *deploy_requires
       - deploy-api:
-          <<: *ignore_master
-          context: serverless_staging
+          <<: *staging_steps
           requires:
             - deploy-function
             - deploy-function02
       - deploy-permission:
-          <<: *ignore_master
-          context: serverless_staging
+          <<: *staging_steps
+          requires:
+            - deploy-api
+      - fix-api:
+          <<: *staging_steps
           requires:
             - deploy-api
           post-steps:
             - jira/notify
-      - fix-api:
-          <<: *ignore_master
-          context: serverless_staging
-          requires:
-            - deploy-api
+
 
       # 本番環境のワークフロー
       - notify-to-slack-for-approval:
+          <<: *production_steps
           <<: *deploy_requires
-          <<: *only_master
-          context: slack_notification
       - approval:
+          <<: *production_steps
           <<: *deploy_requires
-          <<: *only_master
           type: approval
       - labo:
-          <<: *only_master
-          context: serverless_production
+          <<: *production_steps
           <<: *require_approval
       - deploy-function-production:
-          <<: *only_master
-          context: serverless_production
+          <<: *production_steps
           <<: *require_approval
       - deploy-function-production02:
-          <<: *only_master
-          context: serverless_production
+          <<: *production_steps
           <<: *require_approval
       - deploy-api-production:
-          <<: *only_master
-          context: serverless_production
+          <<: *production_steps
           requires:
             - deploy-function-production
             - deploy-function-production02
       - deploy-permission-production:
-          <<: *only_master
-          context: serverless_production
+          <<: *production_steps
           requires:
             - deploy-api-production
       - fix-api-production:
-          <<: *only_master
-          context: serverless_production
+          <<: *production_steps
           requires:
             - deploy-api-production
