@@ -353,7 +353,7 @@ workflows:
       - test_parallel5
       - packaging:
           context: serverless_staging
-          pre-steps:
+          post-steps:
             - jira/notify
 
 
