@@ -5,7 +5,7 @@ from lambda_base import LambdaBase
 from jsonschema import validate
 
 options_count = 5  # 選択肢の数
-valuation_level = 5  # n段階評価の、n TODO: 確認
+valuation_level = 7  # n段階評価の、n
 
 
 class LaboNMajorityJudgement(LambdaBase):
