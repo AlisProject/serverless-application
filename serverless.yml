@@ -71,7 +71,7 @@ functions:
           path: /labo/n/random
 
   MajorityJudgement:
-    description: "MajorityJudgementの投票を行う"
+    description: "MajorityJudgementの画面を表示する"
     handler: handler.lambda_handler
     package:
       artifact: ./deploy/labo_n_majority_judgement.zip
@@ -79,6 +79,19 @@ functions:
       - http:
           method: post
           path: /labo/n/majority_judgement
+          authorizer:
+            name: cognitoUserPool
+            arn: ${ssm:${env:ALIS_APP_ID}ssmCognitoUserPoolArn}
+
+  MajorityJudgementCreate:
+    description: "MajorityJudgementの投票を行う"
+    handler: handler.lambda_handler
+    package:
+      artifact: ./deploy/labo_n_majority_judgement_create.zip
+    events:
+      - http:
+          method: post
+          path: /labo/n/majority_judgement/create
           authorizer:
             name: cognitoUserPool
             arn: ${ssm:${env:ALIS_APP_ID}ssmCognitoUserPoolArn}
