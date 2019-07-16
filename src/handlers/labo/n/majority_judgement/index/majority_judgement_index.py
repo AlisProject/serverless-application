@@ -8,7 +8,7 @@ options_count = 5  # 選択肢の数
 valuation_level = 7  # n段階評価の、n
 
 
-class LaboNMajorityJudgement(LambdaBase):
+class LaboNMajorityJudgementIndex(LambdaBase):
     def get_schema(self):
         opt = {
             "type": "number",
@@ -39,7 +39,7 @@ class LaboNMajorityJudgement(LambdaBase):
         table = self.dynamodb.Table(os.environ['MAJORITY_JUDGEMENT_TABLE_NAME'])
 
         user_id = self.event['requestContext']['authorizer']['claims']['cognito:username']
-        if not LaboNMajorityJudgement.__is_exists(table, user_id):
+        if not LaboNMajorityJudgementIndex.__is_exists(table, user_id):
             item = {
                 'user_id': user_id,
                 'created_at': int(time.time())

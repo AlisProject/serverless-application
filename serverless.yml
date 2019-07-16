@@ -74,11 +74,11 @@ functions:
     description: "MajorityJudgementの画面を表示する"
     handler: handler.lambda_handler
     package:
-      artifact: ./deploy/labo_n_majority_judgement.zip
+      artifact: ./deploy/labo_n_majority_judgement_index.zip
     events:
       - http:
-          method: post
-          path: /labo/n/majority_judgement
+          method: get
+          path: /labo/n/majority_judgement/index
           authorizer:
             name: cognitoUserPool
             arn: ${ssm:${env:ALIS_APP_ID}ssmCognitoUserPoolArn}
