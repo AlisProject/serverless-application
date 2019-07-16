@@ -77,7 +77,7 @@ functions:
       artifact: ./deploy/labo_n_majority_judgement.zip
     events:
       - http:
-          method: get
+          method: post
           path: /labo/n/majority_judgement
 
 resources:
