@@ -104,18 +104,6 @@ resources:
         ManagedPolicyArns:
           - arn:aws:iam::aws:policy/AmazonDynamoDBReadOnlyAccess
           - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
-    LaboLambdaRolePolicies:
-      Type: AWS::IAM::Policy
-      Properties:
-        PolicyName: "${env:ALIS_APP_ID}-LaboLambdaRolePolicies"
-        PolicyDocument:
-          Version: "2012-10-17"
-          Statement:
-            - Effect: Allow
-              Action: dynamodb:*
-              Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/${env:ALIS_APP_ID}-${self:provider.stage}-*"
-        Roles:
-          - Ref: LaboLambdaRole
 
     # DynamoDB
     MajorityJudgmentDB:
@@ -132,6 +120,19 @@ resources:
         PointInTimeRecoverySpecification:
           PointInTimeRecoveryEnabled: true
         BillingMode: PAY_PER_REQUEST
+    LaboLambdaRolePolicies:
+      Type: AWS::IAM::Policy
+      Properties:
+        PolicyName: "${env:ALIS_APP_ID}-LaboLambdaRolePolicies"
+        PolicyDocument:
+          Version: "2012-10-17"
+          # LaboリソースからのDynamoDBの更新は、原則としてLaboリソース専用のDynamoDBテーブル以外は許可しない
+          Statement:
+            - Effect: Allow
+              Action: dynamodb:*
+              Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/${env:ALIS_APP_ID}-${self:provider.stage}-*"
+        Roles:
+          - Ref: LaboLambdaRole
 
   Outputs:
     # Elasticsearchで指定する必要があるためExport
