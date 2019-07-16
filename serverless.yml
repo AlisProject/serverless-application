@@ -91,7 +91,7 @@ functions:
     events:
       - http:
           method: post
-          path: /labo/n/majority_judgement/create
+          path: /labo/n/majority_judgement
           authorizer:
             name: cognitoUserPool
             arn: ${ssm:${env:ALIS_APP_ID}ssmCognitoUserPoolArn}
