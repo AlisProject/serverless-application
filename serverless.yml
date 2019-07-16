@@ -79,6 +79,10 @@ functions:
       - http:
           method: post
           path: /labo/n/majority_judgement
+          authorizer:
+            name: cognitoUserPool
+            arn: ${ssm:${env:ALIS_APP_ID}ssmCognitoUserPoolArn}
+
 
 resources:
   Resources:
