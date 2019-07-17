@@ -1,5 +1,6 @@
 import os
 import shutil
+import argparse
 import subprocess
 import glob
 
@@ -15,6 +16,11 @@ DEPLOY_PATH = os.getcwd() + '/deploy/'
 if os.path.exists(DEPLOY_PATH):
     shutil.rmtree(DEPLOY_PATH)
 os.makedirs(DEPLOY_PATH)
+
+# 引数を取得
+parser = argparse.ArgumentParser()
+parser.add_argument('--target', help='パッケージングする関数のhandlerへのパスを指定')
+args = parser.parse_args()
 
 
 # deploy 用 zip ファイルを作成
@@ -33,13 +39,18 @@ def exec_zip(zip_file_name, zip_target_dir):
     subprocess.check_call(cmd, shell=True)
 
 
-# メイン処理
+# --- メイン処理 ---
+
+
+# 引数でパッケージングする関数のhandlerへのパスを受け取っている場合は変数にセットする
+# デフォルトはすべてのリソースをパッケージング
+target = args.target if args.target is not None else 'src/handlers/**/handler.py'
 
 # 各 handler ファイル毎に、共通ライブラリと venv のライブラリを含めて zip ファイルを作成する
-for name in glob.iglob('src/handlers/**/handler.py', recursive=True):
+for name in glob.iglob(target, recursive=True):
     # 実行ディレクトリパスを取得
-    target_dir = './' + name[:name.rfind('/')]
+    target = './' + name[:name.rfind('/')]
     # zip のファイル名を取得
-    zip_file_name = target_dir[len('./src/handlers/'):].replace('/', '_') + '.zip'
+    zip_file_name = target[len('./src/handlers/'):].replace('/', '_') + '.zip'
     # zip 作成
-    make_deploy_zip(zip_file_name, target_dir)
+    make_deploy_zip(zip_file_name, target)

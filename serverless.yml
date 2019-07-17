@@ -1,7 +1,7 @@
 # スタック名: ${env:ALIS_APP_ID}-laboratory
 service: ${env:ALIS_APP_ID}
 
-frameworkVersion: ">=1.45.1 <2.0.0"
+frameworkVersion: ">=1.47.0 <2.0.0"
 
 custom:
   bucket: ${env:ALIS_APP_ID}-alis-laboratory
@@ -15,6 +15,10 @@ provider:
   logs:
     restApi: true
   environment:
+    # Labo
+    MAJORITY_JUDGEMENT_TABLE_NAME: "${env:ALIS_APP_ID}-${self:provider.stage}-MajorityJudgment"
+
+    # 既存システム
     ARTICLE_INFO_TABLE_NAME: ${ssm:${env:ALIS_APP_ID}ssmArticleInfoTableName}
     ARTICLE_CONTENT_TABLE_NAME: ${ssm:${env:ALIS_APP_ID}ssmArticleContentTableName}
     ARTICLE_HISTORY_TABLE_NAME: ${ssm:${env:ALIS_APP_ID}ssmArticleHistoryTableName}
@@ -66,10 +70,37 @@ functions:
           # CloudFrontによるキャッシュを利かさないものは /n/ 以下に配置する
           path: /labo/n/random
 
+  MajorityJudgementIndex:
+    description: "MajorityJudgementの画面を表示する。既に登録済であれば登録済画面を表示する"
+    handler: handler.lambda_handler
+    package:
+      artifact: ./deploy/labo_n_majority_judgement_index.zip
+    events:
+      - http:
+          method: get
+          path: /labo/n/majority_judgement
+          authorizer:
+            name: cognitoUserPool
+            arn: ${ssm:${env:ALIS_APP_ID}ssmCognitoUserPoolArn}
+
+  MajorityJudgementCreate:
+    description: "MajorityJudgementの投票を行う"
+    handler: handler.lambda_handler
+    package:
+      artifact: ./deploy/labo_n_majority_judgement_create.zip
+    events:
+      - http:
+          method: post
+          path: /labo/n/majority_judgement
+          authorizer:
+            name: cognitoUserPool
+            arn: ${ssm:${env:ALIS_APP_ID}ssmCognitoUserPoolArn}
+
 
 resources:
   Resources:
     # Laboは既存システムと疎結合にするためIAM Roleを分離する
+    # Outputsするためproviderではなくここに定義している
     LaboLambdaRole:
       Type: AWS::IAM::Role
       Properties:
@@ -86,6 +117,36 @@ resources:
         ManagedPolicyArns:
           - arn:aws:iam::aws:policy/AmazonDynamoDBReadOnlyAccess
           - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
+
+    # DynamoDB
+    MajorityJudgmentDB:
+      Type: AWS::DynamoDB::Table
+      DeletionPolicy: 'Retain'
+      Properties:
+        TableName: "${env:ALIS_APP_ID}-${self:provider.stage}-MajorityJudgment"
+        AttributeDefinitions:
+          - AttributeName: user_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: user_id
+            KeyType: HASH
+        PointInTimeRecoverySpecification:
+          PointInTimeRecoveryEnabled: true
+        BillingMode: PAY_PER_REQUEST
+    LaboLambdaRolePolicies:
+      Type: AWS::IAM::Policy
+      Properties:
+        PolicyName: "${env:ALIS_APP_ID}-LaboLambdaRolePolicies"
+        PolicyDocument:
+          Version: "2012-10-17"
+          # LaboリソースからのDynamoDBの更新は、原則としてLaboリソース専用のDynamoDBテーブル以外は許可しない
+          Statement:
+            - Effect: Allow
+              Action: dynamodb:*
+              Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/${env:ALIS_APP_ID}-${self:provider.stage}-*"
+        Roles:
+          - Ref: LaboLambdaRole
+
   Outputs:
     # Elasticsearchで指定する必要があるためExport
     LaboLambdaRole:
