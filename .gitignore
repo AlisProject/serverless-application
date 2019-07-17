@@ -6,6 +6,7 @@ vendor-package
 .envrc
 _tmp_*
 src/**/__pycache__
+update_function.sh
 
 # for tests
 tmp_tests
