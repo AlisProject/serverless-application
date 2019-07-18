@@ -262,6 +262,42 @@ class TestMeArticlesLikeCreate(TestCase):
         self.assertEqual(notification, expected_notification)
         self.assertEqual(len(notification_after), len(notification_before))
 
+    @patch('time.time', MagicMock(return_value=1520150272.000015))
+    def test_main_ok_with_self_liked_user(self):
+        params = {
+            'pathParameters': {
+                'article_id': self.article_info_table_items[2]['article_id']
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': self.article_info_table_items[2]['user_id'],
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
+            }
+        }
+
+        article_liked_user_table = self.dynamodb.Table(os.environ['ARTICLE_LIKED_USER_TABLE_NAME'])
+        notification_table = self.dynamodb.Table(os.environ['NOTIFICATION_TABLE_NAME'])
+        unread_notification_manager_table = self.dynamodb.Table(os.environ['UNREAD_NOTIFICATION_MANAGER_TABLE_NAME'])
+        article_liked_user_before = article_liked_user_table.scan()['Items']
+        notification_before = notification_table.scan()['Items']
+        unread_notification_manager_before = unread_notification_manager_table.scan()['Items']
+
+        response = MeArticlesLikeCreate(event=params, context={}, dynamodb=self.dynamodb).main()
+
+        notification_after = notification_table.scan()['Items']
+        unread_notification_manager_after = unread_notification_manager_table.scan()['Items']
+        article_liked_user_after = article_liked_user_table.scan()['Items']
+
+        self.assertEqual(response['statusCode'], 200)
+        # article_liked_user へは書き込まれるが、通知情報へは書き込まれないことを確認
+        self.assertEqual(len(article_liked_user_after), len(article_liked_user_before) + 1)
+        self.assertEqual(notification_before, notification_after)
+        self.assertEqual(unread_notification_manager_before, unread_notification_manager_after)
+
     @patch('me_articles_like_create.MeArticlesLikeCreate._MeArticlesLikeCreate__create_like_notification',
            MagicMock(side_effect=Exception()))
     def test_raise_exception_in_creating_notification(self):
