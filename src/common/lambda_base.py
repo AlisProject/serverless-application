@@ -10,6 +10,7 @@ from no_permission_error import NoPermissionError
 from record_not_found_error import RecordNotFoundError
 from not_authorized_error import NotAuthorizedError
 from not_verified_user_error import NotVerifiedUserError
+from exceptions import LimitExceeded
 
 
 class LambdaBase(metaclass=ABCMeta):
@@ -66,6 +67,14 @@ class LambdaBase(metaclass=ABCMeta):
             return {
                 'statusCode': 400,
                 'body': json.dumps({'message': "Bad Request: {0}".format(err)})
+            }
+        except LimitExceeded as err:
+            logger.fatal(err)
+            logger.info(self.__filter_event_for_log(self.event))
+
+            return {
+                'statusCode': 400,
+                'body': json.dumps({'message': "Limit exceeded: {0}".format(err)})
             }
         except NotAuthorizedError as err:
             logger.fatal(err)
