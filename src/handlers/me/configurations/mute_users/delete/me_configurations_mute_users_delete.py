@@ -6,7 +6,7 @@ from lambda_base import LambdaBase
 from jsonschema import validate
 
 
-class MeConfiguresMuteUsersDelete(LambdaBase):
+class MeConfigurationsMuteUsersDelete(LambdaBase):
     def get_schema(self):
         return {
             'type': 'object',

@@ -4,7 +4,7 @@ import json
 from lambda_base import LambdaBase
 
 
-class MeConfiguresMuteUsersIndex(LambdaBase):
+class MeConfigurationsMuteUsersIndex(LambdaBase):
     def get_schema(self):
         pass
 

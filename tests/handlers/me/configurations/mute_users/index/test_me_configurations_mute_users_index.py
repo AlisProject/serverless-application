@@ -2,10 +2,10 @@ import json
 import os
 from unittest import TestCase
 from tests_util import TestsUtil
-from me_configures_mute_users_index import MeConfiguresMuteUsersIndex
+from me_configurations_mute_users_index import MeConfigurationsMuteUsersIndex
 
 
-class TestMeConfiguresMuteUsersIndex(TestCase):
+class TestMeConfigurationsMuteUsersIndex(TestCase):
     dynamodb = TestsUtil.get_dynamodb_client()
 
     def setUp(self):
@@ -29,7 +29,7 @@ class TestMeConfiguresMuteUsersIndex(TestCase):
         TestsUtil.delete_all_tables(self.dynamodb)
 
     def assert_bad_request(self, params):
-        response = MeConfiguresMuteUsersIndex(params, {}, dynamodb=self.dynamodb).main()
+        response = MeConfigurationsMuteUsersIndex(params, {}, dynamodb=self.dynamodb).main()
         self.assertEqual(response['statusCode'], 400)
 
     def test_main_ok(self):
@@ -42,7 +42,7 @@ class TestMeConfiguresMuteUsersIndex(TestCase):
                 }
             }
         }
-        response = MeConfiguresMuteUsersIndex(event=params, context={}, dynamodb=self.dynamodb).main()
+        response = MeConfigurationsMuteUsersIndex(event=params, context={}, dynamodb=self.dynamodb).main()
         mute_users = list(self.user_configurations_items[0]['mute_users'])
         # ユーザID の昇順でソートされていること
         mute_users.sort()
@@ -63,7 +63,7 @@ class TestMeConfiguresMuteUsersIndex(TestCase):
                 }
             }
         }
-        response = MeConfiguresMuteUsersIndex(event=params, context={}, dynamodb=self.dynamodb).main()
+        response = MeConfigurationsMuteUsersIndex(event=params, context={}, dynamodb=self.dynamodb).main()
         expected = {
             'mute_users': []
         }
@@ -81,7 +81,7 @@ class TestMeConfiguresMuteUsersIndex(TestCase):
                 }
             }
         }
-        response = MeConfiguresMuteUsersIndex(event=params, context={}, dynamodb=self.dynamodb).main()
+        response = MeConfigurationsMuteUsersIndex(event=params, context={}, dynamodb=self.dynamodb).main()
         expected = {
             'mute_users': []
         }

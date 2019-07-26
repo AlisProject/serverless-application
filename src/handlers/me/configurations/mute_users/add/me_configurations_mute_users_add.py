@@ -7,7 +7,7 @@ from jsonschema import validate, ValidationError
 from exceptions import LimitExceeded
 
 
-class MeConfiguresMuteUsersAdd(LambdaBase):
+class MeConfigurationsMuteUsersAdd(LambdaBase):
     def get_schema(self):
         return {
             'type': 'object',

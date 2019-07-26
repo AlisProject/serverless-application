@@ -2,10 +2,10 @@ import json
 import os
 from unittest import TestCase
 from tests_util import TestsUtil
-from me_configures_mute_users_delete import MeConfiguresMuteUsersDelete
+from me_configurations_mute_users_delete import MeConfigurationsMuteUsersDelete
 
 
-class TestMeConfiguresMuteUsersDelete(TestCase):
+class TestMeConfigurationsMuteUsersDelete(TestCase):
     dynamodb = TestsUtil.get_dynamodb_client()
 
     def setUp(self):
@@ -40,7 +40,7 @@ class TestMeConfiguresMuteUsersDelete(TestCase):
         TestsUtil.delete_all_tables(self.dynamodb)
 
     def assert_bad_request(self, params):
-        response = MeConfiguresMuteUsersDelete(params, {}, dynamodb=self.dynamodb).main()
+        response = MeConfigurationsMuteUsersDelete(params, {}, dynamodb=self.dynamodb).main()
         self.assertEqual(response['statusCode'], 400)
 
     def test_main_ok(self):
@@ -60,7 +60,7 @@ class TestMeConfiguresMuteUsersDelete(TestCase):
             }
         }
         params['body'] = json.dumps(params['body'])
-        response = MeConfiguresMuteUsersDelete(event=params, context={}, dynamodb=self.dynamodb).main()
+        response = MeConfigurationsMuteUsersDelete(event=params, context={}, dynamodb=self.dynamodb).main()
         user_configurations_table = self.dynamodb.Table(os.environ['USER_CONFIGURATIONS_TABLE_NAME'])
         actual = user_configurations_table.get_item(Key={'user_id': test_user})['Item']
         expected = {
@@ -86,7 +86,7 @@ class TestMeConfiguresMuteUsersDelete(TestCase):
             }
         }
         params['body'] = json.dumps(params['body'])
-        response = MeConfiguresMuteUsersDelete(event=params, context={}, dynamodb=self.dynamodb).main()
+        response = MeConfigurationsMuteUsersDelete(event=params, context={}, dynamodb=self.dynamodb).main()
         user_configurations_table = self.dynamodb.Table(os.environ['USER_CONFIGURATIONS_TABLE_NAME'])
         actual = user_configurations_table.get_item(Key={'user_id': test_user})['Item']
         expected = {
@@ -109,7 +109,7 @@ class TestMeConfiguresMuteUsersDelete(TestCase):
             }
         }
         params['body'] = json.dumps(params['body'])
-        response = MeConfiguresMuteUsersDelete(event=params, context={}, dynamodb=self.dynamodb).main()
+        response = MeConfigurationsMuteUsersDelete(event=params, context={}, dynamodb=self.dynamodb).main()
         user_configurations_table = self.dynamodb.Table(os.environ['USER_CONFIGURATIONS_TABLE_NAME'])
         actual = user_configurations_table.get_item(Key={'user_id': test_user})['Item']
         expected = {
@@ -135,7 +135,7 @@ class TestMeConfiguresMuteUsersDelete(TestCase):
             }
         }
         params['body'] = json.dumps(params['body'])
-        response = MeConfiguresMuteUsersDelete(event=params, context={}, dynamodb=self.dynamodb).main()
+        response = MeConfigurationsMuteUsersDelete(event=params, context={}, dynamodb=self.dynamodb).main()
         user_configurations_table = self.dynamodb.Table(os.environ['USER_CONFIGURATIONS_TABLE_NAME'])
         actual = user_configurations_table.get_item(Key={'user_id': test_user})['Item']
         expected = {

@@ -3,10 +3,10 @@ import os
 import settings
 from unittest import TestCase
 from tests_util import TestsUtil
-from me_configures_mute_users_add import MeConfiguresMuteUsersAdd
+from me_configurations_mute_users_add import MeConfigurationsMuteUsersAdd
 
 
-class TestMeConfiguresMuteUsersAdd(TestCase):
+class TestMeConfigurationsMuteUsersAdd(TestCase):
     dynamodb = TestsUtil.get_dynamodb_client()
 
     def setUp(self):
@@ -36,7 +36,7 @@ class TestMeConfiguresMuteUsersAdd(TestCase):
         settings.MUTE_USERS_MAX_COUNT = self.tmp_mute_users_max_count
 
     def assert_bad_request(self, params):
-        response = MeConfiguresMuteUsersAdd(params, {}, dynamodb=self.dynamodb).main()
+        response = MeConfigurationsMuteUsersAdd(params, {}, dynamodb=self.dynamodb).main()
         self.assertEqual(response['statusCode'], 400)
 
     def test_main_ok(self):
@@ -56,7 +56,7 @@ class TestMeConfiguresMuteUsersAdd(TestCase):
             }
         }
         params['body'] = json.dumps(params['body'])
-        response = MeConfiguresMuteUsersAdd(event=params, context={}, dynamodb=self.dynamodb).main()
+        response = MeConfigurationsMuteUsersAdd(event=params, context={}, dynamodb=self.dynamodb).main()
         user_configurations_table = self.dynamodb.Table(os.environ['USER_CONFIGURATIONS_TABLE_NAME'])
         actual = user_configurations_table.get_item(Key={'user_id': test_user})['Item']
         expected = {
@@ -82,7 +82,7 @@ class TestMeConfiguresMuteUsersAdd(TestCase):
             }
         }
         params['body'] = json.dumps(params['body'])
-        response = MeConfiguresMuteUsersAdd(event=params, context={}, dynamodb=self.dynamodb).main()
+        response = MeConfigurationsMuteUsersAdd(event=params, context={}, dynamodb=self.dynamodb).main()
         user_configurations_table = self.dynamodb.Table(os.environ['USER_CONFIGURATIONS_TABLE_NAME'])
         actual = user_configurations_table.get_item(Key={'user_id': test_user})['Item']
         expected = {
@@ -112,7 +112,7 @@ class TestMeConfiguresMuteUsersAdd(TestCase):
             }
         }
         params['body'] = json.dumps(params['body'])
-        response = MeConfiguresMuteUsersAdd(event=params, context={}, dynamodb=self.dynamodb).main()
+        response = MeConfigurationsMuteUsersAdd(event=params, context={}, dynamodb=self.dynamodb).main()
         user_configurations_table = self.dynamodb.Table(os.environ['USER_CONFIGURATIONS_TABLE_NAME'])
         actual = user_configurations_table.get_item(Key={'user_id': test_user})['Item']
         expected = {
@@ -138,7 +138,7 @@ class TestMeConfiguresMuteUsersAdd(TestCase):
             }
         }
         params['body'] = json.dumps(params['body'])
-        response = MeConfiguresMuteUsersAdd(event=params, context={}, dynamodb=self.dynamodb).main()
+        response = MeConfigurationsMuteUsersAdd(event=params, context={}, dynamodb=self.dynamodb).main()
         user_configurations_table = self.dynamodb.Table(os.environ['USER_CONFIGURATIONS_TABLE_NAME'])
         actual = user_configurations_table.get_item(Key={'user_id': test_user})['Item']
         expected = {
@@ -168,7 +168,7 @@ class TestMeConfiguresMuteUsersAdd(TestCase):
             }
         }
         params['body'] = json.dumps(params['body'])
-        response = MeConfiguresMuteUsersAdd(event=params, context={}, dynamodb=self.dynamodb).main()
+        response = MeConfigurationsMuteUsersAdd(event=params, context={}, dynamodb=self.dynamodb).main()
         user_configurations_table = self.dynamodb.Table(os.environ['USER_CONFIGURATIONS_TABLE_NAME'])
         actual = user_configurations_table.get_item(Key={'user_id': test_user})['Item']
         expected = {
@@ -194,7 +194,7 @@ class TestMeConfiguresMuteUsersAdd(TestCase):
             }
         }
         params['body'] = json.dumps(params['body'])
-        response = MeConfiguresMuteUsersAdd(event=params, context={}, dynamodb=self.dynamodb).main()
+        response = MeConfigurationsMuteUsersAdd(event=params, context={}, dynamodb=self.dynamodb).main()
         # データが変更されていないこと
         actual = user_configurations_table.get_item(Key={'user_id': test_user})['Item']
         # status 400 で返却されること
@@ -218,7 +218,7 @@ class TestMeConfiguresMuteUsersAdd(TestCase):
             }
         }
         params['body'] = json.dumps(params['body'])
-        response = MeConfiguresMuteUsersAdd(event=params, context={}, dynamodb=self.dynamodb).main()
+        response = MeConfigurationsMuteUsersAdd(event=params, context={}, dynamodb=self.dynamodb).main()
         self.assertEqual(response['statusCode'], 404)
         self.assertEqual(response['body'], '{"message": "Record Not Found"}')
 
@@ -236,7 +236,7 @@ class TestMeConfiguresMuteUsersAdd(TestCase):
             }
         }
         params['body'] = json.dumps(params['body'])
-        response = MeConfiguresMuteUsersAdd(event=params, context={}, dynamodb=self.dynamodb).main()
+        response = MeConfigurationsMuteUsersAdd(event=params, context={}, dynamodb=self.dynamodb).main()
         self.assertEqual(response['statusCode'], 400)
         self.assertEqual(response['body'], '{"message": "Invalid parameter: mute-user-00 is own user."}')
 
