@@ -16,7 +16,7 @@ class TestMeConfigurationsMuteUsersIndex(TestCase):
         self.user_configurations_items = [
             {
                 'user_id': 'test-user-00',
-                'mute_users': {'mute-user-02', 'mute-user-00', 'mute-user-00'}
+                'mute_users': {'mute-user-02', 'mute-user-00', 'mute-user-01'}
             },
             {
                 'user_id': 'test-user-01'
