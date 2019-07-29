@@ -321,6 +321,7 @@ ARTICLE_IMAGE_MAX_HEIGHT = 2160
 USER_ICON_WIDTH = 240
 USER_ICON_HEIGHT = 240
 
+# 充分に大きな数値で、不足によって UX に影響を及ぼす目処は無いため、SSM ではなく settings にて管理
 MUTE_USERS_MAX_COUNT = 200
 
 S3_ARTICLES_IMAGES_PATH = 'd/api/articles_images/'
