@@ -28,7 +28,7 @@ class MeConfigurationsMuteUsersDelete(LambdaBase):
     def exec_main_proc(self):
         user_configurations_table = self.dynamodb.Table(os.environ['USER_CONFIGURATIONS_TABLE_NAME'])
 
-        # ミュートユーザ追加
+        # ミュートユーザ削除
         user_configurations_table.update_item(
             Key={
                 'user_id': self.event['requestContext']['authorizer']['claims']['cognito:username'],
