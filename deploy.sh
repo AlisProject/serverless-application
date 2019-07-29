@@ -46,6 +46,7 @@ aws cloudformation deploy \
     ArticleScoreTableName=${SSM_PARAMS_PREFIX}ArticleScoreTableName \
     UsersTableName=${SSM_PARAMS_PREFIX}UsersTableName \
     BetaUsersTableName=${SSM_PARAMS_PREFIX}BetaUsersTableName \
+    UserConfigurationsTableName=${SSM_PARAMS_PREFIX}UserConfigurationsTableName \
     ExternalProviderUsersTableName=${SSM_PARAMS_PREFIX}ExternalProviderUsersTableName \
     NotificationTableName=${SSM_PARAMS_PREFIX}NotificationTableName \
     UnreadNotificationManagerTableName=${SSM_PARAMS_PREFIX}UnreadNotificationManagerTableName \
