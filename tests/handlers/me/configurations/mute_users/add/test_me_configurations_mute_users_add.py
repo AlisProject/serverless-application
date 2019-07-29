@@ -150,6 +150,40 @@ class TestMeConfigurationsMuteUsersAdd(TestCase):
         self.assertEqual(expected, actual)
         self.assertEqual(response['statusCode'], 200)
 
+    def test_main_ok_not_exists_mute_users(self):
+        # mute_users が存在しないデータを作成
+        test_user = 'test-user-00'
+        params = {
+            'user_id': test_user
+        }
+        user_configurations_table = self.dynamodb.Table(os.environ['USER_CONFIGURATIONS_TABLE_NAME'])
+        user_configurations_table.put_item(Item=params)
+
+        # mute_users が存在しない状態で追加
+        params = {
+            'body': {
+                'mute_user_id': self.users_table_items[0]['user_id']
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': test_user
+                    }
+                }
+            }
+        }
+        params['body'] = json.dumps(params['body'])
+        response = MeConfigurationsMuteUsersAdd(event=params, context={}, dynamodb=self.dynamodb).main()
+        actual = user_configurations_table.get_item(Key={'user_id': test_user})['Item']
+        expected = {
+            'user_id': test_user,
+            'mute_users': {
+                self.users_table_items[0]['user_id']
+            }
+        }
+        self.assertEqual(expected, actual)
+        self.assertEqual(response['statusCode'], 200)
+
     def test_main_ng_with_limit_exceeded(self):
         settings.MUTE_USERS_MAX_COUNT = 1
         test_user = 'test-user-00'
