@@ -156,9 +156,7 @@ commands:
 
 jobs:
   lint:
-    executor:
-      name: python3_6_1
-
+    executor: python3_6_1
     steps:
       - prepare-python-resources:
           resource: 'requirements_test.txt'
@@ -178,9 +176,7 @@ jobs:
   # 本来は CircleCIの parallelism を使用したいがLabmdaのテストは少々特殊なため難しく、力技で並列化している
   # 効率的なワークフローとするため、個々のテストはpackagingの実行時間を下回ることを目標とする
   test_parallel1:
-    executor:
-      name: test
-
+    executor: python3_6_1
     steps:
       - prepare_test
 
@@ -189,27 +185,21 @@ jobs:
           options: '--ignore /handlers/me/articles/public,/handlers/me/articles/drafts,/handlers/me/articles/purchase,/handlers/me/articles/comments,/handlers/articles,/handlers/me/comments,/handlers/search'
 
   test_parallel2:
-    executor:
-      name: test
-
+    executor: python3_6_1
     steps:
       - prepare_test
       - run_tests:
           options: '--target /handlers/me/articles/public'
 
   test_parallel3:
-    executor:
-      name: test
-
+    executor: test
     steps:
       - prepare_test
       - run_tests:
           options: '--target /handlers/me/articles/drafts'
 
   test_parallel4:
-    executor:
-      name: test
-
+    executor: test
     steps:
       - prepare_test
       - run_tests:
@@ -218,9 +208,7 @@ jobs:
           options: '--target /handlers/me/articles/purchase'
 
   test_parallel5:
-    executor:
-      name: test
-
+    executor: test
     steps:
       - prepare_test
       - run_tests:
@@ -231,9 +219,7 @@ jobs:
           options: '--target /handlers/search'
 
   packaging:
-    executor:
-      name: python3_6_1
-
+    executor: python3_6_1
     steps:
       - prepare-python-resources
 
@@ -248,45 +234,29 @@ jobs:
           paths:
             - deploy/*
 
-  deploy-function: &deploy-function
-    executor:
-      name: python3_6_1
-
+  deploy-function:
+    executor: python3_6_1
     steps:
       - deploy-resources:
           target: 'function'
 
-  deploy-function-production: *deploy-function
-
-  deploy-function02: &deploy-function02
-    executor:
-      name: python3_6_1
-
+  deploy-function02:
+    executor: python3_6_1
     steps:
       - deploy-resources:
           target: 'function02'
 
-  deploy-function-production02: *deploy-function02
-
-  deploy-api: &deploy-api
-    executor:
-      name: python3_6_1
-
+  deploy-api:
+    executor: python3_6_1
     steps:
       - deploy-resources:
           target: 'api'
 
-  deploy-api-production: *deploy-api
-
-  deploy-permission: &deploy-permission
-    executor:
-      name: python3_6_1
-
+  deploy-permission:
+    executor: python3_6_1
     steps:
       - deploy-resources:
           target: 'permission'
-
-  deploy-permission-production: *deploy-permission
 
   labo:
     docker:
@@ -381,11 +351,13 @@ workflows:
       - deploy-function02:
           <<: *staging_steps
           <<: *deploy_requires
+
       - deploy-api:
           <<: *staging_steps
           requires:
             - deploy-function
             - deploy-function02
+
       - deploy-permission:
           <<: *staging_steps
           requires:
@@ -411,22 +383,24 @@ workflows:
       - labo:
           <<: *production_steps
           <<: *require_approval
-      - deploy-function-production:
+      - deploy-function:
           <<: *production_steps
           <<: *require_approval
-      - deploy-function-production02:
+      - deploy-function02:
           <<: *production_steps
           <<: *require_approval
-      - deploy-api-production:
+
+      - deploy-api:
           <<: *production_steps
           requires:
-            - deploy-function-production
-            - deploy-function-production02
-      - deploy-permission-production:
+            - deploy-function
+            - deploy-function02
+
+      - deploy-permission:
           <<: *production_steps
           requires:
-            - deploy-api-production
-      - fix-api-production:
+            - deploy-api
+      - fix-api:
           <<: *production_steps
           requires:
-            - deploy-api-production
+            - deploy-api
