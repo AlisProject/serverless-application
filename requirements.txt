@@ -9,7 +9,7 @@ aws-requests-auth==0.4.2
 requests_aws4auth==0.9
 elasticsearch==6.2.0
 pyjwt==1.7.1
-pycrypto==2.6.1
+pycryptodome==3.8.2
 requests==2.21.0
 requests_oauthlib==1.2.0
 responses==0.10.6
