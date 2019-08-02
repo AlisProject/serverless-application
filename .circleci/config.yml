@@ -26,7 +26,7 @@ references:
   require_approval: &require_approval
     requires:
       - approval
-  forked_env_steps: &forked_env_steps
+  other_env_steps: &other_env_steps
     <<: *ignore_master
     context: serverless_staging
   staging_steps: &staging_steps
@@ -108,9 +108,10 @@ commands:
           at: .
 
       - deploy:
-          name: Deployment
+          name: 'Deployment'
           command: |
-            if [ $ALIS_APP_ID ]; then
+            # masterブランチであるか、フォークした環境であればデプロイを行う
+            if [ $CIRCLE_BRANCH == 'master' ] || [ $CIRCLE_PROJECT_USERNAME != 'AlisProject' ]; then
               . venv/bin/activate
               ./deploy.sh << parameters.target >>
             fi
@@ -322,7 +323,49 @@ jobs:
 
 # CloudFormationスタックの依存関係に即したワークフローとなっている
 workflows:
+  # masterブランチ以外への更新で実行される、その他環境用ビルド
+  # デプロイが実行されるのはフォークした環境のみ
+  other-env-build:
+    jobs:
+      - lint:
+          <<: *other_env_steps
+      - test_parallel1:
+          <<: *other_env_steps
+      - test_parallel2:
+          <<: *other_env_steps
+      - test_parallel3:
+          <<: *other_env_steps
+      - test_parallel4:
+          <<: *other_env_steps
+      - test_parallel5:
+          <<: *other_env_steps
+      - packaging:
+          <<: *other_env_steps
 
+      - labo:
+          <<: *other_env_steps
+          <<: *deploy_requires
+      - deploy-function:
+          <<: *other_env_steps
+          <<: *deploy_requires
+      - deploy-function02:
+          <<: *other_env_steps
+          <<: *deploy_requires
+      - deploy-api:
+          <<: *other_env_steps
+          requires:
+            - deploy-function
+            - deploy-function02
+      - deploy-permission:
+          <<: *other_env_steps
+          requires:
+            - deploy-api
+      - fix-api:
+          <<: *other_env_steps
+          requires:
+            - deploy-api
+          post-steps:
+            - jira/notify
 
   # ステージング環境
   staging:
