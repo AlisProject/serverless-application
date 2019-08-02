@@ -19,6 +19,7 @@ class TestLoginTwitterIndex(TestCase):
         os.environ['EXTERNAL_PROVIDER_LOGIN_MARK'] = 'xxxxx'
         os.environ['COGNITO_USER_POOL_ID'] = 'user_pool_id'
         os.environ['COGNITO_USER_POOL_APP_ID'] = 'user_pool_id'
+        os.environ['LOGIN_SALT'] = '4YGjw4llWxC46bNluUYu1bhaWQgfJjB4'
         TestsUtil.set_all_tables_name_to_env()
         TestsUtil.delete_all_tables(dynamodb)
         external_provider_users_items = [

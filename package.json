@@ -4,7 +4,8 @@
     "build": "python make_deploy_zip.py --target 'src/handlers/labo/**/handler.py'",
     "deploy": "npx sls deploy",
     "remove": "npx sls remove",
-    "invoke": "npx sls invoke -f"
+    "invoke": "npx sls invoke -f",
+    "cilint": "circleci config validate -c .circleci/config.yml"
   },
   "devDependencies": {
     "cfn-lint": "^1.9.7",

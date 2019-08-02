@@ -310,6 +310,8 @@ Resources:
           KeyType: HASH
         - AttributeName: user_id
           KeyType: RANGE
+      StreamSpecification:
+        StreamViewType: NEW_IMAGE
       BillingMode: PAY_PER_REQUEST
   Users:
     Type: AWS::DynamoDB::Table
@@ -340,6 +342,16 @@ Resources:
           AttributeType: S
       KeySchema:
         - AttributeName: email
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+  UserConfigurations:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: user_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: user_id
           KeyType: HASH
       BillingMode: PAY_PER_REQUEST
   ExternalProviderUsers:

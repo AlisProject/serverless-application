@@ -120,3 +120,7 @@ class FacebookVerifyException(Error):
 
 class PrivateChainApiError(Error):
     pass
+
+
+class LimitExceeded(Error):
+    pass
