@@ -9,7 +9,7 @@ from nonce_util import NonceUtil
 from exceptions import YahooOauthError
 from exceptions import YahooVerifyException
 from botocore.exceptions import ClientError
-from jwt.contrib.algorithms.pycrypto import RSAAlgorithm
+from rsa_algorithm import RSAAlgorithm
 
 jwt.register_algorithm('RS256', RSAAlgorithm(RSAAlgorithm.SHA256))
 
