@@ -259,6 +259,12 @@ jobs:
       - deploy-resources:
           target: 'permission'
 
+  deploy-alarms:
+    executor: python3_6_1
+    steps:
+      - deploy-resources:
+          target: 'alarms'
+
   labo:
     docker:
       - image: circleci/node:12.4.0
@@ -403,12 +409,14 @@ workflows:
 
       - deploy-permission:
           <<: *staging_steps
-          requires:
+          requires: &require-api-staging
             - deploy-api
+      - deploy-alarms:
+          <<: *staging_steps
+          requires: *require-api-staging
       - fix-api:
           <<: *staging_steps
-          requires:
-            - deploy-api
+          requires: *require-api-staging
           post-steps:
             - jira/notify
 
@@ -441,9 +449,11 @@ workflows:
 
       - deploy-permission:
           <<: *production_steps
-          requires:
+          requires: &require-api-production
             - deploy-api
+      - deploy-alarms:
+          <<: *production_steps
+          requires: *require-api-production
       - fix-api:
           <<: *production_steps
-          requires:
-            - deploy-api
+          requires: *require-api-production
