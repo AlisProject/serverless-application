@@ -27,7 +27,7 @@ references:
     requires:
       - approval
   staging_steps: &staging_steps
-    <<: *ignore_master
+    <<: *only_master
     context: serverless_staging
   production_steps: &production_steps
     <<: *only_master
