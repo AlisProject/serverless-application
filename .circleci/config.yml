@@ -23,11 +23,14 @@ references:
       - test_parallel4
       - test_parallel5
       - packaging
-  require_approval: &require_approval
+  require_approval: &require_approval_and_packaging
     requires:
       - approval
+      - packaging
   other_env_steps: &other_env_steps
     <<: *ignore_master
+    # AlisProjectアカウントでもビルドは実行されるため、Contextはserverless_stagingを使用している
+    # フォークしたリポジトリで作業する際は、同名のContextを各自の環境に設定する必要がある
     context: serverless_staging
   staging_steps: &staging_steps
     <<: *only_master
@@ -174,10 +177,10 @@ jobs:
             . venv/bin/activate
             pyflakes src tests ./*.py
 
-  # 本来は CircleCIの parallelism を使用したいがLabmdaのテストは少々特殊なため難しく、力技で並列化している
+  # 本来は CircleCIの parallelism を使用したいがLambdaのテストは少々特殊なため難しく、力技で並列化している
   # 効率的なワークフローとするため、個々のテストはpackagingの実行時間を下回ることを目標とする
   test_parallel1:
-    executor: python3_6_1
+    executor: test
     steps:
       - prepare_test
 
@@ -186,7 +189,7 @@ jobs:
           options: '--ignore /handlers/me/articles/public,/handlers/me/articles/drafts,/handlers/me/articles/purchase,/handlers/me/articles/comments,/handlers/articles,/handlers/me/comments,/handlers/search'
 
   test_parallel2:
-    executor: python3_6_1
+    executor: test
     steps:
       - prepare_test
       - run_tests:
@@ -263,7 +266,7 @@ jobs:
     executor: python3_6_1
     steps:
       - deploy-resources:
-          target: 'alarms'
+          target: 'apialarms'
 
   labo:
     docker:
@@ -283,7 +286,7 @@ jobs:
             - v1-npm-dependencies-
 
       - run:
-          command: npm i
+          command: npm ci
 
       - save_cache:
           paths:
@@ -297,10 +300,8 @@ jobs:
               npm run deploy
             fi
 
-  fix-api: &fix-api
-    executor:
-      name: python3_6_1
-
+  fix-api:
+    executor: python3_6_1
     steps:
       - prepare-python-resources
 
@@ -315,12 +316,8 @@ jobs:
             . venv/bin/activate
             ./fix_api.sh
 
-  fix-api-production: *fix-api
-
   notify-to-slack-for-approval:
-    executor:
-      name: python3_6_1
-
+    executor: python3_6_1
     steps:
       - slack/approval:
           message: "本番環境へのデプロイを承認してください"
@@ -423,23 +420,25 @@ workflows:
   # 本番環境(テスト等無し・承認付き)
   production:
     jobs:
+      # stagingで同時にテストを行っているため本番環境ワークフローではテストを行わない
       - packaging:
           <<: *production_steps
       - notify-to-slack-for-approval:
-          <<: *production_steps
+          <<: *only_master
+          context: slack_notification
       - approval:
           <<: *production_steps
           type: approval
 
       - labo:
           <<: *production_steps
-          <<: *require_approval
+          <<: *require_approval_and_packaging
       - deploy-function:
           <<: *production_steps
-          <<: *require_approval
+          <<: *require_approval_and_packaging
       - deploy-function02:
           <<: *production_steps
-          <<: *require_approval
+          <<: *require_approval_and_packaging
 
       - deploy-api:
           <<: *production_steps
