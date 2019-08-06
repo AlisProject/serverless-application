@@ -43,6 +43,8 @@ Resources:
           Fn::Sub: "${AlisAppId}-LambdaRole"
       Runtime: python3.6
       Timeout: 300
+      TracingConfig:
+        Mode: "Active"
   ArticlesTipRanking:
     Type: "AWS::Lambda::Function"
     Properties:
@@ -60,6 +62,8 @@ Resources:
           Fn::Sub: "${AlisAppId}-LambdaRole"
       Runtime: python3.6
       Timeout: 300
+      TracingConfig:
+        Mode: "Active"
   MeArticlesContentEditHistoriesIndex:
     Type: "AWS::Lambda::Function"
     Properties:
@@ -75,6 +79,8 @@ Resources:
           Fn::Sub: "${AlisAppId}-LambdaRole"
       Runtime: python3.6
       Timeout: 300
+      TracingConfig:
+        Mode: "Active"
   MeConfigurationsMuteUsersAdd:
     Type: "AWS::Lambda::Function"
     Properties:
@@ -90,6 +96,8 @@ Resources:
           Fn::Sub: "${AlisAppId}-LambdaRole"
       Runtime: python3.6
       Timeout: 300
+      TracingConfig:
+        Mode: "Active"
   MeConfigurationsMuteUsersDelete:
     Type: "AWS::Lambda::Function"
     Properties:
@@ -105,6 +113,8 @@ Resources:
           Fn::Sub: "${AlisAppId}-LambdaRole"
       Runtime: python3.6
       Timeout: 300
+      TracingConfig:
+        Mode: "Active"
   MeConfigurationsMuteUsersIndex:
     Type: "AWS::Lambda::Function"
     Properties:
@@ -119,6 +129,8 @@ Resources:
           Fn::Sub: "${AlisAppId}-LambdaRole"
       Runtime: python3.6
       Timeout: 300
+      TracingConfig:
+        Mode: "Active"
 
 Outputs:
   ArticleSupportersIndex:
