@@ -396,20 +396,21 @@ workflows:
       - deploy-function:
           <<: *staging_steps
           <<: *deploy_requires
+
       - deploy-function02:
           <<: *staging_steps
-          <<: *deploy_requires
-
+          requires:
+            - deploy-function
       - deploy-api:
           <<: *staging_steps
           requires:
             - deploy-function
-            - deploy-function02
 
       - deploy-permission:
           <<: *staging_steps
           requires: &require-api-staging
             - deploy-api
+            - deploy-function02
       - deploy-alarms:
           <<: *staging_steps
           requires: *require-api-staging
@@ -438,20 +439,21 @@ workflows:
       - deploy-function:
           <<: *production_steps
           <<: *require_approval_and_packaging
+
       - deploy-function02:
           <<: *production_steps
-          <<: *require_approval_and_packaging
-
+          requires:
+            - deploy-function
       - deploy-api:
           <<: *production_steps
           requires:
             - deploy-function
-            - deploy-function02
 
       - deploy-permission:
           <<: *production_steps
           requires: &require-api-production
             - deploy-api
+            - deploy-function02
       - deploy-alarms:
           <<: *production_steps
           requires: *require-api-production
