@@ -351,22 +351,24 @@ workflows:
       - deploy-function:
           <<: *other_env_steps
           <<: *deploy_requires
+
       - deploy-function02:
-          <<: *other_env_steps
-          <<: *deploy_requires
-      - deploy-api:
           <<: *other_env_steps
           requires:
             - deploy-function
-            - deploy-function02
-      - deploy-permission:
+
+      - deploy-api:
           <<: *other_env_steps
           requires:
+            - deploy-function02
+
+      - deploy-permission:
+          <<: *other_env_steps
+          requires: &require-api-other-env
             - deploy-api
       - fix-api:
           <<: *other_env_steps
-          requires:
-            - deploy-api
+          requires: *require-api-other-env
           post-steps:
             - jira/notify
 
@@ -394,14 +396,15 @@ workflows:
       - deploy-function:
           <<: *staging_steps
           <<: *deploy_requires
+
       - deploy-function02:
           <<: *staging_steps
-          <<: *deploy_requires
+          requires:
+            - deploy-function
 
       - deploy-api:
           <<: *staging_steps
           requires:
-            - deploy-function
             - deploy-function02
 
       - deploy-permission:
@@ -436,14 +439,15 @@ workflows:
       - deploy-function:
           <<: *production_steps
           <<: *require_approval_and_packaging
+
       - deploy-function02:
           <<: *production_steps
-          <<: *require_approval_and_packaging
+          requires:
+            - deploy-function
 
       - deploy-api:
           <<: *production_steps
           requires:
-            - deploy-function
             - deploy-function02
 
       - deploy-permission:
