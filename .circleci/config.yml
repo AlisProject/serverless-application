@@ -401,16 +401,16 @@ workflows:
           <<: *staging_steps
           requires:
             - deploy-function
+
       - deploy-api:
           <<: *staging_steps
           requires:
-            - deploy-function
+            - deploy-function02
 
       - deploy-permission:
           <<: *staging_steps
           requires: &require-api-staging
             - deploy-api
-            - deploy-function02
       - deploy-alarms:
           <<: *staging_steps
           requires: *require-api-staging
@@ -444,16 +444,16 @@ workflows:
           <<: *production_steps
           requires:
             - deploy-function
+
       - deploy-api:
           <<: *production_steps
           requires:
-            - deploy-function
+            - deploy-function02
 
       - deploy-permission:
           <<: *production_steps
           requires: &require-api-production
             - deploy-api
-            - deploy-function02
       - deploy-alarms:
           <<: *production_steps
           requires: *require-api-production
