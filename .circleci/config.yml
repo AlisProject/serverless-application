@@ -356,15 +356,15 @@ workflows:
           <<: *other_env_steps
           requires:
             - deploy-function
+
       - deploy-api:
           <<: *other_env_steps
           requires:
-            - deploy-function
+            - deploy-function02
 
       - deploy-permission:
           <<: *other_env_steps
           requires: &require-api-other-env
-            - deploy-function02
             - deploy-api
       - fix-api:
           <<: *other_env_steps
