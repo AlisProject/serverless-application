@@ -1,6 +1,7 @@
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
+import time
 import settings
 from articles_recent import ArticlesRecent
 from tests_util import TestsUtil
@@ -20,33 +21,52 @@ class TestArticlesRecent(TestCase):
     def setUpClass(cls):
         TestsUtil.set_all_tables_name_to_env()
         TestsUtil.delete_all_tables(cls.dynamodb)
+        TestsEsUtil.remove_articles_index(cls.elasticsearch)
 
         # create article_info_table
         article_info_items = [
             {
-                'article_id': 'draftId00001',
-                'status': 'draft',
-                'sort_key': 1520150272000000,
-                'topic': 'crypto'
-            },
-            {
                 'article_id': 'testid000001',
                 'status': 'public',
-                'sort_key': 1520150272000001,
-                'topic': 'crypto'
+                'sort_key': 1565578800000001,
+                'topic': 'crypto',
+                'user_id': 'test_user_id',
+                'title': 'test_title',
+                'overview': 'test_overview',
+                'eye_catch_url': 'test_eye_catch_url',
+                'created_at': 1565578800,
+                'published_at': 1565578900,
+                'tags': ['test1', 'test2'],
+                'version': 2
             },
             {
                 'article_id': 'testid000002',
                 'status': 'public',
-                'sort_key': 1520150272000002,
-                'topic': 'crypto'
+                'sort_key': 1565578800000002,
+                'topic': 'crypto',
+                'user_id': 'test_user_id',
+                'title': 'test_title',
+                'overview': 'test_overview',
+                'eye_catch_url': 'test_eye_catch_url',
+                'created_at': 1565578800,
+                'published_at': 1565578900,
+                'tags': ['test1', 'test2'],
+                'version': 2
             },
             {
                 'article_id': 'testid000003',
                 'status': 'public',
-                'sort_key': 1520150272000003,
+                'sort_key': 1565578800000003,
                 'topic': 'fashion',
-                'price': 300
+                'price': 300,
+                'user_id': 'test_user_id',
+                'title': 'test_title',
+                'overview': 'test_overview',
+                'eye_catch_url': 'test_eye_catch_url',
+                'created_at': 1565578800,
+                'published_at': 1565578900,
+                'tags': ['test1', 'test2'],
+                'version': 2,
             }
         ]
 
@@ -54,14 +74,22 @@ class TestArticlesRecent(TestCase):
             article_info_items.append({
                 'article_id': 'test_dummy_article-' + str(i),
                 'status': 'public',
-                'sort_key': 1520150271000000 + i,
-                'topic': 'food'
+                'sort_key': 1565578800000003 + i,
+                'topic': 'food',
+                'user_id': 'test_user_id',
+                'title': 'test_title',
+                'overview': 'test_overview',
+                'eye_catch_url': 'test_eye_catch_url',
+                'created_at': 1565578800,
+                'published_at': 1565578900,
+                'tags': ['test1', 'test2'],
+                'version': 2
             })
 
-        TestsUtil.create_table(cls.dynamodb, os.environ['ARTICLE_INFO_TABLE_NAME'], article_info_items)
-
-        TestsEsUtil.create_articles_index(cls.elasticsearch)
-        TestsEsUtil.sync_public_articles_from_dynamodb(cls.dynamodb, cls.elasticsearch)
+        for article_info_item in article_info_items:
+            TestsEsUtil.post_article(cls.elasticsearch, article_info_item, {'body': 'test_body'})
+        # ES への反映に時間がかかるため待機
+        time.sleep(1)
 
         topic_items = [
             {'name': 'crypto', 'order': 1, 'index_hash_key': settings.TOPIC_INDEX_HASH_KEY},
@@ -71,9 +99,9 @@ class TestArticlesRecent(TestCase):
         TestsUtil.create_table(cls.dynamodb, os.environ['TOPIC_TABLE_NAME'], topic_items)
 
     @classmethod
-    def tearDownClass(cls):
-        TestsUtil.delete_all_tables(cls.dynamodb)
-        TestsEsUtil.remove_articles_index(cls.elasticsearch)
+    def tearDownClass(self):
+        TestsUtil.delete_all_tables(self.dynamodb)
+        TestsEsUtil.remove_articles_index(self.elasticsearch)
 
     def assert_bad_request(self, params):
         function = ArticlesRecent(params, {}, dynamodb=self.dynamodb, elasticsearch=self.elasticsearch)
@@ -92,16 +120,23 @@ class TestArticlesRecent(TestCase):
 
         expected_items = [
             {
-                'article_id': 'testid000003',
+                'article_id': 'testid000002',
+                'created_at': 1565578800,
+                'eye_catch_url': 'test_eye_catch_url',
+                'overview': 'test_overview',
+                'published_at': 1565578900,
+                'sort_key': 1565578800000002,
                 'status': 'public',
-                'sort_key': 1520150272000003,
-                'topic': 'fashion',
-                'price': 300
-            }
+                'tags': ['test1', 'test2'],
+                'title': 'test_title',
+                'topic': 'crypto',
+                'user_id': 'test_user_id',
+                'version': 2
+             }
         ]
 
         self.assertEqual(response['statusCode'], 200)
-        self.assertEqual(json.loads(response['body'])['Items'], expected_items)
+        self.assertEqual(expected_items, json.loads(response['body'])['Items'])
 
     def test_main_ok_with_no_limit(self):
         params = {
@@ -125,17 +160,32 @@ class TestArticlesRecent(TestCase):
         expected_items = [
             {
                 'article_id': 'testid000002',
+                'created_at': 1565578800,
+                'eye_catch_url': 'test_eye_catch_url',
+                'overview': 'test_overview',
+                'published_at': 1565578900,
+                'sort_key': 1565578800000002,
                 'status': 'public',
-                'sort_key': 1520150272000002,
-                'topic': 'crypto'
+                'tags': ['test1', 'test2'],
+                'title': 'test_title',
+                'topic': 'crypto',
+                'user_id': 'test_user_id',
+                'version': 2
             },
             {
                 'article_id': 'testid000001',
+                'created_at': 1565578800,
+                'eye_catch_url': 'test_eye_catch_url',
+                'overview': 'test_overview',
+                'published_at': 1565578900,
+                'sort_key': 1565578800000001,
                 'status': 'public',
-                'sort_key': 1520150272000001,
-                'topic': 'crypto'
-            }
-        ]
+                'tags': ['test1', 'test2'],
+                'title': 'test_title',
+                'topic': 'crypto',
+                'user_id': 'test_user_id',
+                'version': 2
+            }]
 
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(json.loads(response['body'])['Items'], expected_items)

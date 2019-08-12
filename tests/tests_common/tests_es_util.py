@@ -32,6 +32,18 @@ class TestsEsUtil:
         elasticsearch.indices.create(index='articles', body=article_settings)
 
     @staticmethod
+    def post_article(elasticsearch, article_info, article_content):
+        es_id = article_info['article_id']
+        body = article_info
+        body.update(article_content)
+        elasticsearch.index(
+            index="articles",
+            doc_type="article",
+            id=es_id,
+            body=body
+        )
+
+    @staticmethod
     def create_tip_ranked_articles_index(elasticsearch, index_name):
         article_settings = {
             'mappings': {

@@ -200,6 +200,21 @@ class ESUtil:
             'sort': [
                 {'sort_key': 'desc'}
             ],
+            "_source": [
+                "article_id",
+                "user_id",
+                "status",
+                "title",
+                "overview",
+                "eye_catch_url",
+                "created_at",
+                "published_at",
+                "sort_key",
+                "topic",
+                "tags",
+                "version",
+                "price"
+            ],
             'from': limit * (page - 1),
             'size': limit
         }
