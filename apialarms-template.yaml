@@ -20,7 +20,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -40,7 +40,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -60,7 +60,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -80,7 +80,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -100,7 +100,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -120,7 +120,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -140,7 +140,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -160,7 +160,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -180,7 +180,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -200,7 +200,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -220,7 +220,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -240,7 +240,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -260,7 +260,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -280,7 +280,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -300,7 +300,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -320,7 +320,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -340,7 +340,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -360,7 +360,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -380,7 +380,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -402,7 +402,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -422,7 +422,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -442,7 +442,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -462,7 +462,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -482,7 +482,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -502,7 +502,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -522,7 +522,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -542,7 +542,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -562,7 +562,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -582,7 +582,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -602,7 +602,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -622,7 +622,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -642,7 +642,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -662,7 +662,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -682,7 +682,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -702,7 +702,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -722,7 +722,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -742,7 +742,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -762,7 +762,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -782,7 +782,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -802,7 +802,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -822,7 +822,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -842,7 +842,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -862,7 +862,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -882,7 +882,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -902,7 +902,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -922,7 +922,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -942,7 +942,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -962,7 +962,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -982,7 +982,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -1002,7 +1002,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -1022,7 +1022,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -1042,7 +1042,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -1062,7 +1062,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -1082,7 +1082,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -1102,7 +1102,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -1122,7 +1122,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -1142,7 +1142,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -1162,7 +1162,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -1182,7 +1182,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -1202,7 +1202,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -1222,7 +1222,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -1242,7 +1242,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -1262,7 +1262,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -1282,7 +1282,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -1302,7 +1302,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -1322,7 +1322,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -1342,7 +1342,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -1362,7 +1362,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -1382,7 +1382,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -1402,7 +1402,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -1422,7 +1422,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -1442,7 +1442,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
@@ -1462,7 +1462,7 @@ Resources:
       EvaluationPeriods: 1
       ActionsEnabled: True
       AlarmActions:
-        - 'arn:aws:sns:ap-northeast-1:879243243508:AlarmToSlack'
+        - Fn::ImportValue: alarms:SNSTopicAlarmToSlack
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Statistic: Sum
       Dimensions:
