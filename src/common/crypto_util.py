@@ -9,15 +9,15 @@ class CryptoUtil:
     @staticmethod
     def encrypt_password(plain_text_password, iv):
         salt = os.environ['LOGIN_SALT']
-        cipher = AES.new(salt, AES.MODE_CBC, iv)
-        return base64.b64encode(cipher.encrypt(plain_text_password)).decode()
+        cipher = AES.new(salt.encode("utf8"), AES.MODE_CBC, iv)
+        return base64.b64encode(cipher.encrypt(plain_text_password.encode("utf8"))).decode()
 
     @staticmethod
     def decrypt_password(byte_hash_data, iv):
         encrypted_data = base64.b64decode(byte_hash_data)
         aes_iv = base64.b64decode(iv)
         salt = os.environ['LOGIN_SALT']
-        cipher = AES.new(salt, AES.MODE_CBC, aes_iv)
+        cipher = AES.new(salt.encode("utf8"), AES.MODE_CBC, aes_iv)
         return cipher.decrypt(encrypted_data).decode()
 
     @staticmethod

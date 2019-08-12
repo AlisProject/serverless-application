@@ -1799,6 +1799,89 @@ paths:
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
+  /me/configurations/mute_users:
+    get:
+      description: "ミュートユーザ一覧取得"
+      responses:
+        "200":
+          description: "ミュートユーザ一覧情報"
+          schema:
+            type: object
+            properties:
+              mute_users:
+                type: array
+                items:
+                  type: string
+      security:
+        - cognitoUserPool: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
+              - Fn::ImportValue:
+                  Fn::Sub: "${AlisAppId}-MeConfigurationsMuteUsersIndex"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+    post:
+      description: "ミュートユーザ一追加"
+      parameters:
+      - name: 'user_id'
+        in: 'body'
+        description: '対象ユーザを指定するために使用'
+        required: true
+        type: 'string'
+      responses:
+        '200':
+          description: 'ミュートユーザ一追加成功'
+      security:
+        - cognitoUserPool: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
+              - Fn::ImportValue:
+                  Fn::Sub: "${AlisAppId}-MeConfigurationsMuteUsersAdd"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+    delete:
+      description: "ミュートユーザ一削除"
+      parameters:
+      - name: 'user_id'
+        in: 'body'
+        description: '対象ユーザを指定するために使用'
+        required: true
+        type: 'string'
+      responses:
+        '200':
+          description: 'ミュートユーザ一追加成功'
+      security:
+        - cognitoUserPool: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
+              - Fn::ImportValue:
+                  Fn::Sub: "${AlisAppId}-MeConfigurationsMuteUsersDelete"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
   /me/info:
     get:
       description: 'ログインユーザ情報を取得'

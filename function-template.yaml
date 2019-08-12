@@ -142,6 +142,7 @@ Resources:
         - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
         - arn:aws:iam::aws:policy/AmazonS3FullAccess
         - arn:aws:iam::aws:policy/AmazonCognitoPowerUser
+        - arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess
 
   #  Functions
 
@@ -166,6 +167,8 @@ Resources:
       Role: !GetAtt LambdaRole.Arn
       Runtime: python3.6
       Timeout: 300
+      TracingConfig:
+        Mode: "Active"
   LoginFacebook:
     Type: "AWS::Lambda::Function"
     Properties:
@@ -188,6 +191,8 @@ Resources:
       Role: !GetAtt LambdaRole.Arn
       Runtime: python3.6
       Timeout: 300
+      TracingConfig:
+        Mode: "Active"
   LoginFacebookAuthorizationUrl:
     Type: "AWS::Lambda::Function"
     Properties:
@@ -204,6 +209,8 @@ Resources:
       Role: !GetAtt LambdaRole.Arn
       Runtime: python3.6
       Timeout: 300
+      TracingConfig:
+        Mode: "Active"
   LoginYahooAuthorizationUrl:
     Type: "AWS::Lambda::Function"
     Properties:
@@ -219,6 +226,8 @@ Resources:
       Role: !GetAtt LambdaRole.Arn
       Runtime: python3.6
       Timeout: 300
+      TracingConfig:
+        Mode: "Active"
   ArticlesPriceShow:
     Type: "AWS::Lambda::Function"
     Properties:
@@ -231,6 +240,8 @@ Resources:
       Role: !GetAtt LambdaRole.Arn
       Runtime: python3.6
       Timeout: 300
+      TracingConfig:
+        Mode: "Active"
   MeArticlesPurchasedShow:
     Type: "AWS::Lambda::Function"
     Properties:
@@ -245,6 +256,8 @@ Resources:
       Role: !GetAtt LambdaRole.Arn
       Runtime: python3.6
       Timeout: 300
+      TracingConfig:
+        Mode: "Active"
   MeArticlesPurchasedArticleIdsIndex:
     Type: "AWS::Lambda::Function"
     Properties:
@@ -257,6 +270,8 @@ Resources:
       Role: !GetAtt LambdaRole.Arn
       Runtime: python3.6
       Timeout: 300
+      TracingConfig:
+        Mode: "Active"
   MeArticlesPurchaseCreate:
     Type: "AWS::Lambda::Function"
     Properties:
@@ -279,6 +294,8 @@ Resources:
       Role: !GetAtt LambdaRole.Arn
       Runtime: python3.6
       Timeout: 300
+      TracingConfig:
+        Mode: "Active"
   MeArticlesPurchasedIndex:
     Type: "AWS::Lambda::Function"
     Properties:
@@ -292,6 +309,8 @@ Resources:
       Role: !GetAtt LambdaRole.Arn
       Runtime: python3.6
       Timeout: 300
+      TracingConfig:
+        Mode: "Active"
   MeWalletTokenSend:
     Type: "AWS::Lambda::Function"
     Properties:
@@ -309,6 +328,8 @@ Resources:
       Role: !GetAtt LambdaRole.Arn
       Runtime: python3.6
       Timeout: 300
+      TracingConfig:
+        Mode: "Active"
   WalletBridgeInformationShow:
     Type: "AWS::Lambda::Function"
     Properties:
@@ -323,6 +344,8 @@ Resources:
       Role: !GetAtt LambdaRole.Arn
       Runtime: python3.6
       Timeout: 300
+      TracingConfig:
+        Mode: "Active"
   MeWalletTokenHistoriesIndex:
     Type: "AWS::Lambda::Function"
     Properties:
@@ -338,6 +361,8 @@ Resources:
       Role: !GetAtt LambdaRole.Arn
       Runtime: python3.6
       Timeout: 300
+      TracingConfig:
+        Mode: "Active"
   MeApplicationsIndex:
     Type: "AWS::Lambda::Function"
     Properties:
@@ -351,6 +376,8 @@ Resources:
       MemorySize: 3008
       Runtime: python3.6
       Timeout: 300
+      TracingConfig:
+        Mode: "Active"
   MeApplicationsShow:
     Type: "AWS::Lambda::Function"
     Properties:
@@ -364,6 +391,8 @@ Resources:
       MemorySize: 3008
       Runtime: python3.6
       Timeout: 300
+      TracingConfig:
+        Mode: "Active"
   MeApplicationsCreate:
     Type: "AWS::Lambda::Function"
     Properties:
@@ -377,6 +406,8 @@ Resources:
       MemorySize: 3008
       Runtime: python3.6
       Timeout: 300
+      TracingConfig:
+        Mode: "Active"
   MeApplicationsUpdate:
     Type: "AWS::Lambda::Function"
     Properties:
@@ -390,6 +421,8 @@ Resources:
       MemorySize: 3008
       Runtime: python3.6
       Timeout: 300
+      TracingConfig:
+        Mode: "Active"
   MeApplicationsDelete:
     Type: "AWS::Lambda::Function"
     Properties:
@@ -403,6 +436,8 @@ Resources:
       MemorySize: 3008
       Runtime: python3.6
       Timeout: 300
+      TracingConfig:
+        Mode: "Active"
   MeAllowedApplicationsIndex:
     Type: "AWS::Lambda::Function"
     Properties:
@@ -416,6 +451,8 @@ Resources:
       MemorySize: 3008
       Runtime: python3.6
       Timeout: 300
+      TracingConfig:
+        Mode: "Active"
   MeAllowedApplicationsDelete:
     Type: "AWS::Lambda::Function"
     Properties:
@@ -429,6 +466,8 @@ Resources:
       MemorySize: 3008
       Runtime: python3.6
       Timeout: 300
+      TracingConfig:
+        Mode: "Active"
   ApplicationsShow:
     Type: "AWS::Lambda::Function"
     Properties:
@@ -442,6 +481,8 @@ Resources:
       MemorySize: 3008
       Runtime: python3.6
       Timeout: 300
+      TracingConfig:
+        Mode: "Active"
 
 Outputs:
   LambdaRole:

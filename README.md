@@ -245,3 +245,10 @@ direnv edit
 # Deployment
 ./deploy_cloudfront.sh
 ```
+
+### Resource Groups
+You can create Resource Groups if you want.
+
+```bash
+./create_resource_groups.sh
+```

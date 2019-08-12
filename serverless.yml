@@ -12,6 +12,9 @@ provider:
   stage: laboratory # CloudFrontとの連携の都合上、stageには固定値を指定している
   region: ap-northeast-1
   role: LaboLambdaRole
+  tracing:
+    apiGateway: true
+    lambda: true
   logs:
     restApi: true
   environment:
@@ -117,6 +120,7 @@ resources:
         ManagedPolicyArns:
           - arn:aws:iam::aws:policy/AmazonDynamoDBReadOnlyAccess
           - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
+          - arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess
 
     # DynamoDB
     MajorityJudgmentDB:

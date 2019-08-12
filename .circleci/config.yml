@@ -23,11 +23,17 @@ references:
       - test_parallel4
       - test_parallel5
       - packaging
-  require_approval: &require_approval
+  require_approval: &require_approval_and_packaging
     requires:
       - approval
-  staging_steps: &staging_steps
+      - packaging
+  other_env_steps: &other_env_steps
     <<: *ignore_master
+    # AlisProjectアカウントでもビルドは実行されるため、Contextはserverless_stagingを使用している
+    # フォークしたリポジトリで作業する際は、同名のContextを各自の環境に設定する必要がある
+    context: serverless_staging
+  staging_steps: &staging_steps
+    <<: *only_master
     context: serverless_staging
   production_steps: &production_steps
     <<: *only_master
@@ -35,7 +41,7 @@ references:
 
 orbs:
   aws-cli: circleci/aws-cli@0.1.13
-  slack: circleci/slack@3.2.0
+  slack: circleci/slack@3.3.0
   jira: circleci/jira@1.0.5
 
 executors:
@@ -105,9 +111,10 @@ commands:
           at: .
 
       - deploy:
-          name: Deployment
+          name: 'Deployment'
           command: |
-            if [ $ALIS_APP_ID ]; then
+            # masterブランチであるか、フォークした環境であればデプロイを行う
+            if [ $CIRCLE_BRANCH == 'master' ] || [ $CIRCLE_PROJECT_USERNAME != 'AlisProject' ]; then
               . venv/bin/activate
               ./deploy.sh << parameters.target >>
             fi
@@ -153,9 +160,7 @@ commands:
 
 jobs:
   lint:
-    executor:
-      name: python3_6_1
-
+    executor: python3_6_1
     steps:
       - prepare-python-resources:
           resource: 'requirements_test.txt'
@@ -172,12 +177,10 @@ jobs:
             . venv/bin/activate
             pyflakes src tests ./*.py
 
-  # 本来は CircleCIの parallelism を使用したいがLabmdaのテストは少々特殊なため難しく、力技で並列化している
+  # 本来は CircleCIの parallelism を使用したいがLambdaのテストは少々特殊なため難しく、力技で並列化している
   # 効率的なワークフローとするため、個々のテストはpackagingの実行時間を下回ることを目標とする
   test_parallel1:
-    executor:
-      name: test
-
+    executor: test
     steps:
       - prepare_test
 
@@ -186,27 +189,21 @@ jobs:
           options: '--ignore /handlers/me/articles/public,/handlers/me/articles/drafts,/handlers/me/articles/purchase,/handlers/me/articles/comments,/handlers/articles,/handlers/me/comments,/handlers/search'
 
   test_parallel2:
-    executor:
-      name: test
-
+    executor: test
     steps:
       - prepare_test
       - run_tests:
           options: '--target /handlers/me/articles/public'
 
   test_parallel3:
-    executor:
-      name: test
-
+    executor: test
     steps:
       - prepare_test
       - run_tests:
           options: '--target /handlers/me/articles/drafts'
 
   test_parallel4:
-    executor:
-      name: test
-
+    executor: test
     steps:
       - prepare_test
       - run_tests:
@@ -215,9 +212,7 @@ jobs:
           options: '--target /handlers/me/articles/purchase'
 
   test_parallel5:
-    executor:
-      name: test
-
+    executor: test
     steps:
       - prepare_test
       - run_tests:
@@ -228,9 +223,7 @@ jobs:
           options: '--target /handlers/search'
 
   packaging:
-    executor:
-      name: python3_6_1
-
+    executor: python3_6_1
     steps:
       - prepare-python-resources
 
@@ -245,45 +238,35 @@ jobs:
           paths:
             - deploy/*
 
-  deploy-function: &deploy-function
-    executor:
-      name: python3_6_1
-
+  deploy-function:
+    executor: python3_6_1
     steps:
       - deploy-resources:
           target: 'function'
 
-  deploy-function-production: *deploy-function
-
-  deploy-function02: &deploy-function02
-    executor:
-      name: python3_6_1
-
+  deploy-function02:
+    executor: python3_6_1
     steps:
       - deploy-resources:
           target: 'function02'
 
-  deploy-function-production02: *deploy-function02
-
-  deploy-api: &deploy-api
-    executor:
-      name: python3_6_1
-
+  deploy-api:
+    executor: python3_6_1
     steps:
       - deploy-resources:
           target: 'api'
 
-  deploy-api-production: *deploy-api
-
-  deploy-permission: &deploy-permission
-    executor:
-      name: python3_6_1
-
+  deploy-permission:
+    executor: python3_6_1
     steps:
       - deploy-resources:
           target: 'permission'
 
-  deploy-permission-production: *deploy-permission
+  deploy-alarms:
+    executor: python3_6_1
+    steps:
+      - deploy-resources:
+          target: 'apialarms'
 
   labo:
     docker:
@@ -303,7 +286,7 @@ jobs:
             - v1-npm-dependencies-
 
       - run:
-          command: npm i
+          command: npm ci
 
       - save_cache:
           paths:
@@ -317,10 +300,8 @@ jobs:
               npm run deploy
             fi
 
-  fix-api: &fix-api
-    executor:
-      name: python3_6_1
-
+  fix-api:
+    executor: python3_6_1
     steps:
       - prepare-python-resources
 
@@ -335,85 +316,147 @@ jobs:
             . venv/bin/activate
             ./fix_api.sh
 
-  fix-api-production: *fix-api
-
   notify-to-slack-for-approval:
-    executor:
-      name: python3_6_1
-
+    executor: python3_6_1
     steps:
       - slack/approval:
           message: "本番環境へのデプロイを承認してください"
           color: "#F5E911"
 
 
+# CloudFormationスタックの依存関係に即したワークフローとなっている
 workflows:
-  # CloudFormationスタックの依存関係に即したワークフロー
-  build-deploy:
+  # masterブランチ以外への更新で実行される、その他環境用ビルド
+  # デプロイが実行されるのはフォークした環境のみ
+  other-env-build:
     jobs:
-      - lint
-      - test_parallel1
-      - test_parallel2
-      - test_parallel3
-      - test_parallel4
-      - test_parallel5
-      - packaging
+      - lint:
+          <<: *other_env_steps
+      - test_parallel1:
+          <<: *other_env_steps
+      - test_parallel2:
+          <<: *other_env_steps
+      - test_parallel3:
+          <<: *other_env_steps
+      - test_parallel4:
+          <<: *other_env_steps
+      - test_parallel5:
+          <<: *other_env_steps
+      - packaging:
+          <<: *other_env_steps
 
+      - labo:
+          <<: *other_env_steps
+          <<: *deploy_requires
+      - deploy-function:
+          <<: *other_env_steps
+          <<: *deploy_requires
 
-      # ステージング環境(本番環境以外)のワークフロー
+      - deploy-function02:
+          <<: *other_env_steps
+          requires:
+            - deploy-function
+
+      - deploy-api:
+          <<: *other_env_steps
+          requires:
+            - deploy-function02
+
+      - deploy-permission:
+          <<: *other_env_steps
+          requires: &require-api-other-env
+            - deploy-api
+      - fix-api:
+          <<: *other_env_steps
+          requires: *require-api-other-env
+          post-steps:
+            - jira/notify
+
+  # ステージング環境
+  staging:
+    jobs:
+      - lint:
+          <<: *staging_steps
+      - test_parallel1:
+          <<: *staging_steps
+      - test_parallel2:
+          <<: *staging_steps
+      - test_parallel3:
+          <<: *staging_steps
+      - test_parallel4:
+          <<: *staging_steps
+      - test_parallel5:
+          <<: *staging_steps
+      - packaging:
+          <<: *staging_steps
+
       - labo:
           <<: *staging_steps
           <<: *deploy_requires
       - deploy-function:
           <<: *staging_steps
           <<: *deploy_requires
+
       - deploy-function02:
-          <<: *staging_steps
-          <<: *deploy_requires
-      - deploy-api:
           <<: *staging_steps
           requires:
             - deploy-function
+
+      - deploy-api:
+          <<: *staging_steps
+          requires:
             - deploy-function02
+
       - deploy-permission:
           <<: *staging_steps
-          requires:
+          requires: &require-api-staging
             - deploy-api
+      - deploy-alarms:
+          <<: *staging_steps
+          requires: *require-api-staging
       - fix-api:
           <<: *staging_steps
-          requires:
-            - deploy-api
+          requires: *require-api-staging
           post-steps:
             - jira/notify
 
-
-      # 本番環境のワークフロー
-      - notify-to-slack-for-approval:
+  # 本番環境(テスト等無し・承認付き)
+  production:
+    jobs:
+      # stagingで同時にテストを行っているため本番環境ワークフローではテストを行わない
+      - packaging:
           <<: *production_steps
-          <<: *deploy_requires
+      - notify-to-slack-for-approval:
+          <<: *only_master
+          context: slack_notification
       - approval:
           <<: *production_steps
-          <<: *deploy_requires
           type: approval
+
       - labo:
           <<: *production_steps
-          <<: *require_approval
-      - deploy-function-production:
+          <<: *require_approval_and_packaging
+      - deploy-function:
           <<: *production_steps
-          <<: *require_approval
-      - deploy-function-production02:
-          <<: *production_steps
-          <<: *require_approval
-      - deploy-api-production:
+          <<: *require_approval_and_packaging
+
+      - deploy-function02:
           <<: *production_steps
           requires:
-            - deploy-function-production
-            - deploy-function-production02
-      - deploy-permission-production:
+            - deploy-function
+
+      - deploy-api:
           <<: *production_steps
           requires:
-            - deploy-api-production
-      - fix-api-production:
+            - deploy-function02
+
+      - deploy-permission:
           <<: *production_steps
-          requires:
-            - deploy-api-production
+          requires: &require-api-production
+            - deploy-api
+      - deploy-alarms:
+          <<: *production_steps
+          requires: *require-api-production
+      - fix-api:
+          <<: *production_steps
+          requires: *require-api-production
