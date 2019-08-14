@@ -1,7 +1,4 @@
-import os
 import time
-
-from boto3.dynamodb.conditions import Key
 
 
 class TestsEsUtil:
@@ -32,6 +29,18 @@ class TestsEsUtil:
         elasticsearch.indices.create(index='articles', body=article_settings)
 
     @staticmethod
+    def post_article(elasticsearch, article_info, article_content):
+        es_id = article_info['article_id']
+        body = article_info
+        body.update(article_content)
+        elasticsearch.index(
+            index="articles",
+            doc_type="article",
+            id=es_id,
+            body=body
+        )
+
+    @staticmethod
     def create_tip_ranked_articles_index(elasticsearch, index_name):
         article_settings = {
             'mappings': {
@@ -49,23 +58,6 @@ class TestsEsUtil:
     @staticmethod
     def remove_articles_index(elasticsearch):
         elasticsearch.indices.delete(index='articles', ignore=[404])
-
-    @staticmethod
-    def sync_public_articles_from_dynamodb(dynamodb, elasticsearch):
-        table = dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
-        query_params = {
-            'IndexName': 'status-sort_key-index',
-            'KeyConditionExpression': Key('status').eq('public')
-        }
-        articles = table.query(**query_params)
-        for article in articles['Items']:
-            elasticsearch.index(
-                index='articles',
-                doc_type='article',
-                id=article['article_id'],
-                body=article
-            )
-        elasticsearch.indices.refresh(index='articles')
 
     @staticmethod
     def create_tag_index(elasticsearch):
