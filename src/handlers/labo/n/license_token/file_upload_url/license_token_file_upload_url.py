@@ -9,7 +9,7 @@ from lambda_base import LambdaBase
 from parameter_util import ParameterUtil
 
 
-class CopyrightTokenFileUploadUrl(LambdaBase):
+class LicenseTokenFileUploadUrl(LambdaBase):
     UPLOAD_URL_EXPIRES = 300  # 5 Min
     UPLOAD_FILE_SIZE_MAXIMUM = 52428800  # 50 MB
 
@@ -17,7 +17,7 @@ class CopyrightTokenFileUploadUrl(LambdaBase):
         return {
             'type': 'object',
             'properties': {
-                'token_id': {
+                'content_digest': {
                     'type': 'string',
                     'pattern': r'^0x[a-fA-F0-9]{64}$'
                 },
@@ -30,7 +30,7 @@ class CopyrightTokenFileUploadUrl(LambdaBase):
                     'type': 'string'
                 }
             },
-            'required': ['token_id', 'upload_file_size', 'upload_file_name']
+            'required': ['content_digest', 'upload_file_size', 'upload_file_name']
         }
 
     def validate_params(self):
@@ -41,15 +41,15 @@ class CopyrightTokenFileUploadUrl(LambdaBase):
         s3_cli = boto3.client('s3', config=Config(signature_version='s3v4'), region_name='ap-northeast-1')
 
         bucket = os.environ['LABO_S3_BUCKET_NAME']
-        prefix = 'copyright_token/' + self.params['token_id'] + '/'
+        prefix = 'license_token/' + self.params['content_digest'] + '/'
         key = prefix + self.params['upload_file_name']
         content_length = self.params['upload_file_size']
 
-        # トークンIDに紐づくフォルダが既に存在する場合に、ファイルの作成・上書きを禁止する
+        # コンテンツのダイジェストに紐づくフォルダが既に存在する場合に、ファイルの作成・上書きを禁止する
         list_objects_response = s3_cli.list_objects(Bucket=bucket, Prefix=prefix)
         if 'Contents' in list_objects_response \
                 and len(list_objects_response['Contents']) > 0:
-            raise ValidationError('Token id is duplicated.')
+            raise ValidationError('Content digest is duplicated.')
 
         upload_url = s3_cli.generate_presigned_url(
             ClientMethod='put_object',

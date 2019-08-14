@@ -50,7 +50,7 @@ provider:
     EXTERNAL_PROVIDER_USERS_TABLE_NAME: ${ssm:${env:ALIS_APP_ID}ssmExternalProviderUsersTableName}
     DOMAIN: ${ssm:${env:ALIS_APP_ID}ssmAlisAppDomain}
     PUBLIC_CHAIN_OPERATION_URL: ${ssm:${env:ALIS_APP_ID}ssmPublicChainOperationUrl}
-    PUBLIC_CHAIN_COPYRIGHT_TOKEN_ADDRESS: "${ssm:${env:ALIS_APP_ID}ssmPublicChainCopyrightTokenAddress}"
+    PUBLIC_CHAIN_LICENSE_TOKEN_ADDRESS: "${ssm:${env:ALIS_APP_ID}ssmPublicChainLicenseTokenAddress}"
     PRIVATE_CHAIN_AWS_ACCESS_KEY: ${ssm:${env:ALIS_APP_ID}ssmPrivateChainAwsAccessKey}
     PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY: ${ssm:${env:ALIS_APP_ID}ssmPrivateChainAwsSecretAccessKey}
     PRIVATE_CHAIN_EXECUTE_API_HOST: ${ssm:${env:ALIS_APP_ID}ssmPrivateChainExecuteApiHost}
@@ -102,28 +102,28 @@ functions:
             name: cognitoUserPool
             arn: ${ssm:${env:ALIS_APP_ID}ssmCognitoUserPoolArn}
 
-  CopyrightTokenFileUploadUrl:
+  LicenseTokenFileUploadUrl:
     description: "著作権トークンに対応するファイルのアップロード用URLを取得する"
     handler: handler.lambda_handler
     package:
-      artifact: ./deploy/labo_n_copyright_token_file_upload_url.zip
+      artifact: ./deploy/labo_n_license_token_file_upload_url.zip
     events:
       - http:
           method: get
-          path: /labo/n/copyright_token/file_upload_url
+          path: /labo/n/license_token/file_upload_url
           authorizer:
             name: cognitoUserPool
             arn: ${ssm:${env:ALIS_APP_ID}ssmCognitoUserPoolArn}
 
-  CopyrightTokenFileDownloadUrl:
+  LicenseTokenFileDownloadUrl:
     description: "著作権トークンに対応するファイルのダウンロード用URLを取得する"
     handler: handler.lambda_handler
     package:
-      artifact: ./deploy/labo_n_copyright_token_file_download_url.zip
+      artifact: ./deploy/labo_n_license_token_file_download_url.zip
     events:
       - http:
           method: get
-          path: /labo/n/copyright_token/file_download_url
+          path: /labo/n/license_token/file_download_url
 
 resources:
   Resources:
