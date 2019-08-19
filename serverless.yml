@@ -20,6 +20,7 @@ provider:
   environment:
     # Labo
     MAJORITY_JUDGEMENT_TABLE_NAME: "${env:ALIS_APP_ID}-${self:provider.stage}-MajorityJudgment"
+    QUADRATIC_VOTING_TABLE_NAME: "${env:ALIS_APP_ID}-${self:provider.stage}-QuadraticVoting"
 
     # 既存システム
     ARTICLE_INFO_TABLE_NAME: ${ssm:${env:ALIS_APP_ID}ssmArticleInfoTableName}
@@ -99,6 +100,32 @@ functions:
             name: cognitoUserPool
             arn: ${ssm:${env:ALIS_APP_ID}ssmCognitoUserPoolArn}
 
+  QuadraticVotingIndex:
+    description: "QuadraticVotingの画面を表示する。既に登録済であれば登録済画面を表示する"
+    handler: handler.lambda_handler
+    package:
+      artifact: ./deploy/labo_n_quadratic_voting_index.zip
+    events:
+      - http:
+          method: get
+          path: /labo/n/quadratic_voting
+          authorizer:
+            name: cognitoUserPool
+            arn: ${ssm:${env:ALIS_APP_ID}ssmCognitoUserPoolArn}
+
+  QuadraticVotingCreate:
+    description: "QuadraticVotingの投票を行う"
+    handler: handler.lambda_handler
+    package:
+      artifact: ./deploy/labo_n_quadratic_voting_create.zip
+    events:
+      - http:
+          method: post
+          path: /labo/n/quadratic_voting
+          authorizer:
+            name: cognitoUserPool
+            arn: ${ssm:${env:ALIS_APP_ID}ssmCognitoUserPoolArn}
+
 
 resources:
   Resources:
@@ -128,6 +155,20 @@ resources:
       DeletionPolicy: 'Retain'
       Properties:
         TableName: "${env:ALIS_APP_ID}-${self:provider.stage}-MajorityJudgment"
+        AttributeDefinitions:
+          - AttributeName: user_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: user_id
+            KeyType: HASH
+        PointInTimeRecoverySpecification:
+          PointInTimeRecoveryEnabled: true
+        BillingMode: PAY_PER_REQUEST
+    QuadraticVotingDB:
+      Type: AWS::DynamoDB::Table
+      DeletionPolicy: 'Retain'
+      Properties:
+        TableName: "${env:ALIS_APP_ID}-${self:provider.stage}-QuadraticVoting"
         AttributeDefinitions:
           - AttributeName: user_id
             AttributeType: S
