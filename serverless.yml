@@ -19,6 +19,7 @@ provider:
     restApi: true
   environment:
     # Labo
+    LABO_S3_BUCKET_NAME: ${env:ALIS_APP_ID}-${self:provider.stage}-s3-bucket
     MAJORITY_JUDGEMENT_TABLE_NAME: "${env:ALIS_APP_ID}-${self:provider.stage}-MajorityJudgment"
     QUADRATIC_VOTING_TABLE_NAME: "${env:ALIS_APP_ID}-${self:provider.stage}-QuadraticVoting"
 
@@ -49,6 +50,8 @@ provider:
     TIP_TABLE_NAME: ${ssm:${env:ALIS_APP_ID}ssmTipTableName}
     EXTERNAL_PROVIDER_USERS_TABLE_NAME: ${ssm:${env:ALIS_APP_ID}ssmExternalProviderUsersTableName}
     DOMAIN: ${ssm:${env:ALIS_APP_ID}ssmAlisAppDomain}
+    PUBLIC_CHAIN_OPERATION_URL: ${ssm:${env:ALIS_APP_ID}ssmPublicChainOperationUrl}
+    PUBLIC_CHAIN_LICENSE_TOKEN_ADDRESS: "${ssm:${env:ALIS_APP_ID}ssmPublicChainLicenseTokenAddress}"
     PRIVATE_CHAIN_AWS_ACCESS_KEY: ${ssm:${env:ALIS_APP_ID}ssmPrivateChainAwsAccessKey}
     PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY: ${ssm:${env:ALIS_APP_ID}ssmPrivateChainAwsSecretAccessKey}
     PRIVATE_CHAIN_EXECUTE_API_HOST: ${ssm:${env:ALIS_APP_ID}ssmPrivateChainExecuteApiHost}
@@ -126,6 +129,28 @@ functions:
             name: cognitoUserPool
             arn: ${ssm:${env:ALIS_APP_ID}ssmCognitoUserPoolArn}
 
+  LicenseTokenFileUploadUrl:
+    description: "ライセンストークンに対応するファイルのアップロード用URLを取得する"
+    handler: handler.lambda_handler
+    package:
+      artifact: ./deploy/labo_n_license_token_file_upload_url.zip
+    events:
+      - http:
+          method: get
+          path: /labo/n/license_token/file_upload_url
+          authorizer:
+            name: cognitoUserPool
+            arn: ${ssm:${env:ALIS_APP_ID}ssmCognitoUserPoolArn}
+
+  LicenseTokenFileDownloadUrl:
+    description: "ライセンストークンに対応するファイルのダウンロード用URLを取得する"
+    handler: handler.lambda_handler
+    package:
+      artifact: ./deploy/labo_n_license_token_file_download_url.zip
+    events:
+      - http:
+          method: get
+          path: /labo/n/license_token/file_download_url
 
 resources:
   Resources:
@@ -148,6 +173,27 @@ resources:
           - arn:aws:iam::aws:policy/AmazonDynamoDBReadOnlyAccess
           - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
           - arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess
+
+    LaboLambdaRolePolicies:
+      Type: AWS::IAM::Policy
+      Properties:
+        PolicyName: "${env:ALIS_APP_ID}-LaboLambdaRolePolicies"
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            # LaboリソースからのDynamoDBの更新は、原則としてLaboリソース専用のDynamoDBテーブル以外は許可しない
+            - Effect: Allow
+              Action: dynamodb:*
+              Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/${env:ALIS_APP_ID}-${self:provider.stage}-*"
+
+            # LaboリソースからのS3の更新は、原則としてLaboリソース専用のS3以外は許可しない
+            - Effect: Allow
+              Action: s3:*
+              Resource:
+                - "arn:aws:s3:::${env:ALIS_APP_ID}-${self:provider.stage}-s3-bucket"
+                - "arn:aws:s3:::${env:ALIS_APP_ID}-${self:provider.stage}-s3-bucket/*"
+        Roles:
+          - Ref: LaboLambdaRole
 
     # DynamoDB
     MajorityJudgmentDB:
@@ -178,19 +224,22 @@ resources:
         PointInTimeRecoverySpecification:
           PointInTimeRecoveryEnabled: true
         BillingMode: PAY_PER_REQUEST
-    LaboLambdaRolePolicies:
-      Type: AWS::IAM::Policy
+
+    # S3
+    S3BucketLabo:
+      Type: AWS::S3::Bucket
+      DeletionPolicy: Retain
       Properties:
-        PolicyName: "${env:ALIS_APP_ID}-LaboLambdaRolePolicies"
-        PolicyDocument:
-          Version: "2012-10-17"
-          # LaboリソースからのDynamoDBの更新は、原則としてLaboリソース専用のDynamoDBテーブル以外は許可しない
-          Statement:
-            - Effect: Allow
-              Action: dynamodb:*
-              Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/${env:ALIS_APP_ID}-${self:provider.stage}-*"
-        Roles:
-          - Ref: LaboLambdaRole
+        BucketName: ${env:ALIS_APP_ID}-${self:provider.stage}-s3-bucket
+        CorsConfiguration:
+          CorsRules:
+          - AllowedMethods:
+              - GET
+              - PUT
+            AllowedOrigins:
+              - "*"
+            AllowedHeaders:
+              - "*"
 
   Outputs:
     # Elasticsearchで指定する必要があるためExport
@@ -199,4 +248,3 @@ resources:
         Fn::GetAtt: LaboLambdaRole.Arn
       Export:
         Name: "${env:ALIS_APP_ID}-LaboLambdaRole"
-
