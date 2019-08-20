@@ -13,3 +13,4 @@ pycryptodome==3.8.2
 requests==2.21.0
 requests_oauthlib==1.2.0
 responses==0.10.6
+web3==5.0.0

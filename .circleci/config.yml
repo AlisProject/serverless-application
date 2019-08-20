@@ -369,8 +369,6 @@ workflows:
       - fix-api:
           <<: *other_env_steps
           requires: *require-api-other-env
-          post-steps:
-            - jira/notify
 
   # ステージング環境
   staging:
