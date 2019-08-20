@@ -83,7 +83,7 @@ class LicenseTokenFileDownloadUrl(LambdaBase):
 
         # コンテンツのダイジェスト値を取得
         content_digest = self.__get_content_digest(self.params['token_id'])
-        content_digest_hex = hex(content_digest)
+        content_digest_hex = '0x' + hex(content_digest)[2:].zfill(64)
 
         # ダイジェスト値に対応するファイルのキーを取得
         key = self.__get_object_key_for_digest(s3_cli, bucket, content_digest_hex)
