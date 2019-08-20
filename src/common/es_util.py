@@ -213,7 +213,8 @@ class ESUtil:
                 "topic",
                 "tags",
                 "version",
-                "price"
+                "price",
+                "tip_value"
             ],
             'from': limit * (page - 1),
             'size': limit
