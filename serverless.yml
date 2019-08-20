@@ -103,7 +103,7 @@ functions:
             arn: ${ssm:${env:ALIS_APP_ID}ssmCognitoUserPoolArn}
 
   LicenseTokenFileUploadUrl:
-    description: "著作権トークンに対応するファイルのアップロード用URLを取得する"
+    description: "ライセンストークンに対応するファイルのアップロード用URLを取得する"
     handler: handler.lambda_handler
     package:
       artifact: ./deploy/labo_n_license_token_file_upload_url.zip
@@ -116,7 +116,7 @@ functions:
             arn: ${ssm:${env:ALIS_APP_ID}ssmCognitoUserPoolArn}
 
   LicenseTokenFileDownloadUrl:
-    description: "著作権トークンに対応するファイルのダウンロード用URLを取得する"
+    description: "ライセンストークンに対応するファイルのダウンロード用URLを取得する"
     handler: handler.lambda_handler
     package:
       artifact: ./deploy/labo_n_license_token_file_download_url.zip
