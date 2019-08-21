@@ -13,7 +13,7 @@ maximum = math.sqrt(credit_per_user)  # 許容される最大の値
 class LaboNQuadraticVotingCreate(LambdaBase):
     def get_schema(self):
         opt = {
-            "type": "number",
+            "type": "integer",
             "minimum": 0,
             "maximum": maximum
         }
