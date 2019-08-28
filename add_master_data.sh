@@ -1,17 +1,22 @@
 #!/usr/bin/env bash
 
-# TODO: itemが削除された場合には対応していない
-
 
 # --- Topic ---
 
 # マスタデータ用のJSONを生成
 cp -pf ./misc/topics.json ./_tmp_topics.json
-aws dynamodb list-tables |grep ${ALIS_APP_ID}database-Topic- |sort |tr -d ' ",' | xargs -IXXX sed -i '' 's/Topic/XXX/' _tmp_topics.json
-# ※Mac以外の場合は↓を利用
-#aws dynamodb list-tables |grep ${ALIS_APP_ID}database-Topic- |sort |tr -d ' ",' | xargs -IXXX sed -i 's/Topic/XXX/' _tmp_topics.json
+TARGET_TABLE_NAME=`aws dynamodb list-tables |grep ${ALIS_APP_ID}database-Topic- |sort |tr -d ' ",'`
+# 置換
+if sed --version 2>/dev/null | grep -q GNU; then
+  # Linux の場合(for GNU)
+  sed -i "s/Topic/${TARGET_TABLE_NAME}/" _tmp_topics.json
+else
+  # Macの場合(for BSD)
+  sed -i '' "s/Topic/${TARGET_TABLE_NAME}/" _tmp_topics.json
+fi
+
+# データを削除
+python ./misc/delete_all_items.py ${TARGET_TABLE_NAME}
 
 # データを登録
 aws dynamodb batch-write-item --request-items file://_tmp_topics.json
-
-
