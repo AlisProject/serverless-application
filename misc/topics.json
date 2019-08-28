@@ -148,6 +148,24 @@
       "PutRequest": {
         "Item": {
           "name": {
+            "S": "technology"
+          },
+          "display_name": {
+            "S": "テクノロジー"
+          },
+          "index_hash_key": {
+            "S": "topic"
+          },
+          "order": {
+            "N": "9"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "name": {
             "S": "others"
           },
           "display_name": {
@@ -157,7 +175,7 @@
             "S": "topic"
           },
           "order": {
-            "N": "9"
+            "N": "10"
           }
         }
       }
