@@ -58,24 +58,6 @@
       "PutRequest": {
         "Item": {
           "name": {
-            "S": "technology"
-          },
-          "display_name": {
-            "S": "テクノロジー"
-          },
-          "index_hash_key": {
-            "S": "topic"
-          },
-          "order": {
-            "N": "4"
-          }
-        }
-      }
-    },
-    {
-      "PutRequest": {
-        "Item": {
-          "name": {
             "S": "business"
           },
           "display_name": {
@@ -85,7 +67,7 @@
             "S": "topic"
           },
           "order": {
-            "N": "5"
+            "N": "4"
           }
         }
       }
@@ -103,7 +85,7 @@
             "S": "topic"
           },
           "order": {
-            "N": "6"
+            "N": "5"
           }
         }
       }
@@ -121,7 +103,7 @@
             "S": "topic"
           },
           "order": {
-            "N": "7"
+            "N": "6"
           }
         }
       }
@@ -139,7 +121,7 @@
             "S": "topic"
           },
           "order": {
-            "N": "8"
+            "N": "7"
           }
         }
       }
@@ -152,6 +134,24 @@
           },
           "display_name": {
             "S": "マンガ・アニメ"
+          },
+          "index_hash_key": {
+            "S": "topic"
+          },
+          "order": {
+            "N": "8"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "name": {
+            "S": "technology"
+          },
+          "display_name": {
+            "S": "テクノロジー"
           },
           "index_hash_key": {
             "S": "topic"
