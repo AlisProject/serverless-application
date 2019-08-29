@@ -5,7 +5,8 @@
 
 # マスタデータ用のJSONを生成
 cp -pf ./misc/topics.json ./_tmp_topics.json
-TARGET_TABLE_NAME=`aws dynamodb list-tables |grep ${ALIS_APP_ID}database-Topic- |sort |tr -d ' ",'`
+TARGET_TABLE_NAME=`aws ssm get-parameter --name ${ALIS_APP_ID}ssmTopicTableName --query "Parameter.Value" --output text`
+
 # 置換
 if sed --version 2>/dev/null | grep -q GNU; then
   # Linux の場合(for GNU)
