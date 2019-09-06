@@ -71,7 +71,7 @@ Resources:
       ElasticsearchClusterConfig:
         InstanceType: !If [
           IsProduction,
-          t2.medium.elasticsearch,
+          m5.large.elasticsearch,
           t2.small.elasticsearch
         ]
         InstanceCount: !If [
@@ -83,7 +83,7 @@ Resources:
         ZoneAwarenessEnabled: false
         DedicatedMasterType: !If [
           IsProduction,
-          t2.medium.elasticsearch,
+          m5.large.elasticsearch,
           t2.small.elasticsearch
         ]
         DedicatedMasterCount: 3
