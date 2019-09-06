@@ -1,4 +1,4 @@
-import copy
+@patchimport copy
 import json
 import os
 

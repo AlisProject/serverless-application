@@ -14,3 +14,4 @@ requests==2.21.0
 requests_oauthlib==1.2.0
 responses==0.10.6
 web3==5.0.0
+hexbytes==0.2.0

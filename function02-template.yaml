@@ -22,6 +22,18 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   SucceededTipTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
+  NotificationTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  UnreadNotificationManagerTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  CognitoUserPoolId:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  AllTokenHistoryCsvDownloadS3Bucket:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  PrivateChainOperationUrl:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  PrivateChainAlisTokenAddress:
+    Type: 'AWS::SSM::Parameter::Value<String>'
 
 Resources:
 
@@ -131,6 +143,27 @@ Resources:
       Timeout: 300
       TracingConfig:
         Mode: "Active"
+  MeWalletTokenAllhistoriesCreate:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Code: ./deploy/me_wallet_token_allhistories_create.zip
+      Environment:
+        Variables:
+          NOTIFICATION_TABLE_NAME: !Ref NotificationTableName
+          UNREAD_NOTIFICATION_MANAGER_TABLE_NAME: !Ref UnreadNotificationManagerTableName
+          COGNITO_USER_POOL_ID: !Ref CognitoUserPoolId
+          PRIVATE_CHAIN_ALIS_TOKEN_ADDRESS: !Ref PrivateChainAlisTokenAddress
+          PRIVATE_CHAIN_OPERATION_URL: !Ref PrivateChainOperationUrl
+          ALL_TOKEN_HISTORY_CSV_DWONLOAD_S3_BUCKET: !Ref AllTokenHistoryCsvDownloadS3Bucket
+      Handler: handler.lambda_handler
+      MemorySize: 3008
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
+      Runtime: python3.6
+      Timeout: 900
+      TracingConfig:
+        Mode: "Active"
 
 Outputs:
   ArticleSupportersIndex:
@@ -157,3 +190,7 @@ Outputs:
     Value: !GetAtt MeConfigurationsMuteUsersIndex.Arn
     Export:
       Name: !Sub "${AlisAppId}-MeConfigurationsMuteUsersIndex"
+  MeWalletTokenAllhistoriesCreate:
+    Value: !GetAtt MeWalletTokenAllhistoriesCreate.Arn
+    Export:
+      Name: !Sub "${AlisAppId}-MeWalletTokenAllhistoriesCreate"
