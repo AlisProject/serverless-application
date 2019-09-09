@@ -332,7 +332,7 @@ class TestLoginFacebookIndex(TestCase):
             self.assertEqual(
                 json.loads(response['body']),
                 {
-                    'message': 'Internal server error'
+                    'message': 'Internal server error: LoginFacebookIndex'
                 }
             )
 
@@ -372,6 +372,6 @@ class TestLoginFacebookIndex(TestCase):
             self.assertEqual(
                 json.loads(response['body']),
                 {
-                    'message': 'Internal server error'
+                    'message': 'Internal server error: LoginFacebookIndex'
                 }
             )
