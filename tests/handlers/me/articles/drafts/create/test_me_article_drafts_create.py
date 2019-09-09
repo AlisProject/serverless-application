@@ -146,7 +146,7 @@ class TestMeArticlesDraftsCreate(TestCase):
         article_content_after = self.article_content_table.scan()['Items']
 
         self.assertEqual(response['statusCode'], 500)
-        self.assertEqual(json.loads(response['body'])['message'], 'Internal server error')
+        self.assertEqual(json.loads(response['body'])['message'], 'Internal server error: MeArticlesDraftsCreate')
         self.assertEqual(len(article_info_after) - len(article_info_before), 0)
         self.assertEqual(len(article_content_after) - len(article_content_before), 0)
 

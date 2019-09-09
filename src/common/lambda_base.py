@@ -108,7 +108,7 @@ class LambdaBase(metaclass=ABCMeta):
 
             return {
                 'statusCode': 500,
-                'body': json.dumps({'message': 'Internal server error'})
+                'body': json.dumps({'message': 'Internal server error: ' + self.__class__.__name__})
             }
 
     def __get_params(self):
