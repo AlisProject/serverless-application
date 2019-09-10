@@ -98,7 +98,7 @@ Resources:
           Fn::Sub: "${AlisAppId}-MeArticlesPurchaseCreate"
       Principal: "apigateway.amazonaws.com"
       SourceArn: !Sub ${RestApiArn}/*/POST/me/articles/*/purchase
-  MeWalletTokenHistoriesIndexApiGatewayInvo1ke:
+  MeWalletTokenHistoriesIndexApiGatewayInvoke:
     Type: "AWS::Lambda::Permission"
     Properties:
       Action: "lambda:InvokeFunction"
