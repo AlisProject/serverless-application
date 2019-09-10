@@ -4,6 +4,7 @@ import os
 import time
 import csv
 import hashlib
+import boto3
 from datetime import datetime, timedelta, timezone
 from time_util import TimeUtil
 from user_util import UserUtil
@@ -11,7 +12,7 @@ from web3 import Web3, HTTPProvider
 from lambda_base import LambdaBase
 from record_not_found_error import RecordNotFoundError
 
-### TODO:ユーザーのidentitypoolidをファイル名に挿入する
+### TODO: getusercognitoidの変数をssm化（apigatewayからidentityidを取得できない場合）
 class MeWalletTokenAllhistoriesCreate(LambdaBase):
 
     web3 = None
@@ -61,7 +62,7 @@ class MeWalletTokenAllhistoriesCreate(LambdaBase):
         return '0x' + eoa[26:]
 
     def add_type(self, from_eoa, to_eoa):
-        alis_bridge_contract_address = '0x20326c2C26C5F5D314316131d815eb92940e761A'
+        alis_bridge_contract_address = os.environ['PRIVATE_CHAIN_BRIDGE_ADDRESS']
 
         if from_eoa == self.eoa and to_eoa == alis_bridge_contract_address:
             return 'withdraw'
@@ -72,7 +73,7 @@ class MeWalletTokenAllhistoriesCreate(LambdaBase):
         elif from_eoa == alis_bridge_contract_address and to_eoa == self.eoa:
             return 'deposit'
         elif from_eoa == '---' and to_eoa == self.eoa:
-            return 'get by like'            
+            return 'get by like'
         elif from_eoa != alis_bridge_contract_address and to_eoa == self.eoa:
             return 'get from an user'
         else:
@@ -106,11 +107,11 @@ class MeWalletTokenAllhistoriesCreate(LambdaBase):
                         self.padLeft(eoa)
             ],
         })
-            
+
         transfer_result_from = fromfilter.get_all_entries()
         self.filter_transfer_data(transfer_result_from)
         transfer_result_to = tofilter.get_all_entries()
-        self.filter_transfer_data(transfer_result_to)    
+        self.filter_transfer_data(transfer_result_to)
 
     def filter_mint_data(self, mint_result):
         for i in range(len(mint_result)):
@@ -121,7 +122,7 @@ class MeWalletTokenAllhistoriesCreate(LambdaBase):
                 self.web3.fromWei(int(mint_result[i]['data'], 16), 'ether')
             ])
 
-    def getMintHistory(self, address, eoa):            
+    def getMintHistory(self, address, eoa):
         to_filter = self.web3.eth.filter({
             "address": address,
             "fromBlock": 1,
@@ -133,12 +134,13 @@ class MeWalletTokenAllhistoriesCreate(LambdaBase):
 
         mint_result = to_filter.get_all_entries()
         self.filter_mint_data(mint_result)
-            
+
     def extract_file_to_s3(self):
         bucket = os.environ['ALL_TOKEN_HISTORY_CSV_DOWNLOAD_S3_BUCKET']
         JST = timezone(timedelta(hours=+9), 'JST')
-        ### TODO:keyの${cognito-identity.amazonaws.com:sub}は別途取得が必要
-        key = 'private/ap-northeast-1:6eb2fb02-33b3-42de-8b9a-60d04afe3535/' + self.user_id + '_' + datetime.now(JST).strftime('%Y-%m-%d-%H-%M-%S') + '.csv'
+        ### TODO:できればidentityIdはAPIGateway経由の認証情報から取得したい
+        identityId = self.__get_user_cognito_identity_id()
+        key = 'private/'+ identityId + '/' + self.user_id + '_' + datetime.now(JST).strftime('%Y-%m-%d-%H-%M-%S') + '.csv'
         with open(self.tmp_csv_file, 'rb') as f:
             csv_file = f.read()
             res = self.upload_file(bucket, key, csv_file)
@@ -191,3 +193,18 @@ class MeWalletTokenAllhistoriesCreate(LambdaBase):
 
     def __get_randomhash(self):
         return hashlib.sha256((str(time.time()) + str(os.urandom(16))).encode('utf-8')).hexdigest()
+
+    def __get_user_cognito_identity_id(self):
+        id_token = self.event['headers']['Authorization']
+        IDENTITY_POOL_ID = 'ap-northeast-1:34837d04-bffb-4556-a40a-a91a797593c5'
+        region = 'ap-northeast-1'
+        cognito_user_pool_id = 'ap-northeast-1_TZHcD5Gz0'
+
+        logins = {'cognito-idp.' + region + '.amazonaws.com/' + cognito_user_pool_id : id_token}
+        client = boto3.client('cognito-identity', region_name=region)
+        cognito_identity_id = client.get_id(
+            IdentityPoolId=IDENTITY_POOL_ID,
+            Logins=logins
+        )
+
+        return cognito_identity_id['IdentityId']

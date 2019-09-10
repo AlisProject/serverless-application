@@ -2372,7 +2372,7 @@ paths:
         httpMethod: POST
         type: aws_proxy
   /me/token_history_csv_download:
-    get:
+    post:
       description: "トークンに関する全履歴の取得"
       responses:
         "200":

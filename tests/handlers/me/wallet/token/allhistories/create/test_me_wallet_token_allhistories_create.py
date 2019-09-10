@@ -54,6 +54,8 @@ class TestMeWalletTokenAllHistoriesCreate(TestCase):
            MagicMock(return_value={'timestamp': 1546268400}))
     @patch('me_wallet_token_allhistories_create.MeWalletTokenAllhistoriesCreate._MeWalletTokenAllhistoriesCreate__get_randomhash',
            MagicMock(return_value='notification_id_randomhash'))
+    @patch('me_wallet_token_allhistories_create.MeWalletTokenAllhistoriesCreate._MeWalletTokenAllhistoriesCreate__get_user_cognito_identity_id',
+           MagicMock(return_value='identityId_dummy'))
     def test_main_ok(self):
         with patch('web3.eth.Eth.filter') as web3_eth_filter_mock, patch('me_wallet_token_allhistories_create.UserUtil') as user_util_mock:
             user_util_mock.get_cognito_user_info.return_value = {
@@ -65,10 +67,14 @@ class TestMeWalletTokenAllHistoriesCreate(TestCase):
             web3_eth_filter_mock.return_value = PrivateChainEthFilterFakeResponse()
 
             event = {
+                'headers': {
+                    'Authorization': 'idtoken_dummy'
+                },
                 'requestContext': {
                     'authorizer': {
                         'claims': {
                             'cognito:username': 'user_01',
+                            'cognito-identity': 'ap-northeast-1:hogehoge',
                             'custom:private_eth_address': '0x1111111111111111111111111111111111111111',
                             'phone_number_verified': 'true',
                             'email_verified': 'true'
@@ -105,6 +111,8 @@ class TestMeWalletTokenAllHistoriesCreate(TestCase):
 
     @patch('web3.eth.Eth.getBlock',
            MagicMock(return_value={'timestamp': 1546268400}))
+    @patch('me_wallet_token_allhistories_create.MeWalletTokenAllhistoriesCreate._MeWalletTokenAllhistoriesCreate__get_user_cognito_identity_id',
+           MagicMock(return_value='identityId_dummy'))
     def test_ok_with_several_data(self):
         with patch('web3.eth.Eth.filter') as web3_eth_filter_with_several_data_mock, patch('me_wallet_token_allhistories_create.UserUtil') as user_util_mock:
             user_util_mock.get_cognito_user_info.return_value = {
@@ -116,10 +124,14 @@ class TestMeWalletTokenAllHistoriesCreate(TestCase):
             web3_eth_filter_with_several_data_mock.return_value = PrivateChainEthFilterFakeResponseWithSeveralData()
 
             event = {
+                'headers': {
+                    'Authorization': 'idtoken_dummy'
+                },
                 'requestContext': {
                     'authorizer': {
                         'claims': {
                             'cognito:username': 'user_01',
+                            'cognito-identity': 'ap-northeast-1:hogehoge',
                             'custom:private_eth_address': '0x1111111111111111111111111111111111111111',
                             'phone_number_verified': 'true',
                             'email_verified': 'true'
@@ -133,6 +145,8 @@ class TestMeWalletTokenAllHistoriesCreate(TestCase):
 
     @patch('web3.eth.Eth.getBlock',
            MagicMock(return_value={'timestamp': 1546268400}))
+    @patch('me_wallet_token_allhistories_create.MeWalletTokenAllhistoriesCreate._MeWalletTokenAllhistoriesCreate__get_user_cognito_identity_id',
+           MagicMock(return_value='identityId_dummy'))
     def test_ok_with_no_data(self):
         with patch('web3.eth.Eth.filter') as web3_eth_filter_with_no_data_mock, patch('me_wallet_token_allhistories_create.UserUtil') as user_util_mock:
             user_util_mock.get_cognito_user_info.return_value = {
@@ -144,10 +158,14 @@ class TestMeWalletTokenAllHistoriesCreate(TestCase):
             web3_eth_filter_with_no_data_mock.return_value = PrivateChainEthFilterFakeResponseWithNoData()
 
             event = {
+                'headers': {
+                    'Authorization': 'idtoken_dummy'
+                },
                 'requestContext': {
                     'authorizer': {
                         'claims': {
                             'cognito:username': 'user_01',
+                            'cognito-identity': 'ap-northeast-1:hogehoge',
                             'custom:private_eth_address': '0x1111111111111111111111111111111111111111',
                             'phone_number_verified': 'true',
                             'email_verified': 'true'
@@ -169,11 +187,15 @@ class TestMeWalletTokenAllHistoriesCreate(TestCase):
             }
 
             event = {
+                'headers': {
+                    'Authorization': 'idtoken_dummy'
+                },
                 'requestContext': {
                     'authorizer': {
                         'claims': {
                             'cognito:username': 'user_01',
                             'custom:private_eth_address': '0x1111111111111111111111111111111111111111',
+                            'cognito-identity': 'ap-northeast-1:hogehoge',
                             'phone_number_verified': 'true',
                             'email_verified': 'true'
                         }
@@ -183,7 +205,7 @@ class TestMeWalletTokenAllHistoriesCreate(TestCase):
 
             user_eoa = event['requestContext']['authorizer']['claims']['custom:private_eth_address']
             MeWalletTokenAllhistoriesCreate.eoa = user_eoa
-            alis_bridge_contract_address = '0x20326c2C26C5F5D314316131d815eb92940e761A'
+            alis_bridge_contract_address = os.environ['PRIVATE_CHAIN_BRIDGE_ADDRESS']
 
             response = MeWalletTokenAllhistoriesCreate(event, {}, self.dynamodb).add_type(user_eoa, alis_bridge_contract_address)
             self.assertEqual(response, 'withdraw')
