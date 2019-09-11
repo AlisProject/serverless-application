@@ -92,6 +92,7 @@ aws cloudformation deploy \
     AuthleteApiKey=${SSM_PARAMS_PREFIX}AuthleteApiKey \
     AuthleteApiSecret=${SSM_PARAMS_PREFIX}AuthleteApiSecret \
     AllTokenHistoryCsvDownloadS3Bucket=${SSM_PARAMS_PREFIX}AllTokenHistoryCsvDownloadS3Bucket \
+    CognitoIdentityPoolId=${SSM_PARAMS_PREFIX}CognitoIdentityPoolId\
   --capabilities CAPABILITY_IAM \
   --no-fail-on-empty-changeset
 

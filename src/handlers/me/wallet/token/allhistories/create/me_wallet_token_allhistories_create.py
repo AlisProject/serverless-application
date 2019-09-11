@@ -196,14 +196,14 @@ class MeWalletTokenAllhistoriesCreate(LambdaBase):
 
     def __get_user_cognito_identity_id(self):
         id_token = self.event['headers']['Authorization']
-        IDENTITY_POOL_ID = 'ap-northeast-1:34837d04-bffb-4556-a40a-a91a797593c5'
+        identity_pool_id = os.environ['COGNITO_IDENTITY_POOL_ID']
         region = 'ap-northeast-1'
-        cognito_user_pool_id = 'ap-northeast-1_TZHcD5Gz0'
+        cognito_user_pool_id = os.environ['COGNITO_USER_POOL_ID']
 
         logins = {'cognito-idp.' + region + '.amazonaws.com/' + cognito_user_pool_id : id_token}
         client = boto3.client('cognito-identity', region_name=region)
         cognito_identity_id = client.get_id(
-            IdentityPoolId=IDENTITY_POOL_ID,
+            IdentityPoolId=identity_pool_id,
             Logins=logins
         )
 

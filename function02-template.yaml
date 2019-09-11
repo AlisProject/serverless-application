@@ -28,6 +28,8 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   CognitoUserPoolId:
     Type: 'AWS::SSM::Parameter::Value<String>'
+  CognitoIdentityPoolId:
+    Type: 'AWS::SSM::Parameter::Value<String>'
   AllTokenHistoryCsvDownloadS3Bucket:
     Type: 'AWS::SSM::Parameter::Value<String>'
   PrivateChainOperationUrl:
@@ -154,6 +156,7 @@ Resources:
           NOTIFICATION_TABLE_NAME: !Ref NotificationTableName
           UNREAD_NOTIFICATION_MANAGER_TABLE_NAME: !Ref UnreadNotificationManagerTableName
           COGNITO_USER_POOL_ID: !Ref CognitoUserPoolId
+          COGNITO_IDENTITY_POOL_ID: !Ref CognitoIdentityPoolId
           PRIVATE_CHAIN_ALIS_TOKEN_ADDRESS: !Ref PrivateChainAlisTokenAddress
           PRIVATE_CHAIN_OPERATION_URL: !Ref PrivateChainOperationUrl
           PRIVATE_CHAIN_BRIDGE_ADDRESS: !Ref PrivateChainBridgeAddress
