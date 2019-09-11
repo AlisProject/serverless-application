@@ -423,4 +423,3 @@ class PrivateChainApiFakeResponse:
         return self._text
     status_code = property(get_status_code)
     text = property(get_text)
-
