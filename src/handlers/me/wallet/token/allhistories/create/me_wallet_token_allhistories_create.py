@@ -138,7 +138,7 @@ class MeWalletTokenAllhistoriesCreate(LambdaBase):
     def extract_file_to_s3(self):
         bucket = os.environ['ALL_TOKEN_HISTORY_CSV_DOWNLOAD_S3_BUCKET']
         JST = timezone(timedelta(hours=+9), 'JST')
-        ### TODO:できればidentityIdはAPIGateway経由の認証情報から取得したい
+        ### identityIdの項目はeventの中に存在するが、IAM認証でないと取得できないためlambda側でidtokenを使い取得する実装をした
         identityId = self.__get_user_cognito_identity_id()
         key = 'private/'+ identityId + '/' + self.user_id + '_' + datetime.now(JST).strftime('%Y-%m-%d-%H-%M-%S') + '.csv'
         with open(self.tmp_csv_file, 'rb') as f:
