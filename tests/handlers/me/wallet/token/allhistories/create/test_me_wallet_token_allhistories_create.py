@@ -11,7 +11,7 @@ class TestMeWalletTokenAllHistoriesCreate(TestCase):
     s3 = boto3.resource('s3', endpoint_url='http://localhost:4572/')
 
     @classmethod
-    def setUpClass(cls):
+    def setUp(cls):
         TestsUtil.set_aws_auth_to_env()
         TestsUtil.set_all_private_chain_valuables_to_env()
         TestsUtil.set_all_s3_buckets_name_to_env()
@@ -43,6 +43,10 @@ class TestMeWalletTokenAllHistoriesCreate(TestCase):
         ]
         TestsUtil.create_table(cls.dynamodb, os.environ['NOTIFICATION_TABLE_NAME'], cls.notification_items)
         TestsUtil.create_table(cls.dynamodb, os.environ['UNREAD_NOTIFICATION_MANAGER_TABLE_NAME'], cls.unread_notification_manager_items)
+
+    @classmethod
+    def TearDown(self):
+        TestsUtil.delete_all_tables(cls.dynamodb)
 
     def assert_bad_request(self, params):
         target_function = MeWalletTokenAllhistoriesCreate(params, {}, self.dynamodb, cognito=None)
@@ -87,7 +91,6 @@ class TestMeWalletTokenAllHistoriesCreate(TestCase):
             unread_notification_manager_before = unread_notification_manager_table.get_item(
                 Key={'user_id': 'user_01'}
             ).get('Item')
-            self.assertEqual(unread_notification_manager_before['unread'], False)
 
             notification_table = self.dynamodb.Table(os.environ['NOTIFICATION_TABLE_NAME'])
             notification_before = notification_table.scan()['Items']
@@ -207,19 +210,19 @@ class TestMeWalletTokenAllHistoriesCreate(TestCase):
             MeWalletTokenAllhistoriesCreate.eoa = user_eoa
             alis_bridge_contract_address = os.environ['PRIVATE_CHAIN_BRIDGE_ADDRESS']
 
-            response = MeWalletTokenAllhistoriesCreate(event, {}, self.dynamodb).add_type(user_eoa, alis_bridge_contract_address)
+            response = MeWalletTokenAllhistoriesCreate(event, {}, self.dynamodb).add_type(user_eoa, alis_bridge_contract_address, user_eoa)
             self.assertEqual(response, 'withdraw')
-            response = MeWalletTokenAllhistoriesCreate(event, {}, self.dynamodb).add_type(user_eoa, '0x0123456789012345678901234567890123456789')
+            response = MeWalletTokenAllhistoriesCreate(event, {}, self.dynamodb).add_type(user_eoa, '0x0123456789012345678901234567890123456789', user_eoa)
             self.assertEqual(response, 'give')
-            response = MeWalletTokenAllhistoriesCreate(event, {}, self.dynamodb).add_type(user_eoa, '0x0000000000000000000000000000000000000000')
+            response = MeWalletTokenAllhistoriesCreate(event, {}, self.dynamodb).add_type(user_eoa, '0x0000000000000000000000000000000000000000', user_eoa)
             self.assertEqual(response, 'burn')
-            response = MeWalletTokenAllhistoriesCreate(event, {}, self.dynamodb).add_type(alis_bridge_contract_address, user_eoa)
+            response = MeWalletTokenAllhistoriesCreate(event, {}, self.dynamodb).add_type(alis_bridge_contract_address, user_eoa, user_eoa)
             self.assertEqual(response, 'deposit')
-            response = MeWalletTokenAllhistoriesCreate(event, {}, self.dynamodb).add_type('---', user_eoa)
+            response = MeWalletTokenAllhistoriesCreate(event, {}, self.dynamodb).add_type('---', user_eoa, user_eoa)
             self.assertEqual(response, 'get by like')
-            response = MeWalletTokenAllhistoriesCreate(event, {}, self.dynamodb).add_type('0x0123456789012345678901234567890123456789', user_eoa)
+            response = MeWalletTokenAllhistoriesCreate(event, {}, self.dynamodb).add_type('0x0123456789012345678901234567890123456789', user_eoa, user_eoa)
             self.assertEqual(response, 'get from an user')
-            response = MeWalletTokenAllhistoriesCreate(event, {}, self.dynamodb).add_type('---', None)
+            response = MeWalletTokenAllhistoriesCreate(event, {}, self.dynamodb).add_type('---', None, user_eoa)
             self.assertEqual(response, 'unknown')
 
 class PrivateChainEthFilterFakeResponse:

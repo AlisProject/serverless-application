@@ -5,6 +5,7 @@ import time
 import csv
 import hashlib
 import boto3
+import io
 from datetime import datetime, timedelta, timezone
 from time_util import TimeUtil
 from user_util import UserUtil
@@ -12,15 +13,9 @@ from web3 import Web3, HTTPProvider
 from lambda_base import LambdaBase
 from record_not_found_error import RecordNotFoundError
 
-### TODO: getusercognitoidの変数をssm化（apigatewayからidentityidを取得できない場合）
 class MeWalletTokenAllhistoriesCreate(LambdaBase):
 
     web3 = None
-    address = None
-    user_id = None
-    eoa = None
-    writer = None
-    tmp_csv_file = None
 
     def get_schema(self):
         pass
@@ -29,27 +24,28 @@ class MeWalletTokenAllhistoriesCreate(LambdaBase):
         UserUtil.verified_phone_and_email(self.event)
 
     def exec_main_proc(self):
+        # 必要なパラメーターの取得
         self.web3 = Web3(HTTPProvider(os.environ['PRIVATE_CHAIN_OPERATION_URL']))
-        self.address = self.web3.toChecksumAddress(os.environ['PRIVATE_CHAIN_ALIS_TOKEN_ADDRESS'])
-        self.user_id = self.event['requestContext']['authorizer']['claims']['cognito:username']
-        self.eoa = self.__get_user_private_eth_address(self.user_id)
+        address = self.web3.toChecksumAddress(os.environ['PRIVATE_CHAIN_ALIS_TOKEN_ADDRESS'])
+        user_id = self.event['requestContext']['authorizer']['claims']['cognito:username']
+        eoa = self.__get_user_private_eth_address(user_id)
 
-        self.tmp_csv_file = '/tmp/tmp_csv_file.csv'
-        f = open(self.tmp_csv_file, 'a')
-        self.writer = csv.writer(f)
+        # csvファイルを生成するためのdataの格納先の生成
+        data_for_csv = io.StringIO()
 
-        self.getTransferHistory(self.address, self.eoa)
-        self.getMintHistory(self.address, self.eoa)
+        # private chainからトークンのTransferとMintのデータを取得し、csvに書き込むためのデータを準備する
+        self.setTransferHistoryToData(address, eoa, data_for_csv)
+        self.setMintHistoryToData(address, eoa, data_for_csv)
 
-        f.close()
-        # If file is empty, then error will be raised
-        if sum(1 for i in open(self.tmp_csv_file, 'r')) == 0:
+        # If the file is empty, then error will be raised
+        if len(data_for_csv.getvalue()) == 0:
             raise RecordNotFoundError('Record Not Found')
 
-        announce_url = self.extract_file_to_s3()
+        # 生成したデータをs3にアップロードし、生成したcsvのurlをannounce_urlとしてリターンする
+        announce_url = self.extract_file_to_s3(user_id, data_for_csv)
 
-        notification_id = self.__notification(self.user_id, announce_url)
-        os.remove(self.tmp_csv_file)
+        # ユーザーにcsvのurlを通知する
+        self.__notification(user_id, announce_url)
 
         return {
             'statusCode': 200
@@ -61,34 +57,37 @@ class MeWalletTokenAllhistoriesCreate(LambdaBase):
     def removeLeft(self, eoa):
         return '0x' + eoa[26:]
 
-    def add_type(self, from_eoa, to_eoa):
+    def add_type(self, from_eoa, to_eoa, eoa):
         alis_bridge_contract_address = os.environ['PRIVATE_CHAIN_BRIDGE_ADDRESS']
 
-        if from_eoa == self.eoa and to_eoa == alis_bridge_contract_address:
+        if from_eoa == eoa and to_eoa == alis_bridge_contract_address:
             return 'withdraw'
-        elif from_eoa == self.eoa and to_eoa != '0x0000000000000000000000000000000000000000':
+        elif from_eoa == eoa and to_eoa != '0x0000000000000000000000000000000000000000':
             return 'give'
-        elif from_eoa == self.eoa and to_eoa == '0x0000000000000000000000000000000000000000':
+        elif from_eoa == eoa and to_eoa == '0x0000000000000000000000000000000000000000':
             return 'burn'
-        elif from_eoa == alis_bridge_contract_address and to_eoa == self.eoa:
+        elif from_eoa == alis_bridge_contract_address and to_eoa == eoa:
             return 'deposit'
-        elif from_eoa == '---' and to_eoa == self.eoa:
+        elif from_eoa == '---' and to_eoa == eoa:
             return 'get by like'
-        elif from_eoa != alis_bridge_contract_address and to_eoa == self.eoa:
+        elif from_eoa != alis_bridge_contract_address and to_eoa == eoa:
             return 'get from an user'
         else:
             return 'unknown'
 
-    def filter_transfer_data(self, transfer_result):
+    def filter_transfer_data(self, transfer_result, eoa, data_for_csv):
+        # 取得したデータのうち、csvファイルに書き込むデータのみを抽出し、data_for_csvに成型して書き込む
         for i in range(len(transfer_result)):
-            self.writer.writerow([
-                datetime.fromtimestamp(self.web3.eth.getBlock(transfer_result[i]['blockNumber'])['timestamp']),
-                transfer_result[i]['transactionHash'].hex(),
-                self.add_type(self.removeLeft(transfer_result[i]['topics'][1].hex()),self.removeLeft(transfer_result[i]['topics'][2].hex())),
-                self.web3.fromWei(int(transfer_result[i]['data'], 16), 'ether')
-            ])
+            time = datetime.fromtimestamp(self.web3.eth.getBlock(transfer_result[i]['blockNumber'])['timestamp'])
+            strtime = time.strftime("%Y/%m/%d %H:%M:%S")
+            transactionHash = transfer_result[i]['transactionHash'].hex()
+            type = self.add_type(self.removeLeft(transfer_result[i]['topics'][1].hex()),self.removeLeft(transfer_result[i]['topics'][2].hex()), eoa)
+            amount = self.web3.fromWei(int(transfer_result[i]['data'], 16), 'ether')
+            content_text = strtime + ',' + transactionHash + ',' + type + ',' + str(amount) + '\n'
+            data_for_csv.write(content_text)
 
-    def getTransferHistory(self, address, eoa):
+    def setTransferHistoryToData(self, address, eoa, data_for_csv):
+        # topics[0]の値がERC20のTransferイベントに一致し、topics[1](from)の値が今回データを生成するEoAにマッチするものを取得
         fromfilter = self.web3.eth.filter({
             "address": address,
             "fromBlock": 1,
@@ -98,6 +97,7 @@ class MeWalletTokenAllhistoriesCreate(LambdaBase):
             ],
             })
 
+        # topics[0]の値がERC20のTransferイベントに一致し、topics[2](to)の値が今回データを生成するEoAにマッチするものを取得
         tofilter = self.web3.eth.filter({
             "address": address,
             "fromBlock": 1,
@@ -108,21 +108,26 @@ class MeWalletTokenAllhistoriesCreate(LambdaBase):
             ],
         })
 
+        # filterしたデータをすべて取得するメソッドを実行後、必要なデータだけをcsvに書き込むためのfilterを実行する
         transfer_result_from = fromfilter.get_all_entries()
-        self.filter_transfer_data(transfer_result_from)
+        self.filter_transfer_data(transfer_result_from, eoa, data_for_csv)
         transfer_result_to = tofilter.get_all_entries()
-        self.filter_transfer_data(transfer_result_to)
+        self.filter_transfer_data(transfer_result_to, eoa, data_for_csv)
 
-    def filter_mint_data(self, mint_result):
+    def filter_mint_data(self, mint_result, eoa, data_for_csv):
+        # 取得したデータのうち、csvファイルに書き込むデータのみを抽出し、data_for_csvに成型して書き込む
         for i in range(len(mint_result)):
-            self.writer.writerow([
-                datetime.fromtimestamp(self.web3.eth.getBlock(mint_result[i]['blockNumber'])['timestamp']),
-                mint_result[i]['transactionHash'].hex(),
-                self.add_type('---', self.removeLeft(mint_result[i]['topics'][1].hex())),
-                self.web3.fromWei(int(mint_result[i]['data'], 16), 'ether')
-            ])
+            time = datetime.fromtimestamp(self.web3.eth.getBlock(mint_result[i]['blockNumber'])['timestamp'])
+            strtime = time.strftime("%Y/%m/%d %H:%M:%S")
+            transactionHash = mint_result[i]['transactionHash'].hex()
+            # mintデータの場合はfromを'---'に設定し、typeを判別している
+            type = self.add_type('---', self.removeLeft(mint_result[i]['topics'][1].hex()), eoa)
+            amount = self.web3.fromWei(int(mint_result[i]['data'], 16), 'ether')
+            content_text = strtime + ',' + transactionHash + ',' + type + ',' + str(amount) + '\n'
+            data_for_csv.write(content_text)
 
-    def getMintHistory(self, address, eoa):
+    def setMintHistoryToData(self, address, eoa, data_for_csv):
+        # topics[0]の値がMintに一致し、topics[1]の値が今回データを生成するEoAにマッチするものを取得
         to_filter = self.web3.eth.filter({
             "address": address,
             "fromBlock": 1,
@@ -132,25 +137,25 @@ class MeWalletTokenAllhistoriesCreate(LambdaBase):
             ],
         })
 
+        # filterしたデータをすべて取得するメソッドを実行後、必要なデータだけをcsvに書き込むためのfilterを実行する
         mint_result = to_filter.get_all_entries()
-        self.filter_mint_data(mint_result)
+        self.filter_mint_data(mint_result, eoa, data_for_csv)
 
-    def extract_file_to_s3(self):
+    def extract_file_to_s3(self, user_id, data_for_csv):
         bucket = os.environ['ALL_TOKEN_HISTORY_CSV_DOWNLOAD_S3_BUCKET']
         JST = timezone(timedelta(hours=+9), 'JST')
-        ### identityIdの項目はeventの中に存在するが、IAM認証でないと取得できないためlambda側でidtokenを使い取得する実装をした
+        # identityIdの項目はeventの中に存在するが、IAM認証でないと取得できないためlambda側でidtokenを使い取得する実装をした
         identityId = self.__get_user_cognito_identity_id()
-        key = 'private/'+ identityId + '/' + self.user_id + '_' + datetime.now(JST).strftime('%Y-%m-%d-%H-%M-%S') + '.csv'
-        with open(self.tmp_csv_file, 'rb') as f:
-            csv_file = f.read()
-            res = self.upload_file(bucket, key, csv_file)
+        key = 'private/'+ identityId + '/' + user_id + '_' + datetime.now(JST).strftime('%Y-%m-%d-%H-%M-%S') + '.csv'
+        self.upload_file(bucket, key, data_for_csv.getvalue())
 
+        # announce_urlに生成したcsvのurlを渡す
         announce_url = 'https://'+bucket+'.s3-ap-northeast-1.amazonaws.com/'+key
         return announce_url
 
-    def upload_file(self, bucket, key, bytes):
+    def upload_file(self, bucket, key, data_for_csv):
         s3Obj = self.s3.Object(bucket, key)
-        res = s3Obj.put(Body = bytes)
+        res = s3Obj.put(Body = data_for_csv)
         return res
 
     def __get_user_private_eth_address(self, user_id):
@@ -188,8 +193,6 @@ class MeWalletTokenAllhistoriesCreate(LambdaBase):
         })
 
         self.__update_unread_notification_manager(user_id)
-
-        return notification_id
 
     def __get_randomhash(self):
         return hashlib.sha256((str(time.time()) + str(os.urandom(16))).encode('utf-8')).hexdigest()
