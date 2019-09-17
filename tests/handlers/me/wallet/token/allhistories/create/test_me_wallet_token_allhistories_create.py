@@ -10,16 +10,15 @@ class TestMeWalletTokenAllHistoriesCreate(TestCase):
     dynamodb = TestsUtil.get_dynamodb_client()
     s3 = boto3.resource('s3', endpoint_url='http://localhost:4572/')
 
-    @classmethod
-    def setUp(cls):
+    def setUp(self):
         TestsUtil.set_aws_auth_to_env()
         TestsUtil.set_all_private_chain_valuables_to_env()
         TestsUtil.set_all_s3_buckets_name_to_env()
-        TestsUtil.create_all_s3_buckets(cls.s3)
+        TestsUtil.create_all_s3_buckets(self.s3)
         TestsUtil.set_all_tables_name_to_env()
-        TestsUtil.delete_all_tables(cls.dynamodb)
+        TestsUtil.delete_all_tables(self.dynamodb)
 
-        cls.notification_items = [
+        self.notification_items = [
             {
                 'notification_id': 'like-test01-test_article01',
                 'user_id': 'test01',
@@ -31,7 +30,7 @@ class TestMeWalletTokenAllHistoriesCreate(TestCase):
                 'created_at': 1520150272
             }
         ]
-        cls.unread_notification_manager_items = [
+        self.unread_notification_manager_items = [
             {
                 'user_id': 'user_01',
                 'unread': False
@@ -41,12 +40,11 @@ class TestMeWalletTokenAllHistoriesCreate(TestCase):
                 'unread': False
             }
         ]
-        TestsUtil.create_table(cls.dynamodb, os.environ['NOTIFICATION_TABLE_NAME'], cls.notification_items)
-        TestsUtil.create_table(cls.dynamodb, os.environ['UNREAD_NOTIFICATION_MANAGER_TABLE_NAME'], cls.unread_notification_manager_items)
+        TestsUtil.create_table(self.dynamodb, os.environ['NOTIFICATION_TABLE_NAME'], self.notification_items)
+        TestsUtil.create_table(self.dynamodb, os.environ['UNREAD_NOTIFICATION_MANAGER_TABLE_NAME'], self.unread_notification_manager_items)
 
-    @classmethod
     def TearDown(self):
-        TestsUtil.delete_all_tables(cls.dynamodb)
+        TestsUtil.delete_all_tables(self.dynamodb)
 
     def assert_bad_request(self, params):
         target_function = MeWalletTokenAllhistoriesCreate(params, {}, self.dynamodb, cognito=None)
