@@ -60,9 +60,6 @@ provider:
     ELASTIC_SEARCH_ENDPOINT: ${ssm:${env:ALIS_APP_ID}ssmElasticSearchEndpoint}
     PAID_ARTICLES_TABLE_NAME: ${ssm:${env:ALIS_APP_ID}ssmPaidArticlesTableName}
     PAID_STATUS_TABLE_NAME: ${ssm:${env:ALIS_APP_ID}ssmPaidStatusTableName}
-    ALL_TOKEN_HISTORY_CSV_DOWNLOAD_S3_BUCKET: ${ssm:${env:ALIS_APP_ID}ssmAllTokenHistoryCsvDownloadS3Bucket}
-    COGNITO_USER_POOL_ID: ${ssm:${env:ALIS_APP_ID}ssmCognitoUserPoolId}
-    COGNITO_IDENTITY_POOL_ID: ${ssm:${env:ALIS_APP_ID}ssmCognitoIdentityPoolId}
 
 # パッケージは packaging.sh で生成されたものを使用する
 package:
