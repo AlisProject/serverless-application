@@ -315,6 +315,7 @@ jobs:
           command: |
             . venv/bin/activate
             ./fix_api.sh
+            ./fix_configurations.sh
 
   notify-to-slack-for-approval:
     executor: python3_6_1

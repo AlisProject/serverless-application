@@ -2,7 +2,6 @@
 import settings
 import os
 import time
-import csv
 import hashlib
 import boto3
 import io
@@ -13,8 +12,8 @@ from web3 import Web3, HTTPProvider
 from lambda_base import LambdaBase
 from record_not_found_error import RecordNotFoundError
 
-class MeWalletTokenAllhistoriesCreate(LambdaBase):
 
+class MeWalletTokenAllhistoriesCreate(LambdaBase):
     web3 = None
 
     def get_schema(self):
@@ -24,7 +23,7 @@ class MeWalletTokenAllhistoriesCreate(LambdaBase):
         UserUtil.verified_phone_and_email(self.event)
 
     def exec_main_proc(self):
-        # 必要なパラメーターの取得
+        # 必要なパラメーターを取得する
         self.web3 = Web3(HTTPProvider(os.environ['PRIVATE_CHAIN_OPERATION_URL']))
         address = self.web3.toChecksumAddress(os.environ['PRIVATE_CHAIN_ALIS_TOKEN_ADDRESS'])
         user_id = self.event['requestContext']['authorizer']['claims']['cognito:username']
@@ -81,7 +80,8 @@ class MeWalletTokenAllhistoriesCreate(LambdaBase):
             time = datetime.fromtimestamp(self.web3.eth.getBlock(transfer_result[i]['blockNumber'])['timestamp'])
             strtime = time.strftime("%Y/%m/%d %H:%M:%S")
             transactionHash = transfer_result[i]['transactionHash'].hex()
-            type = self.add_type(self.removeLeft(transfer_result[i]['topics'][1].hex()),self.removeLeft(transfer_result[i]['topics'][2].hex()), eoa)
+            type = self.add_type(self.removeLeft(transfer_result[i]['topics'][1].hex()),
+                                 self.removeLeft(transfer_result[i]['topics'][2].hex()), eoa)
             amount = self.web3.fromWei(int(transfer_result[i]['data'], 16), 'ether')
             content_text = strtime + ',' + transactionHash + ',' + type + ',' + str(amount) + '\n'
             data_for_csv.write(content_text)
@@ -93,9 +93,9 @@ class MeWalletTokenAllhistoriesCreate(LambdaBase):
             "fromBlock": 1,
             "toBlock": 'latest',
             "topics": [self.web3.sha3(text="Transfer(address,address,uint256)").hex(),
-                        self.padLeft(eoa)
-            ],
-            })
+                       self.padLeft(eoa)
+                       ],
+        })
 
         # topics[0]の値がERC20のTransferイベントに一致し、topics[2](to)の値が今回データを生成するEoAにマッチするものを取得
         tofilter = self.web3.eth.filter({
@@ -103,9 +103,9 @@ class MeWalletTokenAllhistoriesCreate(LambdaBase):
             "fromBlock": 1,
             "toBlock": 'latest',
             "topics": [self.web3.sha3(text="Transfer(address,address,uint256)").hex(),
-                        None,
-                        self.padLeft(eoa)
-            ],
+                       None,
+                       self.padLeft(eoa)
+                       ],
         })
 
         # filterしたデータをすべて取得するメソッドを実行後、必要なデータだけをcsvに書き込むためのfilterを実行する
@@ -133,8 +133,8 @@ class MeWalletTokenAllhistoriesCreate(LambdaBase):
             "fromBlock": 1,
             "toBlock": 'latest',
             "topics": [self.web3.sha3(text="Mint(address,uint256)").hex(),
-                        self.padLeft(eoa)
-            ],
+                       self.padLeft(eoa)
+                       ],
         })
 
         # filterしたデータをすべて取得するメソッドを実行後、必要なデータだけをcsvに書き込むためのfilterを実行する
@@ -146,16 +146,16 @@ class MeWalletTokenAllhistoriesCreate(LambdaBase):
         JST = timezone(timedelta(hours=+9), 'JST')
         # identityIdの項目はeventの中に存在するが、IAM認証でないと取得できないためlambda側でidtokenを使い取得する実装をした
         identityId = self.__get_user_cognito_identity_id()
-        key = 'private/'+ identityId + '/' + user_id + '_' + datetime.now(JST).strftime('%Y-%m-%d-%H-%M-%S') + '.csv'
+        key = 'private/' + identityId + '/' + user_id + '_' + datetime.now(JST).strftime('%Y-%m-%d-%H-%M-%S') + '.csv'
         self.upload_file(bucket, key, data_for_csv.getvalue())
 
         # announce_urlに生成したcsvのurlを渡す
-        announce_url = 'https://'+bucket+'.s3-ap-northeast-1.amazonaws.com/'+key
+        announce_url = 'https://' + bucket + '.s3-ap-northeast-1.amazonaws.com/' + key
         return announce_url
 
     def upload_file(self, bucket, key, data_for_csv):
         s3Obj = self.s3.Object(bucket, key)
-        res = s3Obj.put(Body = data_for_csv)
+        res = s3Obj.put(Body=data_for_csv)
         return res
 
     def __get_user_private_eth_address(self, user_id):
@@ -203,7 +203,7 @@ class MeWalletTokenAllhistoriesCreate(LambdaBase):
         region = 'ap-northeast-1'
         cognito_user_pool_id = os.environ['COGNITO_USER_POOL_ID']
 
-        logins = {'cognito-idp.' + region + '.amazonaws.com/' + cognito_user_pool_id : id_token}
+        logins = {'cognito-idp.' + region + '.amazonaws.com/' + cognito_user_pool_id: id_token}
         client = boto3.client('cognito-identity', region_name=region)
         cognito_identity_id = client.get_id(
             IdentityPoolId=identity_pool_id,
