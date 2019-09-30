@@ -8,6 +8,7 @@ from jsonschema import validate, ValidationError
 from botocore.exceptions import ClientError
 from user_util import UserUtil
 from crypto_util import CryptoUtil
+from record_not_found_error import RecordNotFoundError
 
 
 class MeExternalProviderUserCreate(LambdaBase):
@@ -36,7 +37,16 @@ class MeExternalProviderUserCreate(LambdaBase):
         users_table = self.dynamodb.Table(os.environ['USERS_TABLE_NAME'])
         external_provider_users_table = self.dynamodb.Table(os.environ['EXTERNAL_PROVIDER_USERS_TABLE_NAME'])
         external_provider_user_id = params['requestContext']['authorizer']['claims']['cognito:username']
-        exist_check_user = users_table.get_item(Key={'user_id': body['user_id']}).get('Item')
+
+        # usersテーブルのユーザIDの重複チェック
+        already_user_exists_in_users_table = users_table.get_item(Key={'user_id': body['user_id']}).get('Item') is not None
+        # cognitoのユーザIDの重複チェック
+        already_user_exists_in_cognito = False
+        try:
+            already_user_exists_in_cognito = UserUtil.get_cognito_user_info(self.cognito, body['user_id']) is not None
+        except RecordNotFoundError:
+            pass
+        already_user_exists = already_user_exists_in_users_table or already_user_exists_in_cognito
 
         external_provider_user = external_provider_users_table.get_item(Key={
             'external_provider_user_id': external_provider_user_id
@@ -45,7 +55,7 @@ class MeExternalProviderUserCreate(LambdaBase):
         if (external_provider_user is not None) and ('user_id' in external_provider_user):
             raise ValidationError('The user id of this user has been added.')
 
-        elif exist_check_user is None:
+        elif not already_user_exists:
             # EXTERNAL_PROVIDERのidで作成したcognitoのユーザーを除去
             if UserUtil.delete_external_provider_id_cognito_user(self.cognito, external_provider_user_id):
 

@@ -4,6 +4,7 @@ from unittest import TestCase
 from me_external_provider_user_create import MeExternalProviderUserCreate
 from unittest.mock import patch
 from tests_util import TestsUtil
+from record_not_found_error import RecordNotFoundError
 
 dynamodb = TestsUtil.get_dynamodb_client()
 
@@ -92,6 +93,7 @@ class TestMeExternalProviderUserCreate(TestCase):
             user_mock.delete_external_provider_id_cognito_user.return_value = True
             user_mock.has_user_id.return_value = True
             user_mock.add_user_profile.return_value = None
+            user_mock.get_cognito_user_info.side_effect = RecordNotFoundError('Record Not Found')
 
             response = MeExternalProviderUserCreate(event=event, context="", dynamodb=dynamodb).main()
             self.assertEqual(response['statusCode'], 200)
@@ -108,29 +110,29 @@ class TestMeExternalProviderUserCreate(TestCase):
             )
 
     def test_already_exist_user_id(self):
-        event = {
-            'body': {
-                'user_id': 'existname',
-            },
-            'requestContext': {
-                'authorizer': {
-                    'claims': {
-                        'cognito:username': 'Twitter-test-user',
+        with patch('me_external_provider_user_create.UserUtil') as user_mock:
+            event = {
+                'body': {
+                    'user_id': 'existname',
+                },
+                'requestContext': {
+                    'authorizer': {
+                        'claims': {
+                            'cognito:username': 'Twitter-test-user',
+                        }
                     }
                 }
             }
-        }
 
-        event['body'] = json.dumps(event['body'])
+            event['body'] = json.dumps(event['body'])
 
-        response = MeExternalProviderUserCreate(event=event, context="", dynamodb=dynamodb).main()
-        self.assertEqual(response['statusCode'], 400)
+            user_mock.get_cognito_user_info.side_effect = RecordNotFoundError('Record Not Found')
+
+            response = MeExternalProviderUserCreate(event=event, context="", dynamodb=dynamodb).main()
+            self.assertEqual(response['statusCode'], 400)
 
     def test_already_added_user_id(self):
         event = {
-            'body': {
-                'user_id': 'username02',
-            },
             'requestContext': {
                 'authorizer': {
                     'claims': {
@@ -140,10 +142,26 @@ class TestMeExternalProviderUserCreate(TestCase):
             }
         }
 
-        event['body'] = json.dumps(event['body'])
+        # usersテーブルとcognitoの両方にユーザが存在する場合
+        with patch('me_external_provider_user_create.UserUtil') as user_mock:
+            event['body'] = json.dumps({'user_id': 'username02'})
+            user_mock.get_cognito_user_info.return_value = {'Username': 'username02', 'UserAttributes': {}}
+            response = MeExternalProviderUserCreate(event=event, context="", dynamodb=dynamodb).main()
+            self.assertEqual(response['statusCode'], 400)
 
-        response = MeExternalProviderUserCreate(event=event, context="", dynamodb=dynamodb).main()
-        self.assertEqual(response['statusCode'], 400)
+        # usersテーブルのみにユーザが存在する場合(想定されるデータ不整合のため、そのような場合でも意図したエラーを返すことのテスト)
+        with patch('me_external_provider_user_create.UserUtil') as user_mock:
+            event['body'] = json.dumps({'user_id': 'username02'})
+            user_mock.get_cognito_user_info.side_effect = RecordNotFoundError('Record Not Found')
+            response = MeExternalProviderUserCreate(event=event, context="", dynamodb=dynamodb).main()
+            self.assertEqual(response['statusCode'], 400)
+
+        # cognitoのみにユーザが存在する場合(想定されるデータ不整合のため、そのような場合でも意図したエラーを返すことのテスト)
+        with patch('me_external_provider_user_create.UserUtil') as user_mock:
+            event['body'] = json.dumps({'user_id': 'onlycognito'})
+            user_mock.get_cognito_user_info.return_value = {'Username': 'onlycognito', 'UserAttributes': {}}
+            response = MeExternalProviderUserCreate(event=event, context="", dynamodb=dynamodb).main()
+            self.assertEqual(response['statusCode'], 400)
 
     def test_invalid_line_user_id(self):
         event = {
