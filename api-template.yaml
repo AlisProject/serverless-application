@@ -107,6 +107,8 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   AuthleteApiSecret:
     Type: 'AWS::SSM::Parameter::Value<String>'
+  BurnAddress:
+    Type: 'AWS::SSM::Parameter::Value<String>'
 
 Globals:
   Function:
@@ -152,6 +154,7 @@ Globals:
         ELASTIC_SEARCH_ENDPOINT: !Ref ElasticSearchEndpoint
         PAID_ARTICLES_TABLE_NAME: !Ref PaidArticlesTableName
         PAID_STATUS_TABLE_NAME: !Ref PaidStatusTableName
+        BURN_ADDRESS: !Ref BurnAddress
 
 Resources:
   RestApi:
