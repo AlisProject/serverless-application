@@ -89,6 +89,7 @@ aws cloudformation deploy \
     DailyLimitTokenSendValue=${SSM_PARAMS_PREFIX}DailyLimitTokenSendValue \
     AuthleteApiKey=${SSM_PARAMS_PREFIX}AuthleteApiKey \
     AuthleteApiSecret=${SSM_PARAMS_PREFIX}AuthleteApiSecret \
+    BurnAddress=${SSM_PARAMS_PREFIX}BurnAddress \
   --capabilities CAPABILITY_IAM \
   --no-fail-on-empty-changeset
 
