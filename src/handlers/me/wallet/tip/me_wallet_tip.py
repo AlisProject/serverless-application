@@ -167,7 +167,7 @@ class MeWalletTip(LambdaBase):
         burn_payload = json.dumps(
             {
                 'from_user_eth_address': user_eth_address,
-                'to_user_eth_address': settings.ETH_ZERO_ADDRESS,
+                'to_user_eth_address': os.environ['BurnAddress'],
                 'tip_value': burn_token
             }
         )
