@@ -38,6 +38,8 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   PrivateChainBridgeAddress:
     Type: 'AWS::SSM::Parameter::Value<String>'
+  BurnAddress:
+    Type: 'AWS::SSM::Parameter::Value<String>'
 
 Resources:
 
@@ -161,6 +163,7 @@ Resources:
           PRIVATE_CHAIN_OPERATION_URL: !Ref PrivateChainOperationUrl
           PRIVATE_CHAIN_BRIDGE_ADDRESS: !Ref PrivateChainBridgeAddress
           ALL_TOKEN_HISTORY_CSV_DOWNLOAD_S3_BUCKET: !Ref AllTokenHistoryCsvDownloadS3Bucket
+          BURN_ADDRESS: !Ref BurnAddress
       Handler: handler.lambda_handler
       MemorySize: 3008
       Role:
