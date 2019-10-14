@@ -58,9 +58,12 @@ class MeWalletTokenAllhistoriesCreate(LambdaBase):
 
     def add_type(self, from_eoa, to_eoa, eoa):
         alis_bridge_contract_address = os.environ['PRIVATE_CHAIN_BRIDGE_ADDRESS']
+        burn_address = os.environ['BURN_ADDRESS']
 
         if from_eoa == eoa and to_eoa == alis_bridge_contract_address:
             return 'withdraw'
+        elif from_eoa == eoa and to_eoa == burn_address:
+            return 'pool'
         elif from_eoa == eoa and to_eoa != '0x0000000000000000000000000000000000000000':
             return 'give'
         elif from_eoa == eoa and to_eoa == '0x0000000000000000000000000000000000000000':
