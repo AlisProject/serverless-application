@@ -332,7 +332,7 @@ class TestLoginYahooIndex(TestCase):
             self.assertEqual(
                 json.loads(response['body']),
                 {
-                    'message': 'Internal server error'
+                    'message': 'Internal server error: LoginYahooIndex'
                 }
             )
 
@@ -372,6 +372,6 @@ class TestLoginYahooIndex(TestCase):
             self.assertEqual(
                 json.loads(response['body']),
                 {
-                    'message': 'Internal server error'
+                    'message': 'Internal server error: LoginYahooIndex'
                 }
             )

@@ -217,7 +217,7 @@ python make_deploy_zip.py && ./deploy_api_function.py ArticlesRecent
 Experimental features.
 
 ```bash
-npm i
+npm ci
 npx deploy
 ```  
 

@@ -276,7 +276,7 @@ class TestLoginTwitterIndex(TestCase):
             self.assertEqual(
                 json.loads(response['body']),
                 {
-                    'message': 'Internal server error'
+                    'message': 'Internal server error: LoginTwitterIndex'
                 }
             )
 
@@ -309,6 +309,6 @@ class TestLoginTwitterIndex(TestCase):
             self.assertEqual(
                 json.loads(response['body']),
                 {
-                    'message': 'Internal server error'
+                    'message': 'Internal server error: LoginTwitterIndex'
                 }
             )

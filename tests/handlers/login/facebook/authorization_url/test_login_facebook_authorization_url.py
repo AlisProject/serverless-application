@@ -35,7 +35,7 @@ class TestLoginFacebookAuthorizationUrl(TestCase):
             self.assertEqual(response['statusCode'], 500)
             self.assertEqual(
                 json.loads(response['body']),
-                {'message': 'Internal server error'}
+                {'message': 'Internal server error: LoginFacebookAuthorizationUrl'}
             )
 
     def test_exec_main_ng_with_fberror(self):
@@ -49,5 +49,5 @@ class TestLoginFacebookAuthorizationUrl(TestCase):
             self.assertEqual(response['statusCode'], 500)
             self.assertEqual(
                 json.loads(response['body']),
-                {'message': 'Internal server error'}
+                {'message': 'Internal server error: LoginFacebookAuthorizationUrl'}
             )

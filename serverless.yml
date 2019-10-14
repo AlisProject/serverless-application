@@ -103,6 +103,12 @@ functions:
             name: cognitoUserPool
             arn: ${ssm:${env:ALIS_APP_ID}ssmCognitoUserPoolArn}
 
+  MajorityJudgementDeleteAll:
+    description: "MajorityJudgementのDBの内容クリアする"
+    handler: handler.lambda_handler
+    package:
+      artifact: ./deploy/labo_n_majority_judgement_delete_all.zip
+
   QuadraticVotingIndex:
     description: "QuadraticVotingの画面を表示する。既に登録済であれば登録済画面を表示する"
     handler: handler.lambda_handler

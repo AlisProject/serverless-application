@@ -33,5 +33,5 @@ class TestLoginTwitterAuthorizationUrl(TestCase):
             self.assertEqual(response['statusCode'], 500)
             self.assertEqual(
                 json.loads(response['body']),
-                {'message': 'Internal server error'}
+                {'message': 'Internal server error: LoginTwitterAuthorizationUrl'}
             )
