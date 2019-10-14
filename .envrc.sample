@@ -27,6 +27,17 @@ export LaboApiGatewayId=xxxxxxxx
 # ACMのCertificationのArn
 export AcmCertificateArn=arn:aws:acm:us-east-1:xxxxxx:xxxxxx
 
+## --- for fix_configuration ---
+# プライベートチェーンのPrivateSubNetのサブネットID
+## Lambda関数にVPC周りの設定を行うために `fix_configurations.sh` 内で使用する。CIには不要。
+## CloudFormationでLambda関数にVPC周りの設定がサポートされていないための処置
+## serverless applicationにはonVPCのfunctionが存在しなかったため、追加
+export PRIVATE_CHAIN_VPC_SUBNETS=subnet-xxx
+## プライベートチェーンのセキュリティーグループID
+## Lambda関数にVPC周りの設定を行うために `fix_configurations.sh` 内で使用する。CIには不要。
+## CloudFormationでLambda関数にVPC周りの設定がサポートされていないための処置
+export PRIVATE_CHAIN_SECURITY_GROUPS=sg-xxx
+export TOKEN_HISTORY_CREATE=stagingfunction02-MeWalletTokenAllhistoriesCreate-xxx
 
 # --- AWS ---
 

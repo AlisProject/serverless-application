@@ -30,6 +30,8 @@ aws cloudformation deploy \
     PrivateChainAwsSecretAccessKey=${SSM_PARAMS_PREFIX}PrivateChainAwsSecretAccessKey \
     PrivateChainExecuteApiHost=${SSM_PARAMS_PREFIX}PrivateChainExecuteApiHost \
     PrivateChainBridgeAddress=${SSM_PARAMS_PREFIX}PrivateChainBridgeAddress \
+    PrivateChainAlisTokenAddress=${SSM_PARAMS_PREFIX}PrivateChainAlisTokenAddress \
+    PrivateChainOperationUrl=${SSM_PARAMS_PREFIX}PrivateChainOperationUrl \
     BetaModeFlag=${SSM_PARAMS_PREFIX}BetaModeFlag \
     SaltForArticleId=${SSM_PARAMS_PREFIX}SaltForArticleId \
     CognitoUserPoolArn=${SSM_PARAMS_PREFIX}CognitoUserPoolArn \
@@ -90,6 +92,8 @@ aws cloudformation deploy \
     AuthleteApiKey=${SSM_PARAMS_PREFIX}AuthleteApiKey \
     AuthleteApiSecret=${SSM_PARAMS_PREFIX}AuthleteApiSecret \
     BurnAddress=${SSM_PARAMS_PREFIX}BurnAddress \
+    AllTokenHistoryCsvDownloadS3Bucket=${SSM_PARAMS_PREFIX}AllTokenHistoryCsvDownloadS3Bucket \
+    CognitoIdentityPoolId=${SSM_PARAMS_PREFIX}CognitoIdentityPoolId\
   --capabilities CAPABILITY_IAM \
   --no-fail-on-empty-changeset
 

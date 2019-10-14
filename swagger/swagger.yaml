@@ -2371,6 +2371,37 @@ paths:
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
+  /me/token_history_csv_download:
+    post:
+      description: "トークンに関する全履歴の取得"
+      responses:
+        "200":
+          description: "トークンに関する全履歴情報"
+          schema:
+            type: object
+            properties:
+              timestamp:
+                type: "string"
+              relay_events:
+                type: "string"
+              apply_relay_events:
+                type: "string"
+      security:
+        - cognitoUserPool: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
+              - Fn::ImportValue:
+                  Fn::Sub: "${AlisAppId}-MeWalletTokenAllhistoriesCreate"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
   /me/notifications:
     get:
       description: ログインユーザーの通知の一覧を取得

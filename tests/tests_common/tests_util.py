@@ -59,7 +59,8 @@ class TestsUtil:
     @classmethod
     def get_all_s3_buckets(cls):
         return [
-            {'env_name': 'DIST_S3_BUCKET_NAME', 'bucket_name': 'dist'}
+            {'env_name': 'DIST_S3_BUCKET_NAME', 'bucket_name': 'dist'},
+            {'env_name': 'ALL_TOKEN_HISTORY_CSV_DWONLOAD_S3_BUCKET', 'bucket_name': 'tgsdev-token-history-csv-bucket'}
         ]
 
     @classmethod
@@ -125,3 +126,11 @@ class TestsUtil:
     @staticmethod
     def __database_yaml_path():
         return re.sub(r'/(tests|tmp_tests)/.*', '/database.yaml', os.path.dirname(os.path.realpath(__file__)))
+
+    @classmethod
+    def set_all_private_chain_valuables_to_env(cls):
+        os.environ['PRIVATE_CHAIN_OPERATION_URL'] = 'https://example.com:8545'
+        os.environ['PRIVATE_CHAIN_MAIN_SIGNER'] = '0x7ad8f90cfa071c8420e3f09fe0e413d0c47502e6'
+        os.environ['PRIVATE_CHAIN_ALIS_TOKEN_ADDRESS'] = '0xbbfce3c05aef921b35c7264fff21bb08f490a821'
+        os.environ['ALL_TOKEN_HISTORY_CSV_DOWNLOAD_S3_BUCKET'] = 'tgsdev-token-history-csv-bucket'
+        os.environ['BURN_ADDRESS'] = '0x7ad8f90cfa071c8420e3f09fe0e413d0c47502es'
