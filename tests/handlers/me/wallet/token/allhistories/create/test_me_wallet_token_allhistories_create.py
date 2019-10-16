@@ -241,7 +241,7 @@ class TestMeWalletTokenAllHistoriesCreate(TestCase):
             response = MeWalletTokenAllhistoriesCreate(
                 event, {}, self.dynamodb).add_type(
                 '0x0123456789012345678901234567890123456789', user_eoa, user_eoa)
-            self.assertEqual(response, 'get from an user')
+            self.assertEqual(response, 'get from user')
             response = MeWalletTokenAllhistoriesCreate(
                 event, {}, self.dynamodb).add_type('---', None, user_eoa)
             self.assertEqual(response, 'unknown')
