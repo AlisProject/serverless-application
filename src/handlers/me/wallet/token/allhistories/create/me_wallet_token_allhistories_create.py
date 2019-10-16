@@ -73,7 +73,7 @@ class MeWalletTokenAllhistoriesCreate(LambdaBase):
         elif from_eoa == '---' and to_eoa == eoa:
             return 'get by like'
         elif from_eoa != alis_bridge_contract_address and to_eoa == eoa:
-            return 'get from an user'
+            return 'get from user'
         else:
             return 'unknown'
 
