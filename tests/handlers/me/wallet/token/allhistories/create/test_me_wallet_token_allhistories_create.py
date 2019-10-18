@@ -224,7 +224,7 @@ class TestMeWalletTokenAllHistoriesCreate(TestCase):
                 event, {}, self.dynamodb).add_type(user_eoa, alis_bridge_contract_address, user_eoa)
             self.assertEqual(response, 'withdraw')
             response = MeWalletTokenAllhistoriesCreate(
-                event, {}, self.dynamodb).add_type(user_eoa, burn_address, user_eoa)
+                event, {}, self.dynamodb).add_type(user_eoa, '0x' + burn_address, user_eoa)
             self.assertEqual(response, 'pool')
             response = MeWalletTokenAllhistoriesCreate(
                 event, {}, self.dynamodb).add_type(user_eoa, '0x0123456789012345678901234567890123456789', user_eoa)
