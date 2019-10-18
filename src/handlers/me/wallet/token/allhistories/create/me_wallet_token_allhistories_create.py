@@ -6,7 +6,8 @@ import hashlib
 import boto3
 import io
 import pytz
-from datetime import datetime, timedelta, timezone
+from decimal import Decimal, ROUND_FLOOR
+from datetime import datetime
 from time_util import TimeUtil
 from user_util import UserUtil
 from web3 import Web3, HTTPProvider
@@ -90,8 +91,11 @@ class MeWalletTokenAllhistoriesCreate(LambdaBase):
             transactionHash = transfer_result[i]['transactionHash'].hex()
             type = self.add_type(self.removeLeft(transfer_result[i]['topics'][1].hex()),
                                  self.removeLeft(transfer_result[i]['topics'][2].hex()), eoa)
-            amount = self.web3.fromWei(int(transfer_result[i]['data'], 16), 'ether')
-            content_text = strtime + ',' + transactionHash + ',' + type + ',' + str(amount) + '\n'
+            amountEth = Decimal(str(self.web3.fromWei(int(transfer_result[i]['data'], 16), 'ether'))).quantize(
+                Decimal("0.001"), rounding=ROUND_FLOOR)
+            amountWei = int(transfer_result[i]['data'], 16)
+            content_text = strtime + ',' + transactionHash + ',' + type + ',' + str(amountEth) + ',' \
+                + str(amountWei) + '\n'
             data_for_csv.write(content_text)
 
     def setTransferHistoryToData(self, address, eoa, data_for_csv):
@@ -133,8 +137,11 @@ class MeWalletTokenAllhistoriesCreate(LambdaBase):
             transactionHash = mint_result[i]['transactionHash'].hex()
             # mintデータの場合はfromを'---'に設定し、typeを判別している
             type = self.add_type('---', self.removeLeft(mint_result[i]['topics'][1].hex()), eoa)
-            amount = self.web3.fromWei(int(mint_result[i]['data'], 16), 'ether')
-            content_text = strtime + ',' + transactionHash + ',' + type + ',' + str(amount) + '\n'
+            amountEth = Decimal(str(self.web3.fromWei(int(mint_result[i]['data'], 16), 'ether'))).quantize(
+                Decimal("0.001"), rounding=ROUND_FLOOR)
+            amountWei = int(mint_result[i]['data'], 16)
+            content_text = strtime + ',' + transactionHash + ',' + type + ',' + str(amountEth) + ','\
+                + str(amountWei) + '\n'
             data_for_csv.write(content_text)
 
     def setMintHistoryToData(self, address, eoa, data_for_csv):
@@ -157,7 +164,8 @@ class MeWalletTokenAllhistoriesCreate(LambdaBase):
         jst = pytz.timezone('Asia/Tokyo')
         # identityIdの項目はeventの中に存在するが、IAM認証でないと取得できないためlambda側でidtokenを使い取得する実装をした
         identityId = self.__get_user_cognito_identity_id()
-        key = 'private/' + identityId + '/' + user_id + '_' + datetime.now().astimezone(jst).strftime('%Y-%m-%d-%H-%M-%S') + '.csv'
+        key = 'private/' + identityId + '/' + user_id + '_' + datetime.now().astimezone(jst).strftime(
+            '%Y-%m-%d-%H-%M-%S') + '.csv'
         self.upload_file(bucket, key, data_for_csv.getvalue())
 
         # announce_urlに生成したcsvのurlを渡す
