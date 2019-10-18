@@ -17,6 +17,7 @@ from record_not_found_error import RecordNotFoundError
 
 class MeWalletTokenAllhistoriesCreate(LambdaBase):
     web3 = None
+    jst = pytz.timezone('Asia/Tokyo')
 
     def get_schema(self):
         pass
@@ -82,11 +83,9 @@ class MeWalletTokenAllhistoriesCreate(LambdaBase):
 
     def filter_transfer_data(self, transfer_result, eoa, data_for_csv):
         # 取得したデータのうち、csvファイルに書き込むデータのみを抽出し、data_for_csvに成型して書き込む
-        jst = pytz.timezone('Asia/Tokyo')
-
         for i in range(len(transfer_result)):
             time = datetime.fromtimestamp(
-                self.web3.eth.getBlock(transfer_result[i]['blockNumber'])['timestamp']).astimezone(jst)
+                self.web3.eth.getBlock(transfer_result[i]['blockNumber'])['timestamp']).astimezone(self.jst)
             strtime = datetime.strftime(time, "%Y/%m/%d %H:%M:%S")
             transactionHash = transfer_result[i]['transactionHash'].hex()
             type = self.add_type(self.removeLeft(transfer_result[i]['topics'][1].hex()),
@@ -128,11 +127,9 @@ class MeWalletTokenAllhistoriesCreate(LambdaBase):
 
     def filter_mint_data(self, mint_result, eoa, data_for_csv):
         # 取得したデータのうち、csvファイルに書き込むデータのみを抽出し、data_for_csvに成型して書き込む
-        jst = pytz.timezone('Asia/Tokyo')
-
         for i in range(len(mint_result)):
             time = datetime.fromtimestamp(
-                self.web3.eth.getBlock(mint_result[i]['blockNumber'])['timestamp']).astimezone(jst)
+                self.web3.eth.getBlock(mint_result[i]['blockNumber'])['timestamp']).astimezone(self.jst)
             strtime = time.strftime("%Y/%m/%d %H:%M:%S")
             transactionHash = mint_result[i]['transactionHash'].hex()
             # mintデータの場合はfromを'---'に設定し、typeを判別している
@@ -161,10 +158,9 @@ class MeWalletTokenAllhistoriesCreate(LambdaBase):
 
     def extract_file_to_s3(self, user_id, data_for_csv):
         bucket = os.environ['ALL_TOKEN_HISTORY_CSV_DOWNLOAD_S3_BUCKET']
-        jst = pytz.timezone('Asia/Tokyo')
         # identityIdの項目はeventの中に存在するが、IAM認証でないと取得できないためlambda側でidtokenを使い取得する実装をした
         identityId = self.__get_user_cognito_identity_id()
-        key = 'private/' + identityId + '/' + user_id + '_' + datetime.now().astimezone(jst).strftime(
+        key = 'private/' + identityId + '/' + user_id + '_' + datetime.now().astimezone(self.jst).strftime(
             '%Y-%m-%d-%H-%M-%S') + '.csv'
         self.upload_file(bucket, key, data_for_csv.getvalue())
 
