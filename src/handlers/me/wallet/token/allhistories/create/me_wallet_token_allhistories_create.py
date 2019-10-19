@@ -5,7 +5,9 @@ import time
 import hashlib
 import boto3
 import io
-from datetime import datetime, timedelta, timezone
+import pytz
+from decimal import Decimal, ROUND_FLOOR
+from datetime import datetime
 from time_util import TimeUtil
 from user_util import UserUtil
 from web3 import Web3, HTTPProvider
@@ -15,6 +17,7 @@ from record_not_found_error import RecordNotFoundError
 
 class MeWalletTokenAllhistoriesCreate(LambdaBase):
     web3 = None
+    jst = pytz.timezone('Asia/Tokyo')
 
     def get_schema(self):
         pass
@@ -58,7 +61,8 @@ class MeWalletTokenAllhistoriesCreate(LambdaBase):
 
     def add_type(self, from_eoa, to_eoa, eoa):
         alis_bridge_contract_address = os.environ['PRIVATE_CHAIN_BRIDGE_ADDRESS']
-        burn_address = os.environ['BURN_ADDRESS']
+        # ssm上のBURN_ADDRESSは0xを省略しているため
+        burn_address = '0x' + os.environ['BURN_ADDRESS']
 
         if from_eoa == eoa and to_eoa == alis_bridge_contract_address:
             return 'withdraw'
@@ -80,13 +84,17 @@ class MeWalletTokenAllhistoriesCreate(LambdaBase):
     def filter_transfer_data(self, transfer_result, eoa, data_for_csv):
         # 取得したデータのうち、csvファイルに書き込むデータのみを抽出し、data_for_csvに成型して書き込む
         for i in range(len(transfer_result)):
-            time = datetime.fromtimestamp(self.web3.eth.getBlock(transfer_result[i]['blockNumber'])['timestamp'])
-            strtime = time.strftime("%Y/%m/%d %H:%M:%S")
+            time = datetime.fromtimestamp(
+                self.web3.eth.getBlock(transfer_result[i]['blockNumber'])['timestamp']).astimezone(self.jst)
+            strtime = datetime.strftime(time, "%Y/%m/%d %H:%M:%S")
             transactionHash = transfer_result[i]['transactionHash'].hex()
             type = self.add_type(self.removeLeft(transfer_result[i]['topics'][1].hex()),
                                  self.removeLeft(transfer_result[i]['topics'][2].hex()), eoa)
-            amount = self.web3.fromWei(int(transfer_result[i]['data'], 16), 'ether')
-            content_text = strtime + ',' + transactionHash + ',' + type + ',' + str(amount) + '\n'
+            amountEth = Decimal(str(self.web3.fromWei(int(transfer_result[i]['data'], 16), 'ether'))).quantize(
+                Decimal("0.001"), rounding=ROUND_FLOOR)
+            amountWei = int(transfer_result[i]['data'], 16)
+            content_text = strtime + ',' + transactionHash + ',' + type + ',' + str(amountEth) + ',' \
+                + str(amountWei) + '\n'
             data_for_csv.write(content_text)
 
     def setTransferHistoryToData(self, address, eoa, data_for_csv):
@@ -120,13 +128,17 @@ class MeWalletTokenAllhistoriesCreate(LambdaBase):
     def filter_mint_data(self, mint_result, eoa, data_for_csv):
         # 取得したデータのうち、csvファイルに書き込むデータのみを抽出し、data_for_csvに成型して書き込む
         for i in range(len(mint_result)):
-            time = datetime.fromtimestamp(self.web3.eth.getBlock(mint_result[i]['blockNumber'])['timestamp'])
+            time = datetime.fromtimestamp(
+                self.web3.eth.getBlock(mint_result[i]['blockNumber'])['timestamp']).astimezone(self.jst)
             strtime = time.strftime("%Y/%m/%d %H:%M:%S")
             transactionHash = mint_result[i]['transactionHash'].hex()
             # mintデータの場合はfromを'---'に設定し、typeを判別している
             type = self.add_type('---', self.removeLeft(mint_result[i]['topics'][1].hex()), eoa)
-            amount = self.web3.fromWei(int(mint_result[i]['data'], 16), 'ether')
-            content_text = strtime + ',' + transactionHash + ',' + type + ',' + str(amount) + '\n'
+            amountEth = Decimal(str(self.web3.fromWei(int(mint_result[i]['data'], 16), 'ether'))).quantize(
+                Decimal("0.001"), rounding=ROUND_FLOOR)
+            amountWei = int(mint_result[i]['data'], 16)
+            content_text = strtime + ',' + transactionHash + ',' + type + ',' + str(amountEth) + ','\
+                + str(amountWei) + '\n'
             data_for_csv.write(content_text)
 
     def setMintHistoryToData(self, address, eoa, data_for_csv):
@@ -146,10 +158,10 @@ class MeWalletTokenAllhistoriesCreate(LambdaBase):
 
     def extract_file_to_s3(self, user_id, data_for_csv):
         bucket = os.environ['ALL_TOKEN_HISTORY_CSV_DOWNLOAD_S3_BUCKET']
-        JST = timezone(timedelta(hours=+9), 'JST')
         # identityIdの項目はeventの中に存在するが、IAM認証でないと取得できないためlambda側でidtokenを使い取得する実装をした
         identityId = self.__get_user_cognito_identity_id()
-        key = 'private/' + identityId + '/' + user_id + '_' + datetime.now(JST).strftime('%Y-%m-%d-%H-%M-%S') + '.csv'
+        key = 'private/' + identityId + '/' + user_id + '_' + datetime.now().astimezone(self.jst).strftime(
+            '%Y-%m-%d-%H-%M-%S') + '.csv'
         self.upload_file(bucket, key, data_for_csv.getvalue())
 
         # announce_urlに生成したcsvのurlを渡す
