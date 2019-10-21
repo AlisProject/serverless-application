@@ -72,6 +72,11 @@ class TestPrivateChainUtil(TestCase):
                 FakeResponse(status_code=200, text='{}'),
                 FakeResponse(status_code=200, text='{}'),
                 FakeResponse(status_code=200, text='{}'),
+                FakeResponse(status_code=200, text='{}'),
+                FakeResponse(status_code=200, text='{}'),
+                FakeResponse(status_code=200, text='{}'),
+                FakeResponse(status_code=200, text='{}'),
+                FakeResponse(status_code=200, text='{}'),
                 FakeResponse(status_code=200, text='{"result": {"logs": [{"type": "mined"}]}}')
             ]
             tran = '0x1234567890123456789012345678901234567890'
@@ -105,6 +110,11 @@ class TestPrivateChainUtil(TestCase):
     def test_is_transaction_completed_ng_count_over(self):
         with patch('requests.post') as mock_post:
             mock_post.side_effect = [
+                FakeResponse(status_code=200, text='{}'),
+                FakeResponse(status_code=200, text='{}'),
+                FakeResponse(status_code=200, text='{}'),
+                FakeResponse(status_code=200, text='{}'),
+                FakeResponse(status_code=200, text='{}'),
                 FakeResponse(status_code=200, text='{}'),
                 FakeResponse(status_code=200, text='{}'),
                 FakeResponse(status_code=200, text='{}'),
