@@ -88,6 +88,11 @@ class TestPrivateChainUtil(TestCase):
                 FakeResponse(status_code=200, text='{}'),
                 FakeResponse(status_code=200, text='{}'),
                 FakeResponse(status_code=200, text='{}'),
+                FakeResponse(status_code=200, text='{}'),
+                FakeResponse(status_code=200, text='{}'),
+                FakeResponse(status_code=200, text='{}'),
+                FakeResponse(status_code=200, text='{}'),
+                FakeResponse(status_code=200, text='{}'),
                 FakeResponse(status_code=200, text='{"result": {"logs": [{"type": "mined"}, {"type": "mined"}]}}')
             ]
             tran = '0x1234567890123456789012345678901234567890'
