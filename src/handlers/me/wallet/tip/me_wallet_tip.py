@@ -82,6 +82,8 @@ class MeWalletTip(LambdaBase):
             if PrivateChainUtil.is_transaction_completed(transaction_hash):
                 # バーンのトランザクション処理
                 burn_transaction = self.__burn_transaction(burn_quantity, from_user_eth_address, auth, headers)
+            else:
+                logging.info('Burn was not executed because tip transaction was uncompleted.')
         except Exception as err:
             logging.fatal(err)
             traceback.print_exc()
