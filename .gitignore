@@ -12,6 +12,7 @@ update_function.sh
 tmp_tests
 tests/**/database.yaml
 tests/**/__pycache__
+.coverage
 
 # editor
 .idea

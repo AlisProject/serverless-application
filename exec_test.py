@@ -15,7 +15,7 @@ def exec_test(target_dir):
     print(target_dir)
     exit_status = 0
     try:
-        subprocess.check_call(['green', '-vv', '--processes', '1', target_dir])
+        subprocess.check_call(['green', '-vv', '--processes', '1', '--run-coverage', target_dir])
     except subprocess.CalledProcessError:
         exit_status = 1
 
