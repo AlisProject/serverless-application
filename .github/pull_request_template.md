@@ -10,7 +10,7 @@
 * 環境変数やSSMパラメータに変更を加えたか否か
   * 変更したとしたらどのような変更か
 * 変更した場合は以下の作業を行う
-  * [ ] [environmentリポジトリ](https://github.com/AlisProject/environment)に該当の値を追加し本PRと同時にPRを出す
+  * [ ] [ssmリポジトリ](https://github.com/AlisProject/ssm)に該当の値を追加し本PRと同時にPRを出す
   * [ ] ステージング環境のSSMへ該当のパラメータを追加
   * [ ] Slackでエンジニア全員へこのPRの内容を共有
   * [ ] 必要であれば`.envrc.sample` へ環境変数名とその用途の詳細な説明を追加
