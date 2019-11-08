@@ -22,7 +22,7 @@ class TestMeWalletTokenSend(TestCase):
         TestsUtil.set_all_tables_name_to_env()
         TestsUtil.delete_all_tables(self.dynamodb)
         TestsUtil.create_table(self.dynamodb, os.environ['TOKEN_SEND_TABLE_NAME'], [])
-        os.environ['DAILY_LIMIT_TOKEN_SEND_VALUE'] = '10000000000000000000000'
+        os.environ['DAILY_LIMIT_TOKEN_SEND_VALUE'] = '100000000000000000000000'
 
     def tearDown(self):
         TestsUtil.delete_all_tables(self.dynamodb)
