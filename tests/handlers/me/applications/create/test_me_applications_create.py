@@ -20,7 +20,7 @@ class TestMeApplicationsCreate(TestCase):
         pass
 
     @responses.activate
-    def test_main_ok(self):
+    def test_main_ok_type_web(self):
         params = {
             'body': {
                 'name': 'あ' * 80,
@@ -51,6 +51,43 @@ class TestMeApplicationsCreate(TestCase):
 
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(json.loads(response['body']), {"developer": "matsumatsu20"})
+        self.assertEqual('CONFIDENTIAL', json.loads(responses.calls[0].request.body).get('clientType'))
+        self.assertEqual('CLIENT_SECRET_BASIC', json.loads(responses.calls[0].request.body).get('tokenAuthMethod'))
+
+    @responses.activate
+    def test_main_ok_type_native(self):
+        params = {
+            'body': {
+                'name': 'あ' * 80,
+                'description': 'A' * 180,
+                'application_type': 'NATIVE',
+                'redirect_urls': ['http://example.com/1', 'http://example.com/2',
+                                  'http://example.com/3', 'http://example.com/4', 'http://example.com/5']
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'user01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
+            }
+        }
+
+        params['body'] = json.dumps(params['body'])
+
+        responses.add(responses.POST, settings.AUTHLETE_CLIENT_ENDPOINT + '/create',
+                      json={"developer": "matsumatsu20"}, status=200)
+
+        response = MeApplicationsCreate(params, {}).main()
+
+        logging.fatal(response)
+
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(json.loads(response['body']), {"developer": "matsumatsu20"})
+        self.assertEqual('PUBLIC', json.loads(responses.calls[0].request.body).get('clientType'))
+        self.assertEqual('NONE', json.loads(responses.calls[0].request.body).get('tokenAuthMethod'))
 
     @patch('requests.post', MagicMock(side_effect=requests.exceptions.RequestException()))
     def test_main_with_exception(self):

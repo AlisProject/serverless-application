@@ -31,6 +31,7 @@ class MeApplicationsCreate(LambdaBase):
             'clientName': self.params['name'],
             'description': self.params.get('description'),
             'applicationType': self.params['application_type'],
+            'tokenAuthMethod': self.__get_token_auth_method(self.params['application_type']),
             'clientType': self.__get_client_type_from_application_type(self.params['application_type']),
             'developer': self.event['requestContext']['authorizer']['claims']['cognito:username'],
             'redirectUris': self.params['redirect_urls'],
@@ -59,5 +60,13 @@ class MeApplicationsCreate(LambdaBase):
             return 'CONFIDENTIAL'
         elif application_type == 'NATIVE':
             return 'PUBLIC'
+        else:
+            raise ValueError('Invalid application_type')
+
+    def __get_token_auth_method(self, application_type):
+        if application_type == 'WEB':
+            return 'CLIENT_SECRET_BASIC'
+        elif application_type == 'NATIVE':
+            return 'NONE'
         else:
             raise ValueError('Invalid application_type')
