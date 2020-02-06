@@ -33,6 +33,11 @@ class MeArticlesPublicRepublish(LambdaBase):
 
         validate(self.params, self.get_schema())
 
+        DBUtil.validate_write_blacklisted(
+            self.dynamodb,
+            self.event['requestContext']['authorizer']['claims']['cognito:username']
+        )
+
         if self.params.get('tags'):
             ParameterUtil.validate_array_unique(self.params['tags'], 'tags', case_insensitive=True)
             TagUtil.validate_format(self.params['tags'])

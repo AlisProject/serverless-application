@@ -42,6 +42,19 @@ class DBUtil:
 
         return True
 
+    @staticmethod
+    def validate_write_blacklisted(dynamodb, user_id):
+        screened_article_table = dynamodb.Table(os.environ['SCREENED_ARTICLE_TABLE_NAME'])
+        write_blacklisted = screened_article_table.get_item(Key={'article_type': 'write_blacklisted'}).get('Item')
+
+        if not write_blacklisted or not write_blacklisted.get('users'):
+            return True
+
+        if user_id in write_blacklisted.get('users'):
+            raise ValidationError('Write restricted')
+
+        return True
+
     @classmethod
     def validate_latest_price(cls, dynamodb, article_id, price):
         article_info_table = dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])

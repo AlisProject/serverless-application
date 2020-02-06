@@ -52,6 +52,8 @@ class TestMeArticlesCommentsCreate(TestCase):
         self.unread_notification_manager_table = self.dynamodb.Table(os.environ['UNREAD_NOTIFICATION_MANAGER_TABLE_NAME'])
         TestsUtil.create_table(self.dynamodb, os.environ['UNREAD_NOTIFICATION_MANAGER_TABLE_NAME'], [])
 
+        TestsUtil.create_table(self.dynamodb, os.environ['SCREENED_ARTICLE_TABLE_NAME'], [])
+
     def tearDown(self):
         TestsUtil.delete_all_tables(self.dynamodb)
 
@@ -214,7 +216,7 @@ class TestMeArticlesCommentsCreate(TestCase):
         self.assertEqual(len(notification_after) - len(notification_before), 0)
         self.assertEqual(len(unread_notification_manager_after) - len(unread_notification_manager_before), 0)
 
-    def test_call_validate_comment_existence(self):
+    def test_call_validate_methods(self):
         params = {
             'pathParameters': {
                 'article_id': 'publicId0003'
@@ -244,6 +246,11 @@ class TestMeArticlesCommentsCreate(TestCase):
             self.assertTrue(args[0])
             self.assertTrue(args[1])
             self.assertEqual(kwargs['status'], 'public')
+
+            self.assertTrue(mock_lib.validate_write_blacklisted.called)
+            args, kwargs = mock_lib.validate_write_blacklisted.call_args
+            self.assertTrue(args[0])
+            self.assertEqual(args[1], 'comment_user_01')
 
     @patch('me_articles_comments_create.MeArticlesCommentsCreate._MeArticlesCommentsCreate__create_comment_notification',
            MagicMock(side_effect=Exception()))
