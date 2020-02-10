@@ -39,6 +39,10 @@ class MeArticlesCommentsReply(LambdaBase):
             raise ValidationError('Request parameter is required')
 
         validate(self.params, self.get_schema())
+        DBUtil.validate_write_blacklisted(
+            self.dynamodb,
+            self.event['requestContext']['authorizer']['claims']['cognito:username']
+        )
         DBUtil.validate_article_existence(self.dynamodb, self.params['article_id'], status='public')
         DBUtil.validate_parent_comment_existence(self.dynamodb, self.params['parent_id'])
         DBUtil.validate_user_existence(self.dynamodb, self.params['replyed_user_id'])

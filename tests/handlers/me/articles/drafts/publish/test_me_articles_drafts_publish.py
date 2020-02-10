@@ -107,6 +107,8 @@ class TestMeArticlesDraftsPublish(TestCase):
         ]
         TestsUtil.create_table(self.dynamodb, os.environ['TOPIC_TABLE_NAME'], topic_items)
 
+        TestsUtil.create_table(self.dynamodb, os.environ['SCREENED_ARTICLE_TABLE_NAME'], [])
+
         TestsEsUtil.create_tag_index(self.elasticsearch)
         self.elasticsearch.indices.refresh(index="tags")
 
@@ -405,6 +407,11 @@ class TestMeArticlesDraftsPublish(TestCase):
             self.assertTrue(args[1])
             self.assertTrue(kwargs['user_id'])
             self.assertEqual(kwargs['status'], 'draft')
+
+            self.assertTrue(mock_lib.validate_write_blacklisted.called)
+            args, kwargs = mock_lib.validate_write_blacklisted.call_args
+            self.assertTrue(args[0])
+            self.assertEqual(args[1], 'test01')
 
             self.assertTrue(mock_lib.validate_topic.called)
             args, kwargs = mock_lib.validate_topic.call_args

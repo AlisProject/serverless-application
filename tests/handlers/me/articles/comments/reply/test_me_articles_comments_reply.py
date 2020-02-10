@@ -101,6 +101,8 @@ class TestMeArticlesCommentsReply(TestCase):
         self.unread_notification_manager_table = self.dynamodb.Table(os.environ['UNREAD_NOTIFICATION_MANAGER_TABLE_NAME'])
         TestsUtil.create_table(self.dynamodb, os.environ['UNREAD_NOTIFICATION_MANAGER_TABLE_NAME'], [])
 
+        TestsUtil.create_table(self.dynamodb, os.environ['SCREENED_ARTICLE_TABLE_NAME'], [])
+
     def tearDown(self):
         TestsUtil.delete_all_tables(self.dynamodb)
 
@@ -435,7 +437,7 @@ class TestMeArticlesCommentsReply(TestCase):
         except ValueError:
             self.fail('get_thread_notification_tagets() raised ValueError unexpectedly')
 
-    def test_call_validate_comment_existence(self):
+    def test_call_validate_methods(self):
         params = {
             'pathParameters': {
                 'article_id': 'publicId0001'
@@ -467,6 +469,11 @@ class TestMeArticlesCommentsReply(TestCase):
             self.assertEqual(args[0], self.dynamodb)
             self.assertEqual(args[1], 'publicId0001')
             self.assertEqual(kwargs['status'], 'public')
+
+            self.assertTrue(mock_lib.validate_write_blacklisted.called)
+            args, kwargs = mock_lib.validate_write_blacklisted.call_args
+            self.assertTrue(args[0])
+            self.assertEqual(args[1], 'comment_user_01')
 
             args, _ = mock_lib.validate_parent_comment_existence.call_args
             self.assertTrue(mock_lib.validate_parent_comment_existence.called)

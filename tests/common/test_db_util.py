@@ -255,8 +255,9 @@ class TestDBUtil(TestCase):
         TestsUtil.create_table(cls.dynamodb, os.environ['TOPIC_TABLE_NAME'], topic_items)
 
     def setUp(self):
-        # create article_content_edit_history_table
+        # create tables
         TestsUtil.create_table(self.dynamodb, os.environ['ARTICLE_CONTENT_EDIT_HISTORY_TABLE_NAME'], [])
+        TestsUtil.create_table(self.dynamodb, os.environ['SCREENED_ARTICLE_TABLE_NAME'], [])
         # backup settings
         self.tmp_put_interval = settings.ARTICLE_HISTORY_PUT_INTERVAL
 
@@ -265,11 +266,16 @@ class TestDBUtil(TestCase):
         TestsUtil.delete_all_tables(cls.dynamodb)
 
     def tearDown(self):
-        # delete article_content_edit_history_table
-        del_table = self.dynamodb.Table(os.environ['ARTICLE_CONTENT_EDIT_HISTORY_TABLE_NAME'])
-        del_table.delete()
-        del_table.meta.client.get_waiter('table_not_exists').\
-            wait(TableName=os.environ['ARTICLE_CONTENT_EDIT_HISTORY_TABLE_NAME'])
+        # delete tables
+        delete_tables = [
+            'ARTICLE_CONTENT_EDIT_HISTORY_TABLE_NAME',
+            'SCREENED_ARTICLE_TABLE_NAME'
+        ]
+        for delete_table in delete_tables:
+            del_table = self.dynamodb.Table(os.environ[delete_table])
+            del_table.delete()
+            del_table.meta.client.get_waiter('table_not_exists').\
+                wait(TableName=os.environ[delete_table])
         # restore settings
         settings.ARTICLE_HISTORY_PUT_INTERVAL = self.tmp_put_interval
 
@@ -440,6 +446,51 @@ class TestDBUtil(TestCase):
                 self.article_info_table_items[0]['article_id'],
                 user_id=self.article_info_table_items[0]['user_id'],
                 is_purchased=True
+            )
+
+    def test_validate_write_blacklisted_ok_not_exists_write_blacklisted(self):
+        result = DBUtil.validate_write_blacklisted(
+            self.dynamodb,
+            user_id=self.article_info_table_items[0]['user_id'],
+        )
+        self.assertTrue(result)
+
+    def test_validate_write_blacklisted_ok_not_exists_users_column(self):
+        params = {
+            'article_type': 'write_blacklisted'
+        }
+        screened_article_table = self.dynamodb.Table(os.environ['SCREENED_ARTICLE_TABLE_NAME'])
+        screened_article_table.put_item(Item=params)
+        result = DBUtil.validate_write_blacklisted(
+            self.dynamodb,
+            user_id=self.article_info_table_items[0]['user_id'],
+        )
+        self.assertTrue(result)
+
+    def test_validate_write_blacklisted_ok_not_exists_target_user(self):
+        params = {
+            'article_type': 'write_blacklisted',
+            'users': ['testuser1', 'testuser2']
+        }
+        screened_article_table = self.dynamodb.Table(os.environ['SCREENED_ARTICLE_TABLE_NAME'])
+        screened_article_table.put_item(Item=params)
+        result = DBUtil.validate_write_blacklisted(
+            self.dynamodb,
+            user_id=self.article_info_table_items[0]['user_id'],
+        )
+        self.assertTrue(result)
+
+    def test_validate_article_existence_ng_exists_target_user(self):
+        params = {
+            'article_type': 'write_blacklisted',
+            'users': ['testuser1', 'testuser2', self.article_info_table_items[0]['user_id']]
+        }
+        screened_article_table = self.dynamodb.Table(os.environ['SCREENED_ARTICLE_TABLE_NAME'])
+        screened_article_table.put_item(Item=params)
+        with self.assertRaises(ValidationError):
+            DBUtil.validate_write_blacklisted(
+                self.dynamodb,
+                user_id=self.article_info_table_items[0]['user_id'],
             )
 
     def test_validate_user_existence_ok(self):
