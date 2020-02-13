@@ -61,6 +61,17 @@ class TestArticlesPopular(TestCase):
                 'topic': 'crypto',
                 'article_score': 6,
                 'sort_key': 1520150272000003
+            },
+            {
+                'article_id': 'testid000004',
+                'user_id': 'keillera',
+                'created_at': 1520150272,
+                'title': 'title05',
+                'overview': 'overview05',
+                'status': 'public',
+                'topic': 'game',
+                'article_score': 10,
+                'sort_key': 1520150272000003
             }
         ]
 
@@ -81,6 +92,8 @@ class TestArticlesPopular(TestCase):
         ]
         TestsUtil.create_table(self.dynamodb, os.environ['TOPIC_TABLE_NAME'], topic_items)
 
+        TestsUtil.create_table(self.dynamodb, os.environ['SCREENED_ARTICLE_TABLE_NAME'], [])
+
     def tearDown(self):
         TestsUtil.delete_all_tables(self.dynamodb)
 
@@ -93,7 +106,7 @@ class TestArticlesPopular(TestCase):
     def test_main_ok(self):
         params = {
             'queryStringParameters': {
-                'limit': '2'
+                'limit': '3'
             }
         }
 
@@ -122,6 +135,73 @@ class TestArticlesPopular(TestCase):
                 'article_score': 12,
                 'sort_key': 1520150272000001,
                 'price': 100
+            },
+            {
+                'article_id': 'testid000004',
+                'user_id': 'keillera',
+                'created_at': 1520150272,
+                'title': 'title05',
+                'overview': 'overview05',
+                'status': 'public',
+                'topic': 'game',
+                'article_score': 10,
+                'sort_key': 1520150272000003
+            }
+        ]
+
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(json.loads(response['body'])['Items'], expected_items)
+
+    def test_main_ok_exists_blacklisted_user(self):
+        # blacklist のユーザ追加
+        params = {
+            'article_type': 'write_blacklisted',
+            'users': ['keillera']
+        }
+        screened_article_table = self.dynamodb.Table(os.environ['SCREENED_ARTICLE_TABLE_NAME'])
+        screened_article_table.put_item(Item=params)
+
+        params = {
+            'queryStringParameters': {
+                'limit': '3'
+            }
+        }
+        response = ArticlesPopular(params, {}, dynamodb=self.dynamodb, elasticsearch=self.elasticsearch).main()
+
+        expected_items = [
+            {
+                'article_id': 'testid000002',
+                'user_id': 'matsumatsu20',
+                'created_at': 1520150272,
+                'title': 'title03',
+                'overview': 'overview03',
+                'status': 'public',
+                'topic': 'fashion',
+                'article_score': 18,
+                'sort_key': 1520150272000002
+            },
+            {
+                'article_id': 'testid000001',
+                'user_id': 'matsumatsu20',
+                'created_at': 1520150272,
+                'title': 'title02',
+                'overview': 'overview02',
+                'status': 'public',
+                'topic': 'crypto',
+                'article_score': 12,
+                'sort_key': 1520150272000001,
+                'price': 100
+            },
+            {
+                'article_id': 'testid000003',
+                'user_id': 'matsumatsu20',
+                'created_at': 1520150272,
+                'title': 'title04',
+                'overview': 'overview04',
+                'status': 'public',
+                'topic': 'crypto',
+                'article_score': 6,
+                'sort_key': 1520150272000003
             }
         ]
 
@@ -206,6 +286,17 @@ class TestArticlesPopular(TestCase):
         response = ArticlesPopular(params, {}, dynamodb=self.dynamodb, elasticsearch=self.elasticsearch).main()
 
         expected_items = [
+            {
+                'article_id': 'testid000004',
+                'article_score': 10,
+                'created_at': 1520150272,
+                'overview': 'overview05',
+                'sort_key': 1520150272000003,
+                'status': 'public',
+                'title': 'title05',
+                'topic': 'game',
+                'user_id': 'keillera'
+            },
             {
                 'article_id': 'testid000003',
                 'user_id': 'matsumatsu20',
