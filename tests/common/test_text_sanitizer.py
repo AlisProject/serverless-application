@@ -353,7 +353,7 @@ class TestTextSanitizer(TestCase):
         result = TextSanitizer.sanitize_article_body_v2(target_html)
 
         self.assertEqual(result, expected_html)
-        
+
     def test_sanitize_article_body_with_code_unauthorized_class(self):
         target_html = '''
         <pre><code class='image hogehoge' data='aaa'></code></pre>

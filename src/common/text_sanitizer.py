@@ -61,7 +61,7 @@ class TextSanitizer:
             if value == 'true':
                 return True
         return False
-    
+
     @staticmethod
     def sanitize_article_body(text):
         if text is None:
@@ -106,7 +106,7 @@ class TextSanitizer:
             is_url = len(p.scheme) > 0 and len(p.netloc) > 0
             return is_url
         return False
-    
+
     @staticmethod
     def allow_code_v2(tag, name, value):
         if name == 'class':
@@ -127,7 +127,7 @@ class TextSanitizer:
                 'img': TextSanitizer.allow_img_v2,
                 'figure': TextSanitizer.allow_figure_v2,
                 'oembed': TextSanitizer.allow_oembed_v2,
-                'code' : TextSanitizer.allow_code_v2,
+                'code': TextSanitizer.allow_code_v2
             }
         )
 
