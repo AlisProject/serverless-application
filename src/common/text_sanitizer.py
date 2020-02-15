@@ -1,6 +1,7 @@
 import settings
 import bleach
 import os
+import re
 from urllib.parse import urlparse
 from jsonschema import ValidationError
 
@@ -107,6 +108,13 @@ class TextSanitizer:
         return False
 
     @staticmethod
+    def allow_code_v2(tag, name, value):
+        if name == 'class':
+            if re.match("language-", value):
+                return True
+        return False
+
+    @staticmethod
     def sanitize_article_body_v2(text):
         if text is None:
             return
@@ -118,7 +126,8 @@ class TextSanitizer:
                 'a': ['href'],
                 'img': TextSanitizer.allow_img_v2,
                 'figure': TextSanitizer.allow_figure_v2,
-                'oembed': TextSanitizer.allow_oembed_v2
+                'oembed': TextSanitizer.allow_oembed_v2,
+                'code': TextSanitizer.allow_code_v2
             }
         )
 

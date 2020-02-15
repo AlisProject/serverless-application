@@ -257,6 +257,7 @@ class TestTextSanitizer(TestCase):
               <figcaption>hoge</figcaption>
             </figure>
             <p>shift+enter<br>test</p>
+            <pre><code class="language-javascript">const ALIS = "cool"</code></pre>
         '''.format(domain=os.environ['DOMAIN'])
 
         result = TextSanitizer.sanitize_article_body_v2(target_html)
@@ -347,6 +348,19 @@ class TestTextSanitizer(TestCase):
         expected_html = '''
         <h2>sample h2</h2>
         <a href="hogehoge"></a>
+        '''
+
+        result = TextSanitizer.sanitize_article_body_v2(target_html)
+
+        self.assertEqual(result, expected_html)
+
+    def test_sanitize_article_body_with_code_unauthorized_class(self):
+        target_html = '''
+        <pre><code class='image hogehoge' data='aaa'></code></pre>
+        '''
+
+        expected_html = '''
+        <pre><code></code></pre>
         '''
 
         result = TextSanitizer.sanitize_article_body_v2(target_html)
