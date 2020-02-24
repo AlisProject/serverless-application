@@ -72,6 +72,28 @@ class TestArticleTipRanking(TestCase):
                 'topic': 'fashion',
                 'sort_tip_value': 18000000000000.1,
                 'sort_key': 1520150272000003
+            },
+            {
+                'article_id': 'testid000005',
+                'user_id': 'test_user_id_02',
+                'created_at': 1520150272,
+                'title': 'title04',
+                'overview': 'overview04',
+                'status': 'public',
+                'topic': 'crypto',
+                'sort_tip_value': 8000000000000000000000000,
+                'sort_key': 1520150272000003
+            },
+            {
+                'article_id': 'testid000006',
+                'user_id': 'test_user_id_03',
+                'created_at': 1520150272,
+                'title': 'title04',
+                'overview': 'overview04',
+                'status': 'public',
+                'topic': 'crypto',
+                'sort_tip_value': 7000000000000000000000000,
+                'sort_key': 1520150272000003
             }
         ]
 
@@ -92,6 +114,8 @@ class TestArticleTipRanking(TestCase):
         ]
         TestsUtil.create_table(self.dynamodb, os.environ['TOPIC_TABLE_NAME'], topic_items)
 
+        TestsUtil.create_table(self.dynamodb, os.environ['SCREENED_ARTICLE_TABLE_NAME'], [])
+
     def tearDown(self):
         TestsUtil.delete_all_tables(self.dynamodb)
 
@@ -101,7 +125,52 @@ class TestArticleTipRanking(TestCase):
 
         self.assertEqual(response['statusCode'], 400)
 
-    def test_main(self):
+    def test_main_ok(self):
+        params = {
+            'queryStringParameters': {
+                'limit': '2'
+            }
+        }
+
+        response = ArticlesTipRanking(params, {}, dynamodb=self.dynamodb, elasticsearch=self.elasticsearch).main()
+
+        expected_items = [
+            {
+                'article_id': 'testid000005',
+                'user_id': 'test_user_id_02',
+                'created_at': 1520150272,
+                'title': 'title04',
+                'overview': 'overview04',
+                'status': 'public',
+                'topic': 'crypto',
+                'sort_tip_value': 8000000000000000000000000,
+                'sort_key': 1520150272000003
+            },
+            {
+                'article_id': 'testid000006',
+                'user_id': 'test_user_id_03',
+                'created_at': 1520150272,
+                'title': 'title04',
+                'overview': 'overview04',
+                'status': 'public',
+                'topic': 'crypto',
+                'sort_tip_value': 7000000000000000000000000,
+                'sort_key': 1520150272000003
+            }
+        ]
+
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(json.loads(response['body'])['Items'], expected_items)
+
+    def test_main_ok_exists_blacklisted_user(self):
+        # blacklist のユーザ追加
+        params = {
+            'article_type': 'write_blacklisted',
+            'users': ['test_user_id_02', 'test_user_id_03']
+        }
+        screened_article_table = self.dynamodb.Table(os.environ['SCREENED_ARTICLE_TABLE_NAME'])
+        screened_article_table.put_item(Item=params)
+
         params = {
             'queryStringParameters': {
                 'limit': '2'
@@ -207,7 +276,7 @@ class TestArticleTipRanking(TestCase):
     def test_main_ok_with_page(self):
         params = {
             'queryStringParameters': {
-                'limit': '3',
+                'limit': '5',
                 'page': '2'
             }
         }

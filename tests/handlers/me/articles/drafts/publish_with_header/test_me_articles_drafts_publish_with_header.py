@@ -439,11 +439,6 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
             self.assertEqual(kwargs['status'], 'draft')
             self.assertEqual(kwargs['version'], 2)
 
-            self.assertTrue(mock_lib.validate_write_blacklisted.called)
-            args, kwargs = mock_lib.validate_write_blacklisted.call_args
-            self.assertTrue(args[0])
-            self.assertEqual(args[1], 'test01')
-
             self.assertTrue(mock_lib.validate_topic.called)
             args, kwargs = mock_lib.validate_topic.call_args
             self.assertTrue(args[0])

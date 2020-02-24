@@ -68,6 +68,34 @@ class TestArticlesRecent(TestCase):
                 'published_at': 1565579900,
                 'tags': ['test1', 'test2'],
                 'version': 2,
+            },
+            {
+                'article_id': 'testid000004',
+                'status': 'public',
+                'sort_key': 1565579800000004,
+                'topic': 'game',
+                'user_id': 'test_user_id_02',
+                'title': 'test_title',
+                'overview': 'test_overview',
+                'eye_catch_url': 'test_eye_catch_url',
+                'created_at': 1565579800,
+                'published_at': 1565579900,
+                'tags': ['test1', 'test2'],
+                'version': 2
+            },
+            {
+                'article_id': 'testid000005',
+                'status': 'public',
+                'sort_key': 1565579800000005,
+                'topic': 'game',
+                'user_id': 'test_user_id_03',
+                'title': 'test_title',
+                'overview': 'test_overview',
+                'eye_catch_url': 'test_eye_catch_url',
+                'created_at': 1565579800,
+                'published_at': 1565579900,
+                'tags': ['test1', 'test2'],
+                'version': 2
             }
         ]
 
@@ -99,6 +127,16 @@ class TestArticlesRecent(TestCase):
         ]
         TestsUtil.create_table(cls.dynamodb, os.environ['TOPIC_TABLE_NAME'], topic_items)
 
+    def setUp(self):
+        TestsUtil.create_table(self.dynamodb, os.environ['SCREENED_ARTICLE_TABLE_NAME'], [])
+
+    def tearDown(self):
+        # delete table
+        del_table = self.dynamodb.Table(os.environ['SCREENED_ARTICLE_TABLE_NAME'])
+        del_table.delete()
+        del_table.meta.client.get_waiter('table_not_exists'). \
+            wait(TableName=os.environ['SCREENED_ARTICLE_TABLE_NAME'])
+
     @classmethod
     def tearDownClass(cls):
         TestsUtil.delete_all_tables(cls.dynamodb)
@@ -111,6 +149,43 @@ class TestArticlesRecent(TestCase):
         self.assertEqual(response['statusCode'], 400)
 
     def test_main_ok(self):
+        params = {
+            'queryStringParameters': {
+                'limit': '1'
+            }
+        }
+
+        response = ArticlesRecent(params, {}, dynamodb=self.dynamodb, elasticsearch=self.elasticsearch).main()
+
+        expected_items = [
+            {
+                'article_id': 'testid000005',
+                'status': 'public',
+                'sort_key': 1565579800000005,
+                'topic': 'game',
+                'user_id': 'test_user_id_03',
+                'title': 'test_title',
+                'overview': 'test_overview',
+                'eye_catch_url': 'test_eye_catch_url',
+                'created_at': 1565579800,
+                'published_at': 1565579900,
+                'tags': ['test1', 'test2'],
+                'version': 2
+            }
+        ]
+
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(expected_items, json.loads(response['body'])['Items'])
+
+    def test_main_ok_exists_blacklisted_users(self):
+        # blacklist のユーザ追加
+        params = {
+            'article_type': 'write_blacklisted',
+            'users': ['test_user_id_02', 'test_user_id_03']
+        }
+        screened_article_table = self.dynamodb.Table(os.environ['SCREENED_ARTICLE_TABLE_NAME'])
+        screened_article_table.put_item(Item=params)
+
         params = {
             'queryStringParameters': {
                 'limit': '1'

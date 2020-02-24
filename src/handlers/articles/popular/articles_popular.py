@@ -32,7 +32,7 @@ class ArticlesPopular(LambdaBase):
         limit = int(self.params['limit']) if self.params.get('limit') else settings.articles_popular_default_limit
         page = int(self.params['page']) if self.params.get('page') else 1
 
-        articles = ESUtil.search_popular_articles(self.elasticsearch, self.params, limit, page)
+        articles = ESUtil.search_popular_articles(self.elasticsearch, self.dynamodb, self.params, limit, page)
 
         response = {
             'Items': articles

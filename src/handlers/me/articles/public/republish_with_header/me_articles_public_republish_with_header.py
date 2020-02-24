@@ -40,11 +40,6 @@ class MeArticlesPublicRepublishWithHeader(LambdaBase):
 
         validate(self.params, self.get_schema())
 
-        DBUtil.validate_write_blacklisted(
-            self.dynamodb,
-            self.event['requestContext']['authorizer']['claims']['cognito:username']
-        )
-
         if self.params.get('eye_catch_url'):
             TextSanitizer.validate_img_url(self.params.get('eye_catch_url'))
 

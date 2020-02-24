@@ -32,7 +32,7 @@ class ArticlesTipRanking(LambdaBase):
         limit = int(self.params['limit']) if self.params.get('limit') else settings.ARTICLES_TIP_RAKING_DEFAULT_LIMIT
         page = int(self.params['page']) if self.params.get('page') else 1
 
-        articles = ESUtil.search_tip_ranked_articles(self.elasticsearch, self.params, limit, page)
+        articles = ESUtil.search_tip_ranked_articles(self.elasticsearch, self.dynamodb, self.params, limit, page)
 
         response = {
             'Items': articles

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import settings
+import os
 
 
 class ESUtil:
@@ -128,15 +129,15 @@ class ESUtil:
         return res
 
     @staticmethod
-    def search_popular_articles(elasticsearch, params, limit, page):
+    def search_popular_articles(elasticsearch, dynamodb, params, limit, page):
         if not elasticsearch.indices.exists(index='article_scores'):
             return []
 
         body = {
             'query': {
                 'bool': {
-                    'must': [
-                    ]
+                    'must': [],
+                    'must_not': []
                 }
             },
             'sort': [
@@ -149,6 +150,8 @@ class ESUtil:
         if params.get('topic'):
             body['query']['bool']['must'].append({'match': {'topic': params.get('topic')}})
 
+        ESUtil.__set_write_blacklisted(dynamodb, body)
+
         response = elasticsearch.search(
             index='article_scores',
             body=body
@@ -159,15 +162,15 @@ class ESUtil:
         return articles
 
     @staticmethod
-    def search_tip_ranked_articles(elasticsearch, params, limit, page):
+    def search_tip_ranked_articles(elasticsearch, dynamodb, params, limit, page):
         if not elasticsearch.indices.exists(index=settings.ARTICLE_TIP_RANKING_INDEX_NAME):
             return []
 
         body = {
             'query': {
                 'bool': {
-                    'must': [
-                    ]
+                    'must': [],
+                    'must_not': []
                 }
             },
             'sort': [
@@ -180,6 +183,8 @@ class ESUtil:
         if params.get('topic'):
             body['query']['bool']['must'].append({'match': {'topic': params.get('topic')}})
 
+        ESUtil.__set_write_blacklisted(dynamodb, body)
+
         response = elasticsearch.search(
             index=settings.ARTICLE_TIP_RANKING_INDEX_NAME,
             body=body
@@ -190,11 +195,12 @@ class ESUtil:
         return articles
 
     @staticmethod
-    def search_recent_articles(elasticsearch, params, limit, page):
+    def search_recent_articles(elasticsearch, dynamodb, params, limit, page):
         body = {
             'query': {
                 'bool': {
-                    'must': []
+                    'must': [],
+                    'must_not': []
                 }
             },
             'sort': [
@@ -223,6 +229,8 @@ class ESUtil:
         if params.get('topic'):
             body['query']['bool']['must'].append({'match': {'topic': params.get('topic')}})
 
+        ESUtil.__set_write_blacklisted(dynamodb, body)
+
         res = elasticsearch.search(
             index='articles',
             doc_type='article',
@@ -231,3 +239,12 @@ class ESUtil:
         articles = [item['_source'] for item in res['hits']['hits']]
 
         return articles
+
+    @staticmethod
+    def __set_write_blacklisted(dynamodb, body):
+        screened_article_table = dynamodb.Table(os.environ['SCREENED_ARTICLE_TABLE_NAME'])
+        write_blacklisted = screened_article_table.get_item(Key={'article_type': 'write_blacklisted'}).get('Item')
+        # must_not に該当 user を追加
+        if write_blacklisted and write_blacklisted.get('users'):
+            for target_user in write_blacklisted.get('users'):
+                body['query']['bool']['must_not'].append({'match': {'user_id': target_user}})

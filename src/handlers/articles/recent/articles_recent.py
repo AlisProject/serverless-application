@@ -33,7 +33,7 @@ class ArticlesRecent(LambdaBase):
             else settings.article_recent_default_limit
         page = int(self.params.get('page')) if self.params.get('page') is not None else 1
 
-        articles = ESUtil.search_recent_articles(self.elasticsearch, self.params, limit, page)
+        articles = ESUtil.search_recent_articles(self.elasticsearch, self.dynamodb, self.params, limit, page)
 
         response = {
             'Items': articles
