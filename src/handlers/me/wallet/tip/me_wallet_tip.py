@@ -5,19 +5,14 @@ import traceback
 from decimal import Decimal
 
 import settings
-import json
-import requests
 import time
 
 from private_chain_util import PrivateChainUtil
 from time_util import TimeUtil
 from db_util import DBUtil
-from aws_requests_auth.aws_auth import AWSRequestsAuth
 from jsonschema import validate
 from lambda_base import LambdaBase
 from jsonschema import ValidationError
-from record_not_found_error import RecordNotFoundError
-from exceptions import SendTransactionError
 from user_util import UserUtil
 
 
@@ -28,21 +23,32 @@ class MeWalletTip(LambdaBase):
             'type': 'object',
             'properties': {
                 'article_id': settings.parameters['article_id'],
-                'tip_value': settings.parameters['tip_value'],
+                'tip_signed_transaction': settings.parameters['raw_transaction'],
+                'burn_signed_transaction': settings.parameters['raw_transaction']
             },
-            'required': ['article_id', 'tip_value']
+            'required': ['article_id', 'tip_signed_transaction', 'burn_signed_transaction']
         }
 
     def validate_params(self):
+        # 認証・ウォレット情報が登録済であること
         UserUtil.verified_phone_and_email(self.event)
+        UserUtil.validate_private_eth_address(self.dynamodb,
+                                              self.event['requestContext']['authorizer']['claims']['cognito:username'])
+
         # single
-        # tip_value について数値でのチェックを行うため、int に変換
-        try:
-            self.params['tip_value'] = int(self.params['tip_value'])
-        except ValueError:
-            raise ValidationError('Tip value must be numeric')
         validate(self.params, self.get_schema())
+        # 署名が正しいこと
+        PrivateChainUtil.validate_raw_transaction_signature(
+            self.params['tip_signed_transaction'],
+            self.event['requestContext']['authorizer']['claims']['custom:private_eth_address']
+        )
+        PrivateChainUtil.validate_raw_transaction_signature(
+            self.params['burn_signed_transaction'],
+            self.event['requestContext']['authorizer']['claims']['custom:private_eth_address']
+        )
+
         # relation
+        # 公開されている記事であること
         DBUtil.validate_article_existence(
             self.dynamodb,
             self.params['article_id'],
@@ -50,38 +56,61 @@ class MeWalletTip(LambdaBase):
         )
 
     def exec_main_proc(self):
-        # get article info
+        ################
+        # get parameter
+        ################
+        # article info
         article_info_table = self.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
         article_info = article_info_table.get_item(Key={'article_id': self.params['article_id']}).get('Item')
+        # eth_address
+        from_user_eth_address = self.event['requestContext']['authorizer']['claims']['custom:private_eth_address']
+        to_user_eth_address = UserUtil.get_private_eth_address(self.cognito, article_info['user_id'])
+        # transaction_count
+        transaction_count = PrivateChainUtil.get_transaction_count(from_user_eth_address)
+
+        ################
         # validation
+        ################
         # does not tip same user
         if article_info['user_id'] == self.event['requestContext']['authorizer']['claims']['cognito:username']:
             raise ValidationError('Can not tip to myself')
 
-        # send tip
-        headers = {'content-type': 'application/json'}
-        auth = AWSRequestsAuth(aws_access_key=os.environ['PRIVATE_CHAIN_AWS_ACCESS_KEY'],
-                               aws_secret_access_key=os.environ['PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY'],
-                               aws_host=os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'],
-                               aws_region='ap-northeast-1',
-                               aws_service='execute-api')
+        # validate raw_transaction
+        # tip
+        tip_data = PrivateChainUtil.get_data_from_raw_transaction(
+            self.params['tip_signed_transaction'],
+            transaction_count
+        )
+        PrivateChainUtil.validate_erc20_transfer_data(tip_data, to_user_eth_address)
+        # burn
+        transaction_count = PrivateChainUtil.increment_transaction_count(transaction_count)
+        burn_data = PrivateChainUtil.get_data_from_raw_transaction(
+            self.params['burn_signed_transaction'],
+            transaction_count
+        )
+        PrivateChainUtil.validate_erc20_transfer_data(burn_data, '0x' + os.environ['BURN_ADDRESS'])
 
-        from_user_eth_address = self.event['requestContext']['authorizer']['claims']['custom:private_eth_address']
-        to_user_eth_address = self.__get_user_private_eth_address(article_info['user_id'])
-        tip_value = self.params['tip_value']
-        burn_quantity = int(Decimal(tip_value) / Decimal(10))
+        # burn 量が正しいこと
+        tip_value = int(tip_data[72:], 16)
+        burn_value = int(burn_data[72:], 16)
+        calc_burn_value = int(Decimal(tip_value) / Decimal(10))
+        if burn_value != calc_burn_value:
+            raise ValidationError('burn_value is invalid.')
 
-        if not self.__is_burnable_user(from_user_eth_address, tip_value, burn_quantity):
-            raise ValidationError('Required at least {token} token'.format(token=tip_value + burn_quantity))
+        # 残高が足りていること
+        if not self.__is_burnable_user(from_user_eth_address, tip_value, burn_value):
+            raise ValidationError('Required at least {token} token'.format(token=tip_value + burn_value))
 
-        transaction_hash = self.__send_tip(from_user_eth_address, to_user_eth_address, tip_value, auth, headers)
-
+        #######################
+        # send_raw_transaction
+        #######################
+        transaction_hash = PrivateChainUtil.send_raw_transaction(self.params['tip_signed_transaction'])
         burn_transaction = None
         try:
             # 投げ銭が成功した時のみバーン処理を行う
             if PrivateChainUtil.is_transaction_completed(transaction_hash):
                 # バーンのトランザクション処理
-                burn_transaction = self.__burn_transaction(burn_quantity, from_user_eth_address, auth, headers)
+                burn_transaction = PrivateChainUtil.send_raw_transaction(self.params['burn_signed_transaction'])
             else:
                 logging.info('Burn was not executed because tip transaction was uncompleted.')
         except Exception as err:
@@ -89,43 +118,23 @@ class MeWalletTip(LambdaBase):
             traceback.print_exc()
         finally:
             # create tip info
-            self.__create_tip_info(transaction_hash, burn_transaction, article_info)
+            self.__create_tip_info(transaction_hash, tip_value, burn_transaction, article_info)
 
         return {
             'statusCode': 200
         }
 
     @staticmethod
-    def __is_burnable_user(eth_address, tip_value, burn_quantity):
-        url = 'https://' + os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'] + '/production/wallet/balance'
-        payload = {'private_eth_address': eth_address[2:]}
-        token = PrivateChainUtil.send_transaction(request_url=url, payload_dict=payload)
+    def __is_burnable_user(eth_address, tip_value, burn_value):
+        # get_balance
+        token = PrivateChainUtil.get_balance(eth_address)
 
-        if int(token, 16) >= tip_value + burn_quantity:
+        # return result
+        if int(token, 16) >= tip_value + burn_value:
             return True
-
         return False
 
-    @staticmethod
-    def __send_tip(from_user_eth_address, to_user_eth_address, tip_value, auth, headers):
-        payload = json.dumps(
-            {
-                'from_user_eth_address': from_user_eth_address,
-                'to_user_eth_address': to_user_eth_address[2:],
-                'tip_value': format(tip_value, '064x')
-            }
-        )
-        response = requests.post('https://' + os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'] +
-                                 '/production/wallet/tip', auth=auth, headers=headers, data=payload)
-
-        # exists error
-        if json.loads(response.text).get('error'):
-            raise SendTransactionError(json.loads(response.text).get('error'))
-
-        # return transaction hash
-        return json.dumps(json.loads(response.text).get('result')).replace('"', '')
-
-    def __create_tip_info(self, transaction_hash, burn_transaction, article_info):
+    def __create_tip_info(self, transaction_hash, tip_value, burn_transaction, article_info):
         tip_table = self.dynamodb.Table(os.environ['TIP_TABLE_NAME'])
 
         sort_key = TimeUtil.generate_sort_key()
@@ -136,7 +145,7 @@ class MeWalletTip(LambdaBase):
         tip_info = {
             'user_id': user_id,
             'to_user_id': article_info['user_id'],
-            'tip_value': self.params['tip_value'],
+            'tip_value': tip_value,
             'article_id': self.params['article_id'],
             'article_title': article_info['title'],
             'transaction': transaction_hash,
@@ -151,39 +160,3 @@ class MeWalletTip(LambdaBase):
             Item=tip_info,
             ConditionExpression='attribute_not_exists(user_id)'
         )
-
-    def __get_user_private_eth_address(self, user_id):
-        # user_id に紐づく private_eth_address を取得
-        user_info = UserUtil.get_cognito_user_info(self.cognito, user_id)
-        private_eth_address = [a for a in user_info['UserAttributes'] if a.get('Name') == 'custom:private_eth_address']
-        # private_eth_address が存在しないケースは想定していないため、取得出来ない場合は例外とする
-        if len(private_eth_address) != 1:
-            raise RecordNotFoundError('Record Not Found: private_eth_address')
-
-        return private_eth_address[0]['Value']
-
-    @staticmethod
-    def __burn_transaction(burn_quantity, user_eth_address, auth, headers):
-        burn_token = format(burn_quantity, '064x')
-
-        burn_payload = json.dumps(
-            {
-                'from_user_eth_address': user_eth_address,
-                'to_user_eth_address': os.environ['BURN_ADDRESS'],
-                'tip_value': burn_token
-            }
-        )
-
-        # burn transaction
-        response = requests.post('https://' + os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'] +
-                                 '/production/wallet/tip', auth=auth, headers=headers, data=burn_payload)
-
-        # validate status code
-        if response.status_code != 200:
-            raise SendTransactionError('status code not 200')
-
-        # exists error
-        if json.loads(response.text).get('error'):
-            raise SendTransactionError(json.loads(response.text).get('error'))
-
-        return json.loads(response.text).get('result').replace('"', '')

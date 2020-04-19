@@ -10,6 +10,7 @@ from exceptions import PrivateChainApiError
 from aws_requests_auth.aws_auth import AWSRequestsAuth
 from botocore.exceptions import ClientError
 from record_not_found_error import RecordNotFoundError
+from not_authorized_error import NotAuthorizedError
 from not_verified_user_error import NotVerifiedUserError
 from boto3.dynamodb.conditions import Key
 
@@ -37,6 +38,22 @@ class UserUtil:
         raise NotVerifiedUserError('Not Verified')
 
     @staticmethod
+    def exists_private_eth_address(dynamodb, user_id):
+        # validate exists private_eth_address
+        user_configurations_table = dynamodb.Table(os.environ['USER_CONFIGURATIONS_TABLE_NAME'])
+        user_configurations = user_configurations_table.get_item(Key={
+            'user_id': user_id
+        }).get('Item')
+        if user_configurations is not None and user_configurations.get('private_eth_address') is not None:
+            return True
+        return False
+
+    @staticmethod
+    def validate_private_eth_address(dynamodb, user_id):
+        if not UserUtil.exists_private_eth_address(dynamodb, user_id):
+            raise NotAuthorizedError('Not exists private_eth_address')
+
+    @staticmethod
     def get_cognito_user_info(cognito, user_id):
         try:
             return cognito.admin_get_user(
@@ -48,6 +65,16 @@ class UserUtil:
                 raise RecordNotFoundError('Record Not Found')
             else:
                 raise e
+
+    @staticmethod
+    def get_private_eth_address(cognito, user_id):
+        # user_id に紐づく private_eth_address を取得
+        user_info = UserUtil.get_cognito_user_info(cognito, user_id)
+        private_eth_address = [a for a in user_info['UserAttributes'] if a.get('Name') == 'custom:private_eth_address']
+        # private_eth_address が存在しないケースは想定していないため、取得出来ない場合は例外とする
+        if len(private_eth_address) != 1:
+            raise RecordNotFoundError('Record Not Found: private_eth_address')
+        return private_eth_address[0]['Value']
 
     @staticmethod
     def exists_user(dynamodb, external_provider_user_id):

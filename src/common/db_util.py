@@ -3,6 +3,7 @@ import os
 import settings
 import time
 from boto3.dynamodb.conditions import Key
+from decimal import Decimal
 from jsonschema import ValidationError
 from record_not_found_error import RecordNotFoundError
 from not_authorized_error import NotAuthorizedError
@@ -56,12 +57,12 @@ class DBUtil:
         return True
 
     @classmethod
-    def validate_latest_price(cls, dynamodb, article_id, price):
+    def validate_latest_price(cls, dynamodb, article_id, price_without_burn):
         article_info_table = dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
         article_info = article_info_table.get_item(Key={'article_id': article_id}).get('Item')
-        if article_info.get('price') is None or price != article_info['price']:
-            raise RecordNotFoundError('Price was changed')
-
+        if article_info.get('price') is None or \
+           price_without_burn != int(Decimal(article_info['price']) * Decimal(9) / Decimal(10)):
+            raise ValidationError('Price was changed')
         return True
 
     @classmethod

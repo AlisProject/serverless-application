@@ -1,8 +1,5 @@
-# -*- coding: utf-8 -*-
-import os
 import json
-import requests
-from aws_requests_auth.aws_auth import AWSRequestsAuth
+from private_chain_util import PrivateChainUtil
 from lambda_base import LambdaBase
 
 
@@ -14,23 +11,15 @@ class MeWalletBalance(LambdaBase):
         pass
 
     def exec_main_proc(self):
-        address = self.event['requestContext']['authorizer']['claims']['custom:private_eth_address']
-
-        return self.__get_balance(address)
-
-    @staticmethod
-    def __get_balance(address):
-        headers = {"content-type": "application/json"}
-        payload = json.dumps({"private_eth_address": address[2:]})
-        auth = AWSRequestsAuth(aws_access_key=os.environ['PRIVATE_CHAIN_AWS_ACCESS_KEY'],
-                               aws_secret_access_key=os.environ['PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY'],
-                               aws_host=os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'],
-                               aws_region='ap-northeast-1',
-                               aws_service='execute-api')
-        response = requests.post('https://' + os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'] +
-                                 '/production/wallet/balance', auth=auth, headers=headers, data=payload)
+        address = self.event['requestContext']['authorizer']['claims'].get('custom:private_eth_address')
+        # 現在のトークン量を取得
+        # まだウォレットアドレスを作成していないユーザには 0 を返す
+        if address is None:
+            balance = '0x0'
+        else:
+            balance = PrivateChainUtil.get_balance(address)
 
         return {
             'statusCode': 200,
-            'body': json.dumps({'result': json.loads(response.text)["result"]})
+            'body': json.dumps({'result': balance})
         }

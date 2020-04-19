@@ -248,6 +248,22 @@ parameters = {
         'type': 'string',
         'pattern': r'^0x[a-fA-F0-9]{40}$'
     },
+    'eth_signature_schema': {
+        'type': 'string',
+        'pattern': r'^0x[a-fA-F0-9]+$'
+    },
+    'raw_transaction': {
+        'type': 'string',
+        'pattern': r'^0x[a-fA-F0-9]+$'
+    },
+    'wallet_salt': {
+        'type': 'string',
+        'pattern': r'^[a-zA-Z0-9+/=]+$'
+    },
+    'encrypted_secret_key': {
+        'type': 'string',
+        'pattern': r'^[a-zA-Z0-9+/=]+$'
+    },
     'access_token': {
         'type': 'string'
     },
@@ -398,3 +414,7 @@ AUTHLETE_SCOPE_READ = 'read'
 AUTHLETE_SCOPE_WRITE = 'write'
 
 ARTICLE_HISTORY_PUT_INTERVAL = 60
+# chain id を 元に算出される検証用の値。EIP 155
+# 現状 private chain の chain id は 0x2323 だが検証用の値としては 0x4669 もしくは 0x466a が算出される
+# 計算の参考 https://github.com/MyEtherWallet/etherwallet/pull/1979/files#diff-6e71ea384f1daaf034cc00196569e772R72-R82
+PRIVATE_CHAIN_V_VALUES = ['4669', '466a']

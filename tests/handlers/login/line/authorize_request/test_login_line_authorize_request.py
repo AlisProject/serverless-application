@@ -69,7 +69,6 @@ class TestLoginLineAuthorizeRequest(TestCase):
 
             user_mock.exists_user.return_value = False
             user_mock.force_non_verified_phone.return_value = None
-            user_mock.wallet_initialization.return_value = None
             crypto_mock.encrypt_password.return_value = '&yjgFwFeOpd0{0=&y566'
             user_mock.add_external_provider_user_info.return_value = None
             user_mock.create_external_provider_user.return_value = {

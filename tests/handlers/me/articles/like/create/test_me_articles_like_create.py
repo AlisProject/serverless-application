@@ -126,6 +126,7 @@ class TestMeArticlesLikeCreate(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'test05',
+                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -180,6 +181,7 @@ class TestMeArticlesLikeCreate(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'test06',
+                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -231,6 +233,7 @@ class TestMeArticlesLikeCreate(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'test06',
+                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -272,6 +275,7 @@ class TestMeArticlesLikeCreate(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': self.article_info_table_items[2]['user_id'],
+                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -309,6 +313,7 @@ class TestMeArticlesLikeCreate(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'test05',
+                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -330,6 +335,7 @@ class TestMeArticlesLikeCreate(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'test05',
+                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -356,6 +362,7 @@ class TestMeArticlesLikeCreate(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': self.article_liked_user_table_items[0]['user_id'],
+                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -366,6 +373,25 @@ class TestMeArticlesLikeCreate(TestCase):
         response = MeArticlesLikeCreate(event=params, context={}, dynamodb=self.dynamodb).main()
 
         self.assertEqual(response['statusCode'], 400)
+
+    def test_validation_not_exists_private_eth_address(self):
+        params = {
+            'pathParameters': {
+                'article_id': self.article_liked_user_table_items[0]['article_id']
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': self.article_liked_user_table_items[0]['user_id'],
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
+            }
+        }
+        response = MeArticlesLikeCreate(event=params, context={}, dynamodb=self.dynamodb).main()
+        self.assertEqual(response['statusCode'], 400)
+        self.assertEqual(response['body'], '{"message": "Invalid parameter: not exists private_eth_address"}')
 
     def test_validation_with_no_params(self):
         params = {}

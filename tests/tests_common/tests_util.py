@@ -133,4 +133,4 @@ class TestsUtil:
         os.environ['PRIVATE_CHAIN_MAIN_SIGNER'] = '0x7ad8f90cfa071c8420e3f09fe0e413d0c47502e6'
         os.environ['PRIVATE_CHAIN_ALIS_TOKEN_ADDRESS'] = '0xbbfce3c05aef921b35c7264fff21bb08f490a821'
         os.environ['ALL_TOKEN_HISTORY_CSV_DOWNLOAD_S3_BUCKET'] = 'tgsdev-token-history-csv-bucket'
-        os.environ['BURN_ADDRESS'] = '7ad8f90cfa071c8420e3f09fe0e413d0c47502es'
+        os.environ['BURN_ADDRESS'] = '7ad8f90cfa071c8420e3f09fe0e413d0c47502ea'
