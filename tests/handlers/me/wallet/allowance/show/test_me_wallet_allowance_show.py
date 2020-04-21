@@ -29,3 +29,17 @@ class TestMeWalletAllowanceShow(TestCase):
 
             args, _ = magic_lib.call_args
             self.assertEqual(test_address, args[0])
+
+    def test_main_ok_not_exists_private_eth_address(self):
+        params = {
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test-user'
+                    }
+                }
+            }
+        }
+        response = MeWalletAllowanceShow(params, {}, dynamodb=self.dynamodb).main()
+        self.assertEqual(200, response['statusCode'])
+        self.assertEqual({'allowance': '0x0'}, json.loads(response['body']))
