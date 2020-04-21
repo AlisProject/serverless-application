@@ -228,7 +228,7 @@ class PrivateChainUtil:
         if data[0:8] != 'eeec0e24':
             raise ValidationError('method is invalid')
         # recipient_eth_address
-        if not re.fullmatch(r'0{24}[0-9a-zA-Z]{40}', data[8:72]):
+        if not re.fullmatch(r'0{24}[0-9a-fA-F]{40}', data[8:72]):
             raise ValidationError('recipient_eth_address is invalid')
         # value
         validate(
