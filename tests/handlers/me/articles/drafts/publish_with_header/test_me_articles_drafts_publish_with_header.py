@@ -161,6 +161,7 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'test01',
+                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -215,6 +216,7 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'test01',
+                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -267,6 +269,7 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'test01',
+                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -318,6 +321,7 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'test01',
+                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -344,6 +348,7 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'test01',
+                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -386,6 +391,7 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'test01',
+                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -418,6 +424,7 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'test01',
+                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -462,6 +469,7 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'test01',
+                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -491,6 +499,7 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'test01',
+                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -505,6 +514,31 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
                                               elasticsearch=self.elasticsearch).main()
             self.assertEqual(mock_lib.validate_img_url.call_count, 0)
 
+    def test_validation_not_exists_private_eth_address(self):
+        params = {
+            'pathParameters': {
+                'article_id': 'draftId00001'
+            },
+            'body': {
+                'topic': 'crypto'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'test01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
+            }
+        }
+        params['body'] = json.dumps(params['body'])
+        response = MeArticlesDraftsPublishWithHeader(
+            params, {}, dynamodb=self.dynamodb, elasticsearch=self.elasticsearch
+        ).main()
+        self.assertEqual(response['statusCode'], 400)
+        self.assertEqual(response['body'], '{"message": "Invalid parameter: not exists private_eth_address"}')
+
     def test_validation_with_no_article_id(self):
         params = {
             'queryStringParameters': {},
@@ -515,6 +549,7 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'test01',
+                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -537,6 +572,7 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'test01',
+                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -559,6 +595,7 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'test01',
+                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -579,6 +616,7 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'test01',
+                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -602,6 +640,7 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'test01',
+                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -625,6 +664,7 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'test01',
+                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -648,6 +688,7 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'test01',
+                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -671,6 +712,7 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'test01',
+                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -696,6 +738,7 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'test01',
+                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -720,6 +763,7 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'test01',
+                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -749,6 +793,7 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'test01',
+                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -810,6 +855,7 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'test01',
+                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -841,6 +887,7 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'test01',
+                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -873,6 +920,7 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'test01',
+                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }

@@ -4,6 +4,7 @@ import datetime
 from freezegun import freeze_time
 from boto3.dynamodb.conditions import Key
 from db_util import DBUtil
+from decimal import Decimal
 from jsonschema import ValidationError
 from tests_util import TestsUtil
 from unittest import TestCase
@@ -639,11 +640,11 @@ class TestDBUtil(TestCase):
             DBUtil.validate_topic(self.dynamodb, 'BTC')
 
     def test_validate_latest_price_ok(self):
-        price = 1 * (10 ** 18)
+        price = int(1 * (10 ** 18) * Decimal(9) / Decimal(10))
         self.assertTrue(DBUtil.validate_latest_price(self.dynamodb, 'testid000003', price))
 
     def test_validate_latest_price_ng(self):
-        with self.assertRaises(RecordNotFoundError):
+        with self.assertRaises(ValidationError):
             price = 1000 * (10 ** 18)
             DBUtil.validate_latest_price(
                 self.dynamodb,

@@ -1,13 +1,10 @@
 # -*- coding: utf-8 -*-
 import os
-import json
-import requests
-from aws_requests_auth.aws_auth import AWSRequestsAuth
-from lambda_base import LambdaBase
+from cognito_trigger_base import CognitoTriggerBase
 
 
 # Todo: LambdaBase → CognitoTriggerBase への変更
-class PostConfirmation(LambdaBase):
+class PostConfirmation(CognitoTriggerBase):
     def get_schema(self):
         pass
 
@@ -15,8 +12,6 @@ class PostConfirmation(LambdaBase):
         pass
 
     def exec_main_proc(self):
-        self.__wallet_initialization()
-
         users = self.dynamodb.Table(os.environ['USERS_TABLE_NAME'])
         user = {
             'user_id': self.event['userName'],
@@ -32,30 +27,3 @@ class PostConfirmation(LambdaBase):
             }
             beta_users.put_item(Item=beta_user)
         return True
-
-    def __wallet_initialization(self):
-        if 'custom:private_eth_address' in self.event['request']['userAttributes']:
-            return True
-
-        address = self.__create_new_account()
-        self.cognito.admin_update_user_attributes(
-            UserPoolId=self.event['userPoolId'],
-            Username=self.event['userName'],
-            UserAttributes=[
-                {
-                    'Name': 'custom:private_eth_address',
-                    'Value': address
-                },
-            ]
-        )
-
-    @staticmethod
-    def __create_new_account():
-        auth = AWSRequestsAuth(aws_access_key=os.environ['PRIVATE_CHAIN_AWS_ACCESS_KEY'],
-                               aws_secret_access_key=os.environ['PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY'],
-                               aws_host=os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'],
-                               aws_region='ap-northeast-1',
-                               aws_service='execute-api')
-        response = requests.post('https://' + os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'] +
-                                 '/production/accounts/new', auth=auth)
-        return json.loads(response.text)['result']

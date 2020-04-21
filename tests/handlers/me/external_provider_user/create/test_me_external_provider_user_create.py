@@ -87,7 +87,6 @@ class TestMeExternalProviderUserCreate(TestCase):
                 }
             }
 
-            user_mock.wallet_initialization.return_value = None
             user_mock.force_non_verified_phone.return_value = None
             user_mock.add_user_id_to_external_provider_user.return_value = None
             user_mock.delete_external_provider_id_cognito_user.return_value = True

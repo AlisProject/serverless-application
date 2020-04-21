@@ -5,6 +5,8 @@ from not_verified_user_error import NotVerifiedUserError
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 from botocore.exceptions import ClientError
+from record_not_found_error import RecordNotFoundError
+from not_authorized_error import NotAuthorizedError
 from tests_util import TestsUtil
 
 
@@ -29,6 +31,17 @@ class TestUserUtil(TestCase):
             self.external_provider_users_table_items
         )
         TestsUtil.create_table(self.dynamodb, os.environ['USERS_TABLE_NAME'], [])
+
+        user_configurations_items = [
+            {
+                'user_id': 'test-user1',
+                'private_eth_address': '0x1234567890123456789012345678901234567890'
+            },
+            {
+                'user_id': 'test-user2'
+            }
+        ]
+        TestsUtil.create_table(self.dynamodb, os.environ['USER_CONFIGURATIONS_TABLE_NAME'], user_configurations_items)
 
     def test_verified_phone_and_email_ok(self):
         event = {
@@ -409,6 +422,68 @@ class TestUserUtil(TestCase):
                 'user_id',
                 'display_name'
             )
+
+    def test_get_private_eth_address_ok(self):
+        test_address = '0x401BA17D89D795B3C6e373c5062F1C3F8979e73B'
+        self.cognito.admin_get_user = MagicMock(return_value={
+            'UserAttributes': [
+                {
+                    'Name': 'hoge',
+                    'Value': 'piyo'
+                },
+                {
+                    'Name': 'custom:private_eth_address',
+                    'Value': test_address
+                }
+            ]
+        })
+        result = UserUtil.get_private_eth_address(self.cognito, 'test')
+        self.assertEqual(test_address, result)
+
+    def test_get_private_eth_address_ng_not_exists_private_eth_address(self):
+        with self.assertRaises(RecordNotFoundError) as e:
+            self.cognito.admin_get_user = MagicMock(return_value={
+                'UserAttributes': [
+                    {
+                        'Name': 'hoge',
+                        'Value': 'piyo'
+                    }
+                ]
+            })
+            UserUtil.get_private_eth_address(self.cognito, 'test')
+        self.assertEqual(e.exception.args[0], 'Record Not Found: private_eth_address')
+
+    def test_exists_wallet_address_ok_exists_configuration_data(self):
+        test_user = 'test-user1'
+        result = UserUtil.exists_private_eth_address(self.dynamodb, test_user)
+        self.assertTrue(result)
+
+    def test_exists_wallet_address_ok_not_exists_configuration_data(self):
+        test_user = 'not-exists'
+        result = UserUtil.exists_private_eth_address(self.dynamodb, test_user)
+        self.assertFalse(result)
+
+    def test_exists_wallet_address_ok_not_exists_private_eth_address(self):
+        test_user = 'test-user2'
+        result = UserUtil.exists_private_eth_address(self.dynamodb, test_user)
+        self.assertFalse(result)
+
+    def test_validate_private_eth_address_ok(self):
+        test_user = 'test-user1'
+        # 例外が発生しないこと
+        UserUtil.validate_private_eth_address(self.dynamodb, test_user)
+
+    def test_validate_private_eth_address_ng_not_exists_configuration_data(self):
+        with self.assertRaises(NotAuthorizedError) as e:
+            test_user = 'not-exists'
+            UserUtil.validate_private_eth_address(self.dynamodb, test_user)
+        self.assertEqual(e.exception.args[0], 'Not exists private_eth_address')
+
+    def test_validate_private_eth_address_ng_not_exists_private_eth_address(self):
+        with self.assertRaises(NotAuthorizedError) as e:
+            test_user = 'test-user2'
+            UserUtil.validate_private_eth_address(self.dynamodb, test_user)
+        self.assertEqual(e.exception.args[0], 'Not exists private_eth_address')
 
 
 class PrivateChainApiFakeResponse:

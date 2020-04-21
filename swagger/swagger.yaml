@@ -120,6 +120,21 @@ definitions:
         type: string
       overview:
         type: string
+  WalletAddress:
+    type: object
+    properties:
+      wallet_address:
+        type: string
+  MeWalletAllowance:
+    type: object
+    properties:
+      allowance:
+        type: string
+  MeWalletNonce:
+    type: object
+    properties:
+      nonce:
+        type: string
   MeWalletBalance:
     type: object
     properties:
@@ -1882,6 +1897,79 @@ paths:
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
+  /me/configurations/wallet:
+    get:
+      description: "ウォレット情報取得"
+      responses:
+        "200":
+          description: "ウォレット情報"
+          schema:
+            type: object
+            properties:
+              wallet_address:
+                type: 'string'
+              salt:
+                type: 'string'
+              encrypted_secret_key:
+                type: 'string'
+      security:
+        - cognitoUserPool: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
+              - Fn::ImportValue:
+                  Fn::Sub: "${AlisAppId}-MeConfigurationsWalletShow"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+    post:
+      description: "ウォレット情報追加"
+      parameters:
+      - name: 'wallet_address'
+        in: 'body'
+        description: 'ウォレットアドレス'
+        required: true
+        type: 'string'
+      - name: 'salt'
+        in: 'body'
+        description: 'encrypted_secret_key の復号化 key を作成する際に利用'
+        required: true
+        type: 'string'
+      - name: 'encrypted_secret_key'
+        in: 'body'
+        description: '暗号化されている秘密鍵'
+        required: true
+        type: 'string'
+      - name: 'signature'
+        in: 'body'
+        description: 'ユーザIDでの署名'
+        required: true
+        type: 'string'
+      responses:
+        '200':
+          description: 'ウォレット情報追加成功'
+      security:
+        - cognitoUserPool: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
+              - Fn::ImportValue:
+                  Fn::Sub: "${AlisAppId}-MeConfigurationsWalletAdd"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
   /me/info:
     get:
       description: 'ログインユーザ情報を取得'
@@ -2239,6 +2327,67 @@ paths:
             statusCode: '200'
         uri:
           Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${UsersInfo.Arn}/invocations
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /users/{user_id}/wallet/address:
+    get:
+      description: '指定されたユーザーのウォレットアドレス情報を取得'
+      parameters:
+      - name: 'user_id'
+        in: 'path'
+        description: '対象ユーザを指定するために使用'
+        required: true
+        type: 'string'
+      responses:
+        '200':
+          description: 'ウォレットアドレス情報'
+          schema:
+            $ref: '#/definitions/WalletAddress'
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: '200'
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${UserWalletAddressShow.Arn}/invocations
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /me/wallet/allowance:
+    get:
+      description: 'allowance 情報を取得'
+      responses:
+        '200':
+          description: 'allowance 情報'
+          schema:
+           $ref: '#/definitions/MeWalletAllowance'
+      security:
+        - cognitoUserPool: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeWalletAllowance.Arn}/invocations
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /me/wallet/nonce:
+    get:
+      description: 'nonce 情報を取得'
+      responses:
+        '200':
+          description: 'nonce 情報'
+          schema:
+           $ref: '#/definitions/MeWalletNonce'
+      security:
+        - cognitoUserPool: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeWalletNonce.Arn}/invocations
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy

@@ -26,6 +26,9 @@ class MeArticlesLikeCreate(LambdaBase):
 
     def validate_params(self):
         UserUtil.verified_phone_and_email(self.event)
+        if self.event['requestContext']['authorizer']['claims'].get('custom:private_eth_address') is None:
+            raise ValidationError('not exists private_eth_address')
+
         # single
         if self.event.get('pathParameters') is None:
             raise ValidationError('pathParameters is required')

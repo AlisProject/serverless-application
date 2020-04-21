@@ -83,8 +83,6 @@ class MeExternalProviderUserCreate(LambdaBase):
                     user_id=body['user_id']
                 )
 
-                UserUtil.wallet_initialization(self.cognito, os.environ['COGNITO_USER_POOL_ID'], body['user_id'])
-
                 # ExternalProviderUsersテーブルにuser_idを追加
                 UserUtil.add_user_id_to_external_provider_user(
                     body['user_id'],
