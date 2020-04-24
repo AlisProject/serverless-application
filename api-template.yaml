@@ -107,6 +107,12 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   AuthleteApiSecret:
     Type: 'AWS::SSM::Parameter::Value<String>'
+  UserConfigurationsTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  PrivateChainAlisTokenAddress:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  PrivateChainBridgeAddress:
+    Type: 'AWS::SSM::Parameter::Value<String>'
   BurnAddress:
     Type: 'AWS::SSM::Parameter::Value<String>'
 
@@ -145,6 +151,7 @@ Globals:
         TIP_TABLE_NAME: !Ref TipTableName
         SUCCEEDED_TIP_TABLE_NAME: !Ref SucceededTipTableName
         EXTERNAL_PROVIDER_USERS_TABLE_NAME: !Ref ExternalProviderUsersTableName
+        USER_CONFIGURATIONS_TABLE_NAME: !Ref UserConfigurationsTableName
         DOMAIN: !Ref AlisAppDomain
         PRIVATE_CHAIN_AWS_ACCESS_KEY: !Ref PrivateChainAwsAccessKey
         PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY: !Ref PrivateChainAwsSecretAccessKey
@@ -154,6 +161,8 @@ Globals:
         ELASTIC_SEARCH_ENDPOINT: !Ref ElasticSearchEndpoint
         PAID_ARTICLES_TABLE_NAME: !Ref PaidArticlesTableName
         PAID_STATUS_TABLE_NAME: !Ref PaidStatusTableName
+        PRIVATE_CHAIN_ALIS_TOKEN_ADDRESS: !Ref PrivateChainAlisTokenAddress
+        PRIVATE_CHAIN_BRIDGE_ADDRESS: !Ref PrivateChainBridgeAddress
         BURN_ADDRESS: !Ref BurnAddress
 
 Resources:
