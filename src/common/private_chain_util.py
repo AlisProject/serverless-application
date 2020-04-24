@@ -153,12 +153,18 @@ class PrivateChainUtil:
             # 発生しない想定だが念の為個数を確認
             if len(byte_data_list) != 9:
                 raise ValidationError('raw_transaction is invalid')
-            if int(byte_data_list[0].hex(), 16) != int(transaction_count, 16):
+            # nonce
+            if byte_data_list[0].hex() != '' and int(byte_data_list[0].hex(), 16) != int(transaction_count, 16):
                 raise ValidationError('nonce is invalid')
+            if byte_data_list[0].hex() == '' and int(transaction_count, 16) != 0:
+                raise ValidationError('nonce is invalid')
+            # gasPrice
             if byte_data_list[1].hex() != '':
                 raise ValidationError('gasPrice is invalid')
+            # gasLimit
             if byte_data_list[2].hex() != '':
                 raise ValidationError('gasLimit is invalid')
+            # to_address
             # relay method の場合は to_address は PRIVATE_CHAIN_BRIDGE_ADDRESS
             if byte_data_list[5].hex()[0:8] == 'eeec0e24':
                 to_address = os.environ['PRIVATE_CHAIN_BRIDGE_ADDRESS']
@@ -166,6 +172,7 @@ class PrivateChainUtil:
                 to_address = os.environ['PRIVATE_CHAIN_ALIS_TOKEN_ADDRESS']
             if byte_data_list[3].hex() != to_address[2:]:
                 raise ValidationError('private_chain_alis_token_address is invalid')
+            # value
             if byte_data_list[4].hex() != '':
                 raise ValidationError('value is invalid')
             # v は検証パラメータだが、chain_id を含んでいるため確認する

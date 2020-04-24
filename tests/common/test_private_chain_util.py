@@ -317,6 +317,24 @@ class TestPrivateChainUtil(TestCase):
         actual = PrivateChainUtil.get_data_from_raw_transaction(signed.rawTransaction.hex(), format(nonce, '#x'))
         self.assertEqual(test_data[2:], actual)
 
+    def test_get_data_from_raw_transaction_ok_with_nonce_zero(self):
+        web3 = Web3(HTTPProvider('http://localhost:8584'))
+        test_account = web3.eth.account.create()
+        test_data = '0xa9059cbb'
+        nonce = 0
+        transaction = {
+            'nonce': nonce,
+            'gasPrice': 0,
+            'gas': 0,
+            'to': web3.toChecksumAddress(os.environ['PRIVATE_CHAIN_ALIS_TOKEN_ADDRESS']),
+            'value': 0,
+            'data': test_data,
+            'chainId': 8995
+        }
+        signed = web3.eth.account.sign_transaction(transaction, test_account.key)
+        actual = PrivateChainUtil.get_data_from_raw_transaction(signed.rawTransaction.hex(), format(nonce, '#x'))
+        self.assertEqual(test_data[2:], actual)
+
     def test_get_data_from_raw_transaction_ok_with_relay_method(self):
         web3 = Web3(HTTPProvider('http://localhost:8584'))
         test_account = web3.eth.account.create()
@@ -343,6 +361,25 @@ class TestPrivateChainUtil(TestCase):
         test_account = web3.eth.account.create()
         test_data = '0xa9059cbb'
         nonce = 10
+        transaction = {
+            'nonce': nonce + 1,
+            'gasPrice': 0,
+            'gas': 0,
+            'to': web3.toChecksumAddress(os.environ['PRIVATE_CHAIN_ALIS_TOKEN_ADDRESS']),
+            'value': 0,
+            'data': test_data,
+            'chainId': 8995
+        }
+        signed = web3.eth.account.sign_transaction(transaction, test_account.key)
+        with self.assertRaises(ValidationError) as e:
+            PrivateChainUtil.get_data_from_raw_transaction(signed.rawTransaction.hex(), format(nonce, '#x'))
+        self.assertEqual(e.exception.args[0], 'nonce is invalid')
+
+    def test_get_data_from_raw_transaction_ng_failure_zero_nonce(self):
+        web3 = Web3(HTTPProvider('http://localhost:8584'))
+        test_account = web3.eth.account.create()
+        test_data = '0xa9059cbb'
+        nonce = 0
         transaction = {
             'nonce': nonce + 1,
             'gasPrice': 0,
