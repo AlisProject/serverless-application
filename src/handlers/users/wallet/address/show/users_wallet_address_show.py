@@ -5,7 +5,7 @@ from lambda_base import LambdaBase
 from jsonschema import validate
 
 
-class UserWalletAddressShow(LambdaBase):
+class UsersWalletAddressShow(LambdaBase):
     def get_schema(self):
         return {
             'type': 'object',

@@ -249,10 +249,10 @@ Resources:
       Timeout: 900
       TracingConfig:
         Mode: "Active"
-  UserWalletAddressShow:
+  UsersWalletAddressShow:
     Type: "AWS::Lambda::Function"
     Properties:
-      Code: ./deploy/user_wallet_address_show.zip
+      Code: ./deploy/users_wallet_address_show.zip
       Environment:
         Variables:
           COGNITO_USER_POOL_ID: !Ref CognitoUserPoolId
@@ -311,7 +311,7 @@ Outputs:
     Value: !GetAtt MeWalletNonceShow.Arn
     Export:
       Name: !Sub "${AlisAppId}-MeWalletNonceShow"
-  UserWalletAddressShow:
-    Value: !GetAtt UserWalletAddressShow.Arn
+  UsersWalletAddressShow:
+    Value: !GetAtt UsersWalletAddressShow.Arn
     Export:
-      Name: !Sub "${AlisAppId}-UserWalletAddressShow"
+      Name: !Sub "${AlisAppId}-UsersWalletAddressShow"
