@@ -143,7 +143,7 @@ class PrivateChainUtil:
             # 0：nonce(transaction_count)
             # 1：gasPrice（0）
             # 2：gasLimit（0）
-            # 3：to_address（今回の場合は alis トークンのコントラクトアドレス）
+            # 3：to_address
             # 4：value（0）
             # 5：data
             # 6：v（検証で利用。但し、内部で chain_id が利用されているため確認対象）
@@ -159,7 +159,12 @@ class PrivateChainUtil:
                 raise ValidationError('gasPrice is invalid')
             if byte_data_list[2].hex() != '':
                 raise ValidationError('gasLimit is invalid')
-            if byte_data_list[3].hex() != os.environ['PRIVATE_CHAIN_ALIS_TOKEN_ADDRESS'][2:]:
+            # relay method の場合は to_address は PRIVATE_CHAIN_BRIDGE_ADDRESS
+            if byte_data_list[5].hex()[0:8] == 'eeec0e24':
+                to_address = os.environ['PRIVATE_CHAIN_BRIDGE_ADDRESS']
+            else:
+                to_address = os.environ['PRIVATE_CHAIN_ALIS_TOKEN_ADDRESS']
+            if byte_data_list[3].hex() != to_address[2:]:
                 raise ValidationError('private_chain_alis_token_address is invalid')
             if byte_data_list[4].hex() != '':
                 raise ValidationError('value is invalid')

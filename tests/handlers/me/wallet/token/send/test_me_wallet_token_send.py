@@ -922,7 +922,7 @@ class TestMeWalletTokenSend(TestCase):
             'nonce': nonce,
             'gasPrice': 0,
             'gas': 0,
-            'to': self.web3.toChecksumAddress(os.environ['PRIVATE_CHAIN_ALIS_TOKEN_ADDRESS']),
+            'to': self.web3.toChecksumAddress(os.environ['PRIVATE_CHAIN_BRIDGE_ADDRESS']),
             'value': 0,
             'data': relay_data,
             'chainId': 8995
