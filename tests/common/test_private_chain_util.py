@@ -307,7 +307,7 @@ class TestPrivateChainUtil(TestCase):
         transaction = {
             'nonce': nonce,
             'gasPrice': 0,
-            'gas': 0,
+            'gas': 100000,
             'to': web3.toChecksumAddress(os.environ['PRIVATE_CHAIN_ALIS_TOKEN_ADDRESS']),
             'value': 0,
             'data': test_data,
@@ -325,7 +325,7 @@ class TestPrivateChainUtil(TestCase):
         transaction = {
             'nonce': nonce,
             'gasPrice': 0,
-            'gas': 0,
+            'gas': 100000,
             'to': web3.toChecksumAddress(os.environ['PRIVATE_CHAIN_ALIS_TOKEN_ADDRESS']),
             'value': 0,
             'data': test_data,
@@ -343,7 +343,7 @@ class TestPrivateChainUtil(TestCase):
         transaction = {
             'nonce': nonce,
             'gasPrice': 0,
-            'gas': 0,
+            'gas': 100000,
             'to': web3.toChecksumAddress(os.environ['PRIVATE_CHAIN_BRIDGE_ADDRESS']),
             'value': 0,
             'data': test_data,
@@ -364,7 +364,7 @@ class TestPrivateChainUtil(TestCase):
         transaction = {
             'nonce': nonce + 1,
             'gasPrice': 0,
-            'gas': 0,
+            'gas': 100000,
             'to': web3.toChecksumAddress(os.environ['PRIVATE_CHAIN_ALIS_TOKEN_ADDRESS']),
             'value': 0,
             'data': test_data,
@@ -383,7 +383,7 @@ class TestPrivateChainUtil(TestCase):
         transaction = {
             'nonce': nonce + 1,
             'gasPrice': 0,
-            'gas': 0,
+            'gas': 100000,
             'to': web3.toChecksumAddress(os.environ['PRIVATE_CHAIN_ALIS_TOKEN_ADDRESS']),
             'value': 0,
             'data': test_data,
@@ -401,7 +401,7 @@ class TestPrivateChainUtil(TestCase):
         nonce = 10
         transaction = {
             'nonce': nonce,
-            'gas': 0,
+            'gas': 100000,
             'gasPrice': 1,
             'to': web3.toChecksumAddress(os.environ['PRIVATE_CHAIN_ALIS_TOKEN_ADDRESS']),
             'value': 0,
@@ -440,7 +440,7 @@ class TestPrivateChainUtil(TestCase):
         transaction = {
             'nonce': nonce,
             'gasPrice': 0,
-            'gas': 0,
+            'gas': 100000,
             'to': test_account.address,
             'value': 0,
             'data': test_data,
@@ -459,7 +459,7 @@ class TestPrivateChainUtil(TestCase):
         transaction = {
             'nonce': nonce,
             'gasPrice': 0,
-            'gas': 0,
+            'gas': 100000,
             'to': web3.toChecksumAddress(os.environ['PRIVATE_CHAIN_ALIS_TOKEN_ADDRESS']),
             'value': 1,
             'data': test_data,
@@ -478,7 +478,7 @@ class TestPrivateChainUtil(TestCase):
         transaction = {
             'nonce': nonce,
             'gasPrice': 0,
-            'gas': 0,
+            'gas': 100000,
             'to': web3.toChecksumAddress(os.environ['PRIVATE_CHAIN_ALIS_TOKEN_ADDRESS']),
             'value': 0,
             'data': test_data,

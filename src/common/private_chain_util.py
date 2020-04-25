@@ -162,7 +162,7 @@ class PrivateChainUtil:
             if byte_data_list[1].hex() != '':
                 raise ValidationError('gasPrice is invalid')
             # gasLimit
-            if byte_data_list[2].hex() != '':
+            if byte_data_list[2].hex() != '0186a0':
                 raise ValidationError('gasLimit is invalid')
             # to_address
             # relay method の場合は to_address は PRIVATE_CHAIN_BRIDGE_ADDRESS

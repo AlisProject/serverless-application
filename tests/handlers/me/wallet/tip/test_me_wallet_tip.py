@@ -700,7 +700,7 @@ class TestMeWalletTip(TestCase):
         tip_transaction = {
             'nonce': test_nonce,
             'gasPrice': 0,
-            'gas': 0,
+            'gas': 100000,
             'to': self.web3.toChecksumAddress(os.environ['PRIVATE_CHAIN_ALIS_TOKEN_ADDRESS']),
             'value': 0,
             'data': tip_data,
@@ -712,7 +712,7 @@ class TestMeWalletTip(TestCase):
         burn_transaction = {
             'nonce': test_nonce + 1,
             'gasPrice': 0,
-            'gas': 0,
+            'gas': 100000,
             'to': self.web3.toChecksumAddress(os.environ['PRIVATE_CHAIN_ALIS_TOKEN_ADDRESS']),
             'value': 0,
             'data': burn_data,

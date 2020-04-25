@@ -906,7 +906,7 @@ class TestMeWalletTokenSend(TestCase):
         transaction = {
             'nonce': nonce,
             'gasPrice': 0,
-            'gas': 0,
+            'gas': 100000,
             'to': self.web3.toChecksumAddress(os.environ['PRIVATE_CHAIN_ALIS_TOKEN_ADDRESS']),
             'value': 0,
             'data': approve_data,
@@ -921,7 +921,7 @@ class TestMeWalletTokenSend(TestCase):
         transaction = {
             'nonce': nonce,
             'gasPrice': 0,
-            'gas': 0,
+            'gas': 100000,
             'to': self.web3.toChecksumAddress(os.environ['PRIVATE_CHAIN_BRIDGE_ADDRESS']),
             'value': 0,
             'data': relay_data,
