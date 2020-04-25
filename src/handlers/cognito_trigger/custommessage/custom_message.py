@@ -90,10 +90,9 @@ ALIS：https://alismedia.jp
     # トークンを保持していた場合は例外を出力
     def __validate_has_not_token(self, params):
         address = params.get('custom:private_eth_address')
-        if address is None:
-            raise ValidationError('Not exists private_eth_address. user_id: ' + self.event['userName'])
-        url = 'https://' + os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'] + '/production/wallet/balance'
-        payload = {'private_eth_address': address[2:]}
-        token = PrivateChainUtil.send_transaction(request_url=url, payload_dict=payload)
-        if token is not None and token != '0x0000000000000000000000000000000000000000000000000000000000000000':
-            raise ValidationError("Do not allow phone number updates")
+        if address is not None:
+            url = 'https://' + os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'] + '/production/wallet/balance'
+            payload = {'private_eth_address': address[2:]}
+            token = PrivateChainUtil.send_transaction(request_url=url, payload_dict=payload)
+            if token is not None and token != '0x0000000000000000000000000000000000000000000000000000000000000000':
+                raise ValidationError("Do not allow phone number updates")
