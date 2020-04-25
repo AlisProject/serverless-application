@@ -10,55 +10,15 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   ArticleHistoryTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
-  ArticleContentEditTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
-  ArticleEvaluatedManageTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
-  ArticleAlisTokenTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
-  ArticleLikedUserTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
-  ArticleFraudUserTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
-  ArticlePvUserTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
-  ArticleScoreTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
   UsersTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
   UserConfigurationsTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
-  BetaUsersTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
   ExternalProviderUsersTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
   NotificationTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
   UnreadNotificationManagerTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
-  CommentTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
-  CommentLikedUserTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
-  DeletedCommentTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
-  UserFraudTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
-  ScreenedArticleTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
-  TokenDistributionTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
-  UserFirstExperienceTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
-  ElasticSearchEndpoint:
-    Type: 'AWS::SSM::Parameter::Value<String>'
-  TopicTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
-  TagTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
-  TipTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
-  AlisAppDomain:
     Type: 'AWS::SSM::Parameter::Value<String>'
   PrivateChainAwsAccessKey:
     Type: 'AWS::SSM::Parameter::Value<String>'
@@ -71,10 +31,6 @@ Parameters:
   PrivateChainBridgeAddress:
     Type: 'AWS::SSM::Parameter::Value<String>'
   BurnAddress:
-    Type: 'AWS::SSM::Parameter::Value<String>'
-  BetaModeFlag:
-    Type: 'AWS::SSM::Parameter::Value<String>'
-  DistS3BucketName:
     Type: 'AWS::SSM::Parameter::Value<String>'
   CognitoUserPoolId:
     Type: 'AWS::SSM::Parameter::Value<String>'
