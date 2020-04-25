@@ -170,7 +170,7 @@ class PrivateChainUtil:
                 to_address = os.environ['PRIVATE_CHAIN_BRIDGE_ADDRESS']
             else:
                 to_address = os.environ['PRIVATE_CHAIN_ALIS_TOKEN_ADDRESS']
-            if byte_data_list[3].hex() != to_address[2:]:
+            if byte_data_list[3].hex().lower() != to_address[2:].lower():
                 raise ValidationError('private_chain_alis_token_address is invalid')
             # value
             if byte_data_list[4].hex() != '':
@@ -193,7 +193,7 @@ class PrivateChainUtil:
         if data[0:8] != 'a9059cbb':
             raise ValidationError('method is invalid')
         # to_address
-        if data[8:72][24:] != to_address[2:]:
+        if data[8:72][24:].lower() != to_address[2:].lower():
             raise ValidationError('to_address is invalid')
         # tip_value
         validate(
@@ -216,7 +216,7 @@ class PrivateChainUtil:
         if data[0:8] != '095ea7b3':
             raise ValidationError('method is invalid')
         # spender_eth_address
-        if data[8:72][24:] != os.environ['PRIVATE_CHAIN_BRIDGE_ADDRESS'][2:]:
+        if data[8:72][24:].lower() != os.environ['PRIVATE_CHAIN_BRIDGE_ADDRESS'][2:].lower():
             raise ValidationError('spender_eth_address is invalid')
         # value
         if int(data[72:], 16) != 0:
