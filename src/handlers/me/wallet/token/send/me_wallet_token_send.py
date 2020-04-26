@@ -71,7 +71,7 @@ class MeWalletTokenSend(LambdaBase):
         ################
         # validate raw_transaction
         # init_approve_signed_transaction
-        if allowance != '0x0':
+        if int(allowance, 16) != 0:
             # allowance が設定されている場合は必須
             if self.params.get('init_approve_signed_transaction') is None:
                 raise ValidationError('init_approve_signed_transaction is invalid.')
@@ -112,8 +112,8 @@ class MeWalletTokenSend(LambdaBase):
         #######################
         # send_raw_transaction
         #######################
-        # 既に approve されている場合（allowance の戻り値が "0x0" ではない場合）、該当の approve を削除する（0 で更新）
-        if allowance != '0x0':
+        # 既に approve されている場合（allowance の戻り値が 0 ではない場合）、該当の approve を削除する（0 で更新）
+        if int(allowance, 16) != 0:
             PrivateChainUtil.send_raw_transaction(self.params.get('init_approve_signed_transaction'))
 
         # approve 実施

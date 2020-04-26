@@ -63,7 +63,7 @@ class TestMeWalletTokenSend(TestCase):
                 patch('private_chain_util.PrivateChainUtil.is_transaction_completed') as mock_is_transaction_completed:
 
             # mock の初期化
-            mock_get_allowance.return_value = '0x0'
+            mock_get_allowance.return_value = '0x' + '0' * 64
             mock_get_transaction_count.return_value = format(nonce, '#x')
             mock_is_transaction_completed.return_value = True
 
@@ -288,7 +288,7 @@ class TestMeWalletTokenSend(TestCase):
                 patch('private_chain_util.PrivateChainUtil.get_transaction_count') as mock_get_transaction_count, \
                 patch('private_chain_util.PrivateChainUtil.is_transaction_completed') as mock_is_transaction_completed:
             # mock の初期化
-            mock_get_allowance.return_value = '0x0'
+            mock_get_allowance.return_value = '0x' + '0' * 64
             mock_get_transaction_count.return_value = format(nonce, '#x')
             mock_is_transaction_completed.return_value = True
 
@@ -543,7 +543,7 @@ class TestMeWalletTokenSend(TestCase):
                 patch('private_chain_util.PrivateChainUtil.get_transaction_count') as mock_get_transaction_count, \
                 patch('private_chain_util.PrivateChainUtil.is_transaction_completed') as mock_is_transaction_completed:
             # mock の初期化
-            mock_get_allowance.return_value = '0x0'
+            mock_get_allowance.return_value = '0x' + '0' * 64
             mock_get_transaction_count.return_value = format(nonce, '#x')
             mock_is_transaction_completed.return_value = True
 
@@ -688,7 +688,7 @@ class TestMeWalletTokenSend(TestCase):
                 patch('private_chain_util.PrivateChainUtil.get_transaction_count') as mock_get_transaction_count:
 
             # mock の初期化
-            mock_get_allowance.return_value = '0x0'
+            mock_get_allowance.return_value = '0x' + '0' * 64
             mock_get_transaction_count.return_value = format(nonce, '#x')
 
             # テスト実施
@@ -736,7 +736,7 @@ class TestMeWalletTokenSend(TestCase):
                 patch('private_chain_util.PrivateChainUtil.get_transaction_count') as mock_get_transaction_count, \
                 patch('private_chain_util.PrivateChainUtil.is_transaction_completed') as mock_is_transaction_completed:
             # mock の初期化
-            mock_get_allowance.return_value = '0x0'
+            mock_get_allowance.return_value = '0x' + '0' * 64
             mock_get_transaction_count.return_value = format(nonce, '#x')
             mock_is_transaction_completed.side_effect = SendTransactionError()
 
@@ -797,7 +797,7 @@ class TestMeWalletTokenSend(TestCase):
                 patch('private_chain_util.PrivateChainUtil.get_transaction_count') as mock_get_transaction_count, \
                 patch('private_chain_util.PrivateChainUtil.is_transaction_completed') as mock_is_transaction_completed:
             # mock の初期化
-            mock_get_allowance.return_value = '0x0'
+            mock_get_allowance.return_value = '0x' + '0' * 64
             mock_get_transaction_count.return_value = format(nonce, '#x')
             mock_is_transaction_completed.side_effect = ReceiptError()
 
