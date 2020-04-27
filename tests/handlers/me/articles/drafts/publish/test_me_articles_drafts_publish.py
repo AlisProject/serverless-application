@@ -142,7 +142,6 @@ class TestMeArticlesDraftsPublish(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'test01',
-                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -195,7 +194,6 @@ class TestMeArticlesDraftsPublish(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'test01',
-                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -244,7 +242,6 @@ class TestMeArticlesDraftsPublish(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'test01',
-                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -295,7 +292,6 @@ class TestMeArticlesDraftsPublish(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'test01',
-                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -321,7 +317,6 @@ class TestMeArticlesDraftsPublish(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'test01',
-                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -363,7 +358,6 @@ class TestMeArticlesDraftsPublish(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'test01',
-                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -395,7 +389,6 @@ class TestMeArticlesDraftsPublish(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'test01',
-                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -451,7 +444,6 @@ class TestMeArticlesDraftsPublish(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'test01',
-                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -474,7 +466,6 @@ class TestMeArticlesDraftsPublish(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'test01',
-                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -497,7 +488,6 @@ class TestMeArticlesDraftsPublish(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'test01',
-                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -518,7 +508,6 @@ class TestMeArticlesDraftsPublish(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'test01',
-                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -542,7 +531,6 @@ class TestMeArticlesDraftsPublish(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'test01',
-                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -566,7 +554,6 @@ class TestMeArticlesDraftsPublish(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'test01',
-                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -590,7 +577,6 @@ class TestMeArticlesDraftsPublish(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'test01',
-                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -614,7 +600,6 @@ class TestMeArticlesDraftsPublish(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'test01',
-                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
