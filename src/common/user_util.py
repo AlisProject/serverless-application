@@ -37,6 +37,8 @@ class UserUtil:
 
         raise NotVerifiedUserError('Not Verified')
 
+    # private_eth_addressが「DynamoDBに」存在するか確認。
+    # Cognitoに存在してもFalseとなる
     @staticmethod
     def exists_private_eth_address(dynamodb, user_id):
         # validate exists private_eth_address
