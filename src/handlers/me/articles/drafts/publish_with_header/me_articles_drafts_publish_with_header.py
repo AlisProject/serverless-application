@@ -34,8 +34,8 @@ class MeArticlesDraftsPublishWithHeader(LambdaBase):
 
     def validate_params(self):
         UserUtil.verified_phone_and_email(self.event)
-        if self.event['requestContext']['authorizer']['claims'].get('custom:private_eth_address') is None:
-            raise ValidationError('not exists private_eth_address')
+        UserUtil.validate_private_eth_address(self.dynamodb,
+                                              self.event['requestContext']['authorizer']['claims']['cognito:username'])
 
         # check price type is integer or decimal
         ParameterUtil.validate_price_params(self.params.get('price'))
