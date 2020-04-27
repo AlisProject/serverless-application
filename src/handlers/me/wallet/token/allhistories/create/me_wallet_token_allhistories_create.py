@@ -98,7 +98,7 @@ class MeWalletTokenAllhistoriesCreate(LambdaBase):
                 Decimal("0.001"), rounding=ROUND_FLOOR)
             amountWei = int(transfer_result[i]['data'], 16)
             content_text = strtime + ',' + transactionHash + ',' + type + ',' + str(amountEth) + ',' \
-                           + str(amountWei) + '\n'
+                + str(amountWei) + '\n'
             data_for_csv.write(content_text)
 
     def setTransferHistoryToData(self, address, eoa, data_for_csv):
@@ -141,8 +141,8 @@ class MeWalletTokenAllhistoriesCreate(LambdaBase):
             amountEth = Decimal(str(self.web3.fromWei(int(mint_result[i]['data'], 16), 'ether'))).quantize(
                 Decimal("0.001"), rounding=ROUND_FLOOR)
             amountWei = int(mint_result[i]['data'], 16)
-            content_text = strtime + ',' + transactionHash + ',' + type + ',' + str(amountEth) + ',' \
-                           + str(amountWei) + '\n'
+            content_text = strtime + ',' + transactionHash + ',' + type + ',' + str(amountEth) + ','\
+                + str(amountWei) + '\n'
             data_for_csv.write(content_text)
 
     def setMintHistoryToData(self, address, eoa, data_for_csv):

@@ -78,7 +78,7 @@ class TestMeWalletTokenAllHistoriesCreate(TestCase):
         MagicMock(return_value='identityId_dummy'))
     def test_main_ok(self):
         with patch('web3.eth.Eth.filter') as web3_eth_filter_mock, \
-            patch('me_wallet_token_allhistories_create.UserUtil') as user_util_mock:
+                patch('me_wallet_token_allhistories_create.UserUtil') as user_util_mock:
             user_util_mock.get_cognito_user_info.return_value = {
                 'UserAttributes': [{
                     'Name': 'custom:private_eth_address',
@@ -135,7 +135,7 @@ class TestMeWalletTokenAllHistoriesCreate(TestCase):
         MagicMock(return_value='identityId_dummy'))
     def test_ok_with_several_data(self):
         with patch('web3.eth.Eth.filter') as web3_eth_filter_with_several_data_mock, \
-            patch('me_wallet_token_allhistories_create.UserUtil') as user_util_mock:
+                patch('me_wallet_token_allhistories_create.UserUtil') as user_util_mock:
             user_util_mock.get_cognito_user_info.return_value = {
                 'UserAttributes': [{
                     'Name': 'custom:private_eth_address',
@@ -172,7 +172,7 @@ class TestMeWalletTokenAllHistoriesCreate(TestCase):
         MagicMock(return_value='identityId_dummy'))
     def test_ok_with_no_data(self):
         with patch('web3.eth.Eth.filter') as web3_eth_filter_with_no_data_mock, \
-            patch('me_wallet_token_allhistories_create.UserUtil') as user_util_mock:
+                patch('me_wallet_token_allhistories_create.UserUtil') as user_util_mock:
             user_util_mock.get_cognito_user_info.return_value = {
                 'UserAttributes': [{
                     'Name': 'custom:private_eth_address',
