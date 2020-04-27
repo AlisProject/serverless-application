@@ -143,7 +143,7 @@ class PrivateChainUtil:
             # 0：nonce(transaction_count)
             # 1：gasPrice（0）
             # 2：gasLimit（0）
-            # 3：to_address（今回の場合は alis トークンのコントラクトアドレス）
+            # 3：to_address
             # 4：value（0）
             # 5：data
             # 6：v（検証で利用。但し、内部で chain_id が利用されているため確認対象）
@@ -153,14 +153,26 @@ class PrivateChainUtil:
             # 発生しない想定だが念の為個数を確認
             if len(byte_data_list) != 9:
                 raise ValidationError('raw_transaction is invalid')
-            if int(byte_data_list[0].hex(), 16) != int(transaction_count, 16):
+            # nonce
+            if byte_data_list[0].hex() != '' and int(byte_data_list[0].hex(), 16) != int(transaction_count, 16):
                 raise ValidationError('nonce is invalid')
+            if byte_data_list[0].hex() == '' and int(transaction_count, 16) != 0:
+                raise ValidationError('nonce is invalid')
+            # gasPrice
             if byte_data_list[1].hex() != '':
                 raise ValidationError('gasPrice is invalid')
-            if byte_data_list[2].hex() != '':
+            # gasLimit
+            if byte_data_list[2].hex() != '0186a0':
                 raise ValidationError('gasLimit is invalid')
-            if byte_data_list[3].hex() != os.environ['PRIVATE_CHAIN_ALIS_TOKEN_ADDRESS'][2:]:
+            # to_address
+            # relay method の場合は to_address は PRIVATE_CHAIN_BRIDGE_ADDRESS
+            if byte_data_list[5].hex()[0:8] == 'eeec0e24':
+                to_address = os.environ['PRIVATE_CHAIN_BRIDGE_ADDRESS']
+            else:
+                to_address = os.environ['PRIVATE_CHAIN_ALIS_TOKEN_ADDRESS']
+            if byte_data_list[3].hex().lower() != to_address[2:].lower():
                 raise ValidationError('private_chain_alis_token_address is invalid')
+            # value
             if byte_data_list[4].hex() != '':
                 raise ValidationError('value is invalid')
             # v は検証パラメータだが、chain_id を含んでいるため確認する
@@ -181,7 +193,7 @@ class PrivateChainUtil:
         if data[0:8] != 'a9059cbb':
             raise ValidationError('method is invalid')
         # to_address
-        if data[8:72][24:] != to_address[2:]:
+        if data[8:72][24:].lower() != to_address[2:].lower():
             raise ValidationError('to_address is invalid')
         # tip_value
         validate(
@@ -204,7 +216,7 @@ class PrivateChainUtil:
         if data[0:8] != '095ea7b3':
             raise ValidationError('method is invalid')
         # spender_eth_address
-        if data[8:72][24:] != os.environ['PRIVATE_CHAIN_BRIDGE_ADDRESS'][2:]:
+        if data[8:72][24:].lower() != os.environ['PRIVATE_CHAIN_BRIDGE_ADDRESS'][2:].lower():
             raise ValidationError('spender_eth_address is invalid')
         # value
         if int(data[72:], 16) != 0:

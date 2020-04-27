@@ -3,10 +3,10 @@ import boto3
 import json
 from unittest import TestCase
 from unittest.mock import MagicMock
-from user_wallet_address_show import UserWalletAddressShow
+from users_wallet_address_show import UsersWalletAddressShow
 
 
-class TestUserWalletAddressShow(TestCase):
+class TestUsersWalletAddressShow(TestCase):
     cognito = boto3.client('cognito-idp')
     test_user_id = 'test-user'
 
@@ -15,7 +15,7 @@ class TestUserWalletAddressShow(TestCase):
         os.environ['COGNITO_USER_POOL_ID'] = 'xxxxxxx'
 
     def assert_bad_request(self, params):
-        function = UserWalletAddressShow(params, {}, cognito=self.cognito)
+        function = UsersWalletAddressShow(params, {}, cognito=self.cognito)
         response = function.main()
 
         self.assertEqual(response['statusCode'], 400)
@@ -40,7 +40,7 @@ class TestUserWalletAddressShow(TestCase):
             }
         }
 
-        response = UserWalletAddressShow(params, {}, cognito=self.cognito).main()
+        response = UsersWalletAddressShow(params, {}, cognito=self.cognito).main()
 
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(json.loads(response['body']), {'wallet_address': test_address})

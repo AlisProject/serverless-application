@@ -10,23 +10,9 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   ArticleHistoryTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
-  ArticleContentEditTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
-  ArticleEvaluatedManageTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
-  ArticleAlisTokenTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
-  ArticleLikedUserTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
-  ArticleFraudUserTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
-  ArticlePvUserTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
-  ArticleScoreTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
   UsersTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
-  BetaUsersTableName:
+  UserConfigurationsTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
   ExternalProviderUsersTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
@@ -34,39 +20,17 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   UnreadNotificationManagerTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
-  CommentTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
-  CommentLikedUserTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
-  DeletedCommentTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
-  UserFraudTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
-  ScreenedArticleTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
-  TokenDistributionTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
-  UserFirstExperienceTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
-  ElasticSearchEndpoint:
-    Type: 'AWS::SSM::Parameter::Value<String>'
-  TopicTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
-  TagTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
-  TipTableName:
-    Type: 'AWS::SSM::Parameter::Value<String>'
-  AlisAppDomain:
-    Type: 'AWS::SSM::Parameter::Value<String>'
   PrivateChainAwsAccessKey:
     Type: 'AWS::SSM::Parameter::Value<String>'
   PrivateChainAwsSecretAccessKey:
     Type: 'AWS::SSM::Parameter::Value<String>'
   PrivateChainExecuteApiHost:
     Type: 'AWS::SSM::Parameter::Value<String>'
-  BetaModeFlag:
+  PrivateChainAlisTokenAddress:
     Type: 'AWS::SSM::Parameter::Value<String>'
-  DistS3BucketName:
+  PrivateChainBridgeAddress:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  BurnAddress:
     Type: 'AWS::SSM::Parameter::Value<String>'
   CognitoUserPoolId:
     Type: 'AWS::SSM::Parameter::Value<String>'
@@ -109,8 +73,6 @@ Parameters:
   FacebookOauthCallbackUrl:
     Type: 'AWS::SSM::Parameter::Value<String>'
   FacebookAppToken:
-    Type: 'AWS::SSM::Parameter::Value<String>'
-  PrivateChainBridgeAddress:
     Type: 'AWS::SSM::Parameter::Value<String>'
   PaidArticlesTableName:
     Type: 'AWS::SSM::Parameter::Value<String>'
@@ -287,9 +249,13 @@ Resources:
           PRIVATE_CHAIN_AWS_ACCESS_KEY: !Ref PrivateChainAwsAccessKey
           PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY: !Ref PrivateChainAwsSecretAccessKey
           PRIVATE_CHAIN_EXECUTE_API_HOST: !Ref PrivateChainExecuteApiHost
+          PRIVATE_CHAIN_ALIS_TOKEN_ADDRESS: !Ref PrivateChainAlisTokenAddress
+          PRIVATE_CHAIN_BRIDGE_ADDRESS: !Ref PrivateChainBridgeAddress
+          BURN_ADDRESS: !Ref BurnAddress
           COGNITO_USER_POOL_ID: !Ref CognitoUserPoolId
           COGNITO_USER_POOL_APP_ID: !Ref CognitoUserPoolAppId
           PAID_STATUS_TABLE_NAME: !Ref PaidStatusTableName
+          USER_CONFIGURATIONS_TABLE_NAME: !Ref UserConfigurationsTableName
       Handler: handler.lambda_handler
       MemorySize: 3008
       Role: !GetAtt LambdaRole.Arn
@@ -322,8 +288,11 @@ Resources:
           PRIVATE_CHAIN_AWS_ACCESS_KEY: !Ref PrivateChainAwsAccessKey
           PRIVATE_CHAIN_AWS_SECRET_ACCESS_KEY: !Ref PrivateChainAwsSecretAccessKey
           PRIVATE_CHAIN_EXECUTE_API_HOST: !Ref PrivateChainExecuteApiHost
+          PRIVATE_CHAIN_ALIS_TOKEN_ADDRESS: !Ref PrivateChainAlisTokenAddress
+          BURN_ADDRESS: !Ref BurnAddress
           TOKEN_SEND_TABLE_NAME: !Ref TokenSendTableName
           DAILY_LIMIT_TOKEN_SEND_VALUE: !Ref DailyLimitTokenSendValue
+          USER_CONFIGURATIONS_TABLE_NAME: !Ref UserConfigurationsTableName
       Handler: handler.lambda_handler
       MemorySize: 3008
       Role: !GetAtt LambdaRole.Arn
