@@ -25,6 +25,10 @@ class MeWalletTokenAllhistoriesCreate(LambdaBase):
     def validate_params(self):
         UserUtil.verified_phone_and_email(self.event)
 
+        # カストディ規制時のウォレット移行が済んでいなければ利用不可
+        user_id = self.event['requestContext']['authorizer']['claims']['cognito:username']
+        UserUtil.validate_private_eth_address(self.dynamodb, user_id)
+
     def exec_main_proc(self):
         # 必要なパラメーターを取得する
         self.web3 = Web3(HTTPProvider(os.environ['PRIVATE_CHAIN_OPERATION_URL']))
@@ -94,7 +98,7 @@ class MeWalletTokenAllhistoriesCreate(LambdaBase):
                 Decimal("0.001"), rounding=ROUND_FLOOR)
             amountWei = int(transfer_result[i]['data'], 16)
             content_text = strtime + ',' + transactionHash + ',' + type + ',' + str(amountEth) + ',' \
-                + str(amountWei) + '\n'
+                           + str(amountWei) + '\n'
             data_for_csv.write(content_text)
 
     def setTransferHistoryToData(self, address, eoa, data_for_csv):
@@ -137,8 +141,8 @@ class MeWalletTokenAllhistoriesCreate(LambdaBase):
             amountEth = Decimal(str(self.web3.fromWei(int(mint_result[i]['data'], 16), 'ether'))).quantize(
                 Decimal("0.001"), rounding=ROUND_FLOOR)
             amountWei = int(mint_result[i]['data'], 16)
-            content_text = strtime + ',' + transactionHash + ',' + type + ',' + str(amountEth) + ','\
-                + str(amountWei) + '\n'
+            content_text = strtime + ',' + transactionHash + ',' + type + ',' + str(amountEth) + ',' \
+                           + str(amountWei) + '\n'
             data_for_csv.write(content_text)
 
     def setMintHistoryToData(self, address, eoa, data_for_csv):
