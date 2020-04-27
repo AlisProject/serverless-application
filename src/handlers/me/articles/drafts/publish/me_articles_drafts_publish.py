@@ -8,7 +8,7 @@ import time
 
 from boto3.dynamodb.conditions import Key
 from lambda_base import LambdaBase
-from jsonschema import validate, ValidationError
+from jsonschema import validate
 from db_util import DBUtil
 from parameter_util import ParameterUtil
 from tag_util import TagUtil
