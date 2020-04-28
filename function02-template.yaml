@@ -95,7 +95,6 @@ Resources:
         Variables:
           ARTICLE_INFO_TABLE_NAME: !Ref ArticleInfoTableName
           ARTICLE_CONTENT_EDIT_HISTORY_TABLE_NAME: !Ref ArticleContentEditHistoryTableName
-          USER_CONFIGURATIONS_TABLE_NAME: !Ref UserConfigurationsTableName
       Handler: handler.lambda_handler
       MemorySize: 3008
       Role:
