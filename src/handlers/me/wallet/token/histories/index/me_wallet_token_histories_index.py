@@ -15,6 +15,10 @@ class MeWalletTokenHistoriesIndex(LambdaBase):
     def validate_params(self):
         UserUtil.verified_phone_and_email(self.event)
 
+        # カストディ規制時のウォレット移行が済んでいなければ利用不可
+        user_id = self.event['requestContext']['authorizer']['claims']['cognito:username']
+        UserUtil.validate_private_eth_address(self.dynamodb, user_id)
+
     def exec_main_proc(self):
         # 履歴取得対象の開始ブロック番号を算出
         to_block = self.__get_current_block_number()

@@ -1,4 +1,5 @@
 import os
+import json
 import boto3
 from unittest import TestCase
 from me_wallet_token_allhistories_create import MeWalletTokenAllhistoriesCreate
@@ -44,6 +45,17 @@ class TestMeWalletTokenAllHistoriesCreate(TestCase):
         TestsUtil.create_table(self.dynamodb, os.environ['NOTIFICATION_TABLE_NAME'], self.notification_items)
         TestsUtil.create_table(self.dynamodb, os.environ['UNREAD_NOTIFICATION_MANAGER_TABLE_NAME'],
                                self.unread_notification_manager_items)
+        user_configurations_items = [
+            {
+                'user_id': 'user_01',
+                'private_eth_address': '0x1234567890123456789012345678901234567890'
+            },
+            {
+                'user_id': 'user_02',
+                'private_eth_address': '0x1234567890123456789012345678901234567892'
+            }
+        ]
+        TestsUtil.create_table(self.dynamodb, os.environ['USER_CONFIGURATIONS_TABLE_NAME'], user_configurations_items)
 
     def TearDown(self):
         TestsUtil.delete_all_tables(self.dynamodb)
@@ -245,6 +257,25 @@ class TestMeWalletTokenAllHistoriesCreate(TestCase):
             response = MeWalletTokenAllhistoriesCreate(
                 event, {}, self.dynamodb).add_type('---', None, user_eoa)
             self.assertEqual(response, 'unknown')
+
+    def test_ng_migration_checking(self):
+        event = {
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'not-migrated-user',
+                        'cognito-identity': 'ap-northeast-1:hogehoge',
+                        'custom:private_eth_address': '0x1111111111111111111111111111111111111111',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
+            }
+        }
+
+        response = MeWalletTokenAllhistoriesCreate(event, {}, dynamodb=self.dynamodb, s3=self.s3).main()
+        self.assertEqual(response['statusCode'], 403)
+        self.assertEqual(json.loads(response['body'])['message'], 'Not exists private_eth_address')
 
 
 class PrivateChainEthFilterFakeResponse:

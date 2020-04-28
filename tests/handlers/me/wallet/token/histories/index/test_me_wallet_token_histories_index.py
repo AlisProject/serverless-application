@@ -1,4 +1,5 @@
 import os
+import json
 import settings
 from unittest import TestCase
 from me_wallet_token_histories_index import MeWalletTokenHistoriesIndex
@@ -10,8 +11,18 @@ class TestMeWalletTokenHistoriesIndex(TestCase):
     dynamodb = TestsUtil.get_dynamodb_client()
 
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(self):
         TestsUtil.set_aws_auth_to_env()
+        TestsUtil.set_all_tables_name_to_env()
+        TestsUtil.delete_all_tables(self.dynamodb)
+
+        user_configurations_items = [
+            {
+                'user_id': 'user_01',
+                'private_eth_address': '0x1234567890123456789012345678901234567890'
+            },
+        ]
+        TestsUtil.create_table(self.dynamodb, os.environ['USER_CONFIGURATIONS_TABLE_NAME'], user_configurations_items)
 
     def assert_bad_request(self, params):
         target_function = MeWalletTokenHistoriesIndex(params, {}, self.dynamodb, cognito=None)
@@ -95,3 +106,22 @@ class TestMeWalletTokenHistoriesIndex(TestCase):
                 }
             }
             self.assertEqual(mock_send_transaction.call_args_list[3][1], args_apply_relay_events)
+
+    def test_ng_migration_checking(self):
+        event = {
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'not-migrated-user',
+                        'cognito-identity': 'ap-northeast-1:hogehoge',
+                        'custom:private_eth_address': '0x1111111111111111111111111111111111111111',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
+            }
+        }
+
+        response = MeWalletTokenHistoriesIndex(event, {}, dynamodb=self.dynamodb).main()
+        self.assertEqual(response['statusCode'], 403)
+        self.assertEqual(json.loads(response['body'])['message'], 'Not exists private_eth_address')
