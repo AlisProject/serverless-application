@@ -95,6 +95,7 @@ Resources:
         Variables:
           ARTICLE_INFO_TABLE_NAME: !Ref ArticleInfoTableName
           ARTICLE_CONTENT_EDIT_HISTORY_TABLE_NAME: !Ref ArticleContentEditHistoryTableName
+          USER_CONFIGURATIONS_TABLE_NAME: !Ref UserConfigurationsTableName
       Handler: handler.lambda_handler
       MemorySize: 3008
       Role:
@@ -203,6 +204,7 @@ Resources:
           PRIVATE_CHAIN_BRIDGE_ADDRESS: !Ref PrivateChainBridgeAddress
           ALL_TOKEN_HISTORY_CSV_DOWNLOAD_S3_BUCKET: !Ref AllTokenHistoryCsvDownloadS3Bucket
           BURN_ADDRESS: !Ref BurnAddress
+          USER_CONFIGURATIONS_TABLE_NAME: !Ref UserConfigurationsTableName
       Handler: handler.lambda_handler
       MemorySize: 3008
       Role:
