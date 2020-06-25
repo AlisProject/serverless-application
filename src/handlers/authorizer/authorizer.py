@@ -28,10 +28,8 @@ class Authorizer:
 
         if response['action'] == 'OK':
             return self.__generate_policy(response['subject'], 'Allow', self.event['methodArn'])
-        elif response['action'] in ['BAD_REQUEST', 'FORBIDDEN']:
+        elif response['action'] in ['BAD_REQUEST', 'FORBIDDEN', 'UNAUTHORIZED']:
             return self.__generate_policy(response['subject'], 'Deny', self.event['methodArn'])
-        elif response['action'] == 'UNAUTHORIZED':
-            raise Exception('Unauthorized')
         else:
             logging.info(response)
             raise Exception('Internal Server Error')
