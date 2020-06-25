@@ -59,25 +59,12 @@ class TestAuthorizer(TestCase):
             }
         }
 
-        for action in ['BAD_REQUEST', 'FORBIDDEN']:
+        for action in ['BAD_REQUEST', 'FORBIDDEN', 'UNAUTHORIZED']:
             with patch('authorizer.Authorizer._Authorizer__introspect',
                        MagicMock(return_value={'action': action, 'subject': 'John'})):
                 with self.subTest():
                     result = Authorizer(event, {}).main()
                     self.assertEqual(result, expected)
-
-    @patch('authorizer.Authorizer._Authorizer__introspect',
-           MagicMock(return_value={'action': 'UNAUTHORIZED', 'subject': 'John'}))
-    def test_main_unauthorized(self):
-        event = {
-            'methodArn': 'arn:aws:execute-api:ap-northeast-1:000000000000:abcdefghij/*/GET/articles/images:batchGet',
-            'authorizationToken': 'ABCDEFG'
-        }
-
-        with self.assertRaises(Exception) as e:
-            Authorizer(event, {}).main()
-
-        self.assertEqual(e.exception.args[0], 'Unauthorized')
 
     @patch('authorizer.Authorizer._Authorizer__introspect',
            MagicMock(return_value={'action': 'OTHER', 'subject': 'John'}))
