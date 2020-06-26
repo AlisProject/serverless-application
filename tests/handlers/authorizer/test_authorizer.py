@@ -59,12 +59,37 @@ class TestAuthorizer(TestCase):
             }
         }
 
-        for action in ['BAD_REQUEST', 'FORBIDDEN', 'UNAUTHORIZED']:
+        for action in ['BAD_REQUEST', 'FORBIDDEN']:
             with patch('authorizer.Authorizer._Authorizer__introspect',
                        MagicMock(return_value={'action': action, 'subject': 'John'})):
                 with self.subTest():
                     result = Authorizer(event, {}).main()
                     self.assertEqual(result, expected)
+
+    def test_main_deny_api_call_with_unauthorized(self):
+        event = {
+            'methodArn': 'arn:aws:execute-api:ap-northeast-1:000000000000:abcdefghij/*/GET/articles/images:batchGet',
+            'authorizationToken': 'ABCDEFG'
+        }
+
+        expected = {
+            "principalId": 'ng',
+            "policyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Action": 'execute-api:Invoke',
+                        "Effect": 'Deny',
+                        "Resource": 'arn:aws:execute-api:ap-northeast-1:000000000000:abcdefghij/*/GET/articles/images:batchGet'
+                    }
+                ]
+            }
+        }
+        with patch('authorizer.Authorizer._Authorizer__introspect',
+                   MagicMock(return_value={'action': 'UNAUTHORIZED'})):
+            with self.subTest():
+                result = Authorizer(event, {}).main()
+                self.assertEqual(result, expected)
 
     @patch('authorizer.Authorizer._Authorizer__introspect',
            MagicMock(return_value={'action': 'OTHER', 'subject': 'John'}))
