@@ -89,6 +89,40 @@ class TestMeApplicationsCreate(TestCase):
         self.assertEqual('PUBLIC', json.loads(responses.calls[0].request.body).get('clientType'))
         self.assertEqual('NONE', json.loads(responses.calls[0].request.body).get('tokenAuthMethod'))
 
+    @responses.activate
+    def test_main_ng_authlete_api_response_400(self):
+        params = {
+            'body': {
+                'name': 'あ' * 80,
+                'description': 'A' * 180,
+                'application_type': 'NATIVE',
+                'redirect_urls': ['http://example.com/1']
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'user01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
+            }
+        }
+
+        params['body'] = json.dumps(params['body'])
+
+        # 400 が返却されるように mock 化
+        responses.add(responses.POST, settings.AUTHLETE_CLIENT_ENDPOINT + '/create',
+                      json={"resultCode": "A031208", "resultMessage": "error_message"}, status=400)
+
+        response = MeApplicationsCreate(params, {}).main()
+
+        logging.fatal(response)
+
+        self.assertEqual(response['statusCode'], 400)
+        self.assertEqual(json.loads(response['body']),
+                         {"message": "Invalid parameter: Please check the input parameters"})
+
     @patch('requests.post', MagicMock(side_effect=requests.exceptions.RequestException()))
     def test_main_with_exception(self):
         params = {
