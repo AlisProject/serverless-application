@@ -58,6 +58,47 @@ class TestMeApplicationUpdate(TestCase):
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(json.loads(response['body']), {"developer": "user01"})
 
+    @responses.activate
+    def test_main_ng_authlete_api_response_400(self):
+        params = {
+            'pathParameters': {
+                'client_id': '123456789'
+            },
+            'body': {
+                'name': 'あ' * 80,
+                'description': 'A' * 180,
+                'redirect_urls': ['http://example.com/1']
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'user01',
+                        'phone_number_verified': 'true',
+                        'email_verified': 'true'
+                    }
+                }
+            }
+        }
+
+        params['body'] = json.dumps(params['body'])
+
+        # 400 が返却されるように mock 化
+        responses.add(responses.POST,
+                      settings.AUTHLETE_CLIENT_ENDPOINT + '/update/' + params['pathParameters']['client_id'],
+                      json={"resultCode": "A031233", "resultMessage": "error_message"}, status=400)
+        # AuthleteUtilで呼ばれるAPI callをmockする
+        responses.add(responses.GET, settings.AUTHLETE_CLIENT_ENDPOINT + '/get/' + params['pathParameters']['client_id'],
+                      json={'developer': "user01"}, status=200)
+        # アプリケーション情報取得で呼ばれるAPI callをmockする
+        responses.add(responses.GET, settings.AUTHLETE_CLIENT_ENDPOINT + '/get/' + params['pathParameters']['client_id'],
+                      json={'developer': "user01"}, status=200)
+
+        response = MeApplicationUpdate(params, {}).main()
+
+        self.assertEqual(response['statusCode'], 400)
+        self.assertEqual(json.loads(response['body']),
+                         {"message": "Invalid parameter: Please check the input parameters"})
+
     @patch('requests.post', MagicMock(side_effect=requests.exceptions.RequestException()))
     def test_main_with_exception(self):
         params = {

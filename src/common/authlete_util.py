@@ -3,6 +3,7 @@ import os
 import requests
 import settings
 from record_not_found_error import RecordNotFoundError
+from jsonschema import ValidationError
 
 
 class AuthleteUtil:
@@ -24,9 +25,11 @@ class AuthleteUtil:
 
         return developer == user_id
 
-    # 404以外はALIS上では異常な状態であるため、システムエラーとして扱い、検知対象にする
+    # 400, 404以外はALIS上では異常な状態であるため、システムエラーとして扱い、検知対象にする
     @staticmethod
     def verify_valid_response(response, request_client_id=None):
+        if response.status_code == 400:
+            raise ValidationError('Please check the input parameters')
         if request_client_id and response.status_code == 404:
             raise RecordNotFoundError('{0} is not found.'.format(request_client_id))
 

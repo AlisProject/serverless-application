@@ -8,6 +8,7 @@ import responses
 import settings
 from authlete_util import AuthleteUtil
 from record_not_found_error import RecordNotFoundError
+from jsonschema import ValidationError
 
 
 class TestAuthleteUtil(TestCase):
@@ -91,6 +92,11 @@ class TestAuthleteUtil(TestCase):
                 'exception': False
             },
             {
+                'status_code': 400,
+                'request_client_id': '12345',
+                'exception': ValidationError
+            },
+            {
                 'status_code': 404,
                 'request_client_id': None,
                 'exception': Exception
@@ -119,6 +125,10 @@ class TestAuthleteUtil(TestCase):
 
                 if case['exception'] is Exception:
                     with self.assertRaises(Exception):
+                        AuthleteUtil.verify_valid_response(response, case['request_client_id'])
+
+                if case['exception'] is ValidationError:
+                    with self.assertRaises(ValidationError):
                         AuthleteUtil.verify_valid_response(response, case['request_client_id'])
 
                 if case['exception'] is RecordNotFoundError:
