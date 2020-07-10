@@ -56,6 +56,16 @@ class UserUtil:
             raise NotAuthorizedError('Not exists private_eth_address')
 
     @staticmethod
+    def get_private_eth_address_from_db(dynamodb, user_id):
+        user_configurations_table = dynamodb.Table(os.environ['USER_CONFIGURATIONS_TABLE_NAME'])
+        user_configurations = user_configurations_table.get_item(Key={
+            'user_id': user_id
+        }).get('Item')
+        if user_configurations is not None and user_configurations.get('private_eth_address') is not None:
+            return user_configurations.get('private_eth_address')
+        return None
+
+    @staticmethod
     def get_cognito_user_info(cognito, user_id):
         try:
             return cognito.admin_get_user(

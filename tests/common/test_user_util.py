@@ -32,7 +32,7 @@ class TestUserUtil(TestCase):
         )
         TestsUtil.create_table(self.dynamodb, os.environ['USERS_TABLE_NAME'], [])
 
-        user_configurations_items = [
+        self.user_configurations_items = [
             {
                 'user_id': 'test-user1',
                 'private_eth_address': '0x1234567890123456789012345678901234567890'
@@ -41,7 +41,8 @@ class TestUserUtil(TestCase):
                 'user_id': 'test-user2'
             }
         ]
-        TestsUtil.create_table(self.dynamodb, os.environ['USER_CONFIGURATIONS_TABLE_NAME'], user_configurations_items)
+        TestsUtil.create_table(self.dynamodb, os.environ['USER_CONFIGURATIONS_TABLE_NAME'],
+                               self.user_configurations_items)
 
     def test_verified_phone_and_email_ok(self):
         event = {
@@ -452,6 +453,18 @@ class TestUserUtil(TestCase):
             })
             UserUtil.get_private_eth_address(self.cognito, 'test')
         self.assertEqual(e.exception.args[0], 'Record Not Found: private_eth_address')
+
+    def test_get_private_eth_address_from_db_ok_exists_configuration_data(self):
+        result = UserUtil.get_private_eth_address_from_db(self.dynamodb, self.user_configurations_items[0]['user_id'])
+        self.assertEqual(self.user_configurations_items[0]['private_eth_address'], result)
+
+    def test_get_private_eth_address_from_db_ok_not_exists_private_eth_address(self):
+        result = UserUtil.get_private_eth_address_from_db(self.dynamodb, self.user_configurations_items[1]['user_id'])
+        self.assertIsNone(result)
+
+    def test_get_private_eth_address_from_db_ok_not_exists_configuration_data(self):
+        result = UserUtil.get_private_eth_address_from_db(self.dynamodb, 'not-exists')
+        self.assertIsNone(result)
 
     def test_exists_wallet_address_ok_exists_configuration_data(self):
         test_user = 'test-user1'

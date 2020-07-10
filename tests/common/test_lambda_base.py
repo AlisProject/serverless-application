@@ -1,3 +1,4 @@
+import os
 import json
 from tests_util import TestsUtil
 from unittest import TestCase
@@ -10,6 +11,27 @@ from not_authorized_error import NotAuthorizedError
 
 class TestLambdaBase(TestCase):
     dynamodb = TestsUtil.get_dynamodb_client()
+
+    @classmethod
+    def setUpClass(cls):
+        cls.dynamodb = TestsUtil.get_dynamodb_client()
+        TestsUtil.set_all_tables_name_to_env()
+        TestsUtil.delete_all_tables(cls.dynamodb)
+        cls.user_configurations_items = [
+            {
+                'user_id': 'test-user1',
+                'private_eth_address': '0x1234567890123456789012345678901234567890'
+            },
+            {
+                'user_id': 'test-user2'
+            }
+        ]
+        TestsUtil.create_table(cls.dynamodb, os.environ['USER_CONFIGURATIONS_TABLE_NAME'],
+                               cls.user_configurations_items)
+
+    @classmethod
+    def tearDownClass(cls):
+        TestsUtil.delete_all_tables(cls.dynamodb)
 
     class TestLambdaImpl(LambdaBase):
         def get_schema(self):
@@ -133,6 +155,66 @@ class TestLambdaBase(TestCase):
         lambda_impl.main()
         self.assertEqual('oauth_user_id',
                          lambda_impl.event['requestContext']['authorizer']['claims']['cognito:username'])
+        self.assertEqual('true', lambda_impl.event['requestContext']['authorizer']['claims']['phone_number_verified'])
+        self.assertEqual('true', lambda_impl.event['requestContext']['authorizer']['claims']['email_verified'])
+
+    def test_update_event_ok_with_dynamodb(self):
+        event = {
+            'body': {
+                'hoge': 'fuga'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'principalId': 'oauth_user_id'
+                }
+            }
+        }
+
+        lambda_impl = self.TestLambdaImpl(event, {}, self.dynamodb)
+        lambda_impl.main()
+        self.assertEqual('oauth_user_id',
+                         lambda_impl.event['requestContext']['authorizer']['claims']['cognito:username'])
+        self.assertEqual('true', lambda_impl.event['requestContext']['authorizer']['claims']['phone_number_verified'])
+        self.assertEqual('true', lambda_impl.event['requestContext']['authorizer']['claims']['email_verified'])
+
+    def test_update_event_ok_exists_private_eth_address(self):
+        event = {
+            'body': {
+                'hoge': 'fuga'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'principalId': self.user_configurations_items[0]['user_id']
+                }
+            }
+        }
+
+        lambda_impl = self.TestLambdaImpl(event, {}, self.dynamodb)
+        lambda_impl.main()
+        self.assertEqual(self.user_configurations_items[0]['user_id'],
+                         lambda_impl.event['requestContext']['authorizer']['claims']['cognito:username'])
+        self.assertEqual(self.user_configurations_items[0]['private_eth_address'],
+                         lambda_impl.event['requestContext']['authorizer']['claims']['custom:private_eth_address'])
+        self.assertEqual('true', lambda_impl.event['requestContext']['authorizer']['claims']['phone_number_verified'])
+        self.assertEqual('true', lambda_impl.event['requestContext']['authorizer']['claims']['email_verified'])
+
+    def test_update_event_ok_not_exists_private_eth_address(self):
+        event = {
+            'body': {
+                'hoge': 'fuga'
+            },
+            'requestContext': {
+                'authorizer': {
+                    'principalId': self.user_configurations_items[1]['user_id']
+                }
+            }
+        }
+
+        lambda_impl = self.TestLambdaImpl(event, {}, self.dynamodb)
+        lambda_impl.main()
+        self.assertEqual(self.user_configurations_items[1]['user_id'],
+                         lambda_impl.event['requestContext']['authorizer']['claims']['cognito:username'])
+        self.assertIsNone(lambda_impl.event['requestContext']['authorizer']['claims'].get('private_eth_address'))
         self.assertEqual('true', lambda_impl.event['requestContext']['authorizer']['claims']['phone_number_verified'])
         self.assertEqual('true', lambda_impl.event['requestContext']['authorizer']['claims']['email_verified'])
 

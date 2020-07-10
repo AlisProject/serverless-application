@@ -11,6 +11,7 @@ from record_not_found_error import RecordNotFoundError
 from not_authorized_error import NotAuthorizedError
 from not_verified_user_error import NotVerifiedUserError
 from exceptions import LimitExceeded
+from user_util import UserUtil
 
 
 class LambdaBase(metaclass=ABCMeta):
@@ -160,6 +161,11 @@ class LambdaBase(metaclass=ABCMeta):
                 'phone_number_verified': 'true',
                 'email_verified': 'true'
             }
+            # db 上に private_eth_address が設定されていた場合は追加
+            if self.dynamodb:
+                address = UserUtil.get_private_eth_address_from_db(self.dynamodb, principal_id)
+                if address:
+                    self.event['requestContext']['authorizer']['claims']['custom:private_eth_address'] = address
 
     def __filter_event_for_log(self, event):
         copied_event = copy.deepcopy(event)
