@@ -6,6 +6,11 @@ parameters = {
         'minimum': 1,
         'maximum': 100
     },
+    'popular_sort_key': {
+        'type': 'number',
+        'minimum': 10 ** 18,
+        'maximum': 10 ** 24
+    },
     'article_id': {
         'type': 'string',
         'minLength': 12,
@@ -281,6 +286,7 @@ articles_popular_default_limit = 20
 ARTICLES_TIP_RAKING_DEFAULT_LIMIT = 20
 
 USERS_ARTICLE_INDEX_DEFAULT_LIMIT = 10
+USERS_ARTICLE_POPULAR_INDEX_DEFAULT_LIMIT = 3
 NOTIFICATION_INDEX_DEFAULT_LIMIT = 10
 COMMENT_INDEX_DEFAULT_LIMIT = 10
 TAG_SEARCH_DEFAULT_LIMIT = 100
