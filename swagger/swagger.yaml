@@ -2115,6 +2115,53 @@ paths:
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
+  /users/{user_id}/articles/popular:
+    get:
+      description: '指定されたユーザーの人気記事一覧情報を取得'
+      parameters:
+      - name: 'user_id'
+        in: 'path'
+        description: '対象ユーザを指定するために使用'
+        required: true
+        type: 'string'
+      - name: 'limit'
+        in: 'query'
+        description: '取得件数'
+        required: false
+        type: 'integer'
+        minimum: 1
+      - name: 'article_id'
+        in: 'query'
+        description: 'ページング処理における、現在のページの最後の記事のID'
+        required: false
+        type: 'string'
+      - name: 'popular_sort_key'
+        in: 'query'
+        description: 'ページング処理における、現在のページの最後の記事のソートキー'
+        required: false
+        type: 'integer'
+        minimum: 1
+      responses:
+        '200':
+          description: 'ユーザ人気記事一覧'
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ArticleInfo'
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: '200'
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
+              - Fn::ImportValue:
+                  Fn::Sub: "${AlisAppId}-UsersArticlesPopular"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
   /me/articles/{article_id}/drafts:
     get:
       description: '指定されたIDの下書き記事取得を取得'
