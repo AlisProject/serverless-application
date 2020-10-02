@@ -39,9 +39,9 @@ class UsersArticlesPopular(LambdaBase):
 
         if UsersArticlesPopular.require_last_evaluated_key(self.params):
             last_evaluated_key = {
-                'user_id': self.event['pathParameters']['user_id'],
-                'article_id': self.event['queryStringParameters']['article_id'],
-                'popular_sort_key': int(self.event['queryStringParameters']['popular_sort_key'])
+                'user_id': self.params['user_id'],
+                'article_id': self.params['article_id'],
+                'popular_sort_key': int(self.params['popular_sort_key'])
             }
 
             query_params.update({'ExclusiveStartKey': last_evaluated_key})
