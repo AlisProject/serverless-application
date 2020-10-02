@@ -364,7 +364,7 @@ class TestUsersArticlesPublic(TestCase):
                 'user_id': 'TST'
             },
             'queryStringParameters': {
-                'popular_sort_key': 10 ** 24 + 1
+                'popular_sort_key': 10 ** 30 + 1
             }
         }
         self.assert_bad_request(params)
@@ -375,7 +375,7 @@ class TestUsersArticlesPublic(TestCase):
                 'user_id': 'TST'
             },
             'queryStringParameters': {
-                'popular_sort_key': 10 ** 18 - 1
+                'popular_sort_key': -1
             }
         }
         self.assert_bad_request(params)

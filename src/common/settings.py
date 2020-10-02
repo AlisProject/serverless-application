@@ -8,8 +8,8 @@ parameters = {
     },
     'popular_sort_key': {
         'type': 'number',
-        'minimum': 10 ** 18,
-        'maximum': 10 ** 24
+        'minimum': 0,
+        'maximum': 10 ** 30
     },
     'article_id': {
         'type': 'string',
