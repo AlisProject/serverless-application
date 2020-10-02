@@ -250,6 +250,22 @@ Resources:
       Timeout: 900
       TracingConfig:
         Mode: "Active"
+  UsersArticlesPopular:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Code: ./deploy/users_articles_popular.zip
+      Environment:
+        Variables:
+          ARTICLE_INFO_TABLE_NAME: !Ref ArticleInfoTableName
+      Handler: handler.lambda_handler
+      MemorySize: 3008
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
+      Runtime: python3.6
+      Timeout: 900
+      TracingConfig:
+        Mode: "Active"
   UsersWalletAddressShow:
     Type: "AWS::Lambda::Function"
     Properties:
@@ -316,3 +332,7 @@ Outputs:
     Value: !GetAtt UsersWalletAddressShow.Arn
     Export:
       Name: !Sub "${AlisAppId}-UsersWalletAddressShow"
+  UsersArticlesPopular:
+    Value: !GetAtt UsersArticlesPopular.Arn
+    Export:
+      Name: !Sub "${AlisAppId}-UsersArticlesPopular"
