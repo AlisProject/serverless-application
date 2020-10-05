@@ -296,3 +296,12 @@ Resources:
           Fn::Sub: "${AlisAppId}-MeWalletNonceShow"
       Principal: "apigateway.amazonaws.com"
       SourceArn: !Sub ${RestApiArn}/*/GET/me/wallet/nonce
+  UsersArticlesPopularApiGatewayInvoke:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-UsersArticlesPopular"
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub ${RestApiArn}/*/GET/users/*/articles/popular
