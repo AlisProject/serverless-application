@@ -4,6 +4,10 @@ references:
   setup_remote_docker: &setup_remote_docker
     setup_remote_docker:
       version: 18.09.3
+  docker_hub_authentication: &docker_hub_authentication
+    auth:
+      username: $DOCKERHUB_USER
+      password: $DOCKERHUB_PASSWORD
   ignore_master: &ignore_master
     filters:
       branches:
@@ -31,13 +35,19 @@ references:
     <<: *ignore_master
     # AlisProjectアカウントでもビルドは実行されるため、Contextはserverless_stagingを使用している
     # フォークしたリポジトリで作業する際は、同名のContextを各自の環境に設定する必要がある
-    context: serverless_staging
+    context:
+      - serverless_staging
+      - docker-hub-credencials
   staging_steps: &staging_steps
     <<: *only_master
-    context: serverless_staging
+    context:
+      - serverless_staging
+      - docker-hub-credencials
   production_steps: &production_steps
     <<: *only_master
-    context: serverless_production
+    context:
+      - serverless_production
+      - docker-hub-credencials
 
 orbs:
   aws-cli: circleci/aws-cli@0.1.13
@@ -49,15 +59,20 @@ executors:
     working_directory: ~/repo
     docker:
       - image: circleci/python:3.6.1
+        <<: *docker_hub_authentication
   test:
     working_directory: ~/repo
     docker:
       - image: circleci/python:3.6.1
+        <<: *docker_hub_authentication
       - image: bluszcz/bflocalstack-dynamodb-s3
+        <<: *docker_hub_authentication
       - image: alismedia/dynamodb-local
+        <<: *docker_hub_authentication
         environment:
           MAX_HEAP_SIZE: 4096m
           HEAP_NEWSIZE: 3072m
+      # Docker Hubではないので認証情報不要
       - image: docker.elastic.co/elasticsearch/elasticsearch:6.2.0
         environment:
           discovery.type: single-node
@@ -271,6 +286,7 @@ jobs:
   labo:
     docker:
       - image: circleci/node:12.4.0
+        <<: *docker_hub_authentication
 
     working_directory: ~/repo
 
