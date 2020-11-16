@@ -218,7 +218,7 @@ class TestMeWalletTokenAllHistoriesCreate(TestCase):
                     'authorizer': {
                         'claims': {
                             'cognito:username': 'user_01',
-                            'custom:private_eth_address': '0x1111111111111111111111111111111111111111',
+                            'custom:private_eth_address': '0x1111111111111111111111111111111111111abc',
                             'cognito-identity': 'ap-northeast-1:hogehoge',
                             'phone_number_verified': 'true',
                             'email_verified': 'true'
@@ -233,7 +233,7 @@ class TestMeWalletTokenAllHistoriesCreate(TestCase):
             burn_address = os.environ['BURN_ADDRESS']
 
             response = MeWalletTokenAllhistoriesCreate(
-                event, {}, self.dynamodb).add_type(user_eoa, alis_bridge_contract_address, user_eoa)
+                event, {}, self.dynamodb).add_type(user_eoa, alis_bridge_contract_address, user_eoa.upper())
             self.assertEqual(response, 'withdraw')
             response = MeWalletTokenAllhistoriesCreate(
                 event, {}, self.dynamodb).add_type(user_eoa, '0x' + burn_address, user_eoa)
