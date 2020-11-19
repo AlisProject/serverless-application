@@ -67,20 +67,22 @@ class MeWalletTokenAllhistoriesCreate(LambdaBase):
         alis_bridge_contract_address = os.environ['PRIVATE_CHAIN_BRIDGE_ADDRESS']
         # ssm上のBURN_ADDRESSは0xを省略しているため
         burn_address = '0x' + os.environ['BURN_ADDRESS']
+        # eoa を比較用に小文字に変換
+        lower_eoa = eoa.lower()
 
-        if from_eoa == eoa and to_eoa == alis_bridge_contract_address:
+        if from_eoa == lower_eoa and to_eoa == alis_bridge_contract_address:
             return 'withdraw'
-        elif from_eoa == eoa and to_eoa == burn_address:
+        elif from_eoa == lower_eoa and to_eoa == burn_address:
             return 'pool'
-        elif from_eoa == eoa and to_eoa != '0x0000000000000000000000000000000000000000':
+        elif from_eoa == lower_eoa and to_eoa != '0x0000000000000000000000000000000000000000':
             return 'give'
-        elif from_eoa == eoa and to_eoa == '0x0000000000000000000000000000000000000000':
+        elif from_eoa == lower_eoa and to_eoa == '0x0000000000000000000000000000000000000000':
             return 'burn'
-        elif from_eoa == alis_bridge_contract_address and to_eoa == eoa:
+        elif from_eoa == alis_bridge_contract_address and to_eoa == lower_eoa:
             return 'deposit'
-        elif from_eoa == '---' and to_eoa == eoa:
+        elif from_eoa == '---' and to_eoa == lower_eoa:
             return 'get by like'
-        elif from_eoa != alis_bridge_contract_address and to_eoa == eoa:
+        elif from_eoa != alis_bridge_contract_address and to_eoa == lower_eoa:
             return 'get from user'
         else:
             return 'unknown'
