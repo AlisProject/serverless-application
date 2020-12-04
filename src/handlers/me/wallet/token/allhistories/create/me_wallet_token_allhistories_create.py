@@ -43,6 +43,12 @@ class MeWalletTokenAllhistoriesCreate(LambdaBase):
         self.setTransferHistoryToData(address, eoa, data_for_csv)
         self.setMintHistoryToData(address, eoa, data_for_csv)
 
+        # カストディ対応前にアドレスを保持していた場合は追記
+        user_configuration = self.__get_user_configuration(user_id)
+        if user_configuration is not None and user_configuration.get('old_private_eth_address') is not None:
+            self.setTransferHistoryToData(address, user_configuration['old_private_eth_address'], data_for_csv)
+            self.setMintHistoryToData(address, user_configuration['old_private_eth_address'], data_for_csv)
+
         # If the file is empty, then error will be raised
         if len(data_for_csv.getvalue()) == 0:
             raise RecordNotFoundError('Record Not Found')
@@ -232,3 +238,9 @@ class MeWalletTokenAllhistoriesCreate(LambdaBase):
         )
 
         return cognito_identity_id['IdentityId']
+
+    def __get_user_configuration(self, user_id):
+        user_configurations_table = self.dynamodb.Table(os.environ['USER_CONFIGURATIONS_TABLE_NAME'])
+        return user_configurations_table.get_item(Key={
+            'user_id': user_id
+        }).get('Item')
