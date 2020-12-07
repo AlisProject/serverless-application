@@ -53,7 +53,12 @@ class TestMeWalletTokenAllHistoriesCreate(TestCase):
             {
                 'user_id': 'user_02',
                 'private_eth_address': '0x1234567890123456789012345678901234567892'
-            }
+            },
+            {
+                'user_id': 'user_03',
+                'private_eth_address': '0x1234567890123456789012345678901234567890',
+                'old_private_eth_address': '0x1234567890123456789012345678901234567891'
+            },
         ]
         TestsUtil.create_table(self.dynamodb, os.environ['USER_CONFIGURATIONS_TABLE_NAME'], user_configurations_items)
 
@@ -117,6 +122,67 @@ class TestMeWalletTokenAllHistoriesCreate(TestCase):
 
             unread_notification_manager_after = unread_notification_manager_table.get_item(
                 Key={'user_id': 'user_01'}
+            ).get('Item')
+
+            notification_type = notification_table.get_item(
+                Key={'notification_id': 'notification_id_randomhash'}
+            ).get('Item').get('type')
+
+            self.assertEqual(len(notification_after), len(notification_before) + 1)
+            self.assertEqual(unread_notification_manager_after['unread'], True)
+            self.assertEqual(notification_type, 'csvdownload')
+
+    @patch('web3.eth.Eth.getBlock',
+           MagicMock(return_value={'timestamp': 1546268400}))
+    @patch(
+        'me_wallet_token_allhistories_create.MeWalletTokenAllhistoriesCreate.'
+        '_MeWalletTokenAllhistoriesCreate__get_randomhash',
+        MagicMock(return_value='notification_id_randomhash'))
+    @patch(
+        'me_wallet_token_allhistories_create.MeWalletTokenAllhistoriesCreate.'
+        '_MeWalletTokenAllhistoriesCreate__get_user_cognito_identity_id',
+        MagicMock(return_value='identityId_dummy'))
+    def test_main_ok_with_old_address(self):
+        with patch('web3.eth.Eth.filter') as web3_eth_filter_mock, \
+                patch('me_wallet_token_allhistories_create.UserUtil') as user_util_mock:
+            user_util_mock.get_cognito_user_info.return_value = {
+                'UserAttributes': [{
+                    'Name': 'custom:private_eth_address',
+                    'Value': '0x1111111111111111111111111111111111111111'
+                }]
+            }
+            web3_eth_filter_mock.return_value = PrivateChainEthFilterFakeResponse()
+
+            event = {
+                'headers': {
+                    'Authorization': 'idtoken_dummy'
+                },
+                'requestContext': {
+                    'authorizer': {
+                        'claims': {
+                            'cognito:username': 'user_03',
+                            'cognito-identity': 'ap-northeast-1:hogehoge',
+                            'custom:private_eth_address': '0x1111111111111111111111111111111111111111',
+                            'phone_number_verified': 'true',
+                            'email_verified': 'true'
+                        }
+                    }
+                }
+            }
+
+            unread_notification_manager_table = self.dynamodb.Table(
+                os.environ['UNREAD_NOTIFICATION_MANAGER_TABLE_NAME'])
+
+            notification_table = self.dynamodb.Table(os.environ['NOTIFICATION_TABLE_NAME'])
+            notification_before = notification_table.scan()['Items']
+
+            response = MeWalletTokenAllhistoriesCreate(event, {}, dynamodb=self.dynamodb, s3=self.s3).main()
+            self.assertEqual(response['statusCode'], 200)
+
+            notification_after = notification_table.scan()['Items']
+
+            unread_notification_manager_after = unread_notification_manager_table.get_item(
+                Key={'user_id': 'user_03'}
             ).get('Item')
 
             notification_type = notification_table.get_item(
@@ -279,9 +345,9 @@ class TestMeWalletTokenAllHistoriesCreate(TestCase):
 
 
 class PrivateChainEthFilterFakeResponse:
-    def __init__(self):
-        self.eth_filter_mock_value = MagicMock()
-        self.eth_filter_mock_value.side_effect = [
+    def get_all_entries(self):
+        eth_filter_mock_value = MagicMock()
+        eth_filter_mock_value.side_effect = [
             [{'address': '0x1383B25f9ba231e3a1a1E45c0b5689d778D44AD5',
               'blockHash': HexBytes('0xf32e073349e4ca49c5e193b161ea1b9ba7dc9c2a9bf1271725c99bb5c690bba7'),
               'blockNumber': 836877, 'data': '0x0000000000000000000000000000000000000000000000000de0b6b3a7640000',
@@ -316,15 +382,14 @@ class PrivateChainEthFilterFakeResponse:
               'transactionLogIndex': '0x0',
               'type': 'mined'}],
         ]
-
-    def get_all_entries(self):
-        return self.eth_filter_mock_value()
+        return eth_filter_mock_value()
 
 
 class PrivateChainEthFilterFakeResponseWithSeveralData:
-    def __init__(self):
-        self.eth_filter_mock_value = MagicMock()
-        self.eth_filter_mock_value.side_effect = [
+
+    def get_all_entries(self):
+        eth_filter_mock_value = MagicMock()
+        eth_filter_mock_value.side_effect = [
             [{'address': '0x1383B25f9ba231e3a1a1E45c0b5689d778D44AD5',
               'blockHash': HexBytes('0xf32e073349e4ca49c5e193b161ea1b9ba7dc9c2a9bf1271725c99bb5c690bba7'),
               'blockNumber': 836877, 'data': '0x0000000000000000000000000000000000000000000000000de0b6b3a7640000',
@@ -392,9 +457,7 @@ class PrivateChainEthFilterFakeResponseWithSeveralData:
               'transactionLogIndex': '0x0',
               'type': 'mined'}],
         ]
-
-    def get_all_entries(self):
-        return self.eth_filter_mock_value()
+        return eth_filter_mock_value()
 
 
 class PrivateChainEthFilterFakeResponseWithNoData:
