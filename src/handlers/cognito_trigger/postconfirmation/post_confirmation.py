@@ -12,6 +12,10 @@ class PostConfirmation(CognitoTriggerBase):
         pass
 
     def exec_main_proc(self):
+        # パスワード忘れの場合は処理対象外
+        if self.event.get('triggerSource') == 'PostConfirmation_ConfirmForgotPassword':
+            return True
+
         users = self.dynamodb.Table(os.environ['USERS_TABLE_NAME'])
         user = {
             'user_id': self.event['userName'],
