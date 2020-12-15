@@ -8,8 +8,7 @@ dynamodb = TestsUtil.get_dynamodb_client()
 
 class TestPostConfirmation(TestCase):
 
-    @classmethod
-    def setUpClass(cls):
+    def setUp(self):
         user_tables_items = [
             {'user_id': 'testid000000', 'user_display_name': 'testid000000'}
         ]
@@ -21,8 +20,7 @@ class TestPostConfirmation(TestCase):
         TestsUtil.create_table(dynamodb, os.environ['USERS_TABLE_NAME'], user_tables_items)
         TestsUtil.create_table(dynamodb, os.environ['BETA_USERS_TABLE_NAME'], beta_tables)
 
-    @classmethod
-    def tearDownClass(cls):
+    def tearDown(self):
         TestsUtil.delete_all_tables(dynamodb)
 
     def test_create_userid(self):
@@ -42,6 +40,18 @@ class TestPostConfirmation(TestCase):
         items = table.get_item(Key={"user_id": "hogehoge"})
         self.assertEqual(items['Item']['user_id'], items['Item']['user_display_name'])
         self.assertEqual(items['Item']['sync_elasticsearch'], 1)
+
+    def test_ok_with_confirm_forgot_password(self):
+        os.environ['BETA_MODE_FLAG'] = "0"
+        event = {
+                'userName': 'hogehoge',
+                'triggerSource': 'PostConfirmation_ConfirmForgotPassword',
+        }
+        post_confirmation = PostConfirmation(event=event, context="", dynamodb=dynamodb)
+        self.assertEqual(post_confirmation.main(), True)
+        table = dynamodb.Table(os.environ['USERS_TABLE_NAME'])
+        items = table.get_item(Key={"user_id": "hogehoge"})
+        self.assertIsNone(items.get('Item'))
 
     def test_create_userid_already_exists(self):
         os.environ['BETA_MODE_FLAG'] = "0"
