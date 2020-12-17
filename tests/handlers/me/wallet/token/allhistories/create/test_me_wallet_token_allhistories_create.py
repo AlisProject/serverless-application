@@ -1,6 +1,7 @@
 import os
 import json
 import boto3
+import re
 from unittest import TestCase
 from me_wallet_token_allhistories_create import MeWalletTokenAllhistoriesCreate
 from unittest.mock import patch, MagicMock
@@ -57,7 +58,7 @@ class TestMeWalletTokenAllHistoriesCreate(TestCase):
             {
                 'user_id': 'user_03',
                 'private_eth_address': '0x1234567890123456789012345678901234567890',
-                'old_private_eth_address': '0x1234567890123456789012345678901234567891'
+                'old_private_eth_address': '0x1111111111111111111111111111111111111111'
             },
         ]
         TestsUtil.create_table(self.dynamodb, os.environ['USER_CONFIGURATIONS_TABLE_NAME'], user_configurations_items)
@@ -148,10 +149,15 @@ class TestMeWalletTokenAllHistoriesCreate(TestCase):
             user_util_mock.get_cognito_user_info.return_value = {
                 'UserAttributes': [{
                     'Name': 'custom:private_eth_address',
-                    'Value': '0x1111111111111111111111111111111111111111'
+                    'Value': '0x1234567890123456789012345678901234567890'
                 }]
             }
-            web3_eth_filter_mock.return_value = PrivateChainEthFilterFakeResponse()
+
+            response = PrivateChainEthFilterFakeResponse()
+            response_mint_old = PrivateChainEthFilterFakeResponseMintOld()
+            response_mint_new = PrivateChainEthFilterFakeResponseMintNew()
+            web3_eth_filter_mock.side_effect = [response, response, response_mint_old,
+                                                response, response, response_mint_new]
 
             event = {
                 'headers': {
@@ -185,13 +191,22 @@ class TestMeWalletTokenAllHistoriesCreate(TestCase):
                 Key={'user_id': 'user_03'}
             ).get('Item')
 
-            notification_type = notification_table.get_item(
+            notification_item = notification_table.get_item(
                 Key={'notification_id': 'notification_id_randomhash'}
-            ).get('Item').get('type')
+            ).get('Item')
 
             self.assertEqual(len(notification_after), len(notification_before) + 1)
             self.assertEqual(unread_notification_manager_after['unread'], True)
-            self.assertEqual(notification_type, 'csvdownload')
+            self.assertEqual(notification_item.get('type'), 'csvdownload')
+
+            # S3 上のデータ件数を確認
+            s3 = boto3.client('s3', endpoint_url='http://localhost:4572/')
+            s3_param = re.match(r'https://(.*).s3-ap-northeast-1.amazonaws.com/(.*)',
+                                notification_item.get('announce_url'))
+            obj = s3.get_object(Bucket=s3_param.group(1), Key=s3_param.group(2))['Body'].read()
+            # 対象となるテストデータは 16 件だが、移行時のデータ分が除かれ 15 件になっていること
+            # ※ response_mint_new の 2件の内2件が除かれている
+            self.assertEqual(len(obj.decode().split('\n')) - 1, 15)
 
     @patch('web3.eth.Eth.getBlock',
            MagicMock(return_value={'timestamp': 1546268400}))
@@ -347,46 +362,106 @@ class TestMeWalletTokenAllHistoriesCreate(TestCase):
 class PrivateChainEthFilterFakeResponse:
     def get_all_entries(self):
         eth_filter_mock_value = MagicMock()
-        eth_filter_mock_value.side_effect = [
-            [{'address': '0x1383B25f9ba231e3a1a1E45c0b5689d778D44AD5',
-              'blockHash': HexBytes('0xf32e073349e4ca49c5e193b161ea1b9ba7dc9c2a9bf1271725c99bb5c690bba7'),
-              'blockNumber': 836877, 'data': '0x0000000000000000000000000000000000000000000000000de0b6b3a7640000',
-              'logIndex': 0,
-              'topics': [HexBytes('0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'),
-                         HexBytes('0x0000000000000000000000001111111111111111111111111111111111111111'),
-                         HexBytes('0x0000000000000000000000000000000000000000000000000000000000000000')],
-              'transactionHash': HexBytes('0xf45f335a0bb17d112e870f98218ebd5159e5d7ab9f1739677d7c0b3df4879456'),
-              'transactionIndex': 0,
-              'transactionLogIndex': '0x0',
-              'type': 'mined'}],
-            [{'address': '0x1383B25f9ba231e3a1a1E45c0b5689d778D44AD5',
-              'blockHash': HexBytes('0xf32e073349e4ca49c5e193b161ea1b9ba7dc9c2a9bf1271725c99bb5c690bba8'),
-              'blockNumber': 836877, 'data': '0x0000000000000000000000000000000000000000000000000de0b6b3a7640000',
-              'logIndex': 0,
-              'topics': [HexBytes('0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'),
-                         HexBytes('0x0000000000000000000000000000000000000000000000000000000000000000'),
-                         HexBytes('0x0000000000000000000000001111111111111111111111111111111111111111')],
-              'transactionHash': HexBytes('0xf45f335a0bb17d112e870f98218ebd5159e5d7ab9f1739677d7c0b3df4879457'),
-              'transactionIndex': 0,
-              'transactionLogIndex': '0x0',
-              'type': 'mined'}],
-            [{'address': '0x1383B25f9ba231e3a1a1E45c0b5689d778D44AD5',
-              'blockHash': HexBytes('0xf32e073349e4ca49c5e193b161ea1b9ba7dc9c2a9bf1271725c99bb5c690bba9'),
-              'blockNumber': 836877, 'data': '0x0000000000000000000000000000000000000000000000000de0b6b3a7640000',
-              'logIndex': 0,
-              'topics': [HexBytes('0x0f6798a560793a54c3bcfe86a93cde1e73087d944c0ea20544137d4121396885'),
-                         HexBytes('0x0000000000000000000000001111111111111111111111111111111111111111'),
-                         HexBytes('0x0000000000000000000000000000000000000000000000000000000000000000')],
-              'transactionHash': HexBytes('0xf45f335a0bb17d112e870f98218ebd5159e5d7ab9f1739677d7c0b3df4879458'),
-              'transactionIndex': 0,
-              'transactionLogIndex': '0x0',
-              'type': 'mined'}],
+        eth_filter_mock_value.return_value = [
+            {'address': '0x1383B25f9ba231e3a1a1E45c0b5689d778D44AD5',
+             'blockHash': HexBytes('0xf32e073349e4ca49c5e193b161ea1b9ba7dc9c2a9bf1271725c99bb5c690bba7'),
+             'blockNumber': 836877, 'data': '0x0000000000000000000000000000000000000000000000000de0b6b3a7640000',
+             'logIndex': 0,
+             'topics': [HexBytes('0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'),
+                        HexBytes('0x0000000000000000000000001111111111111111111111111111111111111111'),
+                        HexBytes('0x0000000000000000000000000000000000000000000000000000000000000000')],
+             'transactionHash': HexBytes('0xf45f335a0bb17d112e870f98218ebd5159e5d7ab9f1739677d7c0b3df4879456'),
+             'transactionIndex': 0,
+             'transactionLogIndex': '0x0',
+             'type': 'mined'},
+            {'address': '0x1383B25f9ba231e3a1a1E45c0b5689d778D44AD5',
+             'blockHash': HexBytes('0xf32e073349e4ca49c5e193b161ea1b9ba7dc9c2a9bf1271725c99bb5c690bba8'),
+             'blockNumber': 836877, 'data': '0x0000000000000000000000000000000000000000000000000de0b6b3a7640000',
+             'logIndex': 0,
+             'topics': [HexBytes('0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'),
+                        HexBytes('0x0000000000000000000000000000000000000000000000000000000000000000'),
+                        HexBytes('0x0000000000000000000000001111111111111111111111111111111111111111')],
+             'transactionHash': HexBytes('0xf45f335a0bb17d112e870f98218ebd5159e5d7ab9f1739677d7c0b3df4879457'),
+             'transactionIndex': 0,
+             'transactionLogIndex': '0x0',
+             'type': 'mined'},
+            {'address': '0x1383B25f9ba231e3a1a1E45c0b5689d778D44AD5',
+             'blockHash': HexBytes('0xf32e073349e4ca49c5e193b161ea1b9ba7dc9c2a9bf1271725c99bb5c690bba9'),
+             'blockNumber': 836877, 'data': '0x0000000000000000000000000000000000000000000000000de0b6b3a7640000',
+             'logIndex': 0,
+             'topics': [HexBytes('0x0f6798a560793a54c3bcfe86a93cde1e73087d944c0ea20544137d4121396885'),
+                        HexBytes('0x0000000000000000000000001111111111111111111111111111111111111111'),
+                        HexBytes('0x0000000000000000000000000000000000000000000000000000000000000000')],
+             'transactionHash': HexBytes('0xf45f335a0bb17d112e870f98218ebd5159e5d7ab9f1739677d7c0b3df4879458'),
+             'transactionIndex': 0,
+             'transactionLogIndex': '0x0',
+             'type': 'mined'},
+        ]
+        return eth_filter_mock_value()
+
+
+class PrivateChainEthFilterFakeResponseMintOld:
+    def get_all_entries(self):
+        eth_filter_mock_value = MagicMock()
+        eth_filter_mock_value.return_value = [
+            {'address': '0x1383B25f9ba231e3a1a1E45c0b5689d778D44AD5',
+             'blockHash': HexBytes('0xf32e073349e4ca49c5e193b161ea1b9ba7dc9c2a9bf1271725c99bb5c690bba7'),
+             'blockNumber': 836877, 'data': '0x00000000000000000000000000000000000000000000000029A2241AF62C0000',
+             'logIndex': 0,
+             'topics': [HexBytes('0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'),
+                        HexBytes('0x0000000000000000000000001111111111111111111111111111111111111111'),
+                        HexBytes('0x0000000000000000000000000000000000000000000000000000000000000000')],
+             'transactionHash': HexBytes('0xf45f335a0bb17d112e870f98218ebd5159e5d7ab9f1739677d7c0b3df4879456'),
+             'transactionIndex': 0,
+             'transactionLogIndex': '0x0',
+             'type': 'mined'},
+            {'address': '0x1383B25f9ba231e3a1a1E45c0b5689d778D44AD5',
+             'blockHash': HexBytes('0xf32e073349e4ca49c5e193b161ea1b9ba7dc9c2a9bf1271725c99bb5c690bba9'),
+             'blockNumber': 836877, 'data': '0x00000000000000000000000000000000000000000000000029A2241AF62C0000',
+             'logIndex': 0,
+             'topics': [HexBytes('0x0f6798a560793a54c3bcfe86a93cde1e73087d944c0ea20544137d4121396885'),
+                        HexBytes('0x0000000000000000000000001111111111111111111111111111111111111111'),
+                        HexBytes('0x0000000000000000000000000000000000000000000000000000000000000000')],
+             'transactionHash': HexBytes('0xf45f335a0bb17d112e870f98218ebd5159e5d7ab9f1739677d7c0b3df4879458'),
+             'transactionIndex': 0,
+             'transactionLogIndex': '0x0',
+             'type': 'mined'}
+        ]
+        return eth_filter_mock_value()
+
+
+class PrivateChainEthFilterFakeResponseMintNew:
+    def get_all_entries(self):
+        eth_filter_mock_value = MagicMock()
+        # 移行対象のデータが存在する返り値を設定
+        eth_filter_mock_value.return_value = [
+            {'address': '0x1383B25f9ba231e3a1a1E45c0b5689d778D44AD5',
+             'blockHash': HexBytes('0xf32e073349e4ca49c5e193b161ea1b9ba7dc9c2a9bf1271725c99bb5c690bba7'),
+             'blockNumber': 836877, 'data': '0x0000000000000000000000000000000000000000000000003782DACE9D900000',
+             'logIndex': 0,
+             'topics': [HexBytes('0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'),
+                        HexBytes('0x0000000000000000000000001234567890123456789012345678901234567890'),
+                        HexBytes('0x0000000000000000000000000000000000000000000000000000000000000000')],
+             'transactionHash': HexBytes('0xf45f335a0bb17d112e870f98218ebd5159e5d7ab9f1739677d7c0b3df4879456'),
+             'transactionIndex': 0,
+             'transactionLogIndex': '0x0',
+             'type': 'mined'},
+            {'address': '0x1383B25f9ba231e3a1a1E45c0b5689d778D44AD5',
+             'blockHash': HexBytes('0xf32e073349e4ca49c5e193b161ea1b9ba7dc9c2a9bf1271725c99bb5c690bba9'),
+             'blockNumber': 836877, 'data': '0x0000000000000000000000000000000000000000000000003782DACE9D900000',
+             'logIndex': 0,
+             'topics': [HexBytes('0x0f6798a560793a54c3bcfe86a93cde1e73087d944c0ea20544137d4121396885'),
+                        HexBytes('0x0000000000000000000000001234567890123456789012345678901234567890'),
+                        HexBytes('0x0000000000000000000000000000000000000000000000000000000000000000')],
+             'transactionHash': HexBytes('0xf45f335a0bb17d112e870f98218ebd5159e5d7ab9f1739677d7c0b3df4879458'),
+             'transactionIndex': 0,
+             'transactionLogIndex': '0x0',
+             'type': 'mined'},
         ]
         return eth_filter_mock_value()
 
 
 class PrivateChainEthFilterFakeResponseWithSeveralData:
-
     def get_all_entries(self):
         eth_filter_mock_value = MagicMock()
         eth_filter_mock_value.side_effect = [

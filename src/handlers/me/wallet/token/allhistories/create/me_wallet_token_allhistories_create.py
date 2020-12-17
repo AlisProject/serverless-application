@@ -5,6 +5,7 @@ import time
 import hashlib
 import boto3
 import io
+import csv
 import pytz
 from decimal import Decimal, ROUND_FLOOR
 from datetime import datetime
@@ -39,15 +40,16 @@ class MeWalletTokenAllhistoriesCreate(LambdaBase):
         # csvファイルを生成するためのdataの格納先の生成
         data_for_csv = io.StringIO()
 
-        # private chainからトークンのTransferとMintのデータを取得し、csvに書き込むためのデータを準備する
-        self.setTransferHistoryToData(address, eoa, data_for_csv)
-        self.setMintHistoryToData(address, eoa, data_for_csv)
-
         # カストディ対応前にアドレスを保持していた場合は追記
         user_configuration = self.__get_user_configuration(user_id)
         if user_configuration is not None and user_configuration.get('old_private_eth_address') is not None:
             self.setTransferHistoryToData(address, user_configuration['old_private_eth_address'], data_for_csv)
             self.setMintHistoryToData(address, user_configuration['old_private_eth_address'], data_for_csv)
+        tmp_sum_token = self.__get_sum_token(data_for_csv)
+
+        # private chainからトークンのTransferとMintのデータを取得し、csvに書き込むためのデータを準備する
+        self.setTransferHistoryToData(address, eoa, data_for_csv)
+        self.setMintHistoryToData(address, eoa, data_for_csv, tmp_sum_token)
 
         # If the file is empty, then error will be raised
         if len(data_for_csv.getvalue()) == 0:
@@ -137,8 +139,9 @@ class MeWalletTokenAllhistoriesCreate(LambdaBase):
         transfer_result_to = tofilter.get_all_entries()
         self.filter_transfer_data(transfer_result_to, eoa, data_for_csv)
 
-    def filter_mint_data(self, mint_result, eoa, data_for_csv):
+    def filter_mint_data(self, mint_result, eoa, data_for_csv, remove_token):
         # 取得したデータのうち、csvファイルに書き込むデータのみを抽出し、data_for_csvに成型して書き込む
+        is_removed = False
         for i in range(len(mint_result)):
             time = datetime.fromtimestamp(
                 self.web3.eth.getBlock(mint_result[i]['blockNumber'])['timestamp']).astimezone(self.jst)
@@ -151,9 +154,13 @@ class MeWalletTokenAllhistoriesCreate(LambdaBase):
             amountWei = int(mint_result[i]['data'], 16)
             content_text = strtime + ',' + transactionHash + ',' + type + ',' + str(amountEth) + ','\
                 + str(amountWei) + '\n'
-            data_for_csv.write(content_text)
+            # 移行で発生したデータは書き込み対象外とする
+            if amountWei == remove_token and type == 'get by like' and not is_removed:
+                is_removed = True
+            else:
+                data_for_csv.write(content_text)
 
-    def setMintHistoryToData(self, address, eoa, data_for_csv):
+    def setMintHistoryToData(self, address, eoa, data_for_csv, remove_token=0):
         # topics[0]の値がMintに一致し、topics[1]の値が今回データを生成するEoAにマッチするものを取得
         to_filter = self.web3.eth.filter({
             "address": address,
@@ -166,7 +173,7 @@ class MeWalletTokenAllhistoriesCreate(LambdaBase):
 
         # filterしたデータをすべて取得するメソッドを実行後、必要なデータだけをcsvに書き込むためのfilterを実行する
         mint_result = to_filter.get_all_entries()
-        self.filter_mint_data(mint_result, eoa, data_for_csv)
+        self.filter_mint_data(mint_result, eoa, data_for_csv, remove_token)
 
     def extract_file_to_s3(self, user_id, data_for_csv):
         bucket = os.environ['ALL_TOKEN_HISTORY_CSV_DOWNLOAD_S3_BUCKET']
@@ -244,3 +251,13 @@ class MeWalletTokenAllhistoriesCreate(LambdaBase):
         return user_configurations_table.get_item(Key={
             'user_id': user_id
         }).get('Item')
+
+    def __get_sum_token(self, data_for_csv):
+        csv_list = list(csv.reader(data_for_csv.getvalue().splitlines()))
+        tmp_token = 0
+        for l in csv_list:
+            if l[2] in ['withdraw', 'pool', 'give', 'burn']:
+                tmp_token -= int(l[4])
+            elif l[2] in ['deposit', 'get by like', 'get from user']:
+                tmp_token += int(l[4])
+        return tmp_token
