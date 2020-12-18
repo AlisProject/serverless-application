@@ -229,3 +229,22 @@ class TestMeExternalProviderUserCreate(TestCase):
 
         response = MeExternalProviderUserCreate(event=event, context="", dynamodb=dynamodb).main()
         self.assertEqual(response['statusCode'], 400)
+
+    def test_main_ng_not_target_user(self):
+        event = {
+            'body': {
+                'user_id': 'username01',
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'username01',
+                    }
+                }
+            }
+        }
+
+        event['body'] = json.dumps(event['body'])
+
+        response = MeExternalProviderUserCreate(event=event, context="", dynamodb=dynamodb).main()
+        self.assertEqual(response['statusCode'], 400)
