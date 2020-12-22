@@ -2,7 +2,7 @@ import os
 import json
 from unittest import TestCase
 from me_external_provider_user_create import MeExternalProviderUserCreate
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 from tests_util import TestsUtil
 from record_not_found_error import RecordNotFoundError
 
@@ -56,9 +56,22 @@ class TestMeExternalProviderUserCreate(TestCase):
     def tearDown(self):
         TestsUtil.delete_all_tables(dynamodb)
 
+    @patch('me_external_provider_user_create.UserUtil.delete_external_provider_id_cognito_user',
+           MagicMock(return_value=True))
+    @patch('me_external_provider_user_create.UserUtil.force_non_verified_phone', MagicMock(return_value=None))
+    @patch('me_external_provider_user_create.CryptoUtil', MagicMock(return_value='password'))
     def test_main_ok(self):
-        with patch('me_external_provider_user_create.UserUtil') as user_mock, \
-             patch('me_external_provider_user_create.CryptoUtil') as crypto_mock:
+        with patch('me_external_provider_user_create.UserUtil.create_external_provider_user') as create_external_mock, \
+             patch('me_external_provider_user_create.UserUtil.get_cognito_user_info') as get_cognito_user_mock:
+            create_external_mock.return_value = {
+                'AuthenticationResult': {
+                    'AccessToken': 'aaaaa',
+                    'IdToken': 'bbbbb',
+                    'RefreshToken': 'ccccc'
+                }
+            }
+            get_cognito_user_mock.side_effect = RecordNotFoundError('Record Not Found')
+
             event = {
                 'body': {
                     'user_id': 'username01',
@@ -71,28 +84,7 @@ class TestMeExternalProviderUserCreate(TestCase):
                     }
                 }
             }
-
             event['body'] = json.dumps(event['body'])
-
-            user_mock.check_try_to_register_as_twitter_user.return_value = False
-            user_mock.check_try_to_register_as_line_user.return_value = False
-            user_mock.check_try_to_register_as_yahoo_user.return_value = False
-            user_mock.check_try_to_register_as_facebook_user.return_value = False
-            crypto_mock.decrypt_password.return_value = 'password'
-            user_mock.create_external_provider_user.return_value = {
-                'AuthenticationResult': {
-                    'AccessToken': 'aaaaa',
-                    'IdToken': 'bbbbb',
-                    'RefreshToken': 'ccccc'
-                }
-            }
-
-            user_mock.force_non_verified_phone.return_value = None
-            user_mock.add_user_id_to_external_provider_user.return_value = None
-            user_mock.delete_external_provider_id_cognito_user.return_value = True
-            user_mock.has_user_id.return_value = True
-            user_mock.add_user_profile.return_value = None
-            user_mock.get_cognito_user_info.side_effect = RecordNotFoundError('Record Not Found')
 
             response = MeExternalProviderUserCreate(event=event, context="", dynamodb=dynamodb).main()
             self.assertEqual(response['statusCode'], 200)
@@ -228,6 +220,25 @@ class TestMeExternalProviderUserCreate(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'Yahoo-U-test-user',
+                    }
+                }
+            }
+        }
+
+        event['body'] = json.dumps(event['body'])
+
+        response = MeExternalProviderUserCreate(event=event, context="", dynamodb=dynamodb).main()
+        self.assertEqual(response['statusCode'], 400)
+
+    def test_main_ng_not_target_user(self):
+        event = {
+            'body': {
+                'user_id': 'username01',
+            },
+            'requestContext': {
+                'authorizer': {
+                    'claims': {
+                        'cognito:username': 'username01',
                     }
                 }
             }

@@ -32,9 +32,17 @@ class MeExternalProviderUserCreate(LambdaBase):
            UserUtil.check_try_to_register_as_yahoo_user(body['user_id']) or \
            UserUtil.check_try_to_register_as_facebook_user(body['user_id']):
             raise ValidationError('This username is not allowed')
+
+        # ログインしているユーザが本処理対象の external_provider_user であること
+        external_provider_user_id = params['requestContext']['authorizer']['claims']['cognito:username']
+        if not UserUtil.check_try_to_register_as_line_user(external_provider_user_id) and \
+           not UserUtil.check_try_to_register_as_twitter_user(external_provider_user_id) and \
+           not UserUtil.check_try_to_register_as_yahoo_user(external_provider_user_id) and \
+           not UserUtil.check_try_to_register_as_facebook_user(external_provider_user_id):
+            raise ValidationError('This login user is not eligible.')
+
         users_table = self.dynamodb.Table(os.environ['USERS_TABLE_NAME'])
         external_provider_users_table = self.dynamodb.Table(os.environ['EXTERNAL_PROVIDER_USERS_TABLE_NAME'])
-        external_provider_user_id = params['requestContext']['authorizer']['claims']['cognito:username']
 
         # usersテーブルのユーザIDの重複チェック
         already_user_exists_in_users_table = users_table.get_item(Key={'user_id': body['user_id']}).get('Item') is not None
