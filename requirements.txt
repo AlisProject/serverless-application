@@ -1,4 +1,4 @@
-pyyaml==5.1
+pyyaml==5.4
 jsonschema==3.0.1
 hashids==1.2.0
 bleach==3.3.0
