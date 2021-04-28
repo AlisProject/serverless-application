@@ -222,6 +222,27 @@ Resources:
              Cookies:
                Forward: all
           - TargetOriginId: api
+            PathPattern: /api/crypto/ranking
+            ViewerProtocolPolicy: allow-all
+            MinTTL: 5
+            MaxTTL: 5
+            DefaultTTL: 5
+            AllowedMethods:
+              - HEAD
+              - DELETE
+              - POST
+              - GET
+              - OPTIONS
+              - PUT
+              - PATCH
+            CachedMethods:
+              - HEAD
+              - GET
+            ForwardedValues:
+              QueryString: true
+              Cookies:
+                Forward: none
+          - TargetOriginId: api
             PathPattern: /api/*
             ViewerProtocolPolicy: allow-all
             MinTTL: 0 # productionでは120
