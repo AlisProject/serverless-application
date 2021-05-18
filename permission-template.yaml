@@ -305,3 +305,12 @@ Resources:
           Fn::Sub: "${AlisAppId}-UsersArticlesPopular"
       Principal: "apigateway.amazonaws.com"
       SourceArn: !Sub ${RestApiArn}/*/GET/users/*/articles/popular
+  TopicsCryptoRankingIndexApiGatewayInvoke:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-TopicsCryptoRankingIndex"
+      Principal: "apigateway.amazonaws.com"
+      SourceArn: !Sub ${RestApiArn}/*/GET/topics/crypto/ranking

@@ -367,6 +367,23 @@ definitions:
         type: string
       description:
         type: string
+  CryptoRankingInfo:
+    type: object
+    properties:
+      symbol:
+        type: string
+      name:
+        type: string
+      image:
+        type: string
+      current_price:
+        type: integer
+      market_cap:
+        type: integer
+      price_change_percentage_24h:
+        type: number
+        format: double
+
 paths:
   /search/articles:
     get:
@@ -808,6 +825,30 @@ paths:
             statusCode: "200"
         uri:
           Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CommentsLikesShow.Arn}/invocations
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /topics/crypto/ranking:
+    get:
+      description: 'cryptoカテゴリに表示するランキング情報を取得'
+      responses:
+        '200':
+          description: 'cryptoカテゴリに表示するランキング情報'
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/CryptoRankingInfo'
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
+              - Fn::ImportValue:
+                  Fn::Sub: "${AlisAppId}-TopicsCryptoRankingIndex"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy

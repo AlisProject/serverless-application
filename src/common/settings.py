@@ -284,6 +284,7 @@ article_recent_default_limit = 20
 users_articles_public_default_limit = 10
 articles_popular_default_limit = 20
 ARTICLES_TIP_RAKING_DEFAULT_LIMIT = 20
+CRYPTO_RAKING_DEFAULT_LIMIT = 3
 
 USERS_ARTICLE_INDEX_DEFAULT_LIMIT = 10
 USERS_ARTICLE_POPULAR_INDEX_DEFAULT_LIMIT = 3

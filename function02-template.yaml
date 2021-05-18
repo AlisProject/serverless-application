@@ -282,6 +282,19 @@ Resources:
       Timeout: 900
       TracingConfig:
         Mode: "Active"
+  TopicsCryptoRankingIndex:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Code: ./deploy/topics_crypto_ranking_index.zip
+      Handler: handler.lambda_handler
+      MemorySize: 3008
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
+      Runtime: python3.6
+      Timeout: 15
+      TracingConfig:
+        Mode: "Active"
 
 Outputs:
   ArticleSupportersIndex:
@@ -336,3 +349,7 @@ Outputs:
     Value: !GetAtt UsersArticlesPopular.Arn
     Export:
       Name: !Sub "${AlisAppId}-UsersArticlesPopular"
+  TopicsCryptoRankingIndex:
+    Value: !GetAtt TopicsCryptoRankingIndex.Arn
+    Export:
+      Name: !Sub "${AlisAppId}-TopicsCryptoRankingIndex"
