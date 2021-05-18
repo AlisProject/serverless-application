@@ -1,6 +1,6 @@
 from unittest import TestCase
 from unittest.mock import patch, MagicMock
-from crypto_ranking_index import CryptoRankingIndex
+from topics_crypto_ranking_index import TopicsCryptoRankingIndex
 
 import requests
 import responses
@@ -8,9 +8,9 @@ import json
 import settings
 
 
-class TestCryptoRankingIndex(TestCase):
+class TestTopicsCryptoRankingIndex(TestCase):
     def assert_bad_request(self, params):
-        function = CryptoRankingIndex(params, {})
+        function = TopicsCryptoRankingIndex(params, {})
         response = function.main()
 
         self.assertEqual(response['statusCode'], 400)
@@ -107,14 +107,14 @@ class TestCryptoRankingIndex(TestCase):
             },
         ]
 
-        response = CryptoRankingIndex({}, {}).main()
+        response = TopicsCryptoRankingIndex({}, {}).main()
         self.assertEqual(200, response['statusCode'])
         self.assertEqual(json.dumps(expected_json), response['body'])
 
     def test_main_ok_call_default_limit(self):
         magic_mock = MagicMock()
-        with patch('crypto_ranking_index.requests', magic_mock):
-            CryptoRankingIndex({}, {}).main()
+        with patch('topics_crypto_ranking_index.requests', magic_mock):
+            TopicsCryptoRankingIndex({}, {}).main()
             args, _ = magic_mock.get.call_args
             self.assertTrue(magic_mock.get.called)
             self.assertEqual(args[0],
@@ -129,8 +129,8 @@ class TestCryptoRankingIndex(TestCase):
             }
         }
         magic_mock = MagicMock()
-        with patch('crypto_ranking_index.requests', magic_mock):
-            CryptoRankingIndex(params, {}).main()
+        with patch('topics_crypto_ranking_index.requests', magic_mock):
+            TopicsCryptoRankingIndex(params, {}).main()
             args, _ = magic_mock.get.call_args
             self.assertTrue(magic_mock.get.called)
             self.assertEqual(args[0],
@@ -158,5 +158,5 @@ class TestCryptoRankingIndex(TestCase):
 
     @patch('requests.get', MagicMock(side_effect=requests.exceptions.RequestException()))
     def test_main_with_exception(self):
-        response = CryptoRankingIndex({}, {}).main()
+        response = TopicsCryptoRankingIndex({}, {}).main()
         self.assertEqual(500, response['statusCode'])

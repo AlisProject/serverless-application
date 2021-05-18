@@ -828,7 +828,7 @@ paths:
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
-  /crypto/ranking:
+  /topics/crypto/ranking:
     get:
       description: 'cryptoカテゴリに表示するランキング情報を取得'
       responses:
@@ -847,7 +847,7 @@ paths:
             - ''
             - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
               - Fn::ImportValue:
-                  Fn::Sub: "${AlisAppId}-CryptoRankingIndex"
+                  Fn::Sub: "${AlisAppId}-TopicsCryptoRankingIndex"
               - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST

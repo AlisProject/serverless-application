@@ -6,7 +6,7 @@ from lambda_base import LambdaBase
 from parameter_util import ParameterUtil
 
 
-class CryptoRankingIndex(LambdaBase):
+class TopicsCryptoRankingIndex(LambdaBase):
     def get_schema(self):
         return {
             'type': 'object',
