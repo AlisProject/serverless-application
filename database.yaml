@@ -886,3 +886,15 @@ Resources:
         WriteCapacityUnits: 1
       SSESpecification:
         Enabled: true
+  ArticlePrivateInfo:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: article_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: article_id
+          KeyType: HASH
+      ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
