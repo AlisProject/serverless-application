@@ -36,7 +36,6 @@ aws cloudformation deploy \
     SaltForArticleId=${SSM_PARAMS_PREFIX}SaltForArticleId \
     CognitoUserPoolArn=${SSM_PARAMS_PREFIX}CognitoUserPoolArn \
     ArticleInfoTableName=${SSM_PARAMS_PREFIX}ArticleInfoTableName \
-    ArticlePrivateInfoTableName=${SSM_PARAMS_PREFIX}ArticlePrivateInfoTableName \
     ArticleContentTableName=${SSM_PARAMS_PREFIX}ArticleContentTableName \
     ArticleContentEditHistoryTableName=${SSM_PARAMS_PREFIX}ArticleContentEditHistoryTableName \
     ArticleHistoryTableName=${SSM_PARAMS_PREFIX}ArticleHistoryTableName \

@@ -14,7 +14,6 @@ class TestMeArticlesPublicShow(TestCase):
         TestsUtil.set_all_tables_name_to_env()
         TestsUtil.delete_all_tables(cls.dynamodb)
 
-        # article_info
         article_info_items = [
             {
                 'article_id': 'publicId0001',
@@ -24,7 +23,6 @@ class TestMeArticlesPublicShow(TestCase):
                 'overview': 'sample_overview1',
                 'eye_catch_url': 'http://example.com/eye_catch_url'
             },
-            # price が存在
             {
                 'article_id': 'publicId0002',
                 'user_id': 'test02',
@@ -33,34 +31,11 @@ class TestMeArticlesPublicShow(TestCase):
                 'overview': 'sample_overview2',
                 'eye_catch_url': 'http://example.com/eye_catch_url',
                 'price': 100
-            },
-            # article_private_info が存在しない
-            {
-                'article_id': 'publicId0003',
-                'user_id': 'test03',
-                'status': 'public',
-                'sort_key': 1520150272000002,
-                'overview': 'sample_overview3',
-                'eye_catch_url': 'http://example.com/eye_catch_url'
             }
         ]
 
         TestsUtil.create_table(cls.dynamodb, os.environ['ARTICLE_INFO_TABLE_NAME'], article_info_items)
 
-        # article_private_info
-        article_private_info_items = [
-            {
-                'article_id': 'publicId0001',
-                'pv_count': 100,
-            },
-            {
-                'article_id': 'publicId0002',
-                'hoge': 'fuga'
-            }
-        ]
-        TestsUtil.create_table(cls.dynamodb, os.environ['ARTICLE_PRIVATE_INFO_TABLE_NAME'], article_private_info_items)
-
-        # article_content
         article_content_items = [
             {
                 'article_id': 'publicId0001',
@@ -72,13 +47,9 @@ class TestMeArticlesPublicShow(TestCase):
                 'title': 'sample_title2',
                 'body': 'sample_body2',
                 'paid_body': 'sample_paid_body2'
-            },
-            {
-                'article_id': 'publicId0003',
-                'title': 'sample_title3',
-                'body': 'sample_body3'
             }
         ]
+
         TestsUtil.create_table(cls.dynamodb, os.environ['ARTICLE_CONTENT_TABLE_NAME'], article_content_items)
 
     @classmethod
@@ -115,14 +86,13 @@ class TestMeArticlesPublicShow(TestCase):
             'status': 'public',
             'overview': 'sample_overview1',
             'sort_key': 1520150272000000,
-            'eye_catch_url': 'http://example.com/eye_catch_url',
-            'pv_count': 100
+            'eye_catch_url': 'http://example.com/eye_catch_url'
         }
 
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(json.loads(response['body']), expected_item)
 
-    def test_main_ok_with_paid_article(self):
+    def test_paid_article(self):
         params = {
             'pathParameters': {
                 'article_id': 'publicId0002'
@@ -147,39 +117,7 @@ class TestMeArticlesPublicShow(TestCase):
             'overview': 'sample_overview2',
             'sort_key': 1520150272000001,
             'eye_catch_url': 'http://example.com/eye_catch_url',
-            'price': 100,
-            'pv_count': 0
-        }
-
-        self.assertEqual(response['statusCode'], 200)
-        self.assertEqual(json.loads(response['body']), expected_item)
-
-    def test_main_ok_not_exists_private_info(self):
-        params = {
-            'pathParameters': {
-                'article_id': 'publicId0003'
-            },
-            'requestContext': {
-                'authorizer': {
-                    'claims': {
-                        'cognito:username': 'test03'
-                    }
-                }
-            }
-        }
-
-        response = MeArticlesPublicShow(params, {}, self.dynamodb).main()
-
-        expected_item = {
-            'article_id': 'publicId0003',
-            'user_id': 'test03',
-            'title': 'sample_title3',
-            'body': 'sample_body3',
-            'status': 'public',
-            'overview': 'sample_overview3',
-            'sort_key': 1520150272000002,
-            'eye_catch_url': 'http://example.com/eye_catch_url',
-            'pv_count': 0
+            'price': 100
         }
 
         self.assertEqual(response['statusCode'], 200)

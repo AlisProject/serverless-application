@@ -34,24 +34,15 @@ class MeArticlesPublicShow(LambdaBase):
     def exec_main_proc(self):
         article_info_table = self.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
         article_content_table = self.dynamodb.Table(os.environ['ARTICLE_CONTENT_TABLE_NAME'])
-        aricle_private_info_table = self.dynamodb.Table(os.environ['ARTICLE_PRIVATE_INFO_TABLE_NAME'])
 
         article_info = article_info_table.get_item(Key={'article_id': self.params['article_id']}).get('Item')
         article_content = article_content_table.get_item(Key={'article_id': self.params['article_id']}).get('Item')
-        aricle_private_info = aricle_private_info_table.get_item(Key={'article_id': self.params['article_id']}).get(
-            'Item')
 
-        # add paid_body
         if 'price' in article_info:
             article_content['body'] = article_content['paid_body']
             article_content.pop('paid_body', None)
-        article_info.update(article_content)
 
-        # add pv_count
-        if aricle_private_info is None or aricle_private_info.get('pv_count') is None:
-            article_info['pv_count'] = 0
-        else:
-            article_info['pv_count'] = aricle_private_info['pv_count']
+        article_info.update(article_content)
 
         return {
             'statusCode': 200,
