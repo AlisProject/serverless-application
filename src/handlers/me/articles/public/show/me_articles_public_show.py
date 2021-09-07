@@ -47,11 +47,11 @@ class MeArticlesPublicShow(LambdaBase):
             article_content.pop('paid_body', None)
         article_info.update(article_content)
 
-        # add pv_count
-        if aricle_private_info is None or aricle_private_info.get('pv_count') is None:
-            article_info['pv_count'] = 0
+        # add pv_counts
+        if aricle_private_info is None or aricle_private_info.get('pv_counts') is None:
+            article_info['pv_counts'] = 0
         else:
-            article_info['pv_count'] = aricle_private_info['pv_count']
+            article_info['pv_counts'] = aricle_private_info['pv_counts']
 
         return {
             'statusCode': 200,

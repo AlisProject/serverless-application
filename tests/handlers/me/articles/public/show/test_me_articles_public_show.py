@@ -51,7 +51,7 @@ class TestMeArticlesPublicShow(TestCase):
         article_private_info_items = [
             {
                 'article_id': 'publicId0001',
-                'pv_count': 100,
+                'pv_counts': 100,
             },
             {
                 'article_id': 'publicId0002',
@@ -116,7 +116,7 @@ class TestMeArticlesPublicShow(TestCase):
             'overview': 'sample_overview1',
             'sort_key': 1520150272000000,
             'eye_catch_url': 'http://example.com/eye_catch_url',
-            'pv_count': 100
+            'pv_counts': 100
         }
 
         self.assertEqual(response['statusCode'], 200)
@@ -148,7 +148,7 @@ class TestMeArticlesPublicShow(TestCase):
             'sort_key': 1520150272000001,
             'eye_catch_url': 'http://example.com/eye_catch_url',
             'price': 100,
-            'pv_count': 0
+            'pv_counts': 0
         }
 
         self.assertEqual(response['statusCode'], 200)
@@ -179,7 +179,7 @@ class TestMeArticlesPublicShow(TestCase):
             'overview': 'sample_overview3',
             'sort_key': 1520150272000002,
             'eye_catch_url': 'http://example.com/eye_catch_url',
-            'pv_count': 0
+            'pv_counts': 0
         }
 
         self.assertEqual(response['statusCode'], 200)
