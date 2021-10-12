@@ -65,7 +65,9 @@ class TestArticlesEyecatch(TestCase):
         eyecatch_articles = [
             {
                 'article_type': 'eyecatch',
-                'articles': ['testid000001', 'testid000002', 'testid000003']
+                'articles': {
+                    'test_topic': ['testid000001', 'testid000002', 'testid000003']
+                }
             }
         ]
         TestsUtil.create_table(
@@ -79,46 +81,78 @@ class TestArticlesEyecatch(TestCase):
         TestsUtil.delete_all_tables(cls.dynamodb)
 
     def test_main_ok(self):
-        response = ArticlesEyecatch({}, {}, dynamodb=self.dynamodb).main()
+        params = {
+            'queryStringParameters': {
+                'topic': 'test_topic'
+            }
+        }
+        response = ArticlesEyecatch(params, {}, dynamodb=self.dynamodb).main()
         self.assertEqual(response['statusCode'], 200)
 
         expected = [self.article_info_items[0], self.article_info_items[1], self.article_info_items[2]]
         self.assertEqual(json.loads(response['body'])['Items'], expected)
 
     def test_main_ok_with_none_response(self):
+        params = {
+            'queryStringParameters': {
+                'topic': 'test_topic'
+            }
+        }
         table = self.dynamodb.Table(os.environ['SCREENED_ARTICLE_TABLE_NAME'])
         table.put_item(Item={
             'article_type': 'eyecatch',
-            'articles': ['testid000004', 'testid000005', 'testid000003']
+            'articles': {
+                'test_topic': ['testid000004', 'testid000005', 'testid000003']
+            }
         })
 
-        response = ArticlesEyecatch({}, {}, dynamodb=self.dynamodb).main()
+        response = ArticlesEyecatch(params, {}, dynamodb=self.dynamodb).main()
         self.assertEqual(response['statusCode'], 200)
 
-        expected = [None, None, self.article_info_items[2]]
+        expected = [self.article_info_items[2]]
 
         self.assertEqual(json.loads(response['body'])['Items'], expected)
 
     def test_main_ok_with_empty_article(self):
         table = self.dynamodb.Table(os.environ['SCREENED_ARTICLE_TABLE_NAME'])
 
+        params = {
+            'queryStringParameters': {
+                'topic': 'test_topic'
+            }
+        }
+
         table.delete_item(Key={'article_type': 'eyecatch'})
 
-        response = ArticlesEyecatch({}, {}, dynamodb=self.dynamodb).main()
+        response = ArticlesEyecatch(params, {}, dynamodb=self.dynamodb).main()
         self.assertEqual(response['statusCode'], 200)
 
-        expected = [None, None, None]
+        expected = []
 
         self.assertEqual(json.loads(response['body'])['Items'], expected)
 
         table.put_item(Item={
             'article_type': 'eyecatch',
-            'articles': []
+            'articles': {}
         })
 
-        response = ArticlesEyecatch({}, {}, dynamodb=self.dynamodb).main()
+        response = ArticlesEyecatch(params, {}, dynamodb=self.dynamodb).main()
         self.assertEqual(response['statusCode'], 200)
 
-        expected = [None, None, None]
+        expected = []
+
+        self.assertEqual(json.loads(response['body'])['Items'], expected)
+
+        table.put_item(Item={
+            'article_type': 'eyecatch',
+            'articles': {
+                'not_exists': ['testid000001', 'testid000002', 'testid000003']
+            }
+        })
+
+        response = ArticlesEyecatch(params, {}, dynamodb=self.dynamodb).main()
+        self.assertEqual(response['statusCode'], 200)
+
+        expected = []
 
         self.assertEqual(json.loads(response['body'])['Items'], expected)
