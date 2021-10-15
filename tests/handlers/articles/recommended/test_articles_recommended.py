@@ -94,10 +94,6 @@ class TestArticlesRecommended(TestCase):
 
         eyecatch_articles = [
             {
-                'article_type': 'eyecatch',
-                'articles': ['eyecatch0001', 'eyecatch0002', 'eyecatch0003']
-            },
-            {
                 'article_type': 'recommended',
                 'articles': [article['article_id'] for article in self.article_info_items]
             },
@@ -194,12 +190,6 @@ class TestArticlesRecommended(TestCase):
     def test_main_ok_with_eyecatch_and_blacklisted_articles(self):
         table = self.dynamodb.Table(os.environ['SCREENED_ARTICLE_TABLE_NAME'])
         table.put_item(Item={
-            'article_type': 'eyecatch',
-            'articles': [self.article_info_items[0]['article_id'],
-                         self.article_info_items[1]['article_id'],
-                         self.article_info_items[2]['article_id']]
-        })
-        table.put_item(Item={
             'article_type': 'blacklisted',
             'articles': [self.article_info_items[3]['article_id']]
         })
@@ -213,14 +203,19 @@ class TestArticlesRecommended(TestCase):
         response = ArticlesRecommended(params, {}, dynamodb=self.dynamodb).main()
         self.assertEqual(response['statusCode'], 200)
 
-        expected = [self.article_info_items[4], self.article_info_items[5]]
+        expected = [
+            self.article_info_items[0],
+            self.article_info_items[1],
+            self.article_info_items[2],
+            self.article_info_items[4],
+            self.article_info_items[5]
+        ]
 
         self.assertEqual(json.loads(response['body'])['Items'], expected)
 
     def test_main_ok_with_empty_article(self):
         table = self.dynamodb.Table(os.environ['SCREENED_ARTICLE_TABLE_NAME'])
 
-        table.delete_item(Key={'article_type': 'eyecatch'})
         table.delete_item(Key={'article_type': 'recommended'})
         table.delete_item(Key={'article_type': 'blacklisted'})
 

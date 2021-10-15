@@ -28,7 +28,7 @@ class ArticlesRecommended(LambdaBase):
     def exec_main_proc(self):
         recommended_article_ids = self.__get_screened_article_ids('recommended')
 
-        excluded_article_ids = self.__get_screened_article_ids('eyecatch') + self.__get_screened_article_ids('blacklisted')
+        excluded_article_ids = self.__get_screened_article_ids('blacklisted')
         recommended_article_ids = [
             article_id for article_id in recommended_article_ids if article_id not in excluded_article_ids
         ]
