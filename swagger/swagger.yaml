@@ -2274,7 +2274,12 @@ paths:
           default:
             statusCode: "200"
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesDraftsDelete.Arn}/invocations
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
+              - Fn::ImportValue:
+                  Fn::Sub: "${AlisAppId}-MeArticlesDraftsDelete"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
