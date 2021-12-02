@@ -1228,28 +1228,6 @@ paths:
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
-    delete:
-      description: "下書き記事を削除"
-      parameters:
-      - name: 'article_id'
-        in: 'path'
-        description: '対象の記事を指定するために使用'
-        required: true
-        type: 'string'
-      responses:
-        '200':
-          description: '対象記事の削除が完了'
-      security:
-        - cognitoUserPool: []
-      x-amazon-apigateway-integration:
-        responses:
-          default:
-            statusCode: "200"
-        uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesDraftsDelete.Arn}/invocations
-        passthroughBehavior: when_no_templates
-        httpMethod: POST
-        type: aws_proxy
   /me/articles/drafts/article_id:
     post:
       description: 'article_idを作成'
@@ -2275,6 +2253,28 @@ paths:
             statusCode: '200'
         uri:
           Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesDraftsUpdate.Arn}/invocations
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+    delete:
+      description: "下書き記事を削除"
+      parameters:
+        - name: 'article_id'
+          in: 'path'
+          description: '対象の記事を指定するために使用'
+          required: true
+          type: 'string'
+      responses:
+        '200':
+          description: '対象記事の削除が完了'
+      security:
+        - cognitoUserPool: []
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MeArticlesDraftsDelete.Arn}/invocations
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
