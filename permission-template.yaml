@@ -232,7 +232,7 @@ Resources:
         Fn::ImportValue:
           Fn::Sub: "${AlisAppId}-MeArticlesDraftsDelete"
       Principal: "apigateway.amazonaws.com"
-      SourceArn: !Sub ${RestApiArn}/*/DELETE/me/articles/drafts
+      SourceArn: !Sub ${RestApiArn}/*/DELETE/me/articles/*/drafts
   MeConfigurationsMuteUsersAddApiGatewayInvoke:
     Type: "AWS::Lambda::Permission"
     Properties:
