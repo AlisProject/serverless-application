@@ -107,6 +107,26 @@ class TestMeArticlesLikeCreate(TestCase):
             self.unread_notification_manager_items
         )
 
+        user_configurations_items = [
+            {
+                'user_id': 'test01',
+                'private_eth_address': '0x1234567890123456789012345678901234567890'
+            },
+            {
+                'user_id': 'test05',
+                'private_eth_address': '0x1234567890123456789012345678901234567891'
+            },
+            {
+                'user_id': 'test06',
+                'private_eth_address': '0x1234567890123456789012345678901234567892'
+            },
+            {
+                'user_id': 'article_user_id_02',
+                'private_eth_address': '0x1234567890123456789012345678901234567893'
+            },
+        ]
+        TestsUtil.create_table(self.dynamodb, os.environ['USER_CONFIGURATIONS_TABLE_NAME'], user_configurations_items)
+
     def tearDown(self):
         TestsUtil.delete_all_tables(self.dynamodb)
 
@@ -126,7 +146,6 @@ class TestMeArticlesLikeCreate(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'test05',
-                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -181,7 +200,6 @@ class TestMeArticlesLikeCreate(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'test06',
-                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -233,7 +251,6 @@ class TestMeArticlesLikeCreate(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'test06',
-                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -275,7 +292,6 @@ class TestMeArticlesLikeCreate(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': self.article_info_table_items[2]['user_id'],
-                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -313,7 +329,6 @@ class TestMeArticlesLikeCreate(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'test05',
-                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -335,7 +350,6 @@ class TestMeArticlesLikeCreate(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': 'test05',
-                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -362,7 +376,6 @@ class TestMeArticlesLikeCreate(TestCase):
                 'authorizer': {
                     'claims': {
                         'cognito:username': self.article_liked_user_table_items[0]['user_id'],
-                        'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -382,7 +395,7 @@ class TestMeArticlesLikeCreate(TestCase):
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': self.article_liked_user_table_items[0]['user_id'],
+                        'cognito:username': self.article_liked_user_table_items[1]['user_id'],
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
                     }
@@ -390,8 +403,8 @@ class TestMeArticlesLikeCreate(TestCase):
             }
         }
         response = MeArticlesLikeCreate(event=params, context={}, dynamodb=self.dynamodb).main()
-        self.assertEqual(response['statusCode'], 400)
-        self.assertEqual(response['body'], '{"message": "Invalid parameter: not exists private_eth_address"}')
+        self.assertEqual(response['statusCode'], 403)
+        self.assertEqual(response['body'], '{"message": "Not exists private_eth_address"}')
 
     def test_validation_with_no_params(self):
         params = {}

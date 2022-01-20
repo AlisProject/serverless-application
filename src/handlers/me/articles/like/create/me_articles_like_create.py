@@ -26,8 +26,8 @@ class MeArticlesLikeCreate(LambdaBase):
 
     def validate_params(self):
         UserUtil.verified_phone_and_email(self.event)
-        if self.event['requestContext']['authorizer']['claims'].get('custom:private_eth_address') is None:
-            raise ValidationError('not exists private_eth_address')
+        UserUtil.validate_private_eth_address(self.dynamodb,
+                                              self.event['requestContext']['authorizer']['claims']['cognito:username'])
 
         # single
         if self.event.get('pathParameters') is None:
@@ -72,7 +72,8 @@ class MeArticlesLikeCreate(LambdaBase):
 
     def __create_like_notification(self, article_info):
         notification_table = self.dynamodb.Table(os.environ['NOTIFICATION_TABLE_NAME'])
-        notification_id = '-'.join([settings.LIKE_NOTIFICATION_TYPE, article_info['user_id'], article_info['article_id']])
+        notification_id = '-'.join(
+            [settings.LIKE_NOTIFICATION_TYPE, article_info['user_id'], article_info['article_id']])
         notification = notification_table.get_item(Key={'notification_id': notification_id}).get('Item')
 
         liked_count = self.__get_article_likes_count()
@@ -91,15 +92,15 @@ class MeArticlesLikeCreate(LambdaBase):
             )
         else:
             notification_table.put_item(Item={
-                    'notification_id': notification_id,
-                    'user_id': article_info['user_id'],
-                    'article_id': article_info['article_id'],
-                    'article_title': article_info['title'],
-                    'sort_key': TimeUtil.generate_sort_key(),
-                    'type': settings.LIKE_NOTIFICATION_TYPE,
-                    'liked_count': liked_count,
-                    'created_at': int(time.time())
-                }
+                'notification_id': notification_id,
+                'user_id': article_info['user_id'],
+                'article_id': article_info['article_id'],
+                'article_title': article_info['title'],
+                'sort_key': TimeUtil.generate_sort_key(),
+                'type': settings.LIKE_NOTIFICATION_TYPE,
+                'liked_count': liked_count,
+                'created_at': int(time.time())
+            }
             )
 
     def __update_unread_notification_manager(self, article_info):

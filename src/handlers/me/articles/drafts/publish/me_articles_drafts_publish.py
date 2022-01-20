@@ -8,7 +8,7 @@ import time
 
 from boto3.dynamodb.conditions import Key
 from lambda_base import LambdaBase
-from jsonschema import validate, ValidationError
+from jsonschema import validate
 from db_util import DBUtil
 from parameter_util import ParameterUtil
 from tag_util import TagUtil
@@ -30,8 +30,8 @@ class MeArticlesDraftsPublish(LambdaBase):
 
     def validate_params(self):
         UserUtil.verified_phone_and_email(self.event)
-        if self.event['requestContext']['authorizer']['claims'].get('custom:private_eth_address') is None:
-            raise ValidationError('not exists private_eth_address')
+        UserUtil.validate_private_eth_address(self.dynamodb,
+                                              self.event['requestContext']['authorizer']['claims']['cognito:username'])
 
         validate(self.params, self.get_schema())
 
@@ -81,7 +81,8 @@ class MeArticlesDraftsPublish(LambdaBase):
 
     def __delete_article_content_edit(self):
         article_content_edit_table = self.dynamodb.Table(os.environ['ARTICLE_CONTENT_EDIT_TABLE_NAME'])
-        article_content_edit = article_content_edit_table.get_item(Key={'article_id': self.params['article_id']}).get('Item')
+        article_content_edit = article_content_edit_table.get_item(Key={'article_id': self.params['article_id']}).get(
+            'Item')
 
         if article_content_edit:
             article_content_edit_table.delete_item(Key={'article_id': self.params['article_id']})
