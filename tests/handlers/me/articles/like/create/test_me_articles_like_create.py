@@ -1,4 +1,5 @@
 import os
+import settings
 from tests_util import TestsUtil
 from unittest import TestCase
 from me_articles_like_create import MeArticlesLikeCreate
@@ -10,6 +11,8 @@ class TestMeArticlesLikeCreate(TestCase):
     dynamodb = TestsUtil.get_dynamodb_client()
 
     def setUp(self):
+        TestsUtil.set_domain_env()
+        TestsUtil.set_twitter_app_auth_to_env()
         TestsUtil.set_all_tables_name_to_env()
         TestsUtil.delete_all_tables(self.dynamodb)
 
@@ -54,6 +57,7 @@ class TestMeArticlesLikeCreate(TestCase):
                 'title': 'title1',
                 'status': 'public',
                 'user_id': 'article_user_id_00',
+                'tags': ['aaa', 'bbb', 'ccc', 'あいうえお'],
                 'sort_key': 1520150272000000
             },
             {
@@ -118,6 +122,7 @@ class TestMeArticlesLikeCreate(TestCase):
 
     @patch('time.time', MagicMock(return_value=1520150272.000003))
     def test_main_ok_exist_article_id(self):
+        settings.LIKED_TWEET_COUNT = 2
         params = {
             'pathParameters': {
                 'article_id': self.article_info_table_items[0]['article_id']
@@ -139,8 +144,13 @@ class TestMeArticlesLikeCreate(TestCase):
         article_liked_user_before = article_liked_user_table.scan()['Items']
         unread_notification_manager_before = unread_notification_manager_table.scan()['Items']
 
-        article_liked_user = MeArticlesLikeCreate(event=params, context={}, dynamodb=self.dynamodb)
-        response = article_liked_user.main()
+        mock_lib = MagicMock()
+        with patch('me_articles_like_create.TwitterUtil', mock_lib):
+            article_liked_user = MeArticlesLikeCreate(event=params, context={}, dynamodb=self.dynamodb)
+            response = article_liked_user.main()
+            args, _ = mock_lib.return_value.post_tweet.call_args
+            self.assertTrue(mock_lib.return_value.post_tweet.called)
+            self.assertEqual(args[0], 'title1\nhttps://dummy/article_user_id_00/articles/testid000000\n#aaa #bbb #ccc #あいうえお')
 
         article_liked_user_after = article_liked_user_table.scan()['Items']
         unread_notification_manager_after = unread_notification_manager_table.scan()['Items']
@@ -173,6 +183,7 @@ class TestMeArticlesLikeCreate(TestCase):
 
     @patch('time.time', MagicMock(return_value=1520150272.000015))
     def test_create_notification_and_unread_notification_manager(self):
+        settings.LIKED_TWEET_COUNT = 100
         params = {
             'pathParameters': {
                 'article_id': self.article_info_table_items[1]['article_id']
@@ -195,8 +206,12 @@ class TestMeArticlesLikeCreate(TestCase):
         notification_before = notification_table.scan()['Items']
         unread_notification_manager_before = unread_notification_manager_table.scan()['Items']
 
-        article_liked_user = MeArticlesLikeCreate(event=params, context={}, dynamodb=self.dynamodb)
-        response = article_liked_user.main()
+        mock_lib = MagicMock()
+        with patch('me_articles_like_create.TwitterUtil', mock_lib):
+            article_liked_user = MeArticlesLikeCreate(event=params, context={}, dynamodb=self.dynamodb)
+            response = article_liked_user.main()
+            # いいねの数が規定数ではないため、実行されないこと
+            self.assertEqual(mock_lib.call_count, 0)
 
         notification_after = notification_table.scan()['Items']
         unread_notification_manager_after = unread_notification_manager_table.scan()['Items']
@@ -225,6 +240,7 @@ class TestMeArticlesLikeCreate(TestCase):
 
     @patch('time.time', MagicMock(return_value=1520150272.000015))
     def test_main_with_updating_notification(self):
+        settings.LIKED_TWEET_COUNT = 5
         params = {
             'pathParameters': {
                 'article_id': self.article_info_table_items[2]['article_id']
@@ -244,7 +260,13 @@ class TestMeArticlesLikeCreate(TestCase):
         notification_table = self.dynamodb.Table(os.environ['NOTIFICATION_TABLE_NAME'])
         notification_before = notification_table.scan()['Items']
 
-        response = MeArticlesLikeCreate(event=params, context={}, dynamodb=self.dynamodb).main()
+        mock_lib = MagicMock()
+        with patch('me_articles_like_create.TwitterUtil', mock_lib):
+            article_liked_user = MeArticlesLikeCreate(event=params, context={}, dynamodb=self.dynamodb)
+            response = article_liked_user.main()
+            args, _ = mock_lib.return_value.post_tweet.call_args
+            self.assertTrue(mock_lib.return_value.post_tweet.called)
+            self.assertEqual(args[0], 'title3_updated\nhttps://dummy/article_user_id_02/articles/testid000002')
 
         notification_after = notification_table.scan()['Items']
 

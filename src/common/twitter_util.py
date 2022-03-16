@@ -1,14 +1,25 @@
 import json
 import settings
+import os
 from urllib.parse import parse_qsl
 from requests_oauthlib import OAuth1Session
 from exceptions import TwitterOauthError
 
 
 class TwitterUtil:
-    def __init__(self, consumer_key, consumer_secret):
+    def __init__(self, consumer_key, consumer_secret, access_token=None, access_token_secret=None):
         self.consumer_key = consumer_key
         self.consumer_secret = consumer_secret
+        self.access_token = access_token
+        self.access_token_secret = access_token_secret
+
+    def post_tweet(self, payload):
+        if os['DOMAIN'] == 'alis.to':
+            oauth = self.__get_oauth()
+            return oauth.post(
+                "https://api.twitter.com/2/tweets",
+                json=payload,
+            )
 
     def get_user_info(self, oauth_token, oauth_verifier):
         response = self.__get_access_token(
@@ -85,6 +96,14 @@ class TwitterUtil:
         return twitter.post(
             settings.TWITTER_API_ACCESS_TOKEN_URL,
             params={'oauth_verifier': oauth_verifier}
+        )
+
+    def __get_oauth(self):
+        return OAuth1Session(
+            self.consumer_key,
+            client_secret=self.consumer_secret,
+            resource_owner_key=self.access_token,
+            resource_owner_secret=self.access_token_secret,
         )
 
     @staticmethod
