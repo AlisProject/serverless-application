@@ -12,6 +12,7 @@ from lambda_base import LambdaBase
 from jsonschema import validate, ValidationError
 from time_util import TimeUtil
 from user_util import UserUtil
+from twitter_util import TwitterUtil
 
 
 class MeArticlesLikeCreate(LambdaBase):
@@ -42,7 +43,8 @@ class MeArticlesLikeCreate(LambdaBase):
 
     def exec_main_proc(self):
         # 「いいね」情報登録処理
-        article_user_id = self.__get_article_user_id(self.event['pathParameters']['article_id'])
+        article_info = self.__get_article_info(self.event['pathParameters']['article_id'])
+        article_user_id = article_info.get('user_id')
         try:
             article_liked_user_table = self.dynamodb.Table(os.environ['ARTICLE_LIKED_USER_TABLE_NAME'])
             self.__create_article_liked_user(article_liked_user_table, article_user_id)
@@ -56,26 +58,29 @@ class MeArticlesLikeCreate(LambdaBase):
                 raise
 
         # 通知情報登録処理。「セルフいいね」だった場合は通知を行わない
+        liked_count = self.__get_article_likes_count()
         if article_user_id != self.event['requestContext']['authorizer']['claims']['cognito:username']:
             try:
                 article_info_table = self.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
                 article_info = article_info_table.get_item(Key={'article_id': self.params['article_id']}).get('Item')
-                self.__create_like_notification(article_info)
+                self.__create_like_notification(article_info, liked_count)
                 self.__update_unread_notification_manager(article_info)
             except Exception as e:
                 logging.fatal(e)
                 traceback.print_exc()
 
+        # 一定回数いいねされた場合 tweet を行う
+        if liked_count == settings.LIKED_TWEET_COUNT:
+            self.__post_tweet(user_id=article_user_id, title=article_info.get('title'), tags=article_info.get('tags'))
+
         return {
             'statusCode': 200
         }
 
-    def __create_like_notification(self, article_info):
+    def __create_like_notification(self, article_info, liked_count):
         notification_table = self.dynamodb.Table(os.environ['NOTIFICATION_TABLE_NAME'])
         notification_id = '-'.join([settings.LIKE_NOTIFICATION_TYPE, article_info['user_id'], article_info['article_id']])
         notification = notification_table.get_item(Key={'notification_id': notification_id}).get('Item')
-
-        liked_count = self.__get_article_likes_count()
 
         if notification:
             notification_table.update_item(
@@ -126,9 +131,9 @@ class MeArticlesLikeCreate(LambdaBase):
             ConditionExpression='attribute_not_exists(article_id)'
         )
 
-    def __get_article_user_id(self, article_id):
+    def __get_article_info(self, article_id):
         article_info_table = self.dynamodb.Table(os.environ['ARTICLE_INFO_TABLE_NAME'])
-        return article_info_table.get_item(Key={'article_id': article_id}).get('Item').get('user_id')
+        return article_info_table.get_item(Key={'article_id': article_id}).get('Item')
 
     def __get_article_likes_count(self):
         query_params = {
@@ -139,3 +144,22 @@ class MeArticlesLikeCreate(LambdaBase):
         response = article_liked_user_table.query(**query_params)
 
         return response['Count']
+
+    def __post_tweet(self, user_id, title, tags):
+        # tweet 文の作成
+        # hash tag 文
+        hash_tags_str = ''
+        if tags:
+            hash_tags_str += '\n#' + ' #'.join(tags)
+        # tweet 文
+        payload = \
+            f"{title}\nhttps://{os.environ['DOMAIN']}/{user_id}/articles/{self.event['pathParameters']['article_id']}"\
+            + hash_tags_str
+        # tweet 実施
+        twitter_util = TwitterUtil(
+            consumer_key=os.environ['TWITTER_APP_CONSUMER_KEY'],
+            consumer_secret=os.environ['TWITTER_APP_CONSUMER_SECRET'],
+            access_token=os.environ['TWITTER_APP_ACCESS_TOKEN'],
+            access_token_secret=os.environ['TWITTER_APP_ACCESS_TOKEN_SECRET']
+        )
+        twitter_util.post_tweet(payload)

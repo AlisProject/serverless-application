@@ -78,6 +78,10 @@ aws cloudformation deploy \
     TwitterConsumerKey=${SSM_PARAMS_PREFIX}TwitterConsumerKey \
     TwitterConsumerSecret=${SSM_PARAMS_PREFIX}TwitterConsumerSecret \
     TwitterOauthCallbackUrl=${SSM_PARAMS_PREFIX}TwitterOauthCallbackUrl \
+    TwitterAppConsumerKey=${SSM_PARAMS_PREFIX}TwitterAppConsumerKey \
+    TwitterAppConsumerSecret=${SSM_PARAMS_PREFIX}TwitterAppConsumerSecret \
+    TwitterAppAccessToken=${SSM_PARAMS_PREFIX}TwitterAppAccessToken \
+    TwitterAppAccessTokenSecret=${SSM_PARAMS_PREFIX}TwitterAppAccessTokenSecret \
     YahooClientId=${SSM_PARAMS_PREFIX}YahooClientId \
     YahooSecret=${SSM_PARAMS_PREFIX}YahooSecret \
     YahooOauthCallbackUrl=${SSM_PARAMS_PREFIX}YahooOauthCallbackUrl \

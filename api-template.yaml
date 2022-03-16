@@ -87,6 +87,14 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   TwitterOauthCallbackUrl:
     Type: 'AWS::SSM::Parameter::Value<String>'
+  TwitterAppConsumerKey:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  TwitterAppConsumerSecret:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  TwitterAppAccessToken:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  TwitterAppAccessTokenSecret:
+    Type: 'AWS::SSM::Parameter::Value<String>'
   LineChannelId:
     Type: 'AWS::SSM::Parameter::Value<String>'
   LineChannelSecret:
@@ -717,6 +725,12 @@ Resources:
         Fn::ImportValue:
           Fn::Sub: "${AlisAppId}-LambdaRole"
       CodeUri: ./deploy/me_articles_like_create.zip
+      Environment:
+        Variables:
+          TWITTER_APP_CONSUMER_KEY: !Ref TwitterAppConsumerKey
+          TWITTER_APP_CONSUMER_SECRET: !Ref TwitterAppConsumerSecret
+          TWITTER_APP_ACCESS_TOKEN: !Ref TwitterAppAccessToken
+          TWITTER_APP_ACCESS_TOKEN_SECRET: !Ref TwitterAppAccessTokenSecret
       Events:
         Api:
           Type: Api

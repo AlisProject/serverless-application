@@ -64,6 +64,17 @@ class TestsUtil:
         ]
 
     @classmethod
+    def set_twitter_app_auth_to_env(cls):
+        os.environ['TWITTER_APP_CONSUMER_KEY'] = 'dummy'
+        os.environ['TWITTER_APP_CONSUMER_SECRET'] = 'dummy'
+        os.environ['TWITTER_APP_ACCESS_TOKEN'] = 'dummy'
+        os.environ['TWITTER_APP_ACCESS_TOKEN_SECRET'] = 'dummy'
+
+    @classmethod
+    def set_domain_env(cls):
+        os.environ['DOMAIN'] = 'dummy'
+
+    @classmethod
     def delete_all_tables(cls, dynamodb):
         for table in dynamodb.tables.all():
             del_table = dynamodb.Table(table.table_name)
