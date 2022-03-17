@@ -152,9 +152,11 @@ class MeArticlesLikeCreate(LambdaBase):
         if tags:
             hash_tags_str += '\n#' + ' #'.join(tags)
         # tweet 文
-        payload = \
-            f"{title}\nhttps://{os.environ['DOMAIN']}/{user_id}/articles/{self.event['pathParameters']['article_id']}"\
-            + hash_tags_str
+        payload = {
+            "text": f"{title}\n"
+                    f"https://{os.environ['DOMAIN']}/{user_id}/articles/{self.event['pathParameters']['article_id']}" +
+                    hash_tags_str
+        }
         # tweet 実施
         twitter_util = TwitterUtil(
             consumer_key=os.environ['TWITTER_APP_CONSUMER_KEY'],

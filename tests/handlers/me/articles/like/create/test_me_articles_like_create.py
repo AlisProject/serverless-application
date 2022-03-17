@@ -150,7 +150,10 @@ class TestMeArticlesLikeCreate(TestCase):
             response = article_liked_user.main()
             args, _ = mock_lib.return_value.post_tweet.call_args
             self.assertTrue(mock_lib.return_value.post_tweet.called)
-            self.assertEqual(args[0], 'title1\nhttps://dummy/article_user_id_00/articles/testid000000\n#aaa #bbb #ccc #あいうえお')
+            self.assertEqual(
+                args[0],
+                {'text': 'title1\nhttps://dummy/article_user_id_00/articles/testid000000\n#aaa #bbb #ccc #あいうえお'}
+            )
 
         article_liked_user_after = article_liked_user_table.scan()['Items']
         unread_notification_manager_after = unread_notification_manager_table.scan()['Items']
@@ -266,7 +269,7 @@ class TestMeArticlesLikeCreate(TestCase):
             response = article_liked_user.main()
             args, _ = mock_lib.return_value.post_tweet.call_args
             self.assertTrue(mock_lib.return_value.post_tweet.called)
-            self.assertEqual(args[0], 'title3_updated\nhttps://dummy/article_user_id_02/articles/testid000002')
+            self.assertEqual(args[0], {'text': 'title3_updated\nhttps://dummy/article_user_id_02/articles/testid000002'})
 
         notification_after = notification_table.scan()['Items']
 
