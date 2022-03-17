@@ -14,7 +14,7 @@ class TwitterUtil:
         self.access_token_secret = access_token_secret
 
     def post_tweet(self, payload):
-        if os['DOMAIN'] == 'alis.to':
+        if os.environ['DOMAIN'] == 'alis.to':
             oauth = self.__get_oauth()
             return oauth.post(
                 "https://api.twitter.com/2/tweets",
