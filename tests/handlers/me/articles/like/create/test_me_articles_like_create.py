@@ -73,6 +73,14 @@ class TestMeArticlesLikeCreate(TestCase):
                 'status': 'public',
                 'user_id': 'article_user_id_02',
                 'sort_key': 1520150272000002
+            },
+            {
+                'article_id': 'testid000003',
+                'title': '123456789012345678901234567890123456789012345678901234567890',
+                'status': 'public',
+                'user_id': 'article_user_id_03',
+                'tags': ['a1234567890', 'b1234567890', 'c1234567890', 'd1234567890', 'e1234567890'],
+                'sort_key': 1520150272000003
             }
         ]
         TestsUtil.create_table(
@@ -152,7 +160,12 @@ class TestMeArticlesLikeCreate(TestCase):
             self.assertTrue(mock_lib.return_value.post_tweet.called)
             self.assertEqual(
                 args[0],
-                {'text': 'title1\nhttps://dummy/article_user_id_00/articles/testid000000\n#aaa #bbb #ccc #あいうえお'}
+                {'text':
+                    'title1\n'
+                    'https://dummy/article_user_id_00/articles/testid000000\n'
+                    '#aaa #bbb #ccc #あいうえお\n'
+                    '※人気記事ボット🤖'
+                 }
             )
 
         article_liked_user_after = article_liked_user_table.scan()['Items']
@@ -269,7 +282,14 @@ class TestMeArticlesLikeCreate(TestCase):
             response = article_liked_user.main()
             args, _ = mock_lib.return_value.post_tweet.call_args
             self.assertTrue(mock_lib.return_value.post_tweet.called)
-            self.assertEqual(args[0], {'text': 'title3_updated\nhttps://dummy/article_user_id_02/articles/testid000002'})
+            self.assertEqual(
+                args[0],
+                {'text':
+                    'title3_updated\n'
+                    'https://dummy/article_user_id_02/articles/testid000002\n'
+                    '※人気記事ボット🤖'
+                 }
+            )
 
         notification_after = notification_table.scan()['Items']
 
@@ -292,14 +312,15 @@ class TestMeArticlesLikeCreate(TestCase):
 
     @patch('time.time', MagicMock(return_value=1520150272.000015))
     def test_main_ok_with_self_liked_user(self):
+        settings.LIKED_TWEET_COUNT = 1
         params = {
             'pathParameters': {
-                'article_id': self.article_info_table_items[2]['article_id']
+                'article_id': self.article_info_table_items[3]['article_id']
             },
             'requestContext': {
                 'authorizer': {
                     'claims': {
-                        'cognito:username': self.article_info_table_items[2]['user_id'],
+                        'cognito:username': self.article_info_table_items[3]['user_id'],
                         'custom:private_eth_address': '0x1234567890123456789012345678901234567890',
                         'phone_number_verified': 'true',
                         'email_verified': 'true'
@@ -315,7 +336,20 @@ class TestMeArticlesLikeCreate(TestCase):
         notification_before = notification_table.scan()['Items']
         unread_notification_manager_before = unread_notification_manager_table.scan()['Items']
 
-        response = MeArticlesLikeCreate(event=params, context={}, dynamodb=self.dynamodb).main()
+        mock_lib = MagicMock()
+        with patch('me_articles_like_create.TwitterUtil', mock_lib):
+            response = MeArticlesLikeCreate(event=params, context={}, dynamodb=self.dynamodb).main()
+            args, _ = mock_lib.return_value.post_tweet.call_args
+            self.assertTrue(mock_lib.return_value.post_tweet.called)
+            self.assertEqual(
+                args[0],
+                {
+                    'text': '12345678901234567890123456789012345678901234567890...\n'
+                            'https://dummy/article_user_id_03/articles/testid000003\n'
+                            '#a1234567890 #b1234567890 #c1234567890 #d1234567890\n'
+                            '※人気記事ボット🤖'
+                }
+            )
 
         notification_after = notification_table.scan()['Items']
         unread_notification_manager_after = unread_notification_manager_table.scan()['Items']

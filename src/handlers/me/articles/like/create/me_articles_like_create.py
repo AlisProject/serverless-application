@@ -147,15 +147,26 @@ class MeArticlesLikeCreate(LambdaBase):
 
     def __post_tweet(self, user_id, title, tags):
         # tweet 文の作成
-        # hash tag 文
+        # title 文(50文字以上は省略)
+        if len(title) > 50:
+            show_title = title[:50] + '...'
+        else:
+            show_title = title
+        # hash tag 文(最大55文字)
         hash_tags_str = ''
         if tags:
-            hash_tags_str += '\n#' + ' #'.join(tags)
+            for tag in tags:
+                if hash_tags_str == '':
+                    hash_tags_str += '\n#' + tag
+                elif len(hash_tags_str + tag) < 55:
+                    hash_tags_str += ' #' + tag
+                else:
+                    break
         # tweet 文
         payload = {
-            "text": f"{title}\n"
+            "text": f"{show_title}\n"
                     f"https://{os.environ['DOMAIN']}/{user_id}/articles/{self.event['pathParameters']['article_id']}" +
-                    hash_tags_str
+                    hash_tags_str + "\n※人気記事ボット🤖"
         }
         # tweet 実施
         twitter_util = TwitterUtil(
