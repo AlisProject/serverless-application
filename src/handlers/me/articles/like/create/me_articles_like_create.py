@@ -166,7 +166,7 @@ class MeArticlesLikeCreate(LambdaBase):
         payload = {
             "text": f"{show_title}\n"
                     f"https://{os.environ['DOMAIN']}/{user_id}/articles/{self.event['pathParameters']['article_id']}" +
-                    hash_tags_str
+                    hash_tags_str + "\n※人気記事ボット🤖"
         }
         # tweet 実施
         twitter_util = TwitterUtil(

@@ -160,7 +160,12 @@ class TestMeArticlesLikeCreate(TestCase):
             self.assertTrue(mock_lib.return_value.post_tweet.called)
             self.assertEqual(
                 args[0],
-                {'text': 'title1\nhttps://dummy/article_user_id_00/articles/testid000000\n#aaa #bbb #ccc #あいうえお'}
+                {'text':
+                    'title1\n'
+                    'https://dummy/article_user_id_00/articles/testid000000\n'
+                    '#aaa #bbb #ccc #あいうえお\n'
+                    '※人気記事ボット🤖'
+                 }
             )
 
         article_liked_user_after = article_liked_user_table.scan()['Items']
@@ -277,7 +282,14 @@ class TestMeArticlesLikeCreate(TestCase):
             response = article_liked_user.main()
             args, _ = mock_lib.return_value.post_tweet.call_args
             self.assertTrue(mock_lib.return_value.post_tweet.called)
-            self.assertEqual(args[0], {'text': 'title3_updated\nhttps://dummy/article_user_id_02/articles/testid000002'})
+            self.assertEqual(
+                args[0],
+                {'text':
+                    'title3_updated\n'
+                    'https://dummy/article_user_id_02/articles/testid000002\n'
+                    '※人気記事ボット🤖'
+                 }
+            )
 
         notification_after = notification_table.scan()['Items']
 
@@ -334,7 +346,8 @@ class TestMeArticlesLikeCreate(TestCase):
                 {
                     'text': '12345678901234567890123456789012345678901234567890...\n'
                             'https://dummy/article_user_id_03/articles/testid000003\n'
-                            '#a1234567890 #b1234567890 #c1234567890 #d1234567890'
+                            '#a1234567890 #b1234567890 #c1234567890 #d1234567890\n'
+                            '※人気記事ボット🤖'
                 }
             )
 
