@@ -19,6 +19,7 @@ class SearchTagsCount(LambdaBase):
         }
 
     def validate_params(self):
+        self.params['tags'] = self.event['multiValueQueryStringParameters'].get('tags')
         validate(self.params, self.get_schema())
 
     def exec_main_proc(self):

@@ -73,7 +73,7 @@ class TestSearchTagsCount(TestCase):
     @patch('time.time', MagicMock(return_value=1530112710 + 86400 * 7))
     def test_search_request(self):
         params = {
-                'queryStringParameters': {
+                'multiValueQueryStringParameters': {
                     'tags': ['A', 'B', 'C', 'D']
                 }
         }
@@ -90,7 +90,7 @@ class TestSearchTagsCount(TestCase):
 
     def test_search_request_not_exists(self):
         params = {
-                'queryStringParameters': {
+                'multiValueQueryStringParameters': {
                     'tags': ['あ', 'い', 'う']
                 }
         }
@@ -107,7 +107,7 @@ class TestSearchTagsCount(TestCase):
     @patch('time.time', MagicMock(return_value=1530112710 + 86400 * 7))
     def test_search_with_tag_half_kana(self):
         params = {
-                'queryStringParameters': {
+                'multiValueQueryStringParameters': {
                     'tags': ['ﾊﾝｶｸ', '＆＄％！”＃', '𪚲🍣𪚲', 'aaa-aaa', 'abcde vwxyz']
                 }
         }
@@ -130,7 +130,7 @@ class TestSearchTagsCount(TestCase):
             temp_tags.append('AAA')
 
         params = {
-                'queryStringParameters': {
+                'multiValueQueryStringParameters': {
                     'tags': temp_tags,
                 }
         }
@@ -139,14 +139,14 @@ class TestSearchTagsCount(TestCase):
 
     def test_search_no_params(self):
         params = {
-            'queryStringParameters': {}
+            'multiValueQueryStringParameters': {}
         }
         response = SearchTagsCount(params, {}, elasticsearch=self.elasticsearch).main()
         self.assertEqual(response['statusCode'], 400)
 
     def test_invalid_tag_parmas(self):
         params = {
-            'queryStringParameters': {
+            'multiValueQueryStringParameters': {
                 'tags': ['']
             }
         }
@@ -154,7 +154,7 @@ class TestSearchTagsCount(TestCase):
         self.assertEqual(response['statusCode'], 400)
 
         params = {
-            'queryStringParameters': {
+            'multiValueQueryStringParameters': {
                 'tags': ['A' * 26]
             }
         }
