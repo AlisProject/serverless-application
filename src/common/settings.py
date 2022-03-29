@@ -150,6 +150,15 @@ parameters = {
         },
         'maxItems': 5
     },
+    'tags_count': {
+        'type': 'array',
+        'items': {
+            'type': 'string',
+            'minLength': 1,
+            'maxLength': 25
+        },
+        'maxItems': 150
+    },
     'tip_value': {
         'type': 'number',
         'minimum': 1,
