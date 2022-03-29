@@ -314,7 +314,7 @@ Resources:
   SearchTagsCount:
     Type: "AWS::Lambda::Function"
     Properties:
-      Code: ./deploy/articles_tip_ranking.zip
+      Code: ./deploy/search_tags_count.zip
       Environment:
         Variables:
           ELASTIC_SEARCH_ENDPOINT: !Ref ElasticSearchEndpoint
