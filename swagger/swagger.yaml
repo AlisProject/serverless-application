@@ -516,6 +516,11 @@ paths:
         type: array
         items:
           type: string
+      - name: "search_days"
+        in: "query"
+        description: "検索対象の日数"
+        required: false
+        type: "integer"
       responses:
         "200":
           description: "タグ件数一覧"

@@ -88,6 +88,27 @@ class TestSearchTagsCount(TestCase):
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(expected, actual)
 
+    @patch('time.time', MagicMock(return_value=1530112710 + 86400 * 7))
+    def test_search_request_exists_search_days(self):
+        params = {
+                'multiValueQueryStringParameters': {
+                    'tags': ['A', 'B', 'C', 'D']
+                },
+                'queryStringParameters': {
+                    'search_days': '8',
+                }
+        }
+        response = SearchTagsCount(params, {}, elasticsearch=self.elasticsearch).main()
+        actual = json.loads(response['body'])
+        expected = [
+             {'count': 4, 'tag': 'A'},
+             {'count': 3, 'tag': 'B'},
+             {'count': 2, 'tag': 'C'},
+             {'count': 0, 'tag': 'D'}
+        ]
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(expected, actual)
+
     def test_search_request_not_exists(self):
         params = {
                 'multiValueQueryStringParameters': {
@@ -156,6 +177,29 @@ class TestSearchTagsCount(TestCase):
         params = {
             'multiValueQueryStringParameters': {
                 'tags': ['A' * 26]
+            }
+        }
+        response = SearchTagsCount(params, {}, elasticsearch=self.elasticsearch).main()
+        self.assertEqual(response['statusCode'], 400)
+
+    def test_invalid_search_days_parmas(self):
+        params = {
+            'multiValueQueryStringParameters': {
+                'tags': ['aaa']
+            },
+            'queryStringParameters': {
+                'search_days': '0',
+            }
+        }
+        response = SearchTagsCount(params, {}, elasticsearch=self.elasticsearch).main()
+        self.assertEqual(response['statusCode'], 400)
+
+        params = {
+            'multiValueQueryStringParameters': {
+                'tags': ['aaa']
+            },
+            'queryStringParameters': {
+                'search_days': '10001',
             }
         }
         response = SearchTagsCount(params, {}, elasticsearch=self.elasticsearch).main()

@@ -283,7 +283,12 @@ parameters = {
     },
     'pin_code': {
         'type': 'string'
-    }
+    },
+    'tags_count_search_days': {
+        'type': 'integer',
+        'minimum': 1,
+        'maximum': 10000
+    },
 }
 
 # ログに出力されてはいけないパラメータ(ログ出力時に値がマスクされる)
