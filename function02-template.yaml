@@ -311,6 +311,23 @@ Resources:
       Timeout: 15
       TracingConfig:
         Mode: "Active"
+  SearchTagsCount:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Code: ./deploy/search_tags_count.zip
+      Environment:
+        Variables:
+          ELASTIC_SEARCH_ENDPOINT: !Ref ElasticSearchEndpoint
+      Handler: handler.lambda_handler
+      MemorySize: 3008
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
+      Runtime: python3.6
+      Timeout: 300
+      TracingConfig:
+        Mode: "Active"
+
 
 Outputs:
   ArticleSupportersIndex:
@@ -373,3 +390,7 @@ Outputs:
     Value: !GetAtt TopicsCryptoRankingIndex.Arn
     Export:
       Name: !Sub "${AlisAppId}-TopicsCryptoRankingIndex"
+  SearchTagsCount:
+    Value: !GetAtt SearchTagsCount.Arn
+    Export:
+      Name: !Sub "${AlisAppId}-SearchTagsCount"

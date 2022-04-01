@@ -150,6 +150,15 @@ parameters = {
         },
         'maxItems': 5
     },
+    'tags_count': {
+        'type': 'array',
+        'items': {
+            'type': 'string',
+            'minLength': 1,
+            'maxLength': 25
+        },
+        'maxItems': 150
+    },
     'tip_value': {
         'type': 'number',
         'minimum': 1,
@@ -274,7 +283,12 @@ parameters = {
     },
     'pin_code': {
         'type': 'string'
-    }
+    },
+    'tags_count_search_days': {
+        'type': 'integer',
+        'minimum': 1,
+        'maximum': 10000
+    },
 }
 
 # ログに出力されてはいけないパラメータ(ログ出力時に値がマスクされる)

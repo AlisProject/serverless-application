@@ -256,6 +256,13 @@ definitions:
         type: integer
       created_at:
         type: integer
+  TagCount:
+    type: object
+    properties:
+      tag:
+        type: string
+      count:
+        type: integer
   Fraud:
     type: object
     properties:
@@ -495,6 +502,43 @@ paths:
             statusCode: "200"
         uri:
           Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ElasticSearchSearchTags.Arn}/invocations
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /search/tags_count:
+    get:
+      description: "タグ件数検索"
+      parameters:
+      - name: "tags"
+        in: "query"
+        description: "検索タグ"
+        required: true
+        type: array
+        items:
+          type: string
+      - name: "search_days"
+        in: "query"
+        description: "検索対象の日数"
+        required: false
+        type: "integer"
+      responses:
+        "200":
+          description: "タグ件数一覧"
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/TagCount'
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
+              - Fn::ImportValue:
+                  Fn::Sub: "${AlisAppId}-SearchTagsCount"
+              - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy

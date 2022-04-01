@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import settings
 import os
+import time
 
 
 class ESUtil:
@@ -37,6 +38,35 @@ class ESUtil:
         tags = [item['_source'] for item in response['hits']['hits']]
 
         return tags
+
+    @staticmethod
+    def search_tags_count(elasticsearch, size=500, term=604800):
+        from_time = round(time.time()) - term
+        body = {
+          'size': 0,
+          'query': {
+            'bool': {
+              'must': [
+                {'range': {'published_at': {'gte': from_time}}}
+              ]
+            }
+          },
+          'aggs': {
+            'tags_count': {
+              'terms': {
+                'field': 'tags.keyword',
+                'order': {'_count': 'desc'},
+                'size': size
+              }
+            }
+          }
+        }
+
+        response = elasticsearch.search(
+            index='articles',
+            body=body
+        )
+        return response['aggregations']['tags_count']['buckets']
 
     @staticmethod
     def search_article(elasticsearch, limit, page, word=None, tag=None):
