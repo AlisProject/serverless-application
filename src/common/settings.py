@@ -392,7 +392,7 @@ TWITTER_API_ACCESS_TOKEN_URL = 'https://api.twitter.com/oauth/access_token'
 TWITTER_API_VERIFY_CREDENTIALS_URL = 'https://api.twitter.com/1.1/account/verify_credentials.json'
 TWITTER_USERNAME_PREFIX = 'Twitter-'
 FAKE_USER_EMAIL_DOMAIN = 'example.com'
-LIKED_TWEET_COUNT = 10
+LIKED_TWEET_COUNT = 20
 
 LINE_REQUEST_HEADER = {'content-type': 'application/x-www-form-urlencoded'}
 LINE_AUTHORIZE_URL = 'https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id='
