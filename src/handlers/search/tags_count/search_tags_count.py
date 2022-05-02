@@ -30,7 +30,7 @@ class SearchTagsCount(LambdaBase):
         search_size = len(self.params['tags']) * settings.parameters['tags']['maxItems']
         search_days = self.params.get('search_days') if self.params.get('search_days') else 7
         from_time = 86400 * search_days
-        search_result = ESUtil.search_tags_count(self.elasticsearch, search_size, from_time)
+        search_result = ESUtil.search_tags_count(self.elasticsearch, self.params['tags'], search_size, from_time)
 
         # 集計結果より指定タグの件数を取得
         temp = []
