@@ -40,14 +40,15 @@ class ESUtil:
         return tags
 
     @staticmethod
-    def search_tags_count(elasticsearch, size=500, term=604800):
+    def search_tags_count(elasticsearch, tags, size=500, term=604800):
         from_time = round(time.time()) - term
         body = {
           'size': 0,
           'query': {
             'bool': {
               'must': [
-                {'range': {'published_at': {'gte': from_time}}}
+                {'range': {'published_at': {'gte': from_time}}},
+                {'terms': {'tags.keyword': tags}}
               ]
             }
           },
