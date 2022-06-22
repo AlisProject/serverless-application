@@ -145,3 +145,8 @@ class TestsUtil:
         os.environ['PRIVATE_CHAIN_ALIS_TOKEN_ADDRESS'] = '0xbbfce3c05aef921b35c7264fff21bb08f490a821'
         os.environ['ALL_TOKEN_HISTORY_CSV_DOWNLOAD_S3_BUCKET'] = 'tgsdev-token-history-csv-bucket'
         os.environ['BURN_ADDRESS'] = '7ad8f90cfa071c8420e3f09fe0e413d0c47502ea'
+
+    @classmethod
+    def set_all_web3_service_valuables_to_env(cls):
+        os.environ['WEB3_SERVICE_BASE_URL'] = 'https://example.com:8545'
+        os.environ['BADGE_OPERATION_URL'] = 'https://example.com:8545'

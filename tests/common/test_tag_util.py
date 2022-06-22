@@ -3,10 +3,13 @@ from unittest import TestCase
 
 from elasticsearch import Elasticsearch
 from jsonschema import ValidationError
+
+import settings
 from tests_es_util import TestsEsUtil
 
 from tag_util import TagUtil
 from tests_util import TestsUtil
+from unittest.mock import patch, MagicMock
 
 
 class TestTagUtil(TestCase):
@@ -18,6 +21,7 @@ class TestTagUtil(TestCase):
     def setUp(self):
         TestsUtil.set_all_tables_name_to_env()
         TestsUtil.delete_all_tables(self.dynamodb)
+        self.elasticsearch.indices.delete(index="tags", ignore=[404])
         TestsEsUtil.create_tag_index(self.elasticsearch)
 
     def tearDown(self):
@@ -160,14 +164,15 @@ class TestTagUtil(TestCase):
 
         self.assertEqual(tags, expected)
 
-    def test_validate_format(self):
-        def expected_raise_error(args):
+    @patch('tag_util.Web3Util.get_badge_types', MagicMock(return_value=[0]))
+    def test_validate_tags(self):
+        def expected_raise_error(args, user_id=''):
             with self.assertRaises(ValidationError):
-                TagUtil.validate_format(args)
+                TagUtil.validate_tags(args, user_id)
 
-        def expected_raise_no_error(args):
+        def expected_raise_no_error(args, user_id=''):
             try:
-                TagUtil.validate_format(args)
+                TagUtil.validate_tags(args, user_id)
             except ValidationError:
                 self.fail('expected no error is raised')
 
@@ -184,9 +189,15 @@ class TestTagUtil(TestCase):
 
         # ハイフン以外の半角記号
         targets = '!"#$%&\'()*+,./:;<=>?@[\\]^_`{|}~'
-
         for target in targets:
             expected_raise_error(['ALIS', 'INV{target}ALID'.format(target=target)])
+
+        # バッジを取得せずに、限定タグを利用した場合
+        with patch('tag_util.Web3Util.get_badge_types') as badge_types:
+            badge_types.return_value = [0]
+            expected_raise_error(['ALIS', settings.VIP_TAG_NAME], 'test_user')
+            badge_types.return_value = [0, 1, 100]
+            expected_raise_no_error(['ALIS', settings.VIP_TAG_NAME], 'test_user')
 
     def test_get_tags_with_name_collation(self):
         TagUtil.create_tag(self.elasticsearch, "aaa aaa")

@@ -363,9 +363,9 @@ class TestMeArticlesDraftsPublishWithHeader(TestCase):
             MeArticlesDraftsPublishWithHeader(params, {}, dynamodb=self.dynamodb,
                                               elasticsearch=self.elasticsearch).main()
 
-            self.assertTrue(mock_lib.validate_format.called)
-            args, _ = mock_lib.validate_format.call_args
-            self.assertEqual(args[0], ['A'])
+            self.assertTrue(mock_lib.validate_tags.called)
+            args, _ = mock_lib.validate_tags.call_args
+            self.assertEqual(args[0], ['A'], 'test01')
 
             self.assertTrue(mock_lib.get_tags_with_name_collation.called)
             args, _ = mock_lib.get_tags_with_name_collation.call_args

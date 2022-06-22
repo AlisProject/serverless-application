@@ -96,6 +96,8 @@ aws cloudformation deploy \
     AuthleteApiKey=${SSM_PARAMS_PREFIX}AuthleteApiKey \
     AuthleteApiSecret=${SSM_PARAMS_PREFIX}AuthleteApiSecret \
     BurnAddress=${SSM_PARAMS_PREFIX}BurnAddress \
+    BadgeOperationUrl=${SSM_PARAMS_PREFIX}BadgeOperationUrl \
+    Web3ServiceBaseUrl=${SSM_PARAMS_PREFIX}Web3ServiceBaseUrl \
     AllTokenHistoryCsvDownloadS3Bucket=${SSM_PARAMS_PREFIX}AllTokenHistoryCsvDownloadS3Bucket \
     CognitoIdentityPoolId=${SSM_PARAMS_PREFIX}CognitoIdentityPoolId\
   --capabilities CAPABILITY_IAM \

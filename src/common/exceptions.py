@@ -124,3 +124,7 @@ class PrivateChainApiError(Error):
 
 class LimitExceeded(Error):
     pass
+
+
+class Web3ServiceApiError(Error):
+    pass
