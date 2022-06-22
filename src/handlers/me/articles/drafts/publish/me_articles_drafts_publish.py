@@ -37,7 +37,10 @@ class MeArticlesDraftsPublish(LambdaBase):
 
         if self.params.get('tags'):
             ParameterUtil.validate_array_unique(self.params['tags'], 'tags', case_insensitive=True)
-            TagUtil.validate_format(self.params['tags'])
+            TagUtil.validate_tags(
+                self.params['tags'],
+                self.event['requestContext']['authorizer']['claims']['cognito:username']
+            )
 
         DBUtil.validate_article_existence(
             self.dynamodb,

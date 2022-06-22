@@ -1,8 +1,8 @@
 import re
 import time
-
 import settings
 from jsonschema import ValidationError
+from web3_util import Web3Util
 
 
 class TagUtil:
@@ -91,7 +91,7 @@ class TagUtil:
         return results
 
     @staticmethod
-    def validate_format(tags):
+    def validate_tags(tags, user_id=None):
         pattern = re.compile(settings.TAG_DENIED_SYMBOL_PATTERN)
 
         for tag in tags:
@@ -103,6 +103,12 @@ class TagUtil:
             for symbol in settings.TAG_ALLOWED_SYMBOLS:
                 if tag[0] == symbol or tag[-1] == symbol:
                     raise ValidationError("tags don't support {str} with start and end of character".format(str=symbol))
+
+        # 対象バッジ取得者限定タグを利用していた場合、該当バッジを保持しているかを確認
+        if settings.VIP_TAG_NAME in tags:
+            user_types = Web3Util.get_badge_types(user_id)
+            if len(set(settings.VIP_TAG_BADGE_TYPES) & set(user_types)) <= 0:
+                raise ValidationError(f"Tag name {settings.VIP_TAG_NAME} is not available")
 
     @classmethod
     def __get_item_case_insensitive(cls, elasticsearch, tag_name):
