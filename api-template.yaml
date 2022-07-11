@@ -123,6 +123,10 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   BurnAddress:
     Type: 'AWS::SSM::Parameter::Value<String>'
+  BadgeOperationUrl:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  Web3ServiceBaseUrl:
+    Type: 'AWS::SSM::Parameter::Value<String>'
 
 Globals:
   Function:
@@ -172,6 +176,8 @@ Globals:
         PRIVATE_CHAIN_ALIS_TOKEN_ADDRESS: !Ref PrivateChainAlisTokenAddress
         PRIVATE_CHAIN_BRIDGE_ADDRESS: !Ref PrivateChainBridgeAddress
         BURN_ADDRESS: !Ref BurnAddress
+        BADGE_OPERATION_URL: !Ref BadgeOperationUrl
+        WEB3_SERVICE_BASE_URL: !Ref Web3ServiceBaseUrl
 
 Resources:
   RestApi:
