@@ -128,7 +128,7 @@ Resources:
       Handler: handler.lambda_handler
       MemorySize: 3008
       Role: !GetAtt LambdaRole.Arn
-      Runtime: python3.6
+      Runtime: python3.9
       Timeout: 300
       TracingConfig:
         Mode: "Active"
@@ -152,7 +152,7 @@ Resources:
       Handler: handler.lambda_handler
       MemorySize: 3008
       Role: !GetAtt LambdaRole.Arn
-      Runtime: python3.6
+      Runtime: python3.9
       Timeout: 300
       TracingConfig:
         Mode: "Active"
@@ -170,7 +170,7 @@ Resources:
       Handler: handler.lambda_handler
       MemorySize: 3008
       Role: !GetAtt LambdaRole.Arn
-      Runtime: python3.6
+      Runtime: python3.9
       Timeout: 300
       TracingConfig:
         Mode: "Active"
@@ -187,7 +187,7 @@ Resources:
       Handler: handler.lambda_handler
       MemorySize: 3008
       Role: !GetAtt LambdaRole.Arn
-      Runtime: python3.6
+      Runtime: python3.9
       Timeout: 300
       TracingConfig:
         Mode: "Active"
@@ -201,7 +201,7 @@ Resources:
       Handler: handler.lambda_handler
       MemorySize: 3008
       Role: !GetAtt LambdaRole.Arn
-      Runtime: python3.6
+      Runtime: python3.9
       Timeout: 300
       TracingConfig:
         Mode: "Active"
@@ -217,7 +217,7 @@ Resources:
       Handler: handler.lambda_handler
       MemorySize: 3008
       Role: !GetAtt LambdaRole.Arn
-      Runtime: python3.6
+      Runtime: python3.9
       Timeout: 300
       TracingConfig:
         Mode: "Active"
@@ -231,7 +231,7 @@ Resources:
       Handler: handler.lambda_handler
       MemorySize: 3008
       Role: !GetAtt LambdaRole.Arn
-      Runtime: python3.6
+      Runtime: python3.9
       Timeout: 300
       TracingConfig:
         Mode: "Active"
@@ -259,7 +259,7 @@ Resources:
       Handler: handler.lambda_handler
       MemorySize: 3008
       Role: !GetAtt LambdaRole.Arn
-      Runtime: python3.6
+      Runtime: python3.9
       Timeout: 300
       TracingConfig:
         Mode: "Active"
@@ -274,7 +274,7 @@ Resources:
       Handler: handler.lambda_handler
       MemorySize: 3008
       Role: !GetAtt LambdaRole.Arn
-      Runtime: python3.6
+      Runtime: python3.9
       Timeout: 300
       TracingConfig:
         Mode: "Active"
@@ -296,7 +296,7 @@ Resources:
       Handler: handler.lambda_handler
       MemorySize: 3008
       Role: !GetAtt LambdaRole.Arn
-      Runtime: python3.6
+      Runtime: python3.9
       Timeout: 300
       TracingConfig:
         Mode: "Active"
@@ -312,7 +312,7 @@ Resources:
       Handler: handler.lambda_handler
       MemorySize: 3008
       Role: !GetAtt LambdaRole.Arn
-      Runtime: python3.6
+      Runtime: python3.9
       Timeout: 300
       TracingConfig:
         Mode: "Active"
@@ -330,7 +330,7 @@ Resources:
       Handler: handler.lambda_handler
       MemorySize: 3008
       Role: !GetAtt LambdaRole.Arn
-      Runtime: python3.6
+      Runtime: python3.9
       Timeout: 300
       TracingConfig:
         Mode: "Active"
@@ -345,7 +345,7 @@ Resources:
           AUTHLETE_API_KEY: !Ref AuthleteApiKey
           AUTHLETE_API_SECRET: !Ref AuthleteApiSecret
       MemorySize: 3008
-      Runtime: python3.6
+      Runtime: python3.9
       Timeout: 300
       TracingConfig:
         Mode: "Active"
@@ -360,7 +360,7 @@ Resources:
           AUTHLETE_API_KEY: !Ref AuthleteApiKey
           AUTHLETE_API_SECRET: !Ref AuthleteApiSecret
       MemorySize: 3008
-      Runtime: python3.6
+      Runtime: python3.9
       Timeout: 300
       TracingConfig:
         Mode: "Active"
@@ -375,7 +375,7 @@ Resources:
           AUTHLETE_API_KEY: !Ref AuthleteApiKey
           AUTHLETE_API_SECRET: !Ref AuthleteApiSecret
       MemorySize: 3008
-      Runtime: python3.6
+      Runtime: python3.9
       Timeout: 300
       TracingConfig:
         Mode: "Active"
@@ -390,7 +390,7 @@ Resources:
           AUTHLETE_API_KEY: !Ref AuthleteApiKey
           AUTHLETE_API_SECRET: !Ref AuthleteApiSecret
       MemorySize: 3008
-      Runtime: python3.6
+      Runtime: python3.9
       Timeout: 300
       TracingConfig:
         Mode: "Active"
@@ -405,7 +405,7 @@ Resources:
           AUTHLETE_API_KEY: !Ref AuthleteApiKey
           AUTHLETE_API_SECRET: !Ref AuthleteApiSecret
       MemorySize: 3008
-      Runtime: python3.6
+      Runtime: python3.9
       Timeout: 300
       TracingConfig:
         Mode: "Active"
@@ -420,7 +420,7 @@ Resources:
           AUTHLETE_API_KEY: !Ref AuthleteApiKey
           AUTHLETE_API_SECRET: !Ref AuthleteApiSecret
       MemorySize: 3008
-      Runtime: python3.6
+      Runtime: python3.9
       Timeout: 300
       TracingConfig:
         Mode: "Active"
@@ -435,7 +435,7 @@ Resources:
           AUTHLETE_API_KEY: !Ref AuthleteApiKey
           AUTHLETE_API_SECRET: !Ref AuthleteApiSecret
       MemorySize: 3008
-      Runtime: python3.6
+      Runtime: python3.9
       Timeout: 300
       TracingConfig:
         Mode: "Active"
@@ -450,7 +450,7 @@ Resources:
           AUTHLETE_API_KEY: !Ref AuthleteApiKey
           AUTHLETE_API_SECRET: !Ref AuthleteApiSecret
       MemorySize: 3008
-      Runtime: python3.6
+      Runtime: python3.9
       Timeout: 300
       TracingConfig:
         Mode: "Active"

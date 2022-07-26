@@ -7,12 +7,14 @@ from unittest.mock import MagicMock, patch
 from botocore.exceptions import ClientError
 from exceptions import FacebookVerifyException
 from exceptions import FacebookOauthError
+from tests_util import TestsUtil
 
 dynamodb = boto3.resource('dynamodb')
 
 
 class TestFacebookUtil(TestCase):
     def setUp(self):
+        TestsUtil.set_all_tables_name_to_env()
         self.fb = FacebookUtil(
             app_id='fake_client_id',
             app_secret='fake_secret',
@@ -137,31 +139,31 @@ class TestFacebookUtil(TestCase):
         with self.assertRaises(FacebookOauthError):
             with patch('facebook_util.requests.get') as requests_mock, \
                  patch.object(self.fb, '_FacebookUtil__verify_access_token', return_value=True):
-                    requests_mock.return_value = FacebookFakeResponse(
-                        status_code=400,
-                        text=json.dumps({
-                            'id': 'xxxxxx'
-                        })
-                    )
+                requests_mock.return_value = FacebookFakeResponse(
+                    status_code=400,
+                    text=json.dumps({
+                        'id': 'xxxxxx'
+                    })
+                )
 
-                    self.fb.get_user_info(
-                        access_token='xxxx'
-                    )
+                self.fb.get_user_info(
+                    access_token='xxxx'
+                )
 
     def test_get_user_info_ng_with_verify_error(self):
         with self.assertRaises(FacebookVerifyException):
             with patch('facebook_util.requests.get') as requests_mock, \
                  patch.object(self.fb, '_FacebookUtil__verify_access_token', return_value=False):
-                    requests_mock.return_value = FacebookFakeResponse(
-                        status_code=200,
-                        text=json.dumps({
-                            'id': 'xxxxxx'
-                        })
-                    )
+                requests_mock.return_value = FacebookFakeResponse(
+                    status_code=200,
+                    text=json.dumps({
+                        'id': 'xxxxxx'
+                    })
+                )
 
-                    self.fb.get_user_info(
-                        access_token='xxxx'
-                    )
+                self.fb.get_user_info(
+                    access_token='xxxx'
+                )
 
 
 class FacebookFakeResponse:

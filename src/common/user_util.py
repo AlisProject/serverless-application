@@ -287,7 +287,7 @@ class UserUtil:
             'https://' + os.environ['PRIVATE_CHAIN_EXECUTE_API_HOST'] + '/production/accounts/new',
             auth=auth
         )
-        if response.status_code is not 200:
+        if response.status_code != 200:
             raise PrivateChainApiError(response.text)
         return json.loads(response.text)['result']
 

@@ -22,7 +22,7 @@ Parameters:
 
 Globals:
   Function:
-    Runtime: python3.6
+    Runtime: python3.9
     Timeout: 15
     MemorySize: 256
     Environment:

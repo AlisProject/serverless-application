@@ -111,7 +111,7 @@ class Web3Util:
     @staticmethod
     def create_badge_contract_object():
         response = requests.get(os.environ['WEB3_SERVICE_BASE_URL'] + '/api/badge/eth_address')
-        if response.status_code is not 200:
+        if response.status_code != 200:
             raise Web3ServiceApiError(response.text)
         badge_address = json.loads(response.text)['badge_contract_address']
         return Web3Util.create_contract_object(os.environ['BADGE_OPERATION_URL'], Web3Util.BADGE_CONTRACT_ABI,
@@ -121,7 +121,7 @@ class Web3Util:
     def get_badge_types(user_id):
         badge_contract = Web3Util.create_badge_contract_object()
         response = requests.get(f"{os.environ['WEB3_SERVICE_BASE_URL']}/api/users/{user_id}/eth_address")
-        if response.status_code is not 200:
+        if response.status_code != 200:
             raise Web3ServiceApiError(response.text)
         # バッジ連携していない場合は空配列を返却
         badge_address = json.loads(response.text).get('public_chain_address')

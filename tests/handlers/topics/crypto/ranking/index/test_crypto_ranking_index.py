@@ -83,7 +83,7 @@ class TestTopicsCryptoRankingIndex(TestCase):
 
         responses.add(responses.GET,
                       "https://api.coingecko.com/api/v3/coins/markets?vs_currency=jpy&order=market_cap_desc"
-                      f"&per_page=3"
+                      "&per_page=3"
                       "&page=1&sparkline=false&price_change_percentage=24h",
                       json=test_desc,
                       status=200)

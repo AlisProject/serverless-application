@@ -63,7 +63,7 @@ Resources:
       Role:
         Fn::ImportValue:
           Fn::Sub: "${AlisAppId}-LambdaRole"
-      Runtime: python3.6
+      Runtime: python3.9
       Timeout: 300
       TracingConfig:
         Mode: "Active"
@@ -83,7 +83,7 @@ Resources:
       Role:
         Fn::ImportValue:
           Fn::Sub: "${AlisAppId}-LambdaRole"
-      Runtime: python3.6
+      Runtime: python3.9
       Timeout: 300
       TracingConfig:
         Mode: "Active"
@@ -100,7 +100,7 @@ Resources:
       Role:
         Fn::ImportValue:
           Fn::Sub: "${AlisAppId}-LambdaRole"
-      Runtime: python3.6
+      Runtime: python3.9
       Timeout: 300
       TracingConfig:
         Mode: "Active"
@@ -116,7 +116,7 @@ Resources:
       Role:
         Fn::ImportValue:
           Fn::Sub: "${AlisAppId}-LambdaRole"
-      Runtime: python3.6
+      Runtime: python3.9
       Timeout: 300
       TracingConfig:
         Mode: "Active"
@@ -133,7 +133,7 @@ Resources:
       Role:
         Fn::ImportValue:
           Fn::Sub: "${AlisAppId}-LambdaRole"
-      Runtime: python3.6
+      Runtime: python3.9
       Timeout: 300
       TracingConfig:
         Mode: "Active"
@@ -150,7 +150,7 @@ Resources:
       Role:
         Fn::ImportValue:
           Fn::Sub: "${AlisAppId}-LambdaRole"
-      Runtime: python3.6
+      Runtime: python3.9
       Timeout: 300
       TracingConfig:
         Mode: "Active"
@@ -166,7 +166,7 @@ Resources:
       Role:
         Fn::ImportValue:
           Fn::Sub: "${AlisAppId}-LambdaRole"
-      Runtime: python3.6
+      Runtime: python3.9
       Timeout: 300
       TracingConfig:
         Mode: "Active"
@@ -184,7 +184,7 @@ Resources:
       Role:
         Fn::ImportValue:
           Fn::Sub: "${AlisAppId}-LambdaRole"
-      Runtime: python3.6
+      Runtime: python3.9
       Timeout: 300
       TracingConfig:
         Mode: "Active"
@@ -200,7 +200,7 @@ Resources:
       Role:
         Fn::ImportValue:
           Fn::Sub: "${AlisAppId}-LambdaRole"
-      Runtime: python3.6
+      Runtime: python3.9
       Timeout: 300
       TracingConfig:
         Mode: "Active"
@@ -225,7 +225,7 @@ Resources:
       Role:
         Fn::ImportValue:
           Fn::Sub: "${AlisAppId}-LambdaRole"
-      Runtime: python3.6
+      Runtime: python3.9
       Timeout: 900
       TracingConfig:
         Mode: "Active"
@@ -244,7 +244,7 @@ Resources:
       Role:
         Fn::ImportValue:
           Fn::Sub: "${AlisAppId}-LambdaRole"
-      Runtime: python3.6
+      Runtime: python3.9
       Timeout: 900
       TracingConfig:
         Mode: "Active"
@@ -262,7 +262,7 @@ Resources:
       Role:
         Fn::ImportValue:
           Fn::Sub: "${AlisAppId}-LambdaRole"
-      Runtime: python3.6
+      Runtime: python3.9
       Timeout: 900
       TracingConfig:
         Mode: "Active"
@@ -278,7 +278,7 @@ Resources:
       Role:
         Fn::ImportValue:
           Fn::Sub: "${AlisAppId}-LambdaRole"
-      Runtime: python3.6
+      Runtime: python3.9
       Timeout: 900
       TracingConfig:
         Mode: "Active"
@@ -294,7 +294,7 @@ Resources:
       Role:
         Fn::ImportValue:
           Fn::Sub: "${AlisAppId}-LambdaRole"
-      Runtime: python3.6
+      Runtime: python3.9
       Timeout: 900
       TracingConfig:
         Mode: "Active"
@@ -307,7 +307,7 @@ Resources:
       Role:
         Fn::ImportValue:
           Fn::Sub: "${AlisAppId}-LambdaRole"
-      Runtime: python3.6
+      Runtime: python3.9
       Timeout: 15
       TracingConfig:
         Mode: "Active"
@@ -323,7 +323,7 @@ Resources:
       Role:
         Fn::ImportValue:
           Fn::Sub: "${AlisAppId}-LambdaRole"
-      Runtime: python3.6
+      Runtime: python3.9
       Timeout: 300
       TracingConfig:
         Mode: "Active"

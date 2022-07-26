@@ -6,7 +6,7 @@ import glob
 
 # AWS Lambda へのデプロイ用ファイル（zip）を handler.py ファイル毎に作成する
 # 前提
-# pip install が完了していること（./venv/lib/python3.6/site-packages/ 配下に必要ライブラリが作成済であること）
+# pip install が完了していること（./venv/lib/python3.9/site-packages/ 配下に必要ライブラリが作成済であること）
 
 
 # 事前処理

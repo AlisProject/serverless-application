@@ -3,7 +3,7 @@ version: 2.1
 references:
   setup_remote_docker: &setup_remote_docker
     setup_remote_docker:
-      version: 18.09.3
+      version: 20.10.14
   docker_hub_authentication: &docker_hub_authentication
     auth:
       username: $DOCKERHUB_USER
@@ -55,15 +55,15 @@ orbs:
   jira: circleci/jira@1.0.5
 
 executors:
-  python3_6_1:
+  python3_9_13:
     working_directory: ~/repo
     docker:
-      - image: circleci/python:3.6.1
+      - image: cimg/python:3.9.13
         <<: *docker_hub_authentication
   test:
     working_directory: ~/repo
     docker:
-      - image: circleci/python:3.6.1
+      - image: cimg/python:3.9.13
         <<: *docker_hub_authentication
       - image: bluszcz/bflocalstack-dynamodb-s3
         <<: *docker_hub_authentication
@@ -103,7 +103,6 @@ commands:
       - run:
           name: install dependencies
           command: |
-            python3 -m venv venv
             . venv/bin/activate
             pip install -r << parameters.resource >>
 
@@ -175,7 +174,7 @@ commands:
 
 jobs:
   lint:
-    executor: python3_6_1
+    executor: python3_9_13
     steps:
       - prepare-python-resources:
           resource: 'requirements_test.txt'
@@ -238,7 +237,7 @@ jobs:
           options: '--target /handlers/search'
 
   packaging:
-    executor: python3_6_1
+    executor: python3_9_13
     steps:
       - prepare-python-resources
 
@@ -254,31 +253,31 @@ jobs:
             - deploy/*
 
   deploy-function:
-    executor: python3_6_1
+    executor: python3_9_13
     steps:
       - deploy-resources:
           target: 'function'
 
   deploy-function02:
-    executor: python3_6_1
+    executor: python3_9_13
     steps:
       - deploy-resources:
           target: 'function02'
 
   deploy-api:
-    executor: python3_6_1
+    executor: python3_9_13
     steps:
       - deploy-resources:
           target: 'api'
 
   deploy-permission:
-    executor: python3_6_1
+    executor: python3_9_13
     steps:
       - deploy-resources:
           target: 'permission'
 
   deploy-alarms:
-    executor: python3_6_1
+    executor: python3_9_13
     steps:
       - deploy-resources:
           target: 'apialarms'
@@ -317,7 +316,7 @@ jobs:
             fi
 
   fix-api:
-    executor: python3_6_1
+    executor: python3_9_13
     steps:
       - prepare-python-resources
 
@@ -334,7 +333,7 @@ jobs:
             ./fix_configurations.sh
 
   notify-to-slack-for-approval:
-    executor: python3_6_1
+    executor: python3_9_13
     steps:
       - slack/approval:
           message: "本番環境へのデプロイを承認してください"
