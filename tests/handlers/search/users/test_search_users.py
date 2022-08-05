@@ -55,8 +55,8 @@ class TestSearchUsers(TestCase):
         items = []
         for dummy in range(30):
             items.append({
-                'user_id': f"testuser{dummy}",
-                'user_display_name': f"testuser",
+                'user_id': f'testuser{dummy}',
+                'user_display_name': 'testuser',
                 'updated_at': 1530112753,
             })
         for item in items:
@@ -164,7 +164,7 @@ class TestSearchUsers(TestCase):
                 id="AbCdEfG",
                 body={
                     'user_id': "AbCdEfG",
-                    'user_display_name': f"HiJkLmN",
+                    'user_display_name': "HiJkLmN",
                     'updated_at': 1530112761,
                 }
         )

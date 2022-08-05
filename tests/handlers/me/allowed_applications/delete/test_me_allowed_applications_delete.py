@@ -29,7 +29,7 @@ class TestMeAllowedApplicationsDelete(TestCase):
             },
             'body': '{"client_id":12345}'
         }
-        responses.add(responses.DELETE, settings.AUTHLETE_CLIENT_ENDPOINT + f'/authorization/delete/12345/user01',
+        responses.add(responses.DELETE, settings.AUTHLETE_CLIENT_ENDPOINT + '/authorization/delete/12345/user01',
                       json={'statusCode': 200, 'body': ''}, status=200)
         response = MeAllowedApplicationsDelete(params, {}).main()
         self.assertEqual(response['statusCode'], 200)

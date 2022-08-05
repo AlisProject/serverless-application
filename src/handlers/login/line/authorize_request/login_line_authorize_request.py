@@ -160,7 +160,7 @@ class LoginLineAuthorizeRequest(LambdaBase):
             'client_secret': client_secret
         }
         response = requests.post(settings.LINE_TOKEN_END_POINT, data=data, headers=headers)
-        if response.status_code is not 200:
+        if response.status_code != 200:
             raise LineOauthError(
                 endpoint=settings.LINE_TOKEN_END_POINT,
                 status_code=response.status_code,

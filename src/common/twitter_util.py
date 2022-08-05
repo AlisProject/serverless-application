@@ -26,7 +26,7 @@ class TwitterUtil:
             oauth_token=oauth_token,
             oauth_verifier=oauth_verifier
         )
-        if response.status_code is not 200:
+        if response.status_code != 200:
             raise TwitterOauthError(
                 endpoint=settings.TWITTER_API_ACCESS_TOKEN_URL,
                 status_code=response.status_code,
@@ -45,7 +45,7 @@ class TwitterUtil:
         response = twitter.get(
             settings.TWITTER_API_VERIFY_CREDENTIALS_URL + '?include_email=true'
         )
-        if response.status_code is not 200:
+        if response.status_code != 200:
             raise TwitterOauthError(
                 endpoint=settings.TWITTER_API_VERIFY_CREDENTIALS_URL,
                 status_code=response.status_code,
@@ -66,7 +66,7 @@ class TwitterUtil:
             settings.TWITTER_API_REQUEST_TOKEN_URL,
             params={'oauth_callback': callback_url}
         )
-        if response.status_code is not 200:
+        if response.status_code != 200:
             raise TwitterOauthError(
                 endpoint=settings.TWITTER_API_REQUEST_TOKEN_URL,
                 status_code=response.status_code,

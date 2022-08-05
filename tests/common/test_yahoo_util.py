@@ -7,12 +7,14 @@ from unittest.mock import MagicMock, patch
 from exceptions import YahooOauthError
 from exceptions import YahooVerifyException
 from botocore.exceptions import ClientError
+from tests_util import TestsUtil
 
 dynamodb = boto3.resource('dynamodb')
 
 
 class TestYahooUtil(TestCase):
     def setUp(self):
+        TestsUtil.set_all_tables_name_to_env()
         self.yahoo = YahooUtil(
             client_id='fake_client_id',
             secret='fake_secret',

@@ -62,7 +62,7 @@ class FacebookUtil:
             '&code=' + code
         )
 
-        if response.status_code is not 200:
+        if response.status_code != 200:
             raise FacebookOauthError(
                 endpoint=settings.FACEBOOK_API_ACCESSTOKEN_URL,
                 status_code=response.status_code,
@@ -78,7 +78,7 @@ class FacebookUtil:
             '&fields=id,email&appsecret_proof=' +
             self.__get_appsecret_proof(access_token)
         )
-        if response.status_code is not 200:
+        if response.status_code != 200:
             raise FacebookOauthError(
                 endpoint=settings.FACEBOOK_API_USERINFO_URL,
                 status_code=response.status_code,
@@ -115,7 +115,7 @@ class FacebookUtil:
             '&appsecret_proof=' + self.__get_appsecret_proof(access_token)
         )
 
-        if response.status_code is not 200:
+        if response.status_code != 200:
             raise FacebookOauthError(
                 endpoint=settings.FACEBOOK_API_DEBUG_URL,
                 status_code=response.status_code,

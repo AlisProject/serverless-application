@@ -255,9 +255,9 @@ class MeWalletTokenAllhistoriesCreate(LambdaBase):
     def __get_sum_token(self, data_for_csv):
         csv_list = list(csv.reader(data_for_csv.getvalue().splitlines()))
         tmp_token = 0
-        for l in csv_list:
-            if l[2] in ['withdraw', 'pool', 'give', 'burn']:
-                tmp_token -= int(l[4])
-            elif l[2] in ['deposit', 'get by like', 'get from user']:
-                tmp_token += int(l[4])
+        for csv_data in csv_list:
+            if csv_data[2] in ['withdraw', 'pool', 'give', 'burn']:
+                tmp_token -= int(csv_data[4])
+            elif csv_data[2] in ['deposit', 'get by like', 'get from user']:
+                tmp_token += int(csv_data[4])
         return tmp_token

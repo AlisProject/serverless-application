@@ -76,7 +76,7 @@ class YahooUtil:
             headers=headers,
             data='grant_type=authorization_code&redirect_uri=' + self.callback_url + '&code=' + code
         )
-        if response.status_code is not 200:
+        if response.status_code != 200:
             raise YahooOauthError(
                 endpoint=self.endpoints['token_endpoint'],
                 status_code=response.status_code,
@@ -92,7 +92,7 @@ class YahooUtil:
             response = requests.get(
                 settings.YAHOO_API_PUBLIC_KEY_URL
             )
-            if response.status_code is not 200:
+            if response.status_code != 200:
                 raise YahooOauthError(
                     endpoint=settings.YAHOO_API_PUBLIC_KEY_URL,
                     status_code=response.status_code,
@@ -145,7 +145,7 @@ class YahooUtil:
         response = requests.get(
             self.endpoints['userinfo_endpoint'] + '?access_token=' + access_token
         )
-        if response.status_code is not 200:
+        if response.status_code != 200:
             raise YahooOauthError(
                 endpoint=self.endpoints['userinfo_endpoint'],
                 status_code=response.status_code,
@@ -164,7 +164,7 @@ class YahooUtil:
     def __get_endpoins(self):
         response = requests.get(settings.YAHOO_API_WELL_KNOWN_URL)
 
-        if response.status_code is not 200:
+        if response.status_code != 200:
             raise YahooOauthError(
                 endpoint=settings.YAHOO_API_WELL_KNOWN_URL,
                 status_code=response.status_code,
