@@ -110,7 +110,7 @@ commands:
       - save_cache:
           paths:
             - ./venv
-          key: v3-dependencies-{{ checksum "<< parameters.resource >>" }}
+          key: v4-dependencies-{{ checksum "<< parameters.resource >>" }}
 
   deploy-resources:
     description: 'リソースのデプロイの共通処理'
@@ -145,8 +145,8 @@ commands:
 
       - restore_cache:
           keys:
-            - v3-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements_test.txt" }}
-            - v3-dependencies-
+            - v4-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements_test.txt" }}
+            - v4-dependencies-
 
       - run:
           name: install dependencies
@@ -159,7 +159,7 @@ commands:
       - save_cache:
           paths:
             - ./venv
-          key: v3-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements_test.txt" }}
+          key: v4-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements_test.txt" }}
 
   run_tests:
     description: 'テストを実行する'
