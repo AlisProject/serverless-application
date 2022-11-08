@@ -101,6 +101,9 @@ class TestsEsUtil:
                             'type': 'text',
                             'analyzer': 'autocomplete'
                         },
+                        'count': {
+                            'type': 'integer'
+                        },
                         'created_at': {
                             'type': 'integer'
                         }

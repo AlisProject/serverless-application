@@ -33,6 +33,10 @@ class TestDBUtil(TestCase):
         self.__assert_search_tags('apple ora', ['apple orange'])
         self.__assert_search_tags('ALIS on', [])
 
+    def test_search_tag_with_no_tag(self):
+        result = ESUtil.search_tag(self.elasticsearch, 'alis', 10, 1)
+        self.assertEqual(result, [])
+
     def test_search_tag_with_limit(self):
         # 0~10のループを回す
         for x in range(0, 11):
