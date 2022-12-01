@@ -337,6 +337,7 @@ Resources:
       Code: ./deploy/topics_game_nft_games_ranking_index.zip
       Environment:
         Variables:
+          ELASTIC_SEARCH_ENDPOINT: !Ref ElasticSearchEndpoint
           ACQUISITION_INFO_TABLE_NAME: !Ref AcquisitionInfoTableName
           ARTICLE_EVALUATED_MANAGE_TABLE_NAME: !Ref ArticleEvaluatedManageTableName
       Handler: handler.lambda_handler
@@ -354,6 +355,7 @@ Resources:
       Code: ./deploy/topics_game_nft_games_show.zip
       Environment:
         Variables:
+          ELASTIC_SEARCH_ENDPOINT: !Ref ElasticSearchEndpoint
           ACQUISITION_INFO_TABLE_NAME: !Ref AcquisitionInfoTableName
           ARTICLE_EVALUATED_MANAGE_TABLE_NAME: !Ref ArticleEvaluatedManageTableName
       Handler: handler.lambda_handler

@@ -341,7 +341,7 @@ Resources:
           Fn::Sub: "${AlisAppId}-TopicsGameNftGamesRankingIndex"
       Principal: "apigateway.amazonaws.com"
       SourceArn: !Sub ${RestApiArn}/*/GET/topics/game/nft_games/ranking
- TopicsGameNftGamesShowApiGatewayInvoke:
+  TopicsGameNftGamesShowApiGatewayInvoke:
     Type: "AWS::Lambda::Permission"
     Properties:
       Action: "lambda:InvokeFunction"
