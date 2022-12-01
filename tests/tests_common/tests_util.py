@@ -118,7 +118,8 @@ class TestsUtil:
             {'env_name': 'PAID_STATUS_TABLE_NAME', 'table_name': 'PaidStatus'},
             {'env_name': 'TOKEN_SEND_TABLE_NAME', 'table_name': 'TokenSend'},
             {'env_name': 'SUCCEEDED_TIP_TABLE_NAME', 'table_name': 'SucceededTip'},
-            {'env_name': 'USER_CONFIGURATIONS_TABLE_NAME', 'table_name': 'UserConfigurations'}
+            {'env_name': 'USER_CONFIGURATIONS_TABLE_NAME', 'table_name': 'UserConfigurations'},
+            {'env_name': 'ACQUISITION_INFO_TABLE_NAME', 'table_name': 'AcquisitionInfo'}
         ]
         if os.environ.get('IS_DYNAMODB_ENDPOINT_OF_AWS') is not None:
             for table in cls.all_tables:

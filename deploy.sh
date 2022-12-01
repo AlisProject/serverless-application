@@ -100,6 +100,7 @@ aws cloudformation deploy \
     Web3ServiceBaseUrl=${SSM_PARAMS_PREFIX}Web3ServiceBaseUrl \
     AllTokenHistoryCsvDownloadS3Bucket=${SSM_PARAMS_PREFIX}AllTokenHistoryCsvDownloadS3Bucket \
     CognitoIdentityPoolId=${SSM_PARAMS_PREFIX}CognitoIdentityPoolId\
+    AcquisitionInfoTableName=${SSM_PARAMS_PREFIX}AcquisitionInfoTableName \
   --capabilities CAPABILITY_IAM \
   --no-fail-on-empty-changeset
 
