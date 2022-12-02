@@ -288,7 +288,7 @@ parameters = {
         'type': 'integer',
         'minimum': 1,
         'maximum': 10000
-    },
+    }
 }
 
 # ログに出力されてはいけないパラメータ(ログ出力時に値がマスクされる)
@@ -309,6 +309,8 @@ ARTICLES_RECOMMENDED_DEFAULT_LIMIT = 10
 
 article_id_length = 12
 COMMENT_ID_LENGTH = 12
+
+NFT_GAME_TAG_SEARCH_DAYS = 365
 
 html_allowed_tags = ['a', 'b', 'blockquote', 'br', 'h2', 'h3', 'i', 'p', 'u', 'img', 'hr',
                      'div', 'figure', 'figcaption']

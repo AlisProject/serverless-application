@@ -44,6 +44,10 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<String>'
   BurnAddress:
     Type: 'AWS::SSM::Parameter::Value<String>'
+  ArticleEvaluatedManageTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+  AcquisitionInfoTableName:
+    Type: 'AWS::SSM::Parameter::Value<String>'
 
 Resources:
 
@@ -327,6 +331,40 @@ Resources:
       Timeout: 300
       TracingConfig:
         Mode: "Active"
+  TopicsGameNftGamesRankingIndex:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Code: ./deploy/topics_game_nft_games_ranking_index.zip
+      Environment:
+        Variables:
+          ACQUISITION_INFO_TABLE_NAME: !Ref AcquisitionInfoTableName
+          ARTICLE_EVALUATED_MANAGE_TABLE_NAME: !Ref ArticleEvaluatedManageTableName
+      Handler: handler.lambda_handler
+      MemorySize: 3008
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
+      Runtime: python3.9
+      Timeout: 300
+      TracingConfig:
+        Mode: "Active"
+  TopicsGameNftGamesShow:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Code: ./deploy/topics_game_nft_games_show.zip
+      Environment:
+        Variables:
+          ACQUISITION_INFO_TABLE_NAME: !Ref AcquisitionInfoTableName
+          ARTICLE_EVALUATED_MANAGE_TABLE_NAME: !Ref ArticleEvaluatedManageTableName
+      Handler: handler.lambda_handler
+      MemorySize: 3008
+      Role:
+        Fn::ImportValue:
+          Fn::Sub: "${AlisAppId}-LambdaRole"
+      Runtime: python3.9
+      Timeout: 300
+      TracingConfig:
+        Mode: "Active"
 
 
 Outputs:
@@ -394,3 +432,11 @@ Outputs:
     Value: !GetAtt SearchTagsCount.Arn
     Export:
       Name: !Sub "${AlisAppId}-SearchTagsCount"
+  TopicsGameNftGamesRankingIndex:
+    Value: !GetAtt TopicsGameNftGamesRankingIndex.Arn
+    Export:
+      Name: !Sub "${AlisAppId}-TopicsGameNftGamesRankingIndex"
+  TopicsGameNftGamesShow:
+    Value: !GetAtt TopicsGameNftGamesShow.Arn
+    Export:
+      Name: !Sub "${AlisAppId}-TopicsGameNftGamesShow"

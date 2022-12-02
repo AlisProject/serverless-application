@@ -390,6 +390,60 @@ definitions:
       price_change_percentage_24h:
         type: number
         format: double
+  NftGamesRankingInfo:
+    type: object
+    properties:
+      key:
+        type: string
+      name:
+        type: string
+      tag_name:
+        type: string
+      tag_count:
+        type: integer
+      active_users_today:
+        type: integer
+      active_users_7days:
+        type: integer
+      active_users_30days:
+        type: integer
+      total_users:
+        type: integer
+      chains:
+        type: array
+        items:
+          type: string
+  NftGameInfo:
+    type: object
+    properties:
+      name:
+        type: string
+      tag_name:
+        type: string
+      tag_count:
+        type: integer
+      active_users_today:
+        type: integer
+      active_users_7days:
+        type: integer
+      active_users_30days:
+        type: integer
+      total_users:
+        type: integer
+      chains:
+        type: array
+        items:
+          type: string
+      description:
+        type: string
+      discord:
+        type: string
+      officialPageUrl:
+        type: string
+      telegramUrl:
+        type: string
+      twitter:
+        type: string
 
 paths:
   /search/articles:
@@ -892,6 +946,58 @@ paths:
             - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
               - Fn::ImportValue:
                   Fn::Sub: "${AlisAppId}-TopicsCryptoRankingIndex"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /topics/game/nft_games/ranking:
+    get:
+      description: 'NFTゲームのランキング情報を取得'
+      responses:
+        "200":
+          description: 'NFTゲームのランキング情報'
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/NftGamesRankingInfo'
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
+              - Fn::ImportValue:
+                  Fn::Sub: "${AlisAppId}-TopicsGameNftGamesRankingIndex"
+              - "/invocations"
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        type: aws_proxy
+  /topics/game/nft_games/{nft_game_key}:
+    get:
+      description: '指定された nft_game_key のNFTゲーム情報を取得'
+      parameters:
+        - name: 'nft_game_key'
+          in: 'path'
+          description: '対象NFTゲームを指定するために使用'
+          required: true
+          type: 'string'
+      responses:
+        "200":
+          description: 'NFTゲーム情報'
+          schema:
+            $ref: '#/definitions/NftGameInfo'
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+        uri:
+          Fn::Join:
+            - ''
+            - - Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/"
+              - Fn::ImportValue:
+                  Fn::Sub: "${AlisAppId}-TopicsGameNftGamesShow"
               - "/invocations"
         passthroughBehavior: when_no_templates
         httpMethod: POST

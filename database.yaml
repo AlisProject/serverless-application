@@ -886,3 +886,33 @@ Resources:
         WriteCapacityUnits: 1
       SSESpecification:
         Enabled: true
+  AcquisitionInfo:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: key
+          AttributeType: S
+        - AttributeName: sort_key
+          AttributeType: S
+        - AttributeName: rank_value
+          AttributeType: N
+      KeySchema:
+        - AttributeName: key
+          KeyType: HASH
+        - AttributeName: sort_key
+          KeyType: RANGE
+      GlobalSecondaryIndexes:
+        - IndexName: key-rank_value-index
+          KeySchema:
+            - AttributeName: key
+              KeyType: HASH
+            - AttributeName: rank_value
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: 1
+            WriteCapacityUnits: 1
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1

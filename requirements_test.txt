@@ -2,7 +2,7 @@ awscli==1.25.36
 boto3==1.24.36
 freezegun==1.2.1
 green==2.14.1
-pycodestyle==2.8.0
+pycodestyle==2.4.0
 pyflakes==2.4.0
 responses==0.21.0
 six==1.16.0
