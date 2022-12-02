@@ -1,4 +1,5 @@
 import os
+import boto3
 from topics_game_nft_games_ranking_index import TopicsGameNftGamesRankingIndex
 from elasticsearch import Elasticsearch, RequestsHttpConnection
 from requests_aws4auth import AWS4Auth
@@ -18,7 +19,7 @@ elasticsearch = Elasticsearch(
     verify_certs=True,
     connection_class=RequestsHttpConnection
 )
-
+dynamodb = boto3.resource('dynamodb')
 
 def lambda_handler(event, context):
     topics_game_nft_games_ranking_index = TopicsGameNftGamesRankingIndex(event, context, elasticsearch=elasticsearch)
