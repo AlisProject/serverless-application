@@ -23,5 +23,6 @@ dynamodb = boto3.resource('dynamodb')
 
 
 def lambda_handler(event, context):
-    topics_game_nft_games_ranking_index = TopicsGameNftGamesRankingIndex(event, context, elasticsearch=elasticsearch)
+    topics_game_nft_games_ranking_index = TopicsGameNftGamesRankingIndex(event, context, dynamodb=dynamodb,
+                                                                         elasticsearch=elasticsearch)
     return topics_game_nft_games_ranking_index.main()
