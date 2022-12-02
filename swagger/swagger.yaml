@@ -974,11 +974,11 @@ paths:
         passthroughBehavior: when_no_templates
         httpMethod: POST
         type: aws_proxy
-  /topics/game/nft_games/{nft_game_key}:
+  /topics/game/nft_games/{tag}:
     get:
-      description: '指定された nft_game_key のNFTゲーム情報を取得'
+      description: '指定された tag のNFTゲーム情報を取得'
       parameters:
-        - name: 'nft_game_key'
+        - name: 'tag'
           in: 'path'
           description: '対象NFTゲームを指定するために使用'
           required: true
