@@ -349,4 +349,4 @@ Resources:
         Fn::ImportValue:
           Fn::Sub: "${AlisAppId}-TopicsGameNftGamesShow"
       Principal: "apigateway.amazonaws.com"
-      SourceArn: !Sub ${RestApiArn}/*/GET/topics/game/nft_games/*
+      SourceArn: !Sub ${RestApiArn}/*/GET/topics/game/nft_games
