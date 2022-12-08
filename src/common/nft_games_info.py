@@ -874,7 +874,7 @@ NFT_GAMES_INFO = {
     },
     "cryptospells": {
         "name": "CryptoSpells",
-        "tag_name": "クリスぺ",
+        "tag_name": "クリスペ",
         "description": "Cryptospellsは、日本発、自由に売買・発行できる次世代カードゲームです。",
         "officialPageUrl": "https://cryptospells.jp/",
         "twitter": "crypto_spells",
