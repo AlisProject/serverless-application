@@ -52,7 +52,6 @@ references:
 orbs:
   aws-cli: circleci/aws-cli@0.1.13
   slack: circleci/slack@3.3.0
-  jira: circleci/jira@1.0.5
 
 executors:
   python3_9_13:
@@ -432,8 +431,6 @@ workflows:
       - fix-api:
           <<: *staging_steps
           requires: *require-api-staging
-          post-steps:
-            - jira/notify
 
   # 本番環境(テスト等無し・承認付き)
   production:
