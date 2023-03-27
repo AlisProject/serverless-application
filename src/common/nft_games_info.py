@@ -161,6 +161,16 @@ NFT_GAMES_INFO = {
         "discord": "https://discord.gg/crazydefenseheroes",
         "telegramUrl": ""
     },
+    "cross-the-ages": {
+        "name": "Cross the Ages",
+        "tag_name": "Cross the Ages",
+        "description": "Cross The Agesは、Immutable Xに構築されたFree-to-Playのカードゲーム兼メタバースです。ゲームのカードは物理世界では紙のカードとして、仮想世界ではNFT"
+                       "として存在しています。ゲームのキャラクターやストーリーは、7つのファンタジーとSF小説に基づいています。",
+        "officialPageUrl": "https://www.crosstheages.com/",
+        "twitter": "crosstheages",
+        "discord": "https://discord.com/invite/crosstheages",
+        "telegramUrl": "https://t.me/crosstheages"
+    },
     "crypto-citizen": {
         "name": "Crypto Citizen",
         "tag_name": "CryptoCitizen",
