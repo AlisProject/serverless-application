@@ -163,7 +163,7 @@ NFT_GAMES_INFO = {
     },
     "cross-the-ages": {
         "name": "Cross the Ages",
-        "tag_name": "Cross the Ages",
+        "tag_name": "Cross The Ages",
         "description": "Cross The Agesは、Immutable Xに構築されたFree-to-Playのカードゲーム兼メタバースです。ゲームのカードは物理世界では紙のカードとして、仮想世界ではNFT"
                        "として存在しています。ゲームのキャラクターやストーリーは、7つのファンタジーとSF小説に基づいています。",
         "officialPageUrl": "https://www.crosstheages.com/",
