@@ -44,17 +44,14 @@ class LoginYahooIndex(LambdaBase):
                 dynamodb=self.dynamodb,
                 state=self.params['state']
             )
-
             token = yahoo.get_access_token(
                 code=self.params['code']
             )
-
             yahoo.verify_access_token(
                 dynamodb=self.dynamodb,
                 access_token=token['access_token'],
                 id_token=token['id_token']
             )
-
             user_info = yahoo.get_user_info(
                 access_token=token['access_token']
             )
