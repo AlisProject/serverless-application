@@ -283,39 +283,6 @@ jobs:
       - deploy-resources:
           target: 'apialarms'
 
-  labo:
-    docker:
-      - image: circleci/node:12.4.0
-        <<: *docker_hub_authentication
-
-    working_directory: ~/repo
-
-    steps:
-      - checkout
-
-      - attach_workspace:
-          at: .
-
-      - restore_cache:
-          keys:
-            - v1-npm-dependencies-{{ checksum "package-lock.json" }}
-            - v1-npm-dependencies-
-
-      - run:
-          command: npm ci
-
-      - save_cache:
-          paths:
-            - ./node_modules
-          key: v1-npm-dependencies-{{ checksum "package-lock.json" }}
-
-      - deploy:
-          name: Deployment
-          command: |
-            if [ $ALIS_APP_ID ]; then
-              npm run deploy
-            fi
-
   fix-api:
     executor: python3_9_13
     steps:
@@ -362,9 +329,6 @@ workflows:
       - packaging:
           <<: *other_env_steps
 
-      - labo:
-          <<: *other_env_steps
-          <<: *deploy_requires
       - deploy-function:
           <<: *other_env_steps
           <<: *deploy_requires
@@ -405,9 +369,6 @@ workflows:
       - packaging:
           <<: *staging_steps
 
-      - labo:
-          <<: *staging_steps
-          <<: *deploy_requires
       - deploy-function:
           <<: *staging_steps
           <<: *deploy_requires
@@ -448,9 +409,6 @@ workflows:
           <<: *production_steps
           type: approval
 
-      - labo:
-          <<: *production_steps
-          <<: *require_approval_and_packaging
       - deploy-function:
           <<: *production_steps
           <<: *require_approval_and_packaging
